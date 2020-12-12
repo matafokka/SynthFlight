@@ -1,0 +1,73 @@
+{
+  "name": "synthflight",
+  "productName": "SynthFlight",
+  "version": "0.0.1-pre-alpha",
+  "description": "A fully client-side software for planning aerial photography",
+  "main": "electronApp.js",
+  "browser": "index.html",
+  "browserslist": [
+    "chrome >= 4",
+    "firefox >= 3",
+    "ie >= 9",
+    "last 2 versions",
+    "not dead"
+  ],
+  "babel": {
+    "presets": [
+      [
+        "@babel/env",
+        {
+          "useBuiltIns": "usage",
+          "corejs": {
+            "version": 3,
+            "proposals": true
+          },
+          "targets": "chrome >= 4, firefox >= 3, ie >= 9, last 2 versions, not dead",
+          "forceAllTransforms": true,
+          "spec": true
+        }
+      ]
+    ],
+    "plugins": [
+      [
+        "@babel/plugin-proposal-class-properties",
+        {
+          "loose": true
+        }
+      ]
+    ]
+  },
+  "scripts": {
+    "start": "electron electronApp.js"
+  },
+  "keywords": [],
+  "author": "matafokka",
+  "license": "GPL",
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "^5.15.1",
+    "@turf/bbox": "^6.0.1",
+    "@turf/helpers": "^6.1.4",
+    "@turf/union": "^6.0.3",
+    "core-js": "^3.7.0",
+    "dom-shims": "^0.1.4",
+    "jszip": "^3.5.0",
+    "leaflet": "^1.7.1",
+    "leaflet.coordinates": "~0.1.5",
+    "regenerator-runtime": "^0.13.7",
+    "roman-numerals": "^0.3.2",
+    "shpjs": "^3.6.2",
+    "sortablejs": "~1.10.2",
+    "time-input-polyfill": "^1.0.9"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.12.3",
+    "@babel/plugin-proposal-class-properties": "^7.12.1",
+    "@babel/preset-env": "^7.12.1",
+    "babelify": "^10.0.0",
+    "browserify": "^17.0.0",
+    "electron": "^10.1.5",
+    "electron-packager": "^15.2.0",
+    "fs-extra": "^9.0.1",
+    "tinyify": "^3.0.0"
+  }
+}
