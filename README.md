@@ -1,4 +1,4 @@
-#SynthFlight Pre-Alpha
+# SynthFlight Pre-Alpha
 
 SynthFlight is a fully client-side software for planning aerial photography. Run it either on the desktop or in a [browser online](https://matafokka.github.io/SynthFlight/).
 
@@ -10,7 +10,7 @@ SynthFlight also features an advanced extendable layer system for Leaflet that w
 
 You can use layers to try and compare different parameters to choose which ones suites you best.
 
-#Installation
+# Installation
 
 You don't need to install it, just [use it online](https://matafokka.github.io/SynthFlight/). However, if you want to have a local copy:
 
@@ -24,7 +24,7 @@ You don't need to install it, just [use it online](https://matafokka.github.io/S
 
 ***Warning:** macOS builds are not signed.*
 
-#Usage
+# Usage
 
 After running SynthFlight, you can see:
 1. **Zoom buttons** in the top left corner. You can also zoom by rotating a mouse wheel.
@@ -48,7 +48,7 @@ In the menu, you can:
     1. Reorder layer by dragging the button with the **arrows icon**.
 1. Export project to GeoJSON by clicking "Export" button at the bottom of the menu. Warning: other buttons do not work for now.
 
-#Building
+# Building
 
 If you want to build SynthFlight yourself, do the following:
 
@@ -58,16 +58,16 @@ If you want to build SynthFlight yourself, do the following:
 1. Build by running `node build.js`. There are additional options, to see them, run `nodejs build.js -h`.
 1. When build will be finished, in project root will be `dist` directory containing builds for different OSs and platforms.
 
-Warning: To build for macOS, you may need to build on actual macOS.
+***Warning:** To build for macOS, you may need to build on actual macOS.*
 
-#Hosting
+# Hosting
 
 You can easily host SynthFlight on your server:
 1. Since SynthFlight is a fully client-side software, you can use your favorite HTTP server. So go ahead and install it.
 1. Download the `browser` build or build SynthFlight for the browser manually.
 1. Configure your server to serve `index.html` file in that build.
 
-#Contributing
+# Contributing
 
 I want to work on this project myself at least until it will come out of alpha stage.
 
@@ -75,7 +75,7 @@ However, you can contribute by:
 1. Requesting API changes, new functionality or something else. Please, create an issue and describe your request.
 1. Adapting markup to work in IE and older browsers. Please, create an issue and tell me that you want to work on this project before you're going to do actual coding, so I'll update this repository.
 
-#FAQ
+# FAQ
 ## Which browsers are supported?
 All modern browsers (including mobile) and, partially, IE 11.
 
