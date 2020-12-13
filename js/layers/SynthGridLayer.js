@@ -3,6 +3,7 @@ const bbox = require("@turf/bbox").default;
 const turfHelpers = require("@turf/helpers");
 const MathTools = require("../MathTools.js");
 const RomanNumerals = require("roman-numerals");
+const geojsonMerge = require("@mapbox/geojson-merge"); // Using this since turfHelpers.featureCollection() discards previously defined properties.
 require("./SynthGridWizard.js");
 
 /**
@@ -111,8 +112,8 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 		];
 
 		let valueLabels = [
-			new L.ALS.Widgets.ValueLabel("lngPathsCount", "Paths count by parallels"),
-			new L.ALS.Widgets.ValueLabel("latPathsCount", "Paths count by meridians"),
+			new L.ALS.Widgets.ValueLabel("lngPathsCount", "Paths count in one cell by parallels"),
+			new L.ALS.Widgets.ValueLabel("latPathsCount", "Paths count in one cell by meridians"),
 			new L.ALS.Widgets.ValueLabel("lngPathsLength", "Length of paths by parallels", "m"),
 			new L.ALS.Widgets.ValueLabel("latPathsLength", "Length of paths by meridians", "m"),
 			new L.ALS.Widgets.ValueLabel("lngFlightTime", "Flight time by parallels", "h"),
@@ -176,7 +177,6 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 		// Bind all the methods
 		this.addEventListenerTo(this.map, "moveend resize", "_onMapPan");
 		this.addEventListenerTo(this.map, "zoomend", "_onMapZoom");
-		this._onMapZoom(); // No polygons has been added for now, so let's add them
 
 		// Add airport
 		let icon = L.divIcon({
@@ -196,7 +196,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 		this.addLayers(this._airportMarker);
 
 		this.onNameChange();
-		this.calculateParameters();
+		this._updateGrid();
 	},
 
 	onMarkerDrag: function() {
@@ -470,12 +470,15 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 				new L.ALS.Widgets.ValueLabel("meanHeight", "Mean height", "m"),
 				new L.ALS.Widgets.ValueLabel("absoluteHeight", "Absolute height", "m"),
 				new L.ALS.Widgets.ValueLabel("elevationDifference", "(Max height - Min height) / Flight height"),
-				new L.ALS.Widgets.ValueLabel("meanHeight", "Mean height", "m"),
 				new L.ALS.Widgets.ValueLabel("reliefType", "Relief type"),
 				errorLabel
 			];
 			for (let widget of widgets)
 				controlsContainer.addWidget(widget);
+
+			let toFormatNumbers = ["meanHeight", "absoluteHeight", "elevationDifference"];
+			for (let id of toFormatNumbers)
+				controlsContainer.getControlById(id).setFormatNumbers(true);
 
 			this.selectedPolygonsWidgets[name] = controlsContainer;
 			if (!this._doHidePolygonWidgets)
@@ -491,14 +494,17 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 	 */
 	_setColor: function (widget) {
 		this[widget.getId()] = widget.getValue();
-		this._onMapPan(); // Update grid
-		this._calculatePolygonParameters();
-		this._drawPaths(); // Update paths
+		this._updateGrid();
 	},
 
 	_setLineThickness: function (widget) {
 		this.lineThickness = widget.getValue();
+		this._updateGrid();
+	},
+
+	_updateGrid: function () {
 		this._onMapPan();
+		this.calculateParameters();
 		this._calculatePolygonParameters();
 		this._drawPaths();
 	},
@@ -623,7 +629,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 			let sizeName = name + "CellSizeInMeters", countName = name + "PathsCount";
 
 			let cellSize = Math.round(turfHelpers.radiansToLength(turfHelpers.degreesToRadians(this[name + "Distance"]), "meters"));
-			let pathsCount = Math.ceil(cellSize / this.By);
+			let pathsCount = Math.ceil(cellSize / this.By) + 1;
 			this[sizeName] = cellSize;
 			this[countName] = pathsCount;
 
@@ -689,7 +695,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 			return;
 		}
 
-		if (parallelsPathsCount <= 1 || meridiansPathsCount <= 1) {
+		if (parallelsPathsCount <= 2 || meridiansPathsCount <= 2) {
 			errorLabel.setValue("Calculated paths count is too small, it should be greater than 1. Please, check your values.");
 			return;
 		}
@@ -836,7 +842,8 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 
 		let params = [
 			["pathLength", "PathsLength", pathLength],
-			["flightTime", "FlightTime", flightTime]
+			["flightTime", "FlightTime", flightTime],
+			["pathsCount", "PathsCount", this[nameForOutput + "PathsCount"]]
 		];
 		for (let param of params) {
 			let value = param[2];
@@ -898,7 +905,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 				continue;
 			let polygon = this.selectedPolygons[name];
 			let polygonJson = polygon.toGeoJSON();
-			let props = ["polygonName", "minHeight", "maxHeight", "meanHeight", "absoluteHeight", "reliefType"];
+			let props = ["polygonName", "minHeight", "maxHeight", "meanHeight", "absoluteHeight", "reliefType", "elevationDifference"];
 			for (let prop of props)
 				polygonJson.properties[prop] = polygon[prop];
 			polygonJson.properties.name = "Selected cell";
@@ -911,7 +918,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 
 		if (this["pathsByMeridians"] === undefined || this["pathsByParallels"] === undefined) {
 			window.alert("No paths has been drawn! You'll get only selected gird cells and airport position.");
-			return turfHelpers.featureCollection(jsons);
+			return geojsonMerge.merge(jsons);
 		}
 
 		let meridianJson = this["pathsByMeridians"].toGeoJSON();
@@ -920,7 +927,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 		parallelsJson.properties.name = "Flight paths by parallels";
 
 		// See _calculateParameters
-		let params = ["cameraWidth", "cameraHeight", "pixelWidth", "focalLength", "flightHeight", "overlayBetweenPaths", "overlayBetweenImages", "m", "ly", "Ly", "By", "lx", "Lx", "Bx", "GSI", "IFOV", "GIFOV", "FOV", "GFOV", "latCellSizeInMeters", "latPathsCount", "lngCellSizeInMeters", "lngPathsCount", "selectedArea"];
+		let params = ["cameraWidth", "cameraHeight", "pixelWidth", "focalLength", "flightHeight", "overlayBetweenPaths", "overlayBetweenImages", "m", "ly", "Ly", "By", "lx", "Lx", "Bx", "GSI", "IFOV", "GIFOV", "FOV", "GFOV", "latCellSizeInMeters", "lngCellSizeInMeters", "selectedArea"];
 		for (let line of [meridianJson, parallelsJson]) {
 			for (let param of params)
 				line.properties[param] = this[param];
@@ -931,13 +938,14 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 			["pathsByParallels", parallelsJson],
 			["pathsByMeridians", meridianJson]
 		];
-		let lineParams = ["pathLength", "flightTime"];
+		let lineParams = ["pathLength", "flightTime", "pathsCount"];
 		for (let line of lines) {
 			for (let param of lineParams)
 				line[1].properties[param] = this[line[0]][param];
 		}
 
-		return turfHelpers.featureCollection(jsons);
+
+		return geojsonMerge.merge(jsons);
 	}
 
 });

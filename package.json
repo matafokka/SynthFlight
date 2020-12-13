@@ -42,9 +42,10 @@
   },
   "keywords": [],
   "author": "matafokka",
-  "license": "GPL",
+  "license": "GPL-3.0-or-later",
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.15.1",
+    "@mapbox/geojson-merge": "^1.1.1",
     "@turf/bbox": "^6.0.1",
     "@turf/helpers": "^6.1.4",
     "@turf/union": "^6.0.3",
