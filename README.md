@@ -1,6 +1,6 @@
 #SynthFlight Pre-Alpha
 
-SynthFlight is a fully client-side software for planning aerial photography. Run it either on the desktop or in a browser.
+SynthFlight is a fully client-side software for planning aerial photography. Run it either on the desktop or in a [browser online](https://matafokka.github.io/SynthFlight/).
 
 This is a pre-alpha version, so expect bugs, crashes, errors, missing functions, API changes, etc.
 
@@ -11,6 +11,8 @@ SynthFlight also features an advanced extendable layer system for Leaflet that w
 You can use layers to try and compare different parameters to choose which ones suites you best.
 
 #Installation
+
+You don't need to install it, just [use it online](https://matafokka.github.io/SynthFlight/). However, if you want to have a local copy:
 
 1. Download the latest build for the browser (if you plan to use it in a browser) or for your OS and platform (if you want a standalone application).
 1. Extract the downloaded archive wherever you want.
@@ -48,7 +50,7 @@ If you want to build SynthFlight yourself, do the following:
 1. Install [NodeJS](nodejs.org).
 1. Download the source code and `cd` to the project's root.
 1. Download dependencies by running `npm install`.
-1. Build by running `nodejs build.js`. There are additional options, to see them, run `nodejs build.js -h`.
+1. Build by running `node build.js`. There are additional options, to see them, run `nodejs build.js -h`.
 1. When build will be finished, in project root will be `dist` directory containing builds for different OSs and platforms.
 
 Warning: To build for macOS, you may need to build on actual macOS because of bugs in [Electron Packager](https://github.com/electron/electron-packager).
