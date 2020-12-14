@@ -54,6 +54,15 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 
 		let menu = [
 			new L.ALS.Widgets.Checkbox("hidePolygonWidgets", "Hide widgets on the map", this, "_hidePolygonWidgets"),
+			new L.ALS.Widgets.Number("lineThickness", "Line thickness", this, "_setLineThickness", {
+				"min": 1,
+				"max": 20,
+				"value": this.lineThickness
+			}),
+			new L.ALS.Widgets.Color("gridBorderColor", "Border color", this, "_setColor", { "value": this.gridBorderColor }),
+			new L.ALS.Widgets.Color("gridFillColor", "Fill color", this, "_setColor", { "value": this.gridFillColor }),
+			new L.ALS.Widgets.Color("meridiansColor", "Paths by meridians color", this, "_setColor", { "value": this.meridiansColor }),
+			new L.ALS.Widgets.Color("parallelsColor", "Paths by parallels color", this, "_setColor", { "value": this.parallelsColor }),
 			new L.ALS.Widgets.Number("airportLat", "Airport latitude", this, "_setAirportLatLng", {
 				"min": -90,
 				"max": 90,
@@ -69,20 +78,11 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 				"step": 1,
 				"value": 350
 			}),
-			new L.ALS.Widgets.Number("flightHeight", "Flight height (m)", this, "calculateParameters", {
+			new L.ALS.Widgets.Number("imageScale", "Image scale denominator", this, "calculateParameters", {
 				"min": 1,
 				"step": 1,
-				"value": 1000
+				"value": 10000
 			}),
-			new L.ALS.Widgets.Number("lineThickness", "Line thickness", this, "_setLineThickness", {
-				"min": 1,
-				"max": 20,
-				"value": this.lineThickness
-			}),
-			new L.ALS.Widgets.Color("gridBorderColor", "Border color", this, "_setColor", { "value": this.gridBorderColor }),
-			new L.ALS.Widgets.Color("gridFillColor", "Fill color", this, "_setColor", { "value": this.gridFillColor }),
-			new L.ALS.Widgets.Color("meridiansColor", "Color for paths by meridians", this, "_setColor", { "value": this.meridiansColor }),
-			new L.ALS.Widgets.Color("parallelsColor", "Color for paths by parallels", this, "_setColor", { "value": this.parallelsColor }),
 			new L.ALS.Widgets.Number("cameraWidth", "Camera width (px)", this, "calculateParameters", camOpts),
 			new L.ALS.Widgets.Number("cameraHeight", "Camera height (px)", this, "calculateParameters", camOpts),
 			new L.ALS.Widgets.Number("pixelWidth", "Pixel size (μm)", this, "calculateParameters", {
@@ -118,16 +118,16 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 			new L.ALS.Widgets.ValueLabel("latPathsLength", "Length of paths by meridians", "m"),
 			new L.ALS.Widgets.ValueLabel("lngFlightTime", "Flight time by parallels", "h"),
 			new L.ALS.Widgets.ValueLabel("latFlightTime", "Flight time by meridians", "h"),
-			new L.ALS.Widgets.ValueLabel("lngCellSizeInMeters", "Mean grid size by longitude", "m"),
-			new L.ALS.Widgets.ValueLabel("latCellSizeInMeters", "Mean grid size by latitude", "m"),
-			new L.ALS.Widgets.ValueLabel("selectedArea", "Approx. selected area", "sq.m."),
-			new L.ALS.Widgets.ValueLabel("imageScale", "Image scale"),
-			new L.ALS.Widgets.ValueLabel("lx", "lx", "m"),
-			new L.ALS.Widgets.ValueLabel("Lx", "Lx", "m"),
-			new L.ALS.Widgets.ValueLabel("Bx", "Bx", "m"),
-			new L.ALS.Widgets.ValueLabel("ly", "ly", "m"),
-			new L.ALS.Widgets.ValueLabel("Ly", "Ly", "m"),
-			new L.ALS.Widgets.ValueLabel("By", "By", "m"),
+			new L.ALS.Widgets.ValueLabel("lngCellSizeInMeters", "Mean cell width", "m"),
+			new L.ALS.Widgets.ValueLabel("latCellSizeInMeters", "Mean cell height", "m"),
+			new L.ALS.Widgets.ValueLabel("selectedArea", "Selected area", "sq.m."),
+			new L.ALS.Widgets.ValueLabel("flightHeight", "Flight height (m)"),
+			new L.ALS.Widgets.ValueLabel("lx", "Image height, lx", "m"),
+			new L.ALS.Widgets.ValueLabel("Lx", "Image height on the ground, Lx", "m"),
+			new L.ALS.Widgets.ValueLabel("Bx", "Distance between photographing positions, Bx", "m"),
+			new L.ALS.Widgets.ValueLabel("ly", "Image width, ly", "m"),
+			new L.ALS.Widgets.ValueLabel("Ly", "Image width on the ground, Ly", "m"),
+			new L.ALS.Widgets.ValueLabel("By", "Distance between adjacent paths, By", "m"),
 			new L.ALS.Widgets.ValueLabel("GSI", "GSI", "m"),
 			new L.ALS.Widgets.ValueLabel("IFOV", "IFOV", "μrad"),
 			new L.ALS.Widgets.ValueLabel("GIFOV", "GIFOV", "m"),
@@ -142,7 +142,6 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 			widget.setFormatNumbers(true);
 			this.addWidget(widget);
 		}
-		this.getControlById("imageScale").setFormatNumbers(false);
 
 		this.lngDistance = parseFloat(wizardResults["gridLngDistance"]);
 		this.latDistance = parseFloat(wizardResults["gridLatDistance"]);
@@ -203,7 +202,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 		let latLng = this._airportMarker.getLatLng();
 		this.getControlById("airportLat").setValue(latLng.lat.toFixed(5));
 		this.getControlById("airportLng").setValue(latLng.lng.toFixed(5));
-		this._drawPaths(); // TODO: Test performance and possibly move it to dragend
+		this._drawPaths();
 	},
 
 	onNameChange: function() {
@@ -604,9 +603,10 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 	},
 
 	calculateParameters: function () {// Get values from inputs
-		let parameters = ["cameraWidth", "cameraHeight", "pixelWidth", "focalLength", "flightHeight", "overlayBetweenPaths", "overlayBetweenImages", "aircraftSpeed"];
+		let parameters = ["cameraWidth", "cameraHeight", "pixelWidth", "focalLength", "imageScale", "overlayBetweenPaths", "overlayBetweenImages", "aircraftSpeed"];
 		for (let param of parameters)
 			this[param] = this.getControlById(param).getValue();
+		this.flightHeight = this.imageScale * this.focalLength;
 
 		let cameraParametersWarning = this.getControlById("cameraParametersWarning");
 		if (this["cameraHeight"] > this["cameraWidth"])
@@ -618,10 +618,8 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 		let focalLength = this["focalLength"] * 0.001;
 
 		this.ly = this["cameraWidth"] * pixelWidth; // Image size in meters
-		this.m = this["flightHeight"] / focalLength; // Geometric scale coefficient
-		this.imageScale = "1:" + L.ALS.formatNumber(Math.round(this.m));
-		this.Ly = this.ly * this.m // transverse capture
-		this.By = this.Ly * (100 - this["overlayBetweenPaths"]) / 100; // Transverse basis
+		this.Ly = this.ly * this.imageScale // Image width on the ground
+		this.By = this.Ly * (100 - this["overlayBetweenPaths"]) / 100; // Distance between paths
 
 		let latLngs = ["lat", "lng"];
 
@@ -629,7 +627,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 			let sizeName = name + "CellSizeInMeters", countName = name + "PathsCount";
 
 			let cellSize = Math.round(turfHelpers.radiansToLength(turfHelpers.degreesToRadians(this[name + "Distance"]), "meters"));
-			let pathsCount = Math.ceil(cellSize / this.By) + 1;
+			let pathsCount = Math.ceil(cellSize / this.By);
 			this[sizeName] = cellSize;
 			this[countName] = pathsCount;
 
@@ -637,12 +635,12 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 			this.getControlById(countName).setValue(pathsCount);
 		}
 
-		this.lx = this["cameraHeight"] * pixelWidth;
-		this.Lx = this.lx * this.m;
-		this.Bx = this.Lx * (100 - this["overlayBetweenImages"]) / 100; // Capture basis
-		this.captureBasis = turfHelpers.lengthToDegrees(this.Bx, "meters") * 2;
+		this.lx = this["cameraHeight"] * pixelWidth; // Image height
+		this.Lx = this.lx * this.imageScale; // Image height on the ground
+		this.Bx = this.Lx * (100 - this["overlayBetweenImages"]) / 100; // Capture basis, distance between images' centers
+		this.doubleBasis = turfHelpers.lengthToDegrees(this.Bx, "meters") * 2;
 
-		this.GSI = pixelWidth * this.m;
+		this.GSI = pixelWidth * this.imageScale;
 		this.IFOV = pixelWidth / focalLength * 1e6;
 		this.GIFOV = this.GSI;
 		this.FOV = this["cameraWidth"] * this.IFOV;
@@ -650,7 +648,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 
 		this.aircraftSpeedInMetersPerSecond = this["aircraftSpeed"] * 1 / 36;
 
-		let names = ["imageScale", "lx", "Lx", "Bx", "ly", "Ly", "By", "GSI", "IFOV", "GIFOV", "FOV", "GFOV",];
+		let names = ["flightHeight", "lx", "Lx", "Bx", "ly", "Ly", "By", "GSI", "IFOV", "GIFOV", "FOV", "GFOV",];
 		for (let name of names){
 			let value;
 			try { value = this.toFixed(this[name]); }
@@ -696,7 +694,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 		}
 
 		if (parallelsPathsCount <= 2 || meridiansPathsCount <= 2) {
-			errorLabel.setValue("Calculated paths count is too small, it should be greater than 1. Please, check your values.");
+			errorLabel.setValue("Calculated paths count is too small, it should be greater than 2. Please, check your values.");
 			return;
 		}
 		errorLabel.setValue("");
@@ -789,10 +787,10 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 				let index, captureBasis;
 				if (isParallels) {
 					index = 0;
-					captureBasis = this.captureBasis;
+					captureBasis = this.doubleBasis;
 				} else {
 					index = 1;
-					captureBasis = -this.captureBasis;
+					captureBasis = -this.doubleBasis;
 				}
 
 				// WARNING: It somehow modifies polygons when generating paths by parallels! Imagine following selected polygons:
@@ -927,7 +925,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 		parallelsJson.properties.name = "Flight paths by parallels";
 
 		// See _calculateParameters
-		let params = ["cameraWidth", "cameraHeight", "pixelWidth", "focalLength", "flightHeight", "overlayBetweenPaths", "overlayBetweenImages", "m", "ly", "Ly", "By", "lx", "Lx", "Bx", "GSI", "IFOV", "GIFOV", "FOV", "GFOV", "latCellSizeInMeters", "lngCellSizeInMeters", "selectedArea"];
+		let params = ["cameraWidth", "cameraHeight", "pixelWidth", "focalLength", "flightHeight", "overlayBetweenPaths", "overlayBetweenImages", "imageScale", "ly", "Ly", "By", "lx", "Lx", "Bx", "GSI", "IFOV", "GIFOV", "FOV", "GFOV", "latCellSizeInMeters", "lngCellSizeInMeters", "selectedArea"];
 		for (let line of [meridianJson, parallelsJson]) {
 			for (let param of params)
 				line.properties[param] = this[param];

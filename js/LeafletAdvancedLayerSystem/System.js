@@ -81,7 +81,7 @@ L.ALS.System = L.Control.extend({
 	 * @param map - Leaflet map object to manage
 	 * @param enableProjectSystem {boolean} - If set to true, will enable project system. User will be able to save and restore projects, but you have to do extra work. You might want to implement your own system yourself.
 	 */
-	initialize: function (map, enableProjectSystem = false) {
+	initialize: function (map, enableProjectSystem = true) {
 
 		/**
 		 * Contains base layers. Layers will be added in format: "Name": layer object. addBaseLayer() will update this object.
@@ -472,7 +472,7 @@ L.ALS.System = L.Control.extend({
 			let link = document.createElement("a");
 			link.download = filename;
 			link.href = window.URL.createObjectURL(blob);
-			//link.dataset.downloadurl = ['text/plain', link.download, link.href].join(':'); // TODO Check if this line is needed
+			//link.dataset.downloadurl = ['text/plain', link.download, link.href].join(':'); // Seems like this line is useless. TODO: Possibly remove it
 			link.click();
 		}).catch();
 	},
@@ -514,10 +514,11 @@ L.ALS.System = L.Control.extend({
 	 * @private
 	 */
 	_makeHideable: function (button, element = undefined, onHideCallback = undefined, onShowCallback = undefined) {
-		let dataHidden = "data-hidden";
+		let dataHidden = "data-hidden", haveElement = element !== undefined;
 		button.setAttribute(dataHidden, "0");
-		if (element !== undefined)
-			element.setAttribute(dataHidden, "0");
+		if (haveElement)
+			element.setAttribute(dataHidden, "1");
+		button.setAttribute(dataHidden, "1");
 
 		button.addEventListener("click", function () {
 			let newValue, callback;
@@ -530,7 +531,7 @@ L.ALS.System = L.Control.extend({
 			}
 
 			button.setAttribute(dataHidden, newValue);
-			if (element !== undefined)
+			if (haveElement)
 				element.setAttribute(dataHidden, newValue);
 
 			if (callback !== undefined)

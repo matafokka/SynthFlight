@@ -11,13 +11,11 @@ require("./widgets/Widgets.js");
  *
  * 0. Set defaultName property to the default name of your layer.
  *
- * 1. Implement statics.wizard object. It contains properties that will be set up by user and passed to the init() method when layer will be created. See docs on this field for more information.
+ * 1. Assign statics.wizard object to an instance of your wizard.
  *
  * 2. Implement init() method. It's used instead of a constructor.
  *
- * 3. Implement createMenu() method. It should return object with controls that user can change some layer's properties.
- *
- * 4. Implement your own methods or extend current ones. Basically, make it work :D
+ * 3. Implement your own methods or extend current ones. Basically, make it work :D
  *
  * Please, read the docs on each public method, you might need to (if not should) override most of them.
  *
@@ -56,6 +54,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 	 * @param layerSystem Layer system that creates this layer
 	 */
 	initialize: function(map, layerSystem) {
+		L.ALS.Widgetable.prototype.initialize.call(this, "layer-menu");
 		/**
 		 * Contains event listeners bound to various objects. Looks like this:
 		 * ```
@@ -74,7 +73,6 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 
 		this._mapEvents = [];
 
-		L.ALS.Widgetable.prototype.initialize.call(this, "layer-menu");
 		this.map = map;
 		this.id = "SynthLayer" + generateID();
 		this.layers = L.featureGroup();
