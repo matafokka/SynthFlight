@@ -12,7 +12,8 @@ function createWindow () {
 	});
 
 	mainWindow.loadFile('index.html');
-	//mainWindow.webContents.openDevTools();/ / Open the DevTools.
+	if (process.argv.indexOf("--debug") !== -1)
+		mainWindow.webContents.openDevTools();
 	mainWindow.removeMenu();
 	mainWindow.maximize();
 }

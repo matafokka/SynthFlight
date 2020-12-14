@@ -38,7 +38,7 @@
     ]
   },
   "scripts": {
-    "start": "electron electronApp.js"
+    "start": "electron electronApp.js --debug"
   },
   "keywords": [],
   "author": "matafokka",
