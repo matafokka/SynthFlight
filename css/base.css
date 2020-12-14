@@ -204,7 +204,7 @@ select > * {
 #wizard-window {
 	display: flex;
 	flex-flow: column;
-	min-width: 50%;
+	width: 50rem;
 	max-width: 100%;
 	max-height: 100%;
 	background: white;
