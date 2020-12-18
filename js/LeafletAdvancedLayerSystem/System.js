@@ -64,7 +64,7 @@ let tablets = ["tablet", "ipad", "playbook", "silk"];
 let devices = [mobiles, tablets];
 let isTablet = false;
 for (let device of devices) {
-	for (let string of mobiles) {
+	for (let string of device) {
 		if (ua.includes(string)) {
 			L.ALS.deviceType = isTablet ? "tablet" : "phone";
 			break;
