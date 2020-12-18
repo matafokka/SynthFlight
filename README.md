@@ -81,6 +81,9 @@ All modern browsers (including mobile) and, partially, IE 11.
 
 It will support older browsers and IE >= 9 in the stable release.
 
+## Can a local copy work offline?
+Yes.
+
 ## Why did you release such an unstable version?
 To pass a subject.
 

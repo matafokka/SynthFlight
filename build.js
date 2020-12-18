@@ -4,6 +4,9 @@ const tinyify = require("tinyify");
 const packager = require("electron-packager");
 const fs = require("fs");
 const fse = require("fs-extra");
+const postcss = require("postcss");
+const postcssPresetEnv = require("postcss-preset-env");
+const cssnano = require("cssnano");
 
 let onlyBrowser = false;
 
@@ -25,7 +28,23 @@ fse.emptyDirSync("dist");
 
 // Create build directory
 let dir = "dist/SynthFlight-browser/";
-fs.mkdirSync(dir, { recursive: true });
+fs.mkdirSync(dir + "css", { recursive: true });
+
+// Autoprefix and minify CSS
+let cssFiles = fs.readdirSync("css");
+for (let cssFile of cssFiles) {
+	let fileName = "css/" + cssFile;
+	let css = fs.readFileSync(fileName).toString();
+	postcss([
+		postcssPresetEnv(),
+		cssnano()
+	]).process(css, {from: undefined}).then((result) => {
+		fs.writeFile(dir + fileName, result.css, {}, (err) => {
+			if (err !== null)
+				console.log(err);
+		});
+	});
+}
 
 // Build project
 let files = ["polyfills", "main"]; // Files to build
@@ -47,7 +66,8 @@ for (let file of files) {
 }
 
 // Copy styles and scripts referenced in index.html
-let toCopy = ["css", "index.html", "logo.ico",
+
+let toCopy = ["index.html", "logo.ico",
 	"node_modules/@fortawesome/fontawesome-free/css",
 	"node_modules/@fortawesome/fontawesome-free/webfonts",
 	"node_modules/leaflet/dist/leaflet.css",

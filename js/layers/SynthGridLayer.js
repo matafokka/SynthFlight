@@ -412,7 +412,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 
 		// Grid becomes messy when distance is around 15 pixels
 		let shouldHide = distancePx < this.hidingThreshold;
-		if (shouldHide && this.isDisplayed) {
+		if (shouldHide) {
 			this.polygonGroup.remove();
 			this.bordersGroup.remove();
 			this.labelsGroup.remove();
@@ -424,16 +424,21 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 			this.polygonGroup.addTo(this.map); // Add removed polygons
 			this.bordersGroup.addTo(this.map);
 			this.labelsGroup.addTo(this.map);
-			this._onMapPan(); // Redraw polygons
 		}
 
 		shouldHide = distancePx < 200;
 		if (this.isDisplayed) {
 			if (shouldHide)
 				this.widgetsGroup.remove();
-			else if (!shouldHide)
+			else
 				this.widgetsGroup.addTo(this.map);
 		}
+		this._onMapPan(); // Redraw polygons
+	},
+
+	onShow: function () {
+		L.ALS.Layer.prototype.onShow.call(this);
+		this._updateGrid(); // Update grid upon showing
 	},
 
 	/**
@@ -502,7 +507,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 	},
 
 	_updateGrid: function () {
-		this._onMapPan();
+		this._onMapZoom();
 		this.calculateParameters();
 		this._calculatePolygonParameters();
 		this._drawPaths();
@@ -529,7 +534,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 	 */
 	_generatePolygonName: function (polygon) {
 		let firstPoint = polygon.getLatLngs()[0][0];
-		return "p_" + firstPoint.lat + "_" + firstPoint.lng;
+		return "p_" + this.toFixed(firstPoint.lat) + "_" + this.toFixed(firstPoint.lng);
 	},
 
 	statics: {
@@ -567,11 +572,10 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 			}
 			errorLabel.setValue("");
 
-			let difference = layer.maxHeight - layer.minHeight;
-			layer.meanHeight = Math.round(difference / 2);
+			layer.meanHeight = Math.round((layer.maxHeight + layer.minHeight) / 2);
 			layer.absoluteHeight = this["flightHeight"] + layer.meanHeight;
 
-			layer.elevationDifference = difference / this["flightHeight"];
+			layer.elevationDifference = (layer.maxHeight - layer.minHeight) / this["flightHeight"];
 			layer.reliefType = (layer.elevationDifference >= 0.2) ? "Variable" : "Plain";
 
 			let names = ["meanHeight", "absoluteHeight", "elevationDifference", "reliefType"];

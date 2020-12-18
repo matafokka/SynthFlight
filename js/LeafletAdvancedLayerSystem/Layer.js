@@ -178,20 +178,36 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 	},
 
 	/**
-	 * Being called when layer is being shown. If overridden, parent method MUST be called.
+	 * Being called when layer is being showed or and object is being added.
+	 *
+	 * This method is for internal use only. To add behavior upon showing, override onShow() public method.
+	 * @private
 	 */
-	onShow() {
+	_onShow: function () {
 		this.layers.addTo(this.map);
 		this.isShown = true
 	},
 
 	/**
-	 * Being called when layer is being hidden. If overridden, parent method MUST be called.
+	 * Being called when layer is being hidden.
+	 *
+	 * This method is for internal use only. To add behavior upon hiding, override onHide() public method.
+	 * @private
 	 */
-	onHide() {
+	_onHide: function () {
 		this.layers.remove();
 		this.isShown = false;
 	},
+
+	/**
+	 * Being called when layer is being shown
+	 */
+	onShow() {},
+
+	/**
+	 * Being called when layer is being hidden
+	 */
+	onHide() {},
 
 	/**
 	 * Being called when user selects this layer.
@@ -215,7 +231,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 	/**
 	 * Adds Leaflet layers to this SynthFlight layer.
 	 *
-	 * Do NOT reimplement!
+	 * Do NOT override!
 	 *
 	 * @param layers Layers to add
 	 */
@@ -224,7 +240,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 			this.layers.addLayer(layer);
 
 		if (this.isShown)
-			this.onShow();
+			this._onShow();
 
 		this._layerSystem._reorderLayers(); // We gotta reorder layers because Leaflet will bring lastly added layer on top.
 	},

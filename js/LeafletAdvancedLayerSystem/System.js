@@ -1,3 +1,8 @@
+// Add helpers
+
+/**
+ * Root object containing all AdvancedLayerSystem stuff.
+ */
 L.ALS = {
 
 	/**
@@ -44,9 +49,36 @@ L.ALS = {
 			repeats++;
 		}
 		return finalString;
-	}
+	},
+
+	/**
+	 * {"desktop"|"phone"|"tablet"} Contains user's device type. Do NOT override!
+	 */
+	deviceType: "desktop",
 };
 
+// Detect user browser
+let ua = window.navigator.userAgent.toLowerCase();
+let mobiles = ["android", "iphone", "ipod", "opera mini", "windows phone", "bb", "blackberry"];
+let tablets = ["tablet", "ipad", "playbook", "silk"];
+let devices = [mobiles, tablets];
+let isTablet = false;
+for (let device of devices) {
+	for (let string of mobiles) {
+		if (ua.includes(string)) {
+			L.ALS.deviceType = isTablet ? "tablet" : "phone";
+			break;
+		}
+	}
+	isTablet = true;
+}
+
+// If user's device is a phone, make UI a bit bigger
+let isMobile = (L.ALS.deviceType === "phone");
+if (isMobile)
+	document.querySelector(":root").style.fontSize = "16pt";
+
+// Actual layer system
 const Sortable = require("sortablejs");
 const JSZip = require("jszip");
 require("./Widgetable.js");
@@ -60,14 +92,14 @@ require("./Layer.js");
  * Just add it, implement your layers, register them, and you're good to go.
  *
  * Usage:
- * <pre>
+ * ```JS
  * require("AdvancedLayerSystem"); // Require this plugin or add it to your .html page via "script" tag
  * require("./MyLayerType.js"); // Require your custom layer types
  * let layerSystem = new L.Control.LeafletAdvancedLayerSystem(map); // Create an instance of this class
  * let baseLayer = ...; // Create some base layers
  * layerSystem.addBaseLayer(baseLayer, "My Base Layer"); // Add your base layers to the system
  * layerSystem.addLayerType(L.MyLayerType); // Add your layer types
- * </pre>
+ * ```
  *
  * So all you have to do is to implement your layer types. They should do whatever you do with Leaflet. The layer system will do the rest.
  *
@@ -126,6 +158,8 @@ L.ALS.System = L.Control.extend({
 		});
 
 		// Menu-related stuff
+		if (isMobile)
+			document.getElementById("menu").classList.add("menu-mobile");
 
 		this._baseLayerMenu = document.getElementById("menu-maps-select");
 		this._baseLayerMenu.addEventListener("change", (event) => {
@@ -319,9 +353,11 @@ L.ALS.System = L.Control.extend({
 		hideButton.className = "fas fa-eye";
 		this._makeHideable(hideButton, undefined, () => {
 			hideButton.className = "fas fa-eye-slash";
+			layer._onHide();
 			layer.onHide();
 		}, () => {
 			hideButton.className = "fas fa-eye";
+			layer._onShow();
 			layer.onShow();
 		});
 
