@@ -46,6 +46,39 @@ L.ALS.WidgetLayer =  L.ALS.Widgetable.extend({
 		return this.marker;
 	},
 
+	addWidget: function (widget) {
+		L.ALS.Widgetable.prototype.addWidget.call(this, widget);
+		this._checkWidgets();
+	},
+
+	removeWidget: function (id) {
+		L.ALS.Widgetable.prototype.removeWidget.call(this, id);
+		this._checkWidgets();
+	},
+
+	removeAllWidgets: function () {
+		L.ALS.Widgetable.prototype.removeAllWidgets.call(this);
+		this._checkWidgets();
+	},
+
+	_checkWidgets: function () {
+		let hasFirst = false, hasSecond = false;
+		for (let prop in this._widgets) {
+			if (!this._widgets.hasOwnProperty(prop))
+				continue;
+			if (!hasFirst)
+				hasFirst = true;
+			else if (hasFirst && !hasSecond)
+				hasSecond = true;
+			else if (hasFirst && hasSecond)
+				break;
+		}
+		if (hasFirst && hasSecond)
+			this.container.classList.remove("nostyle");
+		else
+			this.container.classList.add("nostyle");
+	},
+
 	/**
 	 * Sets origin of this layer
 	 * @param origin {"topLeft"|"topCenter"|"topRight"|"bottomLeft"|"bottomCenter"|"bottomRight"|"leftCenter"|"rightCenter"|"center"} Origin to set

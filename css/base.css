@@ -329,6 +329,15 @@ select > * {
 	display: none;
 }
 
+/* Divider */
+.adv-lyr-sys-divider {
+	height: 1px;
+	margin: 0.2rem;
+	border: none;
+	padding: 0;
+	background: linear-gradient(90deg, transparent 0%, grey 25%, grey 75%, transparent 100%);
+}
+
 /* WidgetLayer */
 
 .adv-lyr-sys-divicon-container {
@@ -342,6 +351,20 @@ select > * {
 	border: 1px solid #ccc;
 	max-width: 12rem;
 	padding-right: 0.4rem;
+}
+
+.adv-lyr-sys-divicon-container .nostyle {
+	border: none;
+	padding: 0;
+}
+
+.adv-lyr-sys-divicon-container .nostyle > * {
+	padding: 0;
+}
+
+.adv-lyr-sys-divicon-container .nostyle > * > .adv-lyr-sys-simple-label {
+	border: 1px solid #ccc;
+	padding: 0 0.1rem;
 }
 
 .adv-lyr-sys-divicon > * > input,
@@ -398,25 +421,25 @@ select > * {
 .adv-lyr-sys-simple-label.error {
 	padding: 0.2rem;
 	background: #ffbebe;
-	border: 1px solid darkred;
+	border: 1px solid darkred !important;
 }
 
 .adv-lyr-sys-simple-label.message {
 	padding: 0.2rem;
 	background: #e4f7ff;
-	border: 1px solid cornflowerblue;
+	border: 1px solid cornflowerblue !important;
 }
 
 .adv-lyr-sys-simple-label.success {
 	padding: 0.2rem;
 	background: #e3ffd3;
-	border: 1px solid green;
+	border: 1px solid green !important;
 }
 
 .adv-lyr-sys-simple-label.warning {
 	padding: 0.2rem;
 	background: #fff4c3;
-	border: 1px solid goldenrod;
+	border: 1px solid goldenrod !important;
 }
 
 /* Text area */

@@ -8,6 +8,7 @@ require("./ValueLabel.js");
 require("./TextArea.js");
 require("./Number.js");
 require("./Checkbox.js");
+require("./Divider.js");
 
 // Build textual widgets
 let types = ["Text", "Email", "Password", "Color"];

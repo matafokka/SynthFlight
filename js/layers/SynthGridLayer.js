@@ -33,7 +33,15 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 	 */
 	isDisplayed: true,
 
+	/**
+	 * Indicates whether polygons' widgets should be hidden or not.
+	 */
 	_doHidePolygonWidgets: false,
+
+	/**
+	 * Indicates whether paths' connections should be hidden or not
+	 */
+	_doHidePathsConnections: false,
 
 	init: function (wizardResults) {
 		this.selectedPolygons = {};
@@ -54,6 +62,8 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 
 		let menu = [
 			new L.ALS.Widgets.Checkbox("hidePolygonWidgets", "Hide widgets on the map", this, "_hidePolygonWidgets"),
+			new L.ALS.Widgets.Checkbox("hideNumbers", "Hide points numbers on the map", this, "_hidePointsNumbers"),
+			new L.ALS.Widgets.Checkbox("hidePathsConnections", "Hide paths connections", this, "_hidePathsConnections"),
 			new L.ALS.Widgets.Number("lineThickness", "Line thickness", this, "_setLineThickness", {
 				"min": 1,
 				"max": 20,
@@ -63,6 +73,9 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 			new L.ALS.Widgets.Color("gridFillColor", "Fill color", this, "_setColor", { "value": this.gridFillColor }),
 			new L.ALS.Widgets.Color("meridiansColor", "Paths by meridians color", this, "_setColor", { "value": this.meridiansColor }),
 			new L.ALS.Widgets.Color("parallelsColor", "Paths by parallels color", this, "_setColor", { "value": this.parallelsColor }),
+
+			new L.ALS.Widgets.Divider("div1"),
+
 			new L.ALS.Widgets.Number("airportLat", "Airport latitude", this, "_setAirportLatLng", {
 				"min": -90,
 				"max": 90,
@@ -109,6 +122,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 			}),
 			calculateParametersError,
 			cameraParametersWarning,
+			new L.ALS.Widgets.Divider("div2"),
 		];
 
 		let valueLabels = [
@@ -167,7 +181,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 		// Additional redrawing actually won't introduce any noticeable delay.
 
 		// Create empty group containing our stuff
-		let props = ["polygonGroup", "labelsGroup", "widgetsGroup", "bordersGroup"];
+		let props = ["polygonGroup", "labelsGroup", "widgetsGroup", "bordersGroup", "numbersGroup", "pathsWithoutConnectionsGroup"];
 		for (let prop of props) {
 			this[prop] = L.featureGroup();
 			this.addLayers(this[prop]);
@@ -427,7 +441,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 		}
 
 		shouldHide = distancePx < 200;
-		if (this.isDisplayed) {
+		if (this.isDisplayed && !this._doHidePolygonWidgets) {
 			if (shouldHide)
 				this.widgetsGroup.remove();
 			else
@@ -485,17 +499,12 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 				controlsContainer.getControlById(id).setFormatNumbers(true);
 
 			this.selectedPolygonsWidgets[name] = controlsContainer;
-			if (!this._doHidePolygonWidgets)
-				this.widgetsGroup.addLayer(controlsContainer.getLayer());
+			this.widgetsGroup.addLayer(controlsContainer.getLayer());
 		}
 		this._calculatePolygonParameters();
 		this._drawPaths();
 	},
 
-	/**
-	 * Sets color to grid and paths
-	 * @private
-	 */
 	_setColor: function (widget) {
 		this[widget.getId()] = widget.getValue();
 		this._updateGrid();
@@ -506,6 +515,15 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 		this._updateGrid();
 	},
 
+	_hidePathsConnections: function (widget) {
+		this._doHidePathsConnections = widget.getValue();
+		this._drawPaths();
+	},
+
+	/**
+	 * Updates grid.
+	 * @private
+	 */
 	_updateGrid: function () {
 		this._onMapZoom();
 		this.calculateParameters();
@@ -514,16 +532,27 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 	},
 
 	_hidePolygonWidgets: function (widget) {
-		this._doHidePolygonWidgets = widget.getValue();
-		for (let name in this.selectedPolygons) {
-			if (!this.selectedPolygons.hasOwnProperty(name))
-				continue;
-			let layer = this.selectedPolygonsWidgets[name].getLayer();
-			if (this._doHidePolygonWidgets)
-				this.widgetsGroup.removeLayer(layer);
-			else
-				this.widgetsGroup.addLayer(layer);
-		}
+		this._doHidePolygonWidgets = this._hideOrShowLayer(widget, this.widgetsGroup);
+	},
+
+	_hidePointsNumbers: function (widget) {
+		this._hideOrShowLayer(widget, this.numbersGroup);
+	},
+
+	/**
+	 * Hides or shows layer.
+	 * @param checkbox {L.ALS.Widgets.Checkbox} Checkbox that indicates whether layer should be hidden or not
+	 * @param layer {L.ALS.Layer} Layer to show or hide
+	 * @return {boolean} If true, layer has been hidden. False otherwise.
+	 * @private
+	 */
+	_hideOrShowLayer: function (checkbox, layer) {
+		let isChecked = checkbox.getValue();
+		if (isChecked)
+			layer.remove();
+		else
+			this.map.addLayer(layer);
+		return isChecked;
 	},
 
 	/**
@@ -681,6 +710,9 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 			});
 		}
 
+		this.pathsWithoutConnectionsGroup.clearLayers();
+		this.numbersGroup.clearLayers();
+
 		// Validate parameters
 
 		let errorLabel = this.getControlById("calculateParametersError");
@@ -712,13 +744,15 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 	 * @private
 	 */
 	_drawPathsWorker: function (isParallels) {
-		let pathName, nameForOutput;
+		let pathName, nameForOutput, color;
 		if (isParallels) {
 			pathName = "pathsByParallels";
 			nameForOutput = "lng";
+			color = "parallelsColor";
 		} else {
 			pathName = "pathsByMeridians";
 			nameForOutput = "lat";
+			color = "meridiansColor";
 		}
 
 		let parallelsPathsCount = this["lngPathsCount"];
@@ -763,6 +797,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 
 			let lat = startLat, lng = startLng;
 			let turfPolygonCoordinates = turfPolygon.geometry.coordinates[0] // MathTools.isLineOnEdgeOfPolygon accepts coordinates of the polygon, not polygon itself
+			let number = 1;
 			while (lat >= endLat && lng <= endLng) {
 				let lineCoordinates;
 				if (isParallels)
@@ -823,16 +858,33 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 					secondPoint = newClippedLine[1];
 				}
 
-				// Add points to the path
-				let propertyName = isParallels ? "pathsByParallels" : "pathsByMeridians";
-				for (let point of [firstPoint, secondPoint])
-					this[propertyName].addLatLng([point[1], point[0]]);
+				// This line will be added to pathsWithoutConnectionsGroup
+				let line = L.polyline([], {
+					color: this[color],
+					weight: this.lineThickness
+				});
+
+				for (let point of [firstPoint, secondPoint]) {
+					// Add points to the path
+					let coord = [point[1], point[0]];
+					this[pathName].addLatLng(coord);
+					line.addLatLng(coord);
+
+					// Add numbers
+					let container = new L.ALS.WidgetLayer(coord);
+					let label = new L.ALS.Widgets.SimpleLabel("pt" + pathName + number, number, "center", (isParallels ? "message": "error"));
+					container.addWidget(label);
+					this.numbersGroup.addLayer(container.getLayer());
+					number++;
+				}
+				this.pathsWithoutConnectionsGroup.addLayer(line);
 
 				swapPoints = !swapPoints;
 				if (isParallels)
 					lat -= parallelsDistance;
 				else
 					lng += meridiansDistance;
+
 			}
 		}
 		this[pathName].addLatLng(airportLatLng);
@@ -851,6 +903,15 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 			let value = param[2];
 			this[pathName][param[0]] = value;
 			this.getControlById(nameForOutput + param[1]).setValue(value);
+		}
+
+		// Display either polyline or paths without connections
+		if (this._doHidePathsConnections) {
+			this[pathName].remove();
+			this.map.addLayer(this.pathsWithoutConnectionsGroup);
+		} else {
+			this.pathsWithoutConnectionsGroup.remove();
+			this.map.addLayer(this[pathName]);
 		}
 	},
 
@@ -918,8 +979,8 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 		airport.name = "Airport";
 		jsons.push(airport);
 
-		if (this["pathsByMeridians"] === undefined || this["pathsByParallels"] === undefined) {
-			window.alert("No paths has been drawn! You'll get only selected gird cells and airport position.");
+		if (this["pathsByMeridians"].isEmpty() || this["pathsByParallels"].isEmpty()) {
+			window.alert(`No paths has been drawn in layer \"${this.name}\"! You'll get only selected gird cells and airport position.`);
 			return geojsonMerge.merge(jsons);
 		}
 
