@@ -33,6 +33,15 @@ L.ALS.Widgets.DropDownList = L.ALS.Widgets.BaseWidget.extend({
 				return;
 			}
 		}
+	},
+
+	/**
+	 * Selects specific item.
+	 * @param item {string} String that you've passed to addItem().
+	 */
+	selectItem: function (item) {
+		this.input.value = item;
+		L.ALS.dispatchEvent(this.input, "change");
 	}
 
 });

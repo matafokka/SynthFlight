@@ -33,15 +33,10 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 	 */
 	isDisplayed: true,
 
-	/**
-	 * Indicates whether polygons' widgets should be hidden or not.
-	 */
 	_doHidePolygonWidgets: false,
-
-	/**
-	 * Indicates whether paths' connections should be hidden or not
-	 */
 	_doHidePathsConnections: false,
+	_doHidePathsByMeridians: false,
+	_doHidePathsByParallels: false,
 
 	init: function (wizardResults) {
 		this.selectedPolygons = {};
@@ -52,7 +47,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 		let camOpts = {
 			"min": 1,
 			"step": 1,
-			"value": 4096
+			"value": 17000
 		};
 
 		let calculateParametersError = new L.ALS.Widgets.SimpleLabel("calculateParametersError");
@@ -62,8 +57,10 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 
 		let menu = [
 			new L.ALS.Widgets.Checkbox("hidePolygonWidgets", "Hide widgets on the map", this, "_hidePolygonWidgets"),
-			new L.ALS.Widgets.Checkbox("hideNumbers", "Hide points numbers on the map", this, "_hidePointsNumbers"),
-			new L.ALS.Widgets.Checkbox("hidePathsConnections", "Hide paths connections", this, "_hidePathsConnections"),
+			new L.ALS.Widgets.Checkbox("hideNumbers", "Hide points' numbers on the map", this, "_hidePointsNumbers"),
+			new L.ALS.Widgets.Checkbox("hidePathsConnections", "Hide paths' connections", this, "_hidePathsConnections"),
+			new L.ALS.Widgets.Checkbox("hidePathsByMeridians", "Hide paths by meridians", this, "_hidePathsByMeridians"),
+			new L.ALS.Widgets.Checkbox("hidePathsByParallels", "Hide paths by parallels", this, "_hidePathsByParallels"),
 			new L.ALS.Widgets.Number("lineThickness", "Line thickness", this, "_setLineThickness", {
 				"min": 1,
 				"max": 20,
@@ -94,14 +91,14 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 			new L.ALS.Widgets.Number("imageScale", "Image scale denominator", this, "calculateParameters", {
 				"min": 1,
 				"step": 1,
-				"value": 10000
+				"value": 25000
 			}),
 			new L.ALS.Widgets.Number("cameraWidth", "Camera width (px)", this, "calculateParameters", camOpts),
 			new L.ALS.Widgets.Number("cameraHeight", "Camera height (px)", this, "calculateParameters", camOpts),
 			new L.ALS.Widgets.Number("pixelWidth", "Pixel size (μm)", this, "calculateParameters", {
 				"min": 0.001,
 				"step": 0.001,
-				"value": 1
+				"value": 5
 			}),
 			new L.ALS.Widgets.Number("overlayBetweenPaths", "Overlay between images from adjacent paths (%)", this, "calculateParameters", {
 				"min": 60,
@@ -113,12 +110,12 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 				"min": 30,
 				"max": 100,
 				"step": 0.1,
-				"value": 50
+				"value": 30
 			}),
 			new L.ALS.Widgets.Number("focalLength", "Focal length (mm)", this, "calculateParameters", {
 				"min": 0.001,
 				"step": 1,
-				"value": 100
+				"value": 112
 			}),
 			calculateParametersError,
 			cameraParametersWarning,
@@ -539,6 +536,16 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 		this._hideOrShowLayer(widget, this.numbersGroup);
 	},
 
+	_hidePathsByMeridians: function (widget) {
+		this._doHidePathsByMeridians = this._hideOrShowLayer(widget, this.pathsByMeridians);
+		this._updateGrid();
+	},
+
+	_hidePathsByParallels: function (widget) {
+		this._doHidePathsByParallels = this._hideOrShowLayer(widget, this.pathsByParallels);
+		this._updateGrid();
+	},
+
 	/**
 	 * Hides or shows layer.
 	 * @param checkbox {L.ALS.Widgets.Checkbox} Checkbox that indicates whether layer should be hidden or not
@@ -643,7 +650,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 
 		let cameraParametersWarning = this.getControlById("cameraParametersWarning");
 		if (this["cameraHeight"] > this["cameraWidth"])
-			cameraParametersWarning.setValue("Camera height is greater than camera width! It means that camera will be rotated by 90°.");
+			cameraParametersWarning.setValue("Camera height is greater than camera width!");
 		else
 			cameraParametersWarning.setValue("");
 
@@ -744,15 +751,17 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 	 * @private
 	 */
 	_drawPathsWorker: function (isParallels) {
-		let pathName, nameForOutput, color;
+		let pathName, nameForOutput, color, hideEverything;
 		if (isParallels) {
 			pathName = "pathsByParallels";
 			nameForOutput = "lng";
 			color = "parallelsColor";
+			hideEverything = this._doHidePathsByParallels;
 		} else {
 			pathName = "pathsByMeridians";
 			nameForOutput = "lat";
 			color = "meridiansColor";
+			hideEverything = this._doHidePathsByMeridians;
 		}
 
 		let parallelsPathsCount = this["lngPathsCount"];
@@ -868,6 +877,10 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 					// Add points to the path
 					let coord = [point[1], point[0]];
 					this[pathName].addLatLng(coord);
+
+					if (hideEverything)
+						continue;
+
 					line.addLatLng(coord);
 
 					// Add numbers
@@ -888,7 +901,6 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 			}
 		}
 		this[pathName].addLatLng(airportLatLng);
-		this.addLayers(this[pathName]);
 
 		// Calculate parameters based on paths length
 		let pathLength = Math.round(this.lineLengthUsingFlightHeight(this[pathName]));
@@ -905,6 +917,9 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 			this.getControlById(nameForOutput + param[1]).setValue(value);
 		}
 
+		if (hideEverything)
+			return;
+
 		// Display either polyline or paths without connections
 		if (this._doHidePathsConnections) {
 			this[pathName].remove();
@@ -913,6 +928,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 			this.pathsWithoutConnectionsGroup.remove();
 			this.map.addLayer(this[pathName]);
 		}
+		this.addLayers(this[pathName]);
 	},
 
 	/**

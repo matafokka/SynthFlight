@@ -335,7 +335,7 @@ select > * {
 	margin: 0.2rem;
 	border: none;
 	padding: 0;
-	background: linear-gradient(90deg, transparent 0%, grey 25%, grey 75%, transparent 100%);
+	background: linear-gradient(90deg, transparent 5%, grey 25%, grey 75%, transparent 95%);
 }
 
 /* WidgetLayer */

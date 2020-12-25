@@ -49,6 +49,7 @@ L.ALS.SynthGridWizard = L.ALS.Wizard.extend({
 				dropDownList.addItem(param);
 		}
 		dropDownList.addItem("Custom");
+		dropDownList.selectItem("1:25 000");
 	},
 
 	onGridStandardScalesChange: function (widget) {
