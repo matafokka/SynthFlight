@@ -1,4 +1,7 @@
-module.exports = function() {
+/**
+ * Contains System's markup: menu and wizard window
+ */
+module.exports = function () {
 	let parsedDom = document.implementation.createHTMLDocument("title");
 	parsedDom.body.innerHTML += `
 

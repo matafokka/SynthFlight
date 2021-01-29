@@ -6,9 +6,6 @@ const RomanNumerals = require("roman-numerals");
 const geojsonMerge = require("@mapbox/geojson-merge"); // Using this since turfHelpers.featureCollection() discards previously defined properties.
 require("./SynthGridWizard.js");
 
-/**
- * Grid layer
- */
 L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 
 	defaultName: "Grid Layer",

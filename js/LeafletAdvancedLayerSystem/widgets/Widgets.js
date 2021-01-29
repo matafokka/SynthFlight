@@ -1,3 +1,6 @@
+/**
+ * Contains widgets to add to `Widgetable`s
+ */
 L.ALS.Widgets = {};
 
 require("./BaseWidget.js");

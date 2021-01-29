@@ -17,7 +17,7 @@ class MathTools {
 	}
 
 	/**
-	 * Determines if given point is lying on given line.
+	 * Determines if given point is lying on the given line.
 	 * @param point {Array} - point in format [lng, lat]
 	 * @param line {Array} - line in format [[lng, lat], [lng, lat]]
 	 * @return {boolean} true, if does. False otherwise.
@@ -47,6 +47,11 @@ class MathTools {
 		return this.isEqual((params.slope * px + params.intercept), py);
 	}
 
+	/**
+	 * Calculates slope and intercept for the given line
+	 * @param line - line in format [[lng, lat], [lng, lat]]
+	 * @return {{intercept: number, slope: number}|undefined} Object containing slope and intercept or undefined, if it can't be found (when dx = 0);
+	 */
 	static getSlopeAndIntercept(line) {
 		let p1 = line[0], p2 = line[1];
 		let p1x = p1[0], p1y = p1[1], p2x = p2[0], p2y = p2[1];
@@ -135,6 +140,12 @@ class MathTools {
 		return [point2, point1];
 	}
 
+	/**
+	 * Calculate y coordinate for given x, so the [x, y] point is the point lying on the given line.
+	 * @param line - line in format [[lng, lat], [lng, lat]]
+	 * @param x {number} X coordinate
+	 * @return {number|undefined} Y coordinate or undefined, if line slope and intercept can't be found for the given line
+	 */
 	static yForX(line, x) {
 		let params = this.getSlopeAndIntercept(line);
 		if (params === undefined)

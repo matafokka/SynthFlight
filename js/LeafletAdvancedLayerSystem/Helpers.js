@@ -70,7 +70,7 @@ L.ALS.Helpers = {
 
 	/**
 	 * @type {"desktop"|"phone"|"tablet"}
-	 * Contains user's device type
+	 * Contains user's device type. This detection has been performed using only user agent. If you want to implement something that relies on actual device type, consider performing feature detection by yourself. Otherwise, use this property to maintain consistent look and feel.
 	 */
 	deviceType: "desktop",
 
