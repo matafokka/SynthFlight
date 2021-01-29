@@ -437,8 +437,6 @@ select > * {
 }
 
 .adv-lyr-sys-number > * {
-	display: inline-block;
-	vertical-align: middle;
 	border-right: none;
 }
 

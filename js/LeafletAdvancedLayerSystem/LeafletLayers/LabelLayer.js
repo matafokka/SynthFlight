@@ -27,7 +27,7 @@ L.ALS.LeafletLayers.LabelLayer = L.ALS.LeafletLayers.CanvasLayer.extend({
 	/**
 	 * Font size in pixels. You can extend this class and modify it, but it's not recommended because it will introduce inconsistency between everything.
 	 */
-	_fontSize: 12,
+	_fontSize: L.ALS.Helpers.isMobile ? 36 : 12,
 
 	/**
 	 * Padding around text in pixels. You can extend this class and modify it, but it's not recommended because it will introduce inconsistency between everything.

@@ -21,20 +21,22 @@ let map = L.map("map", {
 		L.latLng(-90, 180)
 	),
 	maxBoundsViscosity: 1,
-	preferCanvas: true, // Canvas is faster than SVG renderer,
+	preferCanvas: true, // Canvas is faster than SVG renderer
 	keyboard: false,
 }).setView([51.505, -0.09], 13);
 map.doubleClickZoom.disable();
 
-// Show coordinates via Leaflet.Control plugin
-L.control.coordinates({
-	position: "bottomleft",
-	decimals: 5,
-	labelTemplateLat: "Lat (y): {y}",
-	labelTemplateLng: "Lng (x): {x}",
-	enableUserInput: false,
-	useLatLngOrder: true,
-}).addTo(map);
+// Show coordinates via Leaflet.Control plugin. It doesn't look good on phones, so we won't add it in this case.
+if (!L.ALS.Helpers.isMobile) {
+	L.control.coordinates({
+		position: "bottomleft",
+		decimals: 5,
+		labelTemplateLat: "Lat (y): {y}",
+		labelTemplateLng: "Lng (x): {x}",
+		enableUserInput: false,
+		useLatLngOrder: true,
+	}).addTo(map);
+}
 
 // Initialize layer system. Create and add base layers.
 
