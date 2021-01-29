@@ -1,4 +1,3 @@
-const generateID = require("./generateID.js");
 require("./Widgetable.js");
 require("./widgets/Widgets.js");
 
@@ -74,7 +73,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 		this._mapEvents = [];
 
 		this.map = map;
-		this.id = "SynthLayer" + generateID();
+		this.id = "SynthLayer" + L.ALS.Helpers.generateID();
 		this.layers = L.featureGroup();
 		this._layerSystem = layerSystem;
 		this.name = this.defaultName;
@@ -92,7 +91,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 	addEventListenerTo: function (object, type, handler) {
 		// Write added event listener to the _eventsForObjects
 		if (object._advSysID === undefined)
-			object._advSysID = "advLayerSys" + generateID();
+			object._advSysID = "advLayerSys" + L.ALS.Helpers.generateID();
 		if (this._eventsForObjects[object._advSysID] === undefined)
 			this._eventsForObjects[object._advSysID] = {};
 		if (this._eventsForObjects[object._advSysID][type] === undefined)
@@ -136,7 +135,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 	/**
 	 * Removes event listener (handler) to the specified event type from the object. Use it instead object.off().
 	 *
-	 * @see AdvancedLayer.addEventListenerTo For more information
+	 * @see Layer.addEventListenerTo For more information
 	 *
 	 * @param object {object} - Object to remove event listener from
 	 * @param type {string} - Event type
@@ -274,16 +273,15 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 	 * Use it instead of constructor.
 	 * @param wizardResults Results compiled from the wizard. It is an object who's keys are IDs of your controls and values are values of your controls.
 	 */
-	init: function(wizardResults) {
-		let widgetLayer = new L.ALS.WidgetLayer();
-		this.addLayers(widgetLayer.getLayer());
-		widgetLayer.addWidget(new L.ALS.Widgets.Number("idk", "Test", this, "testCallback"));
-		widgetLayer.addWidget(new L.ALS.Widgets.Color("idk2", "Test2", this, "testCallback"));
-		widgetLayer.addWidget(new L.ALS.Widgets.SimpleLabel("label", "Label haha"));
-	},
+	init: function(wizardResults) {},
 
-	testCallback: function (input) {
-		console.log("New value is: " + input.getValue());
+	/**
+	 * Deletes this layer
+	 * @param shouldAskUser {boolean} If set to true, the message asking if user wants to delete selected layer will be displayed. Otherwise, layer will be silently deleted.
+	 */
+	deleteLayer: function (shouldAskUser = false) {
+		this._layerSystem._selectLayer(this.id);
+		this._layerSystem._deleteLayer(shouldAskUser);
 	},
 
 	statics: {
@@ -315,6 +313,23 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 	eachLayer: function (fn, context) {
 		this.layers.eachLayer(fn, context);
 		return this;
+	},
+
+	/**
+	 * Sets name of this layer
+	 * @param name {string} Name to set
+	 */
+	setName: function (name) {
+		this.name = name;
+		this._nameLabel.innerHTML = this.name;
+		this.onNameChange();
+	},
+
+	/**
+	 * @return {string} Name of this layer
+	 */
+	getName: function () {
+		return this.name;
 	},
 
 	/**

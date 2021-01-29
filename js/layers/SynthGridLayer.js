@@ -37,6 +37,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 	_doHidePathsConnections: false,
 	_doHidePathsByMeridians: false,
 	_doHidePathsByParallels: false,
+	_doHidePathsNumbers: false,
 
 	init: function (wizardResults) {
 		this.selectedPolygons = {};
@@ -178,11 +179,20 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 		// Additional redrawing actually won't introduce any noticeable delay.
 
 		// Create empty group containing our stuff
-		let props = ["polygonGroup", "labelsGroup", "widgetsGroup", "bordersGroup", "numbersGroup", "pathsWithoutConnectionsGroup"];
+		let props = ["polygonGroup", "widgetsGroup", "bordersGroup", "pathsWithoutConnectionsGroup"];
 		for (let prop of props) {
 			this[prop] = L.featureGroup();
 			this.addLayers(this[prop]);
 		}
+		this.labelsGroup = new L.LabelLayer(false);
+		this.addLayers(this.labelsGroup);
+
+		/**
+		 * Contains polygons' names IDs
+		 * @type {string[]}
+		 * @private
+		 */
+		this._namesIDs = [];
 
 		// Bind all the methods
 		this.addEventListenerTo(this.map, "moveend resize", "_onMapPan");
@@ -221,19 +231,21 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 	},
 
 	/**
-	 * When map is being panned, removes previously drawn polygons and draws again only visible ones.
+	 * When map is being panned, removes previously drawn polygons and draws only visible ones.
 	 * This improves performance and memory consumption.
 	 * @private
 	 */
 	_onMapPan: function () {
-		// We introduce drawOnlyRuler here to avoid unnecessary iterations over the same loop
 
 		// Though it seems like leaflet doesn't perform any actions, we'll still won't do anything in case this behavior will change
 		if (!this.isShown || !this.isDisplayed)
 			return;
 
 		this.polygonGroup.clearLayers();
-		this.labelsGroup.clearLayers();
+
+		for (let id of this._namesIDs)
+			this.labelsGroup.deleteLabel(id);
+		this._namesIDs = [];
 
 		// Get viewport bounds
 		let bounds = this.map.getBounds();
@@ -270,19 +282,21 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 		let mapLatLng = this.map.getBounds().getNorthWest();
 		let isFirstIteration = true;
 
-		let createLabel = (latLng, content, origin="center") => {
-			let container = new L.ALS.WidgetLayer(latLng, origin);
-			container.addWidget(new L.ALS.Widgets.SimpleLabel("c", content, "center"));
-			this.labelsGroup.addLayer(container.getLayer());
+		let createLabel = (latLng, content, origin="center", colorful = false) => {
+			let id = L.ALS.Helpers.generateID();
+			this._namesIDs.push(id);
+			this.labelsGroup.addLabel(id, latLng, content, { origin: origin });
+			if (colorful)
+				this.labelsGroup.setLabelDisplayOptions(id, L.LabelLayer.DefaultDisplayOptions.Success);
 		}
 
 		// We will use toFixed() to generate lat and lng labels and to fix floating point errors in generating polygons' names
 
 		for (let lat = latFrom; lat <= latTo; lat += this.latDistance) { // From bottom (South) to top (North)
-			createLabel([lat, mapLatLng.lng], this.toFixed(lat), "leftCenter");
+			createLabel([lat, mapLatLng.lng], this.toFixed(lat), "leftCenter", true);
 			for (let lng = lngFrom; lng <= lngTo; lng += this.lngDistance) { // From left (West) to right (East)
 				if (isFirstIteration)
-					createLabel([mapLatLng.lat, lng], this.toFixed(lng), "topCenter");
+					createLabel([mapLatLng.lat, lng], this.toFixed(lng), "topCenter", true);
 
 				let polygon = L.polygon([
 					[lat, lng],
@@ -360,19 +374,15 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 					polygonName += "-" + sheetNumber(2);
 				else if (this._currentStandardScale === 300000) // 1:300 000
 					polygonName = RomanNumerals.toRoman(sheetNumber(3)) + "-" + polygonName;
-					// polygonName += "-" + sheetNumber(3); // TODO: Remove after all the tests
 				else if (this._currentStandardScale === 200000)  // 1:200 000
 					polygonName += "-" + RomanNumerals.toRoman(sheetNumber(6));
-					// polygonName += "-" + sheetNumber(6); // TODO: Remove after all the tests
 				else if (this._currentStandardScale <= 100000) // 1:100 000. This part is always present if scale is less than or equal to 1:100 000.
 					polygonName += "-" + sheetNumber(12);
 
 				if (this._currentStandardScale <= 50000 && this._currentStandardScale > 5000) {
 					polygonName += "-" + this._alphabet[sheetNumber(2, 2 / 6, 3 / 6) - 1]; // 1:50 000. Always present.
-					//polygonName += "-" + sheetNumber(2, 2 / 6, 3 / 6);
 					if (this._currentStandardScale <= 25000)
 						polygonName += "-" + this._alphabet[sheetNumber(2, 1 / 6, 15 / 60) - 1].toLowerCase();
-						//polygonName += "-" + sheetNumber(2, 1 / 6, 15 / 60);
 					if (this._currentStandardScale <= 10000)
 						polygonName += "-" + sheetNumber(2, 5 / 60, 7.5 / 60);
 				} else if (this._currentStandardScale <= 5000) {
@@ -397,6 +407,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 			}
 			isFirstIteration = false;
 		}
+		this.labelsGroup.redraw();
 	},
 
 	_closestGreater: function (current, divider) {
@@ -464,14 +475,14 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 		if (this.selectedPolygons[name] !== undefined) {
 			polygon.setStyle({fill: false});
 			delete this.selectedPolygons[name];
-			let widgetLayer = this.selectedPolygonsWidgets[name].getLayer();
+			let widgetLayer = this.selectedPolygonsWidgets[name];
 			this.widgetsGroup.removeLayer(widgetLayer);
 			delete this.selectedPolygonsWidgets[name];
 		} else {
 			polygon.setStyle({fill: true});
 			this.selectedPolygons[name] = polygon;
 
-			let controlsContainer = new L.ALS.WidgetLayer(polygon.getLatLngs()[0][1], "topLeft");
+			let controlsContainer = new L.WidgetLayer(polygon.getLatLngs()[0][1], "topLeft");
 			let numberAttrs = {
 				min: 1,
 				value: 1
@@ -496,10 +507,9 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 				controlsContainer.getControlById(id).setFormatNumbers(true);
 
 			this.selectedPolygonsWidgets[name] = controlsContainer;
-			this.widgetsGroup.addLayer(controlsContainer.getLayer());
+			this.widgetsGroup.addLayer(controlsContainer);
 		}
-		this._calculatePolygonParameters();
-		this._drawPaths();
+		this._updateGrid();
 	},
 
 	_setColor: function (widget) {
@@ -522,6 +532,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 	 * @private
 	 */
 	_updateGrid: function () {
+		this.labelsGroup.deleteAllLabels();
 		this._onMapZoom();
 		this.calculateParameters();
 		this._calculatePolygonParameters();
@@ -533,7 +544,8 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 	},
 
 	_hidePointsNumbers: function (widget) {
-		this._hideOrShowLayer(widget, this.numbersGroup);
+		this._doHidePathsNumbers = widget.getValue();
+		this._updateGrid();
 	},
 
 	_hidePathsByMeridians: function (widget) {
@@ -718,7 +730,6 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 		}
 
 		this.pathsWithoutConnectionsGroup.clearLayers();
-		this.numbersGroup.clearLayers();
 
 		// Validate parameters
 
@@ -822,14 +833,15 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 
 				let clippedLine = MathTools.clipLineByPolygon(lineCoordinates, turfPolygonCoordinates);
 
-				// TODO: Remove after all the tests
-				/*if (clippedLine === undefined) {
+				// This should not occur, but let's have a handler anyway
+				if (clippedLine === undefined) {
 					L.polyline([[lat, startLng], [lat, endLng]], {color: "black"}).addTo(this.map);
 					lat -= parallelsDistance;
 					//continue;
+					window.alert("An error occurred in Grid Layer. Please, report it to https://github.com/matafokka/SynthFlight and provide a screenshot of a selected area and all layer's settings.");
 					console.log(lineCoordinates, turfPolygonCoordinates);
 					break;
-				}*/
+				}
 
 				// Extend line by double capture basis to each side
 				let index, captureBasis;
@@ -884,10 +896,10 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 					line.addLatLng(coord);
 
 					// Add numbers
-					let container = new L.ALS.WidgetLayer(coord);
-					let label = new L.ALS.Widgets.SimpleLabel("pt" + pathName + number, number, "center", (isParallels ? "message": "error"));
-					container.addWidget(label);
-					this.numbersGroup.addLayer(container.getLayer());
+					if (this._doHidePathsNumbers)
+						continue;
+					let id = "pt" + pathName + number;
+					this.labelsGroup.addLabel(id, coord, number, L.LabelLayer.DefaultDisplayOptions[isParallels ? "Message" : "Error"]);
 					number++;
 				}
 				this.pathsWithoutConnectionsGroup.addLayer(line);
@@ -1022,7 +1034,6 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 			for (let param of lineParams)
 				line[1].properties[param] = this[line[0]][param];
 		}
-
 
 		return geojsonMerge.merge(jsons);
 	}

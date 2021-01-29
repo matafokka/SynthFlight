@@ -1,90 +1,16 @@
-// Add helpers
-
 /**
  * Root object containing all AdvancedLayerSystem stuff.
  */
-L.ALS = {
+L.ALS = {};
 
-	/**
-	 * Dispatches event of given type to given object.
-	 * @param object Object to dispatch event to
-	 * @param type Type of event
-	 * @public
-	 */
-	dispatchEvent: function (object, type) {
-		let event;
-		if (typeof (Event) === "function") {
-			event = new Event(type);
-		} else {
-			event = document.createEvent('Event');
-			event.initEvent(type, true, true);
-		}
-		object.dispatchEvent(event);
-	},
-
-	/**
-	 * Formats number to more readable format by inserting spaces
-	 * @param number {number | string} Number to format
-	 * @return {string} Formatted number
-	 */
-	formatNumber: function (number) {
-		let numberString = number.toString();
-		let finalString = "", fraction = "", repeats = 0;
-		for (let i = numberString.length - 1; i >= 0; i--) {
-			let symbol = numberString[i];
-
-			if (symbol === ".") {
-				finalString = "." + fraction;
-				repeats = 0;
-				continue;
-			}
-
-			if (repeats === 3) {
-				finalString = " " + finalString;
-				repeats = 0;
-			}
-
-			finalString = symbol + finalString;
-			fraction = symbol + fraction;
-			repeats++;
-		}
-		return finalString;
-	},
-
-	/**
-	 * {"desktop"|"phone"|"tablet"} Contains user's device type. Do NOT override!
-	 */
-	deviceType: "desktop",
-};
-
-// Detect user browser
-let ua = window.navigator.userAgent.toLowerCase();
-let mobiles = ["android", "iphone", "ipod", "opera mini", "windows phone", "bb", "blackberry"];
-let tablets = ["tablet", "ipad", "playbook", "silk"];
-let devices = [mobiles, tablets];
-let isTablet = false;
-for (let device of devices) {
-	for (let string of device) {
-		if (ua.includes(string)) {
-			L.ALS.deviceType = isTablet ? "tablet" : "phone";
-			break;
-		}
-	}
-	isTablet = true;
-}
-
-// If user's device is a phone, make UI a bit bigger
-let isMobile = (L.ALS.deviceType === "phone");
-if (isMobile)
-	document.querySelector(":root").style.fontSize = "16pt";
-
-// Actual layer system
 const Sortable = require("sortablejs");
 const JSZip = require("jszip");
+const saveAs = require("file-saver");
+require("./Helpers.js");
 require("./Widgetable.js");
-require("./WidgetLayer.js");
 require("./Wizard.js");
 require("./Layer.js");
+require("./LeafletLayers/LeafletLayers.js");
 
 /**
  * Advanced extensible layer system for Leaflet. Manages things like layer creation, ordering, deletion and much more for you.
@@ -93,7 +19,11 @@ require("./Layer.js");
  *
  * Usage:
  * ```JS
- * require("AdvancedLayerSystem"); // Require this plugin or add it to your .html page via "script" tag
+ * let map = L.map("map", { // Create a map
+ *     preferCanvas: true, // Use it to improve performance
+ *     keyboard: false // Setting this option to false is a MANDATORY! If you don't do that, you'll encounter problems when using L.ALS.LeafletLayers.WidgetLayer!
+ * })
+ * require("AdvancedLayerSystem.js"); // Require this plugin or add it to your .html page via "script" tag
  * require("./MyLayerType.js"); // Require your custom layer types
  * let layerSystem = new L.Control.LeafletAdvancedLayerSystem(map); // Create an instance of this class
  * let baseLayer = ...; // Create some base layers
@@ -114,6 +44,7 @@ L.ALS.System = L.Control.extend({
 	 * @param enableProjectSystem {boolean} - If set to true, will enable project system. User will be able to save and restore projects, but you have to do extra work. You might want to implement your own system yourself.
 	 */
 	initialize: function (map, enableProjectSystem = true) {
+		L.Control.prototype.initialize.call(this);
 
 		/**
 		 * Contains base layers. Layers will be added in format: "Name": layer object. addBaseLayer() will update this object.
@@ -136,8 +67,8 @@ L.ALS.System = L.Control.extend({
 		this._selectedLayer = undefined;
 
 		this.map = map;
-		const markup = require("./markup.js");
-		markup();
+
+		require("./markup.js")();
 
 		// Wizard-related stuff
 
@@ -145,6 +76,7 @@ L.ALS.System = L.Control.extend({
 		this._wizardContent = document.getElementById("wizard-content");
 		this._wizardMenu = document.getElementById("wizard-menu");
 		this._layerContainer = document.getElementById("menu-items");
+
 		this._wizardMenu.addEventListener("change", (event) => {
 			this._displayWizardControls(event);
 		});
@@ -158,8 +90,10 @@ L.ALS.System = L.Control.extend({
 		});
 
 		// Menu-related stuff
-		if (isMobile)
-			document.getElementById("menu").classList.add("menu-mobile");
+		this.menu = document.getElementById("menu");
+		if (L.ALS.Helpers.isMobile)
+			this.menu.classList.add("menu-mobile");
+		this._makeHideable(document.getElementById("menu-close"), this.menu);
 
 		this._baseLayerMenu = document.getElementById("menu-maps-select");
 		this._baseLayerMenu.addEventListener("change", (event) => {
@@ -194,22 +128,12 @@ L.ALS.System = L.Control.extend({
 			this._deleteLayer();
 		});
 
-		// Layer-related stuff
-
 		// Make layers sortable. We have to reorder layers when their widgets has been reordered and when map state changes. See _reorderLayers() implementation.
-		let sortableOptions = {
+		new Sortable(this._layerContainer, {
 			handle: ".layer-handle",
 			animation: 250,
-			onEnd: () => {
-				this._reorderLayers();
-			}
-		};
-
-		// Parcel and NodeJS resolves require of ES 6 module (or just SortableJS) differently. Here we detect it.
-		if (Sortable.Sortable !== undefined)
-			Sortable.Sortable.create(this._layerContainer, sortableOptions);
-		else
-			new Sortable(this._layerContainer, sortableOptions);
+			onEnd: () => { this._reorderLayers(); }
+		});
 	},
 
 	// Base layers
@@ -264,7 +188,7 @@ L.ALS.System = L.Control.extend({
 		};
 
 		// Menu will display all added controls, so we gotta fire change event and by doing that calling displayWizardControls()
-		L.ALS.dispatchEvent(this._wizardMenu, "change");
+		L.ALS.Helpers.dispatchEvent(this._wizardMenu, "change");
 	},
 
 	// Wizard-related stuff
@@ -310,12 +234,11 @@ L.ALS.System = L.Control.extend({
 		// Handle
 		let handle = document.createElement("i");
 		handle.className = "layer-handle fas fa-arrows-alt";
-		//handle.innerText = "☰";
 
 		// Editable label containing layer's name
 		let label = document.createElement("p");
 		label.className = "layer-label";
-		label.innerText = layer.defaultName;
+		label.innerHTML = layer.defaultName;
 
 		// Make it editable on double click
 		label.addEventListener("dblclick", function () {
@@ -327,8 +250,7 @@ L.ALS.System = L.Control.extend({
 		label.addEventListener("blur", (event) => {
 			let target = event.target;
 			target.contentEditable = "false";
-			layer.name = target.innerText;
-			layer.onNameChange();
+			layer.setName(target.innerHTML);
 		});
 
 		// Make it end editing when user presses Enter
@@ -345,8 +267,11 @@ L.ALS.System = L.Control.extend({
 
 		// Menu itself
 		let menu = layer.container;
-		this._makeHideable(menuButton, menu);
-		menu.setAttribute("data-hidden", "1");
+		this._makeHideable(menuButton, menu, () => {
+			menu.style.height = "0";
+		}, () => {
+			menu.style.height = menu.scrollHeight + "px";
+		});
 
 		// Hide/show button
 		let hideButton = document.createElement("i");
@@ -359,23 +284,25 @@ L.ALS.System = L.Control.extend({
 			hideButton.className = "fas fa-eye";
 			layer._onShow();
 			layer.onShow();
-		});
+		}, false);
 
 		let layerWidget = document.createElement("div");
 		layerWidget.className = "layer-container";
 		layerWidget.id = layer.id;
 
-		let elements = [handle, label, menuButton, hideButton, menu];
+		let controlsContainer = document.createElement("div");
+		controlsContainer.className = "controls-row-set";
+		let elements = [handle, label, menuButton, hideButton];
 		for (let e of elements)
-			layerWidget.appendChild(e);
-
-		layerWidget.addEventListener("click", () => {
-			this._selectLayer(layer.id); // Defined in main.js
-		});
+			controlsContainer.appendChild(e);
+		layerWidget.appendChild(controlsContainer);
+		layerWidget.appendChild(menu);
+		layerWidget.addEventListener("click", () => { this._selectLayer(layer.id); });
 
 		this._layerContainer.appendChild(layerWidget);
 		this._selectLayer(layer.id); // Select new layer
 		this._closeWizard();
+		layer._nameLabel = label;
 		layer.init(properties); // Initialize layer and pass all the properties
 	},
 
@@ -408,14 +335,15 @@ L.ALS.System = L.Control.extend({
 
 	/**
 	 * Deletes selected layer and LITERALLY everything related to it
+	 * @param shouldAskUser {boolean} If set to true, the message asking if user wants to delete selected layer will be displayed. Otherwise, layer will be silently deleted.
 	 */
-	_deleteLayer: function () {
-		if (this._selectedLayer === undefined || !window.confirm("Are you sure you want to delete this layer?"))
+	_deleteLayer: function (shouldAskUser = true) {
+		if (this._selectedLayer === undefined || (shouldAskUser && !window.confirm("Are you sure you want to delete this layer?")))
 			return;
 
 		// Remove layer's widget
 		let widget = document.getElementById(this._selectedLayer.id);
-		widget.parentElement.removeChild(widget);
+		widget.parentNode.removeChild(widget);
 
 		// Remove layer from the map
 		this._selectedLayer.layers.remove();
@@ -480,8 +408,22 @@ L.ALS.System = L.Control.extend({
 	 * @private
 	 */
 	_exportProject: function () {
+		let inconvenienceText = "Sorry for the inconvenience. Please, update your browser, so this and many other things on the web won't happen.\n\n" +
+			"Your download will start after you'll close this window.";
+
+		// Will be false in Chrome 7 which does not support DataURL
+		let supportsDataURL = !L.ALS.Helpers.isIElte9 && ((window.URL && window.URL.createObjectURL) || (window.webkitURL && window.webkitURL.createObjectURL));
+
 		let filenames = {};
 		let zip = new JSZip();
+		if (!supportsDataURL) {
+			let firstLine = "Please, manually save text form all tabs that will open to \".geojson\" files.";
+			if (L.ALS.Helpers.isIElte9)
+				firstLine = "Please, download all the files and manually set their extensions to \".geojson\"";
+			window.alert(firstLine + "\n" + inconvenienceText);
+		}
+
+		// Gather GeoJSON representation of all layers and either build zip or download as text
 		for (let name in this._layers) {
 			if (!this._layers.hasOwnProperty(name))
 				continue;
@@ -491,26 +433,45 @@ L.ALS.System = L.Control.extend({
 			if (filenames.hasOwnProperty(layer.name)) {
 				postfix = " (" + filenames[layer.name] + ")";
 				filenames[layer.name]++;
-			}
-			else
+			} else
 				filenames[layer.name] = 1;
 
-			zip.file(layer.name + postfix + ".geojson", JSON.stringify(layer.toGeoJSON()));
+			let json = JSON.stringify(layer.toGeoJSON());
+			let filename = layer.name + postfix + ".geojson";
+
+			if (supportsDataURL) { // Any normal browser
+				zip.file(filename, json);
+				continue;
+			}
+			// Chrome 7 and IE9
+			let fileWindow = window.open("", "_blank");
+			fileWindow.document.open('text/plain');
+			fileWindow.document.write(json);
+			if (L.ALS.Helpers.isIElte9) {
+				fileWindow.document.execCommand('SaveAs', true, filename + ".txt");
+				fileWindow.close();
+			}
 		}
 
-		zip.generateAsync({type:"blob"}).then(function (blob) {
+		if (!supportsDataURL)
+			return;
+
+		// FileSaver doesn't work correctly with older Chrome versions (around v14). So we have to perform following check:
+		let isBlob = JSZip.support.blob && (!window.webkitURL || (window.URL && window.URL.createObjectURL));
+		let type = isBlob ? "blob" : "base64";
+		zip.generateAsync({ type: type }).then((data) => {
 			let filename = "SynthFlightProject.zip";
-			if (window.navigator.msSaveOrOpenBlob) { // IE workaround
-				window.navigator.msSaveBlob(blob, filename);
+			if (isBlob) {
+				saveAs(data, filename);
 				return;
 			}
-
 			let link = document.createElement("a");
+			if (link.download === undefined)
+				window.alert("Please, manually change extension of the downloaded file to \"zip\".\n" + inconvenienceText);
 			link.download = filename;
-			link.href = window.URL.createObjectURL(blob);
-			//link.dataset.downloadurl = ['text/plain', link.download, link.href].join(':'); // Seems like this line is useless. TODO: Possibly remove it
-			link.click();
-		}).catch();
+			link.href = "data:application/zip;base64," + data;
+			L.ALS.Helpers.dispatchEvent(link, "click"); // link.click() is not implemented in some older browsers
+		}).catch((reason) => { console.log(reason); });
 	},
 
 	_loadProject: function () {
@@ -522,22 +483,7 @@ L.ALS.System = L.Control.extend({
 
 	_saveProject: function () {
 		window.alert("Sorry, projects saving is not implemented yet");
-		//this._selectedLayer.layers.eachLayer((l) => {console.log(l);})
-		let json = {};
-		let layers = this._selectedLayer.layers.getLayers();
-		for (let layer of layers) {
-
-		}
 	},
-
-	/*_fillJson: function (json, layer) {
-		if (layer.getLayers !== undefined) {
-			let layers = layer.getLayers();
-			for (let l of layers) {
-
-			}
-		}
-	}*/
 
 	// Helpers
 
@@ -547,32 +493,59 @@ L.ALS.System = L.Control.extend({
 	 * @param element {HTMLElement} Element that will be controlled
 	 * @param onHideCallback {function} Function to call on hiding
 	 * @param onShowCallback {function} Function to call on showing
+	 * @param clickAfter {boolean} If set to true, button will be clicked after all the things will be applied. You may want to set it to false if your callbacks affects unfinished stuff.
 	 * @private
 	 */
-	_makeHideable: function (button, element = undefined, onHideCallback = undefined, onShowCallback = undefined) {
-		let dataHidden = "data-hidden", haveElement = element !== undefined;
-		button.setAttribute(dataHidden, "0");
-		if (haveElement)
-			element.setAttribute(dataHidden, "1");
-		button.setAttribute(dataHidden, "1");
+	_makeHideable: function (button, element = undefined, onHideCallback = undefined, onShowCallback = undefined, clickAfter = true) {
+		let dataHidden = "data-hidden";
+		let e = element === undefined ? button : element;
+
+		if (!e.hasAttribute(dataHidden))
+			e.setAttribute(dataHidden, "1");
 
 		button.addEventListener("click", function () {
 			let newValue, callback;
-			if (button.getAttribute(dataHidden) === "1") {
+			if (e.getAttribute(dataHidden) === "1") {
 				newValue = "0";
 				callback = onHideCallback;
 			} else {
 				newValue = "1";
 				callback = onShowCallback;
 			}
-
-			button.setAttribute(dataHidden, newValue);
-			if (haveElement)
-				element.setAttribute(dataHidden, newValue);
+			e.setAttribute(dataHidden, newValue);
 
 			if (callback !== undefined)
 				callback();
 		});
+		if (clickAfter)
+			L.ALS.Helpers.dispatchEvent(button, "click");
 	},
+
+	onAdd: function () {
+		let button = document.createElement("a");
+		button.id = "menu-button";
+		button.className = "button-base icon-button fas fa-bars";
+		this._makeHideable(button, this.menu);
+
+		let container = document.createElement("div");
+		container.className = "leaflet-bar leaflet-control";
+		container.appendChild(button);
+		return container;
+	},
+
+	/**
+	 * Sets position of the menu button and menu itself, i.e. if position is "topleft" or "bottomleft", both button and menu will be on the left side of the map.
+	 * @param position {"topleft"|"bottomleft"|"topright"|"bottomright"} Position to set
+	 * @return {L.ALS.System} this
+	 */
+	setPosition: function (position) {
+		L.Control.prototype.setPosition.call(this, position);
+		let name = "menu-left";
+		if (position === "topleft" || position === "bottomleft")
+			this.menu.classList.add(name);
+		else
+			this.menu.classList.remove(name);
+		return this;
+	}
 
 });

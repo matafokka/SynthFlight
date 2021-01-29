@@ -1,42 +1,46 @@
 module.exports = function() {
-	let parsedDom = new DOMParser().parseFromString(`
+	let parsedDom = document.implementation.createHTMLDocument("title");
+	parsedDom.body.innerHTML += `
 
-<body>
-	<div id="menu">
-		<!-- Top panel -->
-		<div id="menu-buttons" class="controls-row-set">
-			<label for="menu-button-checkbox" id="menu-close" class="button-base icon-button fas fa-times"></label>
+<div id="menu">
+	<!-- Top panel -->
+	<div id="top-panel-wrapper">
+		<div id="top-panel" class="controls-row-set">
+			<i id="menu-close" class="button-base fas fa-times"></i>
 			<select id="menu-maps-select"></select>
-			<i id="menu-add" class="icon-button fas fa-plus"></i>
-			<i id="menu-delete" class="icon-button fas fa-trash"></i>
-		</div>
-		
-		<!-- Content container -->
-		<div id="menu-items"></div>
-		
-		<!-- Bottom panel -->
-		<div id="adv-lyr-sys-menu-bottom-panel" class="controls-row-set">
-			<input type="button" id="adv-lyr-sys-save-button" value="Save" />
-			<input type="button" id="adv-lyr-sys-load-button" value="Load" />
-			<input type="button" id="adv-lyr-sys-export-button" value="Export">
-			<input type="button" id="adv-lyr-sys-settings-button" value="Settings">
+			<i id="menu-add" class="fas fa-plus"></i>
+			<i id="menu-delete" class="fas fa-trash"></i>
 		</div>
 	</div>
 	
-	<!-- Wizard that lets users add new layers -->
-	<div id="wizard-container" data-hidden="1">
-		<div id="wizard-window">
-			<select id="wizard-menu"></select>
-			<div id="wizard-content"></div>
-			<div id="wizard-buttons" class="controls-row-set">
-				<input type="button" id="wizard-cancel-button" value="Cancel" />
-				<input type="button" id="wizard-add-button" value="Add">
-			</div>
+	<!-- Content container -->
+	<div id="menu-items"></div>
+	
+	<!-- Bottom panel -->
+	<div id="bottom-panel-wrapper">
+		<div id="adv-lyr-sys-menu-bottom-panel" class="controls-row-set">
+			<div id="adv-lyr-sys-save-button" class="button-base">Save</div>
+			<div id="adv-lyr-sys-load-button" class="button-base">Load</div>
+			<div id="adv-lyr-sys-export-button" class="button-base">Export</div>
+			<div id="adv-lyr-sys-settings-button" class="button-base">Settings</div>
 		</div>
 	</div>
-</body>
+</div>
 
-`, "text/html");
-	while (parsedDom.body.hasChildNodes())
-		document.body.appendChild(parsedDom.body.firstChild);
+<!-- Wizard that lets users add new layers -->
+<div id="wizard-container" data-hidden="1">
+	<div id="wizard-window">
+		<select id="wizard-menu"></select>
+		<div id="wizard-content"></div>
+		<div id="wizard-buttons" class="controls-row-set">
+			<div class="button-base" id="wizard-cancel-button">Cancel</div>
+			<div class="button-base" id="wizard-add-button">Add</div>
+		</div>
+	</div>
+</div>
+`
+	while (parsedDom.body.hasChildNodes()) {
+		document.body.appendChild(parsedDom.body.firstChild.cloneNode(true));
+		parsedDom.body.removeChild(parsedDom.body.firstChild);
+	}
 }

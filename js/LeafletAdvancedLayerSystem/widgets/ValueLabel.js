@@ -17,7 +17,7 @@ L.ALS.Widgets.ValueLabel = L.ALS.Widgets.SimpleLabel.extend({
 	 * @param description {string} Value description
 	 * @param units {string} Units for this label. If set to empty string, unitsPosition won't take an effect.
 	 * @param unitsPosition {"description"|"value"} Units position. If set to "description", units will be displayed after description. Otherwise, units will be displayed after the value.
-	 * @param formatNumbers {boolean} If set to true, value will be formatted using L.ALS.formatNumber()
+	 * @param formatNumbers {boolean} If set to true, value will be formatted using L.ALS.Helpers.formatNumber()
 	 * @param style {"nostyle"|"message"|"success"|"warning"|"error"} Style of this label
 	 * @param initialValue {string} Initial value of this label
 	 */
@@ -41,7 +41,7 @@ L.ALS.Widgets.ValueLabel = L.ALS.Widgets.SimpleLabel.extend({
 	},
 
 	/**
-	 * Sets whether this label will automatically format numbers using L.ALS.formatNumber()
+	 * Sets whether this label will automatically format numbers using L.ALS.Helpers.formatNumber()
 	 * @param formatNumbers {boolean} If true, this label will automatically format numbers.
 	 */
 	setFormatNumbers: function (formatNumbers) {
@@ -108,7 +108,7 @@ L.ALS.Widgets.ValueLabel = L.ALS.Widgets.SimpleLabel.extend({
 		let value = this.description;
 		if (isDescription && hasUnits)
 			value += " (" + this.units + ")";
-		value += ": " + (this.formatNumbers ? L.ALS.formatNumber(this._labelValue) : this._labelValue);
+		value += ": " + (this.formatNumbers ? L.ALS.Helpers.formatNumber(this._labelValue) : this._labelValue);
 		if (!isDescription && hasUnits)
 			value += " " + this.units;
 		L.ALS.Widgets.SimpleLabel.prototype.setValue.call(this, value);

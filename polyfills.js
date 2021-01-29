@@ -1,3 +1,3 @@
 require("core-js/stable");
 require("regenerator-runtime/runtime");
-//require("dom-shims");
+require("keyboardevent-key-polyfill").polyfill();

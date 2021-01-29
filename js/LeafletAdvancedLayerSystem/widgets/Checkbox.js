@@ -3,6 +3,8 @@
  */
 L.ALS.Widgets.Checkbox = L.ALS.Widgets.BaseWidget.extend({
 
+	customWrapperClassName: "adv-lyr-sys-checkbox-wrapper",
+
 	initialize: function (id, label, objectToControl = undefined, callback = "") {
 		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "checkbox", id, label, objectToControl, callback, ["change"], {});
 		this.setValue(false);

@@ -1,10 +1,14 @@
-const generateID = require("../generateID.js");
-
 /**
  * Base class for all widgets
  * @type {Input}
  */
 L.ALS.Widgets.BaseWidget = L.Class.extend({
+
+	/**
+	 * Custom classname for an input wrapper. Should NOT be changed from outside.
+	 */
+	customWrapperClassName: "",
+
 	/**
 	 * Constructs this widget.
 	 * @param type {string} Type of input
@@ -18,7 +22,7 @@ L.ALS.Widgets.BaseWidget = L.Class.extend({
 	initialize: function (type, id, label, objectToControl = undefined, callback = "", events = [], attributes = {}) {
 		this.objectToControl = objectToControl;
 		this.events = events;
-		this._inputID = "adv-lyr_sys_input" + generateID();
+		this._inputID = "adv-lyr_sys_input" + L.ALS.Helpers.generateID();
 
 		this.type = type;
 		this.id = id;
@@ -87,31 +91,37 @@ L.ALS.Widgets.BaseWidget = L.Class.extend({
 	 * @protected
 	 */
 	_createInput: function () {
+		// Create input
 		this.input = this.createInputElement();
 		this.input.id = this._inputID;
 		this.input.setAttribute("data-id", this.id);
 
+		// Bind events
 		for (let event of this.events)
 			this.input.addEventListener(event, (event) => {
 				if (!this.onChange(event))
 					this.input.classList.add("invalid-input");
 				else
 					this.input.classList.remove("invalid-input");
-
-				if (this.objectToControl !== undefined && this.callback !== "")
-					this.objectToControl[this.callback](this);
+				this.callCallback();
 			});
 
 		this.setAttributes(this.attributes);
 
+		// Set value so input won't be empty
 		let value;
 		if (this.value !== "")
 			value = this.value;
 		else if (this.attributes.value !== undefined)
 			value = this.attributes.value;
 
-		this.input.value = value;
-		return this.input;
+		this.setValue(value);
+
+		// Wrap input
+		let wrapper = document.createElement("div");
+		wrapper.className = "adv-lyr-sys-input " + this.customWrapperClassName;
+		wrapper.appendChild(this.input);
+		return wrapper;
 	},
 
 	/**
@@ -137,6 +147,14 @@ L.ALS.Widgets.BaseWidget = L.Class.extend({
 		return true;
 	},
 
+	/**
+	 * Calls callback attached to this widget
+	 */
+	callCallback: function () {
+		if (this.objectToControl !== undefined && this.callback !== "")
+			this.objectToControl[this.callback](this);
+	},
+
 	getId: function () {
 		return this.id;
 	},
@@ -145,6 +163,14 @@ L.ALS.Widgets.BaseWidget = L.Class.extend({
 		return this.input.value;
 	},
 
+	/**
+	 * Sets value of this widget.
+	 *
+	 * *Note: This method is being called before container has been assigned to the widget.
+	 * Before accessing container in this method, check if it's undefined: `if (this.container === undefined) return;`*
+	 *
+	 * @param value - Value to set
+	 */
 	setValue: function (value) {
 		this.input.value = value;
 	},
@@ -163,11 +189,11 @@ L.ALS.Widgets.BaseWidget = L.Class.extend({
 
 	getLabelText: function () {
 		if (this.label !== undefined)
-			return this.labelWidget.innerText.slice(0, this.labelWidget.innerText.length - 2);
+			return this.labelWidget.innerHTML.slice(0, this.labelWidget.innerHTML.length - 2);
 	},
 
 	setLabelText: function (text) {
-		this.labelWidget.innerText = text + ":";
+		this.labelWidget.innerHTML = text + ":";
 	},
 
 	serialize: function () {

@@ -1,21 +1,19 @@
 // Just want to mention here. Electron messes paths in scripts that has been imported from HTML.
 // So, if we'll put this file into "js" directory and import GridManager like:
-//      require("./GridManager/GridManager.js");
+//      require("./LeafletAdvancedLayerSystem/System.js");
 // We'll get an error. But following will work:
-//      require("./js/GridManager/GridManager.js");
+//      require("./js/LeafletAdvancedLayerSystem/System.js");
 // This problem doesn't present in scripts that has been imported into other scripts.
-// Furthermore, parcel doesn't respect such behavior.
 // So the easiest solution is to move main.js into project's root directory.
 // I've spend hours struggling with this issue, so don't try to reorganise the code, you'll fail and, as it seems, break compatibility with the older Electron versions.
 
-// WARNING: Leaflet and it's plugins imported in index.html 'cuz one can't simply import it in JS script.
-
 require("./js/LeafletAdvancedLayerSystem/System.js");
-//require("./js/layers/SynthShapefileLayer.js");
+require("./js/layers/SynthShapefileLayer.js");
 require("./js/layers/SynthGridLayer.js");
+require("./node_modules/leaflet.coordinates/dist/Leaflet.Coordinates-0.1.5.min.js")
 
 // Create map
-let map = L.map('map', {
+let map = L.map("map", {
 	attributionControl: false, // Attribution will be present in About window
 	minZoom: 2, // Leaflet will hide everything below this zoom
 	maxBounds: L.latLngBounds( // This will disable infinite panning
@@ -23,7 +21,8 @@ let map = L.map('map', {
 		L.latLng(-90, 180)
 	),
 	maxBoundsViscosity: 1,
-	preferCanvas: true // Canvas is faster than SVG renderer
+	preferCanvas: true, // Canvas is faster than SVG renderer,
+	keyboard: false,
 }).setView([51.505, -0.09], 13);
 map.doubleClickZoom.disable();
 
@@ -39,9 +38,9 @@ L.control.coordinates({
 
 // Initialize layer system. Create and add base layers.
 
-let layerSystem = new L.ALS.System(map, true);
+let layerSystem = new L.ALS.System(map, true).addTo(map);
 
-let osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+let osmLayer = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 	maxZoom: 19,
 	noWrap: true,
 	attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
@@ -77,5 +76,5 @@ layerSystem.addBaseLayer(L.tileLayer(""), "Empty");
 
 // Add layer types
 layerSystem.addLayerType(L.ALS.SynthGridLayer);
+layerSystem.addLayerType(L.ALS.SynthShapefileLayer);
 layerSystem.addLayerType(L.ALS.Layer);
-//layerSystem.addLayerType(L.ALS.SynthShapefileLayer);

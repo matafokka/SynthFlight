@@ -48,17 +48,35 @@ In the menu, you can:
     1. Reorder layer by dragging the button with the **arrows icon**.
 1. Export project to GeoJSON by clicking "Export" button at the bottom of the menu. Warning: other buttons do not work for now.
 
+# System requirements
+
+If you want to run the **client**:
+
+* **Operating system**: one of:
+    * **Windows 7** or later. ARM64, x86 and x64 platforms are supported.
+    * **Linux** with X-Server installed (basically all of the modern distros). ARM32, ARM64, x86 and x64 platforms are supported.
+    * **macOS**. I have no idea which versions are supported. Try and see if it works.
+* **CPU**: One that can handle web surfing. If you can browse the internet, SynthFlight will work fine.
+* **RAM**: 1 GB or more.
+
+If you want to run from **browser**: one of:
+
+* Chrome 7 or later.
+* Firefox 22 or later.
+* Internet Explorer 9 or later.
+* Any other modern desktop or mobile browser.
+
 # Building
 
 If you want to build SynthFlight yourself, do the following:
 
-1. Install [NodeJS](nodejs.org).
+1. Install [NodeJS](https://www.nodejs.org).
 1. Download the source code and `cd` to the project's root.
 1. Download dependencies by running `npm install`.
 1. Build by running `node build.js`. There are additional options, to see them, run `nodejs build.js -h`.
 1. When build will be finished, in project root will be `dist` directory containing builds for different OSs and platforms.
 
-***Warning:** To build for macOS, you may need to build on actual macOS.*
+***Warning:** To build for macOS, you may need to build on an actual macOS.*
 
 # Hosting
 
@@ -76,10 +94,6 @@ However, you can contribute by:
 1. Adapting markup to work in IE and older browsers. Please, create an issue and tell me that you want to work on this project before you're going to do actual coding, so I'll update this repository.
 
 # FAQ
-## Which browsers are supported?
-All modern browsers (including mobile) and, partially, IE 11.
-
-It will support older browsers and IE >= 9 in the stable release.
 
 ## Can a local copy work offline?
 Yes.

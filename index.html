@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-
-	<title>SynthFlight</title>
-
 	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-	<script src="polyfills.js"></script>
-
+	<title>SynthFlight</title>
 	<link rel="shortcut icon" type="image/x-icon" href="logo.ico" />
+
+	 <!--[if IE 8]>
+	<script src="node_modules/ie8/build/ie8.js"></script>
+	<script src="node_modules/object-defineproperty-ie/src/object-defineproperty-ie.js" type="text/javascript"></script>
+	<![endif]-->
+	<script src="polyfills.js"></script>
+	<script src="node_modules/classlist/classList.min.js"></script>
 
 	<!-- Fontawesome -->
 	<link rel="stylesheet" href="node_modules/@fortawesome/fontawesome-free/css/all.css" />
@@ -18,25 +19,16 @@
 	<link rel="stylesheet" href="node_modules/leaflet/dist/leaflet.css" />
 	<script src="node_modules/leaflet/dist/leaflet.js"></script>
 
-	<!-- Leaflet plugins. Some of them can't be imported in JS file for some reason -->
-
 	<!-- Leaflet.Coordinates -->
 	<link rel="stylesheet" href="node_modules/leaflet.coordinates/dist/Leaflet.Coordinates-0.1.5.css" />
-	<script src="node_modules/leaflet.coordinates/dist/Leaflet.Coordinates-0.1.5.min.js"></script>
 
 	<!-- SynthFlight stylesheet. Include it after all other stylesheets because we're gonna change some styles here. -->
 	<link rel="stylesheet" href="css/base.css" />
-	<link rel="stylesheet" href="css/ie.css" />
 
 </head>
 
 <body>
 	<div id="map"></div> <!-- Leaflet map -->
-
-	<!-- Menu button -->
-	<label for="menu-button-checkbox" id="menu-button" class="button-base icon-button fas fa-bars"></label>
-	<input type="checkbox" id="menu-button-checkbox" class="hidden" />
-
 	<script src="main.js"></script> <!-- Main script -->
 </body>
 </html>

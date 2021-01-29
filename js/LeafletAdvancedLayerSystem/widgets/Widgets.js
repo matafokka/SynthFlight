@@ -9,9 +9,11 @@ require("./TextArea.js");
 require("./Number.js");
 require("./Checkbox.js");
 require("./Divider.js");
+require("./File.js");
+require("./Color.js");
 
 // Build textual widgets
-let types = ["Text", "Email", "Password", "Color"];
+let types = ["Text", "Email", "Password"];
 for (let type of types) {
 	L.ALS.Widgets[type] = L.ALS.Widgets.BaseWidget.extend({
 		initialize: function (id, label, objectToControl = undefined, callback = "", attributes = {}) {

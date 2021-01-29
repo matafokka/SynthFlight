@@ -1,6 +1,5 @@
 const browserify = require("browserify");
 const babelify = require("babelify");
-const tinyify = require("tinyify");
 const packager = require("electron-packager");
 const fs = require("fs");
 const fse = require("fs-extra");
@@ -8,17 +7,20 @@ const postcss = require("postcss");
 const postcssPresetEnv = require("postcss-preset-env");
 const cssnano = require("cssnano");
 
-let onlyBrowser = false;
+let onlyBrowser = false, debug = false;
 
 for (let arg of process.argv) {
 	if (arg === "-h" || arg === "--help") {
 		console.log("Run build.js with following arguments to tweak build process:\n" +
 		"\t-h or --help - Show help and quit.\n" +
-		"\t-b or --only-browser - Build only for browser. Warning: this script still will remove ALL previous builds!\n"
+		"\t-b or --only-browser - Build only for browser. Warning: ALL previous builds will still be removed!\n" +
+		"\t-d or --debug - Nothing will be minified for easier debugging."
 		);
 		process.exit(-1);
 	} else if (arg === "-b" || arg === "--only-browser")
 		onlyBrowser = true;
+	else if (arg === "-d" || arg === "--debug")
+		debug = true;
 }
 
 console.log("\nStarting SynthFlight build process...\n" +
@@ -33,12 +35,15 @@ fs.mkdirSync(dir + "css", { recursive: true });
 // Autoprefix and minify CSS
 let cssFiles = fs.readdirSync("css");
 for (let cssFile of cssFiles) {
+	let plugins = [postcssPresetEnv({
+		autoprefixer: { flexbox: "no-2009" }
+	})];
+	if (!debug)
+		plugins.push(cssnano());
+
 	let fileName = "css/" + cssFile;
 	let css = fs.readFileSync(fileName).toString();
-	postcss([
-		postcssPresetEnv(),
-		cssnano()
-	]).process(css, {from: undefined}).then((result) => {
+	postcss(plugins).process(css, {from: undefined}).then((result) => {
 		fs.writeFile(dir + fileName, result.css, {}, (err) => {
 			if (err !== null)
 				console.log(err);
@@ -57,12 +62,15 @@ for (let file of files) {
 		});
 	}
 
-	build
-		.transform('uglifyify', { global: true })
-		.plugin('common-shakeify')
-		.bundle()
-		.pipe(require('minify-stream')({ sourceMap: false }))
-		.pipe(fs.createWriteStream(dir + file + ".js"));
+	if (!debug) {
+		build = build
+			.plugin('common-shakeify')
+			.transform('uglifyify', {
+				global: true,
+				ie8: true,
+			});
+	}
+	build.bundle().pipe(fs.createWriteStream(dir + file + ".js"));
 }
 
 // Copy styles and scripts referenced in index.html
@@ -73,7 +81,11 @@ let toCopy = ["index.html", "logo.ico",
 	"node_modules/leaflet/dist/leaflet.css",
 	"node_modules/leaflet/dist/leaflet.js",
 	"node_modules/leaflet.coordinates/dist/Leaflet.Coordinates-0.1.5.css",
-	"node_modules/leaflet.coordinates/dist/Leaflet.Coordinates-0.1.5.min.js"
+	"node_modules/leaflet.coordinates/dist/Leaflet.Coordinates-0.1.5.min.js",
+	"node_modules/classlist/classList.min.js",
+	// TODO: Remove it if layer system won't support IE8
+	//"node_modules/ie8/build/ie8.js",
+	//"node_modules/object-defineproperty-ie/src/object-defineproperty-ie.js",
 ];
 
 for (let stuff of toCopy)

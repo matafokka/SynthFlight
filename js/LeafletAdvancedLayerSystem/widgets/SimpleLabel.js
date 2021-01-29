@@ -3,6 +3,8 @@
  */
 L.ALS.Widgets.SimpleLabel = L.ALS.Widgets.BaseWidget.extend({
 
+	customWrapperClassName: "adv-lyr-sys-simple-label-wrapper",
+
 	/**
 	 * Constructs label
 	 * @param id {string} ID of this label
@@ -14,8 +16,8 @@ L.ALS.Widgets.SimpleLabel = L.ALS.Widgets.BaseWidget.extend({
 		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "", id, "");
 		this.setValue(value);
 		this.setTextAlign(textAlign);
-
 		this._styleNames = ["message", "success", "warning", "error"];
+		this.setStyle(style);
 	},
 
 	toHtmlElement: function () {
@@ -31,8 +33,10 @@ L.ALS.Widgets.SimpleLabel = L.ALS.Widgets.BaseWidget.extend({
 	},
 
 	setValue: function (value) {
-		this.input.innerText = value;
+		this.input.innerHTML = value;
 
+		if (this.container === undefined)
+			return;
 		let display = "";
 		if (value === "")
 			display = "none";
@@ -40,7 +44,7 @@ L.ALS.Widgets.SimpleLabel = L.ALS.Widgets.BaseWidget.extend({
 	},
 
 	getValue: function () {
-		return this.input.innerText;
+		return this.input.innerHTML;
 	},
 
 	/**

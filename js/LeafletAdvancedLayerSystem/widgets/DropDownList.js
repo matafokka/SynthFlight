@@ -19,7 +19,7 @@ L.ALS.Widgets.DropDownList = L.ALS.Widgets.BaseWidget.extend({
 		let option = document.createElement("option");
 		option.text = item;
 		this.input.appendChild(option);
-		L.ALS.dispatchEvent(this.input, "change");
+		this.callCallback();
 	},
 
 	/**
@@ -40,8 +40,14 @@ L.ALS.Widgets.DropDownList = L.ALS.Widgets.BaseWidget.extend({
 	 * @param item {string} String that you've passed to addItem().
 	 */
 	selectItem: function (item) {
-		this.input.value = item;
-		L.ALS.dispatchEvent(this.input, "change");
+		// We do this because changing HTMLSelectElement.value doesn't work in IE
+		for (let option of this.input.options) {
+			if (option.value === item) {
+				option.selected = "selected";
+				this.callCallback();
+				return;
+			}
+		}
 	}
 
 });

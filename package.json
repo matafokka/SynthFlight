@@ -1,16 +1,15 @@
 {
   "name": "synthflight",
   "productName": "SynthFlight",
-  "version": "0.0.1-pre-alpha",
+  "version": "0.0.2-pre-alpha",
   "description": "A fully client-side software for planning aerial photography",
   "main": "electronApp.js",
   "browser": "index.html",
   "browserslist": [
-    "chrome >= 4",
-    "firefox >= 3",
-    "ie >= 9",
-    "last 2 versions",
-    "not dead"
+    "chrome >= 7",
+    "firefox >= 4",
+    "ie >= 8",
+    "last 2 versions"
   ],
   "babel": {
     "presets": [
@@ -22,7 +21,7 @@
             "version": 3,
             "proposals": true
           },
-          "targets": "chrome >= 4, firefox >= 3, ie >= 9, last 2 versions, not dead",
+          "targets": "chrome >= 7, firefox >= 4, ie >= 8, last 2 versions",
           "forceAllTransforms": true,
           "spec": true
         }
@@ -30,9 +29,12 @@
     ],
     "plugins": [
       [
-        "@babel/plugin-proposal-class-properties",
+        "@babel/plugin-proposal-class-properties"
+      ],
+      [
+        "@babel/plugin-transform-runtime",
         {
-          "loose": true
+          "corejs": 3
         }
       ]
     ]
@@ -43,35 +45,44 @@
   "keywords": [],
   "author": "matafokka",
   "license": "GPL-3.0-or-later",
+  "homepage": "https://github.com/matafokka/SynthFlight",
+  "repository": "https://github.com/matafokka/SynthFlight",
   "dependencies": {
+    "@babel/runtime-corejs3": "^7.12.5",
     "@fortawesome/fontawesome-free": "^5.15.1",
     "@mapbox/geojson-merge": "^1.1.1",
     "@turf/bbox": "^6.0.1",
     "@turf/helpers": "^6.1.4",
     "@turf/union": "^6.0.3",
+    "classlist": "github:eligrey/classList.js",
     "core-js": "^3.7.0",
-    "dom-shims": "^0.1.4",
+    "file-saver": "^2.0.5",
+    "ie8": "^0.8.1",
+    "jscolor": "github:EastDesire/jscolor#2.1.1",
     "jszip": "^3.5.0",
+    "keyboardevent-key-polyfill": "^1.1.0",
     "leaflet": "^1.7.1",
     "leaflet.coordinates": "~0.1.5",
+    "object-defineproperty-ie": "^3.1.0",
     "regenerator-runtime": "^0.13.7",
     "roman-numerals": "^0.3.2",
     "shpjs": "^3.6.2",
     "sortablejs": "~1.10.2",
-    "time-input-polyfill": "^1.0.9"
+    "time-input-polyfill": "^1.0.9",
+    "uninstall": "0.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.3",
     "@babel/plugin-proposal-class-properties": "^7.12.1",
+    "@babel/plugin-transform-runtime": "^7.12.10",
     "@babel/preset-env": "^7.12.1",
     "babelify": "^10.0.0",
-    "browserify": "^17.0.0",
+    "browserify": "~13.3.0",
+    "cssnano": "^4.1.10",
     "electron": "^10.1.5",
     "electron-packager": "^15.2.0",
     "fs-extra": "^9.0.1",
-    "tinyify": "^3.0.0",
-    "postcss": "^8.2.1",
-    "postcss-preset-env": "^6.7.0",
-    "cssnano": "^4.1.10"
+    "postcss": "^8.2.4",
+    "postcss-preset-env": "^6.7.0"
   }
 }
