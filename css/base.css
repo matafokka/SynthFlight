@@ -38,7 +38,7 @@ body {
 	width: 4.1rem !important;
 }
 
-.leaflet-control-zoom > * {
+.leaflet-control-zoom > *, #menu-button  {
 	display: inline-block !important;
 	width: 2rem !important;
 	height: 2rem !important;
@@ -56,7 +56,7 @@ body {
 	margin-bottom: 0;
 }
 
-.button-base, input[type="button"], select, .fas, .leaflet-control > a, .jscolor-btn-close {
+.button-base, input[type="button"], select, .fas, .leaflet-control > a {
 	display: inline-block;
 	vertical-align: middle;
 	height: 2rem;
@@ -66,6 +66,10 @@ body {
 	align-items: center;
 	text-align: center;
 	transition: background 0.2s;
+}
+
+.fas {
+	max-width: 2rem;
 }
 
 .button-base:hover, input[type="button"]:hover, select:hover, .fas:hover, .leaflet-control > a:hover, .jscolor-btn-close:hover {
@@ -189,6 +193,10 @@ select > * {
 	right: -100%;
 }
 
+#menu.menu-mobile[data-hidden="0"] {
+	right: 0;
+}
+
 #top-panel-wrapper, #bottom-panel-wrapper {
 	position: fixed;
 	width: 100%;
@@ -197,6 +205,10 @@ select > * {
 
 #top-panel-wrapper {
 	top: 0;
+}
+
+#menu.menu-mobile #top-panel-wrapper, #menu.menu-mobile #bottom-panel-wrapper {
+	max-width: 100%;
 }
 
 #menu-items {
@@ -213,6 +225,8 @@ select > * {
 .controls-row-set {
 	display: table; /* Hack for older browsers */
 	table-layout: fixed;
+	display: flex;
+	flex-flow: row;
 	width: 100%;
 	padding: 0;
 	border-top: 1px solid #ccc;
@@ -221,9 +235,11 @@ select > * {
 
 .controls-row-set > * {
 	display: table-cell !important;
+	display: flex !important;
 	border: none !important;
 	word-wrap: break-word;
 	border-right: 1px solid #ccc !important;
+	flex: 1;
 }
 
 .controls-row-set > *:last-child {
@@ -319,8 +335,11 @@ select > * {
 .layer-label {
 	display: inline-block;
 	vertical-align: middle;
+	display: flex;
+	align-items: center;
 	width: 73%;
 	height: 2rem;
+	margin: 0;
 	white-space: nowrap;
 	overflow: hidden;
 }

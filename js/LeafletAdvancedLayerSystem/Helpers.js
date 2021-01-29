@@ -104,6 +104,6 @@ for (let device of devices) {
 }
 
 // If user's device is a phone, make UI a bit bigger
-L.ALS.Helpers.isMobile = (L.ALS.deviceType === "phone");
+L.ALS.Helpers.isMobile = (L.ALS.Helpers.deviceType === "phone");
 if (L.ALS.Helpers.isMobile)
 	document.querySelector(":root").style.fontSize = "16pt";
