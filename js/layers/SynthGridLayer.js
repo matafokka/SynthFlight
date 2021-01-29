@@ -940,7 +940,6 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 			this.pathsWithoutConnectionsGroup.remove();
 			this.map.addLayer(this[pathName]);
 		}
-		this.addLayers(this[pathName]);
 	},
 
 	/**
