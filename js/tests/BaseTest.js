@@ -46,7 +46,7 @@ class BaseTest {
 	 * @param name {string} name of the section
 	 */
 	static logSection(name) {
-		console.log(chalk.blueBright("\n---" + name + "---\n"));
+		console.log(chalk.blueBright("\n--- " + name + " ---\n"));
 	}
 
 }

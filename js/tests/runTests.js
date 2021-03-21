@@ -1,3 +1,4 @@
+const chalk = require("chalk");
 const fs = require("fs");
 const skipFiles = ["runTests.js", "BaseTest.js"];
 
@@ -6,11 +7,23 @@ fs.readdirSync(__dirname, { withFileTypes: true }).forEach(file => {
 		return;
 	let test;
 	try { test = require(__dirname + "/" + file.name) }
-	catch (e) { console.log(e); return; }
+	catch (e) {
+		console.log("Can't import test, following exception occurred:");
+		console.log(e);
+		return;
+	}
 
 	let divider = "\n";
-	for (let i = 0; i <= file.name.length; i++)
+	for (let i = 0; i < test.testName.length; i++)
 		divider += "-";
-	console.log(divider + "\n" + test.testName + divider);
-	test.test();
+
+	console.log(chalk.rgb(
+		50, 0, 50).bold(divider + "\n" + test.testName + divider
+		));
+
+	try { test.test(); }
+	catch (e) {
+		console.log("Can't run test " + test.testName + " because following error occurred:");
+		console.log(e);
+	}
 });
