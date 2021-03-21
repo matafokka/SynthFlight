@@ -5,6 +5,7 @@ L.ALS.Widgets.File = L.ALS.Widgets.BaseWidget.extend({
 	 */
 	initialize: function (id, label, objectToControl= undefined, callback = "") {
 		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "file", id, label, objectToControl, callback, ["input"]);
+		this.setConstructorArguments(arguments);
 		this.input.addEventListener("input", () => { this._updateFileArea(); });
 	},
 

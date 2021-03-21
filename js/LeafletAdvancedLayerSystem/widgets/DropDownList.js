@@ -5,6 +5,7 @@ L.ALS.Widgets.DropDownList = L.ALS.Widgets.BaseWidget.extend({
 	 */
 	initialize: function (id, label, objectToControl, callback) {
 		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "", id, label, objectToControl, callback, ["change"]);
+		this.setConstructorArguments(arguments);
 	},
 
 	createInputElement: function () {

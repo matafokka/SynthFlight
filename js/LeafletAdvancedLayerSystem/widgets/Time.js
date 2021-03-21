@@ -5,6 +5,7 @@ L.ALS.Widgets.Time = L.ALS.Widgets.BaseWidget.extend({
 
 	initialize: function (id, label, objectToControl, callback, attributes) {
 		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "time", id, label, objectToControl, ["edit", "change"], ["edit", "change"], attributes);
+		this.setConstructorArguments(arguments);
 		this._waitForElementToBeAdded();
 	},
 

@@ -16,6 +16,7 @@ L.ALS.Widgets.TextArea = L.ALS.Widgets.BaseWidget.extend({
 			wrap: "soft",
 			placeholder: placeholder
 		});
+		this.setConstructorArguments(arguments);
 		this.setText("");
 	},
 

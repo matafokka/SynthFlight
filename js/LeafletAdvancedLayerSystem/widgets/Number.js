@@ -4,6 +4,7 @@ L.ALS.Widgets.Number = L.ALS.Widgets.BaseWidget.extend({
 
 	initialize: function (id, label, objectToControl = undefined, callback = "", attributes = {}) {
 		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "text", id, label, objectToControl, callback, ["edit", "change", "keyup"], attributes);
+		this.setConstructorArguments(arguments);
 
 		this.input.addEventListener("keydown", (event) => {
 			// If:
@@ -60,9 +61,8 @@ L.ALS.Widgets.Number = L.ALS.Widgets.BaseWidget.extend({
 	 * @param value {string|number} Value to set
 	 */
 	setValue: function (value) {
-		if (!this._validateValue(parseFloat(value)))
-			return;
-		this.input.value = value;
+		if (this._validateValue(parseFloat(value)))
+			this.input.value = value;
 	},
 
 	onChange: function (event) {

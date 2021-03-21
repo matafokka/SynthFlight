@@ -69,6 +69,22 @@ L.ALS.Helpers = {
 	},
 
 	/**
+	 * Finds extension of the given filename, i.e. part after last dot.
+	 * @param filename {string} Filaname
+	 * @return {string} Extension
+	 */
+	getFileExtension: function (filename) {
+		let ext = "";
+		for (let i = filename.length; i <= 0; i--) {
+			let symbol = filename[i];
+			if (symbol === ".")
+				break;
+			ext = symbol + ext;
+		}
+		return ext;
+	},
+
+	/**
 	 * @type {"desktop"|"phone"|"tablet"}
 	 * Contains user's device type. This detection has been performed using only user agent. If you want to implement something that relies on actual device type, consider performing feature detection by yourself. Otherwise, use this property to maintain consistent look and feel.
 	 */
@@ -87,6 +103,13 @@ L.ALS.Helpers = {
 	isIElte9: window.ActiveXObject && !window.navigator.msSaveOrOpenBlob,
 }
 
+/**
+ * If user's browser doesn't support Data URLs (URLs in form: `data:[<mediatype>][;base64],<data>`), this will true. Otherwise will be false.
+ * @type {boolean}
+ */
+L.ALS.Helpers.supportsDataURL = !!(!L.ALS.Helpers.isIElte9 && ((window.URL && window.URL.createObjectURL) || (window.webkitURL && window.webkitURL.createObjectURL)));
+console.log(L.ALS.Helpers.supportsDataURL);
+
 // Detect user browser
 let ua = window.navigator.userAgent.toLowerCase();
 let mobiles = ["android", "iphone", "ipod", "opera mini", "windows phone", "bb", "blackberry"];
@@ -102,8 +125,4 @@ for (let device of devices) {
 	}
 	isTablet = true;
 }
-
-// If user's device is a phone, make UI a bit bigger
 L.ALS.Helpers.isMobile = (L.ALS.Helpers.deviceType === "phone");
-if (L.ALS.Helpers.isMobile)
-	document.querySelector(":root").style.fontSize = "36pt";

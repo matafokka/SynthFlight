@@ -1,8 +1,8 @@
 /**
- * Base class for all widgets
+ * Base class for all widgets. This class should NOT be instantiated!
  * @type {Input}
  */
-L.ALS.Widgets.BaseWidget = L.Class.extend({
+L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend({
 
 	/**
 	 * Custom classname for an input wrapper. Should NOT be changed from outside.
@@ -14,22 +14,25 @@ L.ALS.Widgets.BaseWidget = L.Class.extend({
 	 * @param type {string} Type of input
 	 * @param id {string} ID of this input. You can select this object using this ID.
 	 * @param label {string} Label for this input
-	 * @param objectToControl {object} Just pass "this".
-	 * @param callback {string} Name of a method of your object that will be called when widget's value changes
+	 * @param objectToControl {Object|L.ALS.Serializable} Just pass "this". If you plan to use serialization, this object MUST be instance of L.ALS.Serializable.
+	 * @param callback {string} Name of a method of objectToControl that will be called when widget's value changes
 	 * @param events {string[]} Array containing event's names to bind to the provided callback
-	 * @param attributes {object} Attributes of an input, such as min, max, etc in format `{attributeName1: attributeValue1, attributeName2: attributeValue2, ...}`
+	 * @param attributes {Object} Attributes of an input, such as min, max, etc in format `{attributeName1: attributeValue1, attributeName2: attributeValue2, ...}`
 	 */
 	initialize: function (type, id, label, objectToControl = undefined, callback = "", events = [], attributes = {}) {
+		L.ALS.Serializable.prototype.initialize.call(this);
+		this.setConstructorArguments(arguments);
+		this.serializationIgnoreList.push("getContainer");
+
 		this.objectToControl = objectToControl;
 		this.events = events;
 		this._inputID = "adv-lyr_sys_input" + L.ALS.Helpers.generateID();
 
 		this.type = type;
 		this.id = id;
-		this.label = label;
+		this.labelText = label;
 		this.callback = callback;
 		this.attributes = attributes;
-		this.value = "";
 		this.container = this.toHtmlElement();
 	},
 
@@ -71,7 +74,7 @@ L.ALS.Widgets.BaseWidget = L.Class.extend({
 		this.labelWidget = document.createElement("label");
 		this.labelWidget.className = "adv-lyr-sys-label";
 		this.labelWidget.htmlFor = this._inputID;
-		this.setLabelText(this.label);
+		this.setLabelText(this.labelText);
 		return this.labelWidget;
 	},
 
@@ -110,9 +113,7 @@ L.ALS.Widgets.BaseWidget = L.Class.extend({
 
 		// Set value so input won't be empty
 		let value;
-		if (this.value !== "")
-			value = this.value;
-		else if (this.attributes.value !== undefined)
+		if (this.attributes.value !== undefined)
 			value = this.attributes.value;
 
 		this.setValue(value);
@@ -129,6 +130,8 @@ L.ALS.Widgets.BaseWidget = L.Class.extend({
 	 * @param attributes Object containing attributes
 	 */
 	setAttributes: function (attributes) {
+		if (this.input === undefined)
+			return; // In some cases widgets doesn't have an input
 		for (let attr in attributes) {
 			if (attributes.hasOwnProperty(attr))
 				this.input.setAttribute(attr, attributes[attr]);
@@ -160,6 +163,8 @@ L.ALS.Widgets.BaseWidget = L.Class.extend({
 	},
 
 	getValue: function () {
+		if (!this.input) // In some cases widget (like label) won't have input. In this case return undefined.
+			return undefined;
 		return this.input.value;
 	},
 
@@ -172,15 +177,19 @@ L.ALS.Widgets.BaseWidget = L.Class.extend({
 	 * @param value - Value to set
 	 */
 	setValue: function (value) {
-		this.input.value = value;
-	},
-
-	setEnabled: function (isEnabled) {
-		this.input.disabled = !isEnabled;
+		if (this.input) // See comment above
+			this.input.value = value;
 	},
 
 	getEnabled: function () {
+		if (!this.input)
+			return true;
 		return (this.input.disabled !== "true");
+	},
+
+	setEnabled: function (isEnabled) {
+		if (this.input)
+			this.input.disabled = !isEnabled;
 	},
 
 	getContainer: function () {
@@ -188,29 +197,14 @@ L.ALS.Widgets.BaseWidget = L.Class.extend({
 	},
 
 	getLabelText: function () {
-		if (this.label !== undefined)
-			return this.labelWidget.innerHTML.slice(0, this.labelWidget.innerHTML.length - 2);
+		if (!this.labelWidget) // When widget doesn't have label, labelWidget will be undefined. In this case, return empty string.
+			return "";
+		return this.labelWidget.innerHTML.slice(0, this.labelWidget.innerHTML.length - 1);
 	},
 
 	setLabelText: function (text) {
-		this.labelWidget.innerHTML = text + ":";
+		if (this.labelWidget) // See comment above
+			this.labelWidget.innerHTML = text + ":";
 	},
-
-	serialize: function () {
-		return {
-			type: this.type,
-			id: this.id,
-			label: this.label,
-			callback: this.callback,
-			attributes: this.attributes,
-			value: this.value,
-		}
-	},
-
-	deserialize: function (serializedObject, objectToControl) {
-		for (let attr in serializedObject)
-			if (serializedObject.hasOwnProperty(attr))
-				this[attr] = serializedObject[attr];
-	}
 
 });

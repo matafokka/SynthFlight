@@ -35,7 +35,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 	defaultName: "Advanced Layer",
 
 	/**
-	 * Indicates whether this layer is shown or not. Should not be modified!
+	 * Indicates whether this layer is shown or not. Do NOT modify!
 	 * @type {boolean}
 	 * @public
 	 */
@@ -49,11 +49,14 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 
 	/**
 	 * SynthLayer's constructor. Do NOT override it! Use init() method instead!
-	 * @param map Leaflet map to display layer on
 	 * @param layerSystem Layer system that creates this layer
+	 * @param args {*[]} Arguments to pass to `init()`
 	 */
-	initialize: function(map, layerSystem) {
+	initialize: function(layerSystem, args) {
 		L.ALS.Widgetable.prototype.initialize.call(this, "layer-menu");
+		this.setConstructorArguments([args]);
+		this.serializationIgnoreList.push("_layerSystem", "map", "_nameLabel", "layers", "_mapEvents", "getBounds", "isSelected");
+
 		/**
 		 * Contains event listeners bound to various objects. Looks like this:
 		 * ```
@@ -71,12 +74,86 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 		this._eventsForObjects = {};
 
 		this._mapEvents = [];
-
-		this.map = map;
+		this._layerSystem = layerSystem;
+		this.map = this._layerSystem.map;
 		this.id = "SynthLayer" + L.ALS.Helpers.generateID();
 		this.layers = L.featureGroup();
-		this._layerSystem = layerSystem;
 		this.name = this.defaultName;
+
+		// Build menu
+		// Handle
+		let handle = document.createElement("i");
+		handle.className = "layer-handle fas fa-arrows-alt";
+
+		// Editable label containing layer's name
+		let label = document.createElement("p");
+		label.className = "layer-label";
+		label.innerHTML = this.defaultName;
+
+		// Make it editable on double click
+		label.addEventListener("dblclick", function () {
+			this.contentEditable = "true";
+			this.focus();
+		});
+
+		// Make it not editable when user leaves
+		label.addEventListener("blur", (event) => {
+			let target = event.target;
+			target.contentEditable = "false";
+			this.setName(target.innerHTML);
+		});
+
+		// Make it end editing when user presses Enter
+		label.addEventListener("keydown", function (event) {
+			if (event.key === "Enter") {
+				event.preventDefault();
+				this.blur();
+			}
+		})
+
+		// Drop-down menu button
+		let menuButton = document.createElement("i");
+		menuButton.className = "fas fa-cog";
+
+		// Menu itself
+		this._layerSystem._makeHideable(menuButton, this.container, () => {
+			this.container.style.height = "0";
+		}, () => {
+			this.container.style.height = this.container.scrollHeight + "px";
+		});
+
+		// Hide/show button
+		let hideButton = document.createElement("i");
+		hideButton.className = "fas fa-eye";
+		this._layerSystem._makeHideable(hideButton, undefined, () => {
+			hideButton.className = "fas fa-eye-slash";
+			this._onHide();
+			this.onHide();
+		}, () => {
+			hideButton.className = "fas fa-eye";
+			this._onShow();
+			this.onShow();
+		}, false);
+
+		let layerWidget = document.createElement("div");
+		layerWidget.className = "layer-container";
+		layerWidget.id = this.id;
+
+		let controlsContainer = document.createElement("div");
+		controlsContainer.className = "controls-row-set";
+		let elements = [handle, label, menuButton, hideButton];
+		for (let e of elements)
+			controlsContainer.appendChild(e);
+		layerWidget.appendChild(controlsContainer);
+		layerWidget.appendChild(this.container);
+		layerWidget.addEventListener("click", () => { this._layerSystem._selectLayer(this.id); });
+
+		this._layerSystem._layerContainer.appendChild(layerWidget);
+		this._layerSystem._layers[this.id] = this;
+		this._layerSystem._selectLayer(this.id); // Select new layer
+		this._layerSystem._closeWizard();
+		this._nameLabel = label;
+		this.init(args); // Initialize layer and pass all the properties
 	},
 
 	/**
@@ -273,7 +350,13 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 	 * Use it instead of constructor.
 	 * @param wizardResults Results compiled from the wizard. It is an object who's keys are IDs of your controls and values are values of your controls.
 	 */
-	init: function(wizardResults) {},
+	init: function(wizardResults) {
+		let w = new L.ALS.Widgets.Number("id", "label", this, "control");
+		this.addWidget(w);
+		w.setValue(2);
+	},
+
+	control: function () { console.log("Hey!"); },
 
 	/**
 	 * Deletes this layer
@@ -284,9 +367,10 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 		this._layerSystem._deleteLayer(shouldAskUser);
 	},
 
-	statics: {
-		wizard: new L.ALS.Wizard()
-	},
+	/**
+	 * Being called upon deletion. There you can clean up everything you've done which can't be undone by the system (i.e., added layers directly to the map or created elements on the page)
+	 */
+	onDelete: function () {},
 
 	// Wrappers
 
@@ -337,13 +421,22 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 	 *
 	 * Default implementation is:
 	 * ```JS
-	 * return this.layers.toGeoJSON(precision);
+	 * return this.layers.toGeoJSON();
 	 * ```
 	 *
-	 * @see FeatureGroup.toGeoJSON
+	 * @see L.FeatureGroup.toGeoJSON
 	 */
 	toGeoJSON: function () {
 		return this.layers.toGeoJSON();
-	}
+	},
+
+	statics: {
+		wizard: new L.ALS.Wizard(),
+
+		deserialize: function (serialized, layerSystem, seenObjects) {
+			serialized.constructorArguments = [layerSystem, serialized.constructorArguments[0]];
+			return L.ALS.Widgetable.deserialize(serialized, seenObjects);
+		}
+	},
 
 });

@@ -12,33 +12,26 @@ L.ALS.SynthShapefileLayer = L.ALS.Layer.extend({
 	geometryType: undefined,
 
 	init: function (wizardResults) {
-		let borderColor = new L.ALS.Widgets.Color("borderColor", "Border color", this, "_setColor", { "value": this.borderColor });
-		let fillColor = new L.ALS.Widgets.Color("fillColor", "Fill color", this, "_setColor", { "value": this.fillColor });
+		this.setConstructorArguments(["deserialized"]);
+
+		if (wizardResults === "deserialized")
+			return;
 
 		let file = wizardResults["zippedShapefile"][0]
 		let fileReader = new FileReader();
-		fileReader.readAsArrayBuffer(file);
+		try { fileReader.readAsArrayBuffer(file); }
+		catch (e) {
+			this._deleteInvalidLayer();
+			return;
+		}
 		fileReader.addEventListener("load", (event) => {
 			shp(event.target.result).then((geoJson) => {
 				if (geoJson.features.length === 0) {
-					window.alert("This shapefile doesn't contain any features so it won't be added.");
-					this.deleteLayer();
+					this._deleteInvalidLayer("This shapefile doesn't contain any features so it won't be added");
 					return;
 				}
 
-				this.type = geoJson.features[0].geometry.type;
-				let menu = [];
-				if (this.type === "Polygon")
-					menu = [borderColor, fillColor];
-				else if (this.type === "LineString")
-					menu = [borderColor];
-				for (let widget of menu)
-					this.addWidget(widget);
-
-				this._layer = L.geoJSON(geoJson);
-				this.addLayers(this._layer);
-				this._setLayerColors();
-
+				this._displayShapefile(geoJson);
 				// Check if bounds are valid
 				let bounds = this._layer.getBounds();
 				if (bounds._northEast.lng > 180 || bounds._northEast.lat > 90 || bounds._southWest.lng < -180 || bounds._southWest.lat < -90 )
@@ -47,10 +40,32 @@ L.ALS.SynthShapefileLayer = L.ALS.Layer.extend({
 
 			}).catch((reason => {
 				console.log(reason);
-				window.alert("This file is not valid zipped shapefile");
-				this.deleteLayer();
+				this._deleteInvalidLayer();
 			}));
 		});
+	},
+
+	_displayShapefile: function (geoJson) {
+		let borderColor = new L.ALS.Widgets.Color("borderColor", "Border color", this, "_setColor", { "value": this.borderColor });
+		let fillColor = new L.ALS.Widgets.Color("fillColor", "Fill color", this, "_setColor", { "value": this.fillColor });
+
+		this.type = geoJson.features[0].geometry.type;
+		let menu = [];
+		if (this.type === "Polygon")
+			menu = [borderColor, fillColor];
+		else if (this.type === "LineString")
+			menu = [borderColor];
+		for (let widget of menu)
+			this.addWidget(widget);
+
+		this._layer = L.geoJSON(geoJson);
+		this.addLayers(this._layer);
+		this._setLayerColors();
+	},
+
+	_deleteInvalidLayer: function (message = "This file is not valid zipped shapefile") {
+		window.alert(message);
+		this.deleteLayer();
 	},
 
 	_setColor(widget) {
@@ -66,7 +81,38 @@ L.ALS.SynthShapefileLayer = L.ALS.Layer.extend({
 		});
 	},
 
+	serialize: function (seenObjects) {
+		if (!this.serializationID) {
+			this.serializationID = L.ALS.Helpers.generateID();
+			seenObjects[this.serializationID] = this;
+		}
+
+		let json = {
+			widgets: this.serializeWidgets(seenObjects),
+			name: this.getName(),
+			geoJson: this.toGeoJSON(),
+			serializationID: this.serializationID
+		};
+
+		for (let prop of L.ALS.SynthShapefileLayer.serializationProperties)
+			json[prop] = this[prop];
+
+		return json;
+	},
+
 	statics: {
-		wizard: new L.ALS.SynthShapefileWizard()
+		wizard: new L.ALS.SynthShapefileWizard(),
+
+		serializationProperties: ["serializableClassName", "type", "fillColor", "borderColor", "geometryType"],
+
+		deserialize: function (serialized, layerSystem, seenObjects) {
+			serialized.constructorArguments = [layerSystem, "deserialized"];
+			let object = L.ALS.Serializable.getObjectFromSerialized(serialized, seenObjects);
+			object.setName(serialized.name);
+			for (let prop of L.ALS.SynthShapefileLayer.serializationProperties)
+				object[prop] = serialized[prop];
+			object._displayShapefile(serialized.geoJson);
+			return object;
+		}
 	},
 });

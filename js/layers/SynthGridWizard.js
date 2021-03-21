@@ -51,8 +51,8 @@ L.ALS.SynthGridWizard = L.ALS.Wizard.extend({
 
 	onGridStandardScalesChange: function (widget) {
 		let value = widget.getValue();
-		let latDistanceControl = this.getControlById("gridLatDistance");
-		let lngDistanceControl = this.getControlById("gridLngDistance");
+		let latDistanceControl = this.getWidgetById("gridLatDistance");
+		let lngDistanceControl = this.getWidgetById("gridLngDistance");
 
 		let isEnabled = value === "Custom";
 		if (!isEnabled) {
