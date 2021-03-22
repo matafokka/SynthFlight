@@ -108,7 +108,6 @@ L.ALS.Helpers = {
  * @type {boolean}
  */
 L.ALS.Helpers.supportsDataURL = !!(!L.ALS.Helpers.isIElte9 && ((window.URL && window.URL.createObjectURL) || (window.webkitURL && window.webkitURL.createObjectURL)));
-console.log(L.ALS.Helpers.supportsDataURL);
 
 // Detect user browser
 let ua = window.navigator.userAgent.toLowerCase();

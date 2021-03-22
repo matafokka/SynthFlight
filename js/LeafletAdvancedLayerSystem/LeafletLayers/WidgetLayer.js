@@ -19,7 +19,6 @@ L.ALS.LeafletLayers.WidgetLayer =  L.ALS.Widgetable.extend({
 	 */
 	initialize: function (latLng = [52, 0], origin="center") {
 		L.ALS.Widgetable.prototype.initialize.call(this, "adv-lyr-sys-divicon");
-		console.log(latLng, origin);
 		L.Marker.prototype.initialize.call(this, latLng);
 
 		this.setConstructorArguments(arguments);

@@ -1077,10 +1077,8 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 			object.selectedPolygonsWidgets = L.ALS.Serializable.deserialize(serialized.selectedPolygonsWidgets, seenObjects);
 
 			for (let prop in object.selectedPolygonsWidgets) {
-				if (object.selectedPolygonsWidgets[prop].addTo) {
-					console.log(object.selectedPolygonsWidgets[prop]);
+				if (object.selectedPolygonsWidgets[prop].addTo)
 					object.widgetsGroup.addLayer(object.selectedPolygonsWidgets[prop]);
-				}
 			}
 			object._setAirportLatLng();
 			object._updateGrid();

@@ -95,7 +95,7 @@ class SerializationTest extends BaseTest {
 		this.logResult("null", a.testValues.null === null);
 		this.logResult("NaN", isNaN(a.testValues.nan));
 		this.logResult("Symbol", (a.testValues.symbol.toString() === "Symbol(My symbol)"));
-		this.logResult("BigInt", (a.testValues.bigInt instanceof BigInt));
+		this.logResult("BigInt", (typeof a.testValues.bigInt === "bigint" && a.testValues.bigInt.toString() === "45652615781231478123765"));
 		this.logResult("RegExp", (a.testValues.regexp.toString() === /a*b/.toString()));
 		this.logResult("Custom RegExp properties", (a.testValues.regexp.customValue === "custom value"));
 		this.logResult("Empty array", (a.testValues.emptyArray instanceof Array && a.testValues.emptyArray.length === 0));

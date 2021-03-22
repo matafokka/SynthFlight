@@ -40,7 +40,8 @@
     ]
   },
   "scripts": {
-    "start": "electron electronApp.js --debug"
+    "start": "electron electronApp.js --debug",
+    "test": "node js/tests/runTests.js"
   },
   "keywords": [],
   "author": "matafokka",

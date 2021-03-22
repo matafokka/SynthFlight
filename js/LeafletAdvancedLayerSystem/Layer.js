@@ -350,13 +350,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 	 * Use it instead of constructor.
 	 * @param wizardResults Results compiled from the wizard. It is an object who's keys are IDs of your controls and values are values of your controls.
 	 */
-	init: function(wizardResults) {
-		let w = new L.ALS.Widgets.Number("id", "label", this, "control");
-		this.addWidget(w);
-		w.setValue(2);
-	},
-
-	control: function () { console.log("Hey!"); },
+	init: function(wizardResults) {},
 
 	/**
 	 * Deletes this layer

@@ -198,7 +198,7 @@ L.ALS.Serializable = L.Class.extend({
 		 */
 		getSerializableConstructor: function (className) {
 			className += ".";
-			let namespace = global;
+			let namespace = window;
 			let currentPart = "";
 			for (let symbol of className) {
 				if (symbol === ".") {
