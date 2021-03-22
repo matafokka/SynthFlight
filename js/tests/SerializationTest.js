@@ -1,4 +1,3 @@
-const {JSDOM} = require("jsdom");
 require('jsdom-global')(`
 <html><body>
 	<div id="map"></div>
@@ -115,7 +114,8 @@ class SerializationTest extends BaseTest {
 		this.logResult("RegExp element", (a.testValues.array[9].toString() === /a/.toString()));
 		this.logResult("Cyclic reference to the same array", (a.testValues.array[10] === a.testValues.array));
 		this.logResult("Reference to the other array which references the original array",
-			(a.testValues.array[11] === a.testValues.otherArray && a.testValues.array[11][1] === a.testValues.array[11]));
+			(a.testValues.array[11] === a.testValues.otherArray && a.testValues.array[11][1] === a.testValues.array)
+		);
 
 		this.logSection("Widgetable");
 
