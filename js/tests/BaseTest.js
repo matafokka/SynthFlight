@@ -10,6 +10,8 @@ const chalk = require("chalk");
  * Use `logResult()` to log your tests' results.
  *
  * Use `logSection()` to output tests sections.
+ *
+ * To mock DOM, use `jsdom-global` instead of just `jsdom`.
  */
 class BaseTest {
 
@@ -47,6 +49,14 @@ class BaseTest {
 	 */
 	static logSection(name) {
 		console.log(chalk.blueBright("\n--- " + name + " ---\n"));
+	}
+
+	// TODO: Make it work, clean up custom global vars correctly.
+	static _cleanUpJSDOMGlobal(cleanUpFn, ...customGlobalVars) {
+		window.close();
+		for (let v of customGlobalVars)
+			delete global[v];
+		cleanUpFn();
 	}
 
 }
