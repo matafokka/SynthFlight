@@ -14,9 +14,9 @@ L.ALS.Widgets.SimpleLabel = L.ALS.Widgets.BaseWidget.extend({
 	 */
 	initialize: function (id, value ="", textAlign= "left", style="nostyle") {
 		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "", id, "");
+		this.setConstructorArguments(arguments);
 		this.setValue(value);
 		this.setTextAlign(textAlign);
-		this._styleNames = ["message", "success", "warning", "error"];
 		this.setStyle(style);
 	},
 
@@ -63,11 +63,15 @@ L.ALS.Widgets.SimpleLabel = L.ALS.Widgets.BaseWidget.extend({
 	 * @param style {"nostyle"|"message"|"success"|"warning"|"error"} Style of this label
 	 */
 	setStyle: function (style) {
-		for (let s of this._styleNames)
+		for (let s of L.ALS.Widgets.SimpleLabel.styleNames)
 			this.input.classList.remove(s);
 		if (style === "nostyle")
 			return;
 		this.input.classList.add(style);
+	},
+
+	statics: {
+		styleNames: ["message", "success", "warning", "error"]
 	}
 
 })

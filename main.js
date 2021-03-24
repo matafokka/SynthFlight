@@ -12,6 +12,8 @@ require("./js/layers/SynthShapefileLayer.js");
 require("./js/layers/SynthGridLayer.js");
 require("./node_modules/leaflet.coordinates/dist/Leaflet.Coordinates-0.1.5.min.js")
 
+L.ALS.System.initializeSystem();
+
 // Create map
 let map = L.map("map", {
 	attributionControl: false, // Attribution will be present in About window

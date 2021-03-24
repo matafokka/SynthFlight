@@ -7,6 +7,7 @@ L.ALS.Widgets.Checkbox = L.ALS.Widgets.BaseWidget.extend({
 
 	initialize: function (id, label, objectToControl = undefined, callback = "") {
 		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "checkbox", id, label, objectToControl, callback, ["change"], {});
+		this.setConstructorArguments(arguments);
 		this.setValue(false);
 	},
 

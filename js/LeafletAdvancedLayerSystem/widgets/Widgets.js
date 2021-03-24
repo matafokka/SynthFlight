@@ -1,3 +1,6 @@
+/**
+ * Contains widgets to add to `Widgetable`s
+ */
 L.ALS.Widgets = {};
 
 require("./BaseWidget.js");
@@ -18,6 +21,7 @@ for (let type of types) {
 	L.ALS.Widgets[type] = L.ALS.Widgets.BaseWidget.extend({
 		initialize: function (id, label, objectToControl = undefined, callback = "", attributes = {}) {
 			L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, type, id, label, objectToControl, callback, ["edit", "change"], attributes);
+			this.setConstructorArguments(arguments);
 		}
 	});
 }

@@ -66,6 +66,10 @@ If you want to run from **browser**: one of:
 * Internet Explorer 9 or later.
 * Any other modern desktop or mobile browser.
 
+***Note 1.*** *Outdated Chromium-based browsers have a "feature" that prevents FileReader from reading local files. If you're using such browser, please, either host SynthFlight on a web server or add ` --allow-file-access-from-files` flag when running browser.*
+
+***Note 2:*** *Some of the outdated browsers can't download files normally. Please, update your browser for better user experience.*
+
 # Building
 
 If you want to build SynthFlight yourself, do the following:
@@ -87,11 +91,9 @@ You can easily host SynthFlight on your server:
 
 # Contributing
 
-I want to work on this project myself at least until it will come out of alpha stage.
+There's a "Development" branch which you can fork and commit to. If you plan to contribute to this project, please, notify me before doing so because I might be working on a big feature and not commit until it's ready. I'll commit more often if someone will work with me.
 
-However, you can contribute by:
-1. Requesting API changes, new functionality or something else. Please, create an issue and describe your request.
-1. Adapting markup to work in IE and older browsers. Please, create an issue and tell me that you want to work on this project before you're going to do actual coding, so I'll update this repository.
+You can also contribute by reporting bugs, requesting API changes, new functionality or something else. Please, create an issue and describe your request.
 
 # FAQ
 

@@ -40,7 +40,8 @@
     ]
   },
   "scripts": {
-    "start": "electron electronApp.js --debug"
+    "start": "electron electronApp.js --debug",
+    "test": "node js/tests/runTests.js"
   },
   "keywords": [],
   "author": "matafokka",
@@ -68,8 +69,7 @@
     "roman-numerals": "^0.3.2",
     "shpjs": "^3.6.2",
     "sortablejs": "~1.10.2",
-    "time-input-polyfill": "^1.0.9",
-    "uninstall": "0.0.0"
+    "time-input-polyfill": "^1.0.9"
   },
   "devDependencies": {
     "@babel/core": "^7.12.3",
@@ -78,11 +78,16 @@
     "@babel/preset-env": "^7.12.1",
     "babelify": "^10.0.0",
     "browserify": "~13.3.0",
+    "chalk": "^2.4.2",
+    "common-shakeify": "^0.6.2",
     "cssnano": "^4.1.10",
     "electron": "^10.1.5",
     "electron-packager": "^15.2.0",
     "fs-extra": "^9.0.1",
+    "jsdom": "^16.5.1",
+    "jsdom-global": "^3.0.2",
     "postcss": "^8.2.4",
-    "postcss-preset-env": "^6.7.0"
+    "postcss-preset-env": "^6.7.0",
+    "uglifyify": "^5.0.2"
   }
 }

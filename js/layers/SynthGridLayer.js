@@ -6,9 +6,6 @@ const RomanNumerals = require("roman-numerals");
 const geojsonMerge = require("@mapbox/geojson-merge"); // Using this since turfHelpers.featureCollection() discards previously defined properties.
 require("./SynthGridWizard.js");
 
-/**
- * Grid layer
- */
 L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 
 	defaultName: "Grid Layer",
@@ -42,6 +39,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 	init: function (wizardResults) {
 		this.selectedPolygons = {};
 		this.selectedPolygonsWidgets = {};
+		this.serializationIgnoreList.push("selectedPolygons", "_airportMarker", "lngDistance", "latDistance", "_currentStandardScale");
 
 		// Create menu
 
@@ -97,8 +95,8 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 			new L.ALS.Widgets.Number("cameraWidth", "Camera width (px)", this, "calculateParameters", camOpts),
 			new L.ALS.Widgets.Number("cameraHeight", "Camera height (px)", this, "calculateParameters", camOpts),
 			new L.ALS.Widgets.Number("pixelWidth", "Pixel size (μm)", this, "calculateParameters", {
-				"min": 0.001,
-				"step": 0.001,
+				"min": 0.1,
+				"step": 0.1,
 				"value": 5
 			}),
 			new L.ALS.Widgets.Number("overlayBetweenPaths", "Overlay between images from adjacent paths (%)", this, "calculateParameters", {
@@ -178,12 +176,16 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 		// 2. Hide grid when it'll contain a lot of polygons and becomes messy
 		// Additional redrawing actually won't introduce any noticeable delay.
 
-		// Create empty group containing our stuff
+		// Create empty groups containing our stuff
+
+		this.polygonGroup = L.featureGroup();
+		this.widgetsGroup = L.featureGroup();
+		this.bordersGroup = L.featureGroup();
+		this.pathsWithoutConnectionsGroup = L.featureGroup();
+
 		let props = ["polygonGroup", "widgetsGroup", "bordersGroup", "pathsWithoutConnectionsGroup"];
-		for (let prop of props) {
-			this[prop] = L.featureGroup();
+		for (let prop of props)
 			this.addLayers(this[prop]);
-		}
 		this.labelsGroup = new L.LabelLayer(false);
 		this.addLayers(this.labelsGroup);
 
@@ -221,8 +223,8 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 
 	onMarkerDrag: function() {
 		let latLng = this._airportMarker.getLatLng();
-		this.getControlById("airportLat").setValue(latLng.lat.toFixed(5));
-		this.getControlById("airportLng").setValue(latLng.lng.toFixed(5));
+		this.getWidgetById("airportLat").setValue(latLng.lat.toFixed(5));
+		this.getWidgetById("airportLng").setValue(latLng.lng.toFixed(5));
 		this._drawPaths();
 	},
 
@@ -236,7 +238,6 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 	 * @private
 	 */
 	_onMapPan: function () {
-
 		// Though it seems like leaflet doesn't perform any actions, we'll still won't do anything in case this behavior will change
 		if (!this.isShown || !this.isDisplayed)
 			return;
@@ -307,9 +308,8 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 
 				// If this polygon has been selected, we should fill it and replace it in the array.
 				// Because fill will be changed, we can't keep old polygon, it's easier to just replace it
-				let name = this._generatePolygonName(polygon)
-				let poly = this.selectedPolygons[name];
-				let isSelected = poly !== undefined;
+				let name = this._generatePolygonName(polygon);
+				let isSelected = this.selectedPolygons[name] !== undefined;
 				polygon.setStyle({
 					color: this.gridBorderColor,
 					fillColor: this.gridFillColor,
@@ -435,15 +435,14 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 		// Grid becomes messy when distance is around 15 pixels
 		let shouldHide = distancePx < this.hidingThreshold;
 		if (shouldHide) {
-			this.polygonGroup.remove();
-			this.bordersGroup.remove();
-			this.labelsGroup.remove();
-			this.widgetsGroup.remove();
+			let groups = ["polygonGroup", "bordersGroup", "labelsGroup", "widgetsGroup"];
+			for (let group of groups)
+				this[group].remove();
 			this.isDisplayed = false;
 		}
 		else if (!shouldHide && !this.isDisplayed) {
 			this.isDisplayed = true;
-			this.polygonGroup.addTo(this.map); // Add removed polygons
+			this.polygonGroup.addTo(this.map); // Add removed stuff
 			this.bordersGroup.addTo(this.map);
 			this.labelsGroup.addTo(this.map);
 		}
@@ -452,15 +451,11 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 		if (this.isDisplayed && !this._doHidePolygonWidgets) {
 			if (shouldHide)
 				this.widgetsGroup.remove();
-			else
+			else {
 				this.widgetsGroup.addTo(this.map);
+			}
 		}
 		this._onMapPan(); // Redraw polygons
-	},
-
-	onShow: function () {
-		L.ALS.Layer.prototype.onShow.call(this);
-		this._updateGrid(); // Update grid upon showing
 	},
 
 	/**
@@ -469,16 +464,8 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 	 */
 	_selectOrDeselectPolygon: function(event) {
 		let polygon = event.target;
-
 		let name = this._generatePolygonName(polygon); // Generate name for current polygon
-		// If this polygon is already selected, remove selection from it and don't do anything
-		if (this.selectedPolygons[name] !== undefined) {
-			polygon.setStyle({fill: false});
-			delete this.selectedPolygons[name];
-			let widgetLayer = this.selectedPolygonsWidgets[name];
-			this.widgetsGroup.removeLayer(widgetLayer);
-			delete this.selectedPolygonsWidgets[name];
-		} else {
+		if (!this.selectedPolygons[name]) {
 			polygon.setStyle({fill: true});
 			this.selectedPolygons[name] = polygon;
 
@@ -504,10 +491,16 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 
 			let toFormatNumbers = ["meanHeight", "absoluteHeight", "elevationDifference"];
 			for (let id of toFormatNumbers)
-				controlsContainer.getControlById(id).setFormatNumbers(true);
+				controlsContainer.getWidgetById(id).setFormatNumbers(true);
 
 			this.selectedPolygonsWidgets[name] = controlsContainer;
 			this.widgetsGroup.addLayer(controlsContainer);
+
+		} else { // If this polygon is already selected, remove selection from it and don't do anything
+			polygon.setStyle({fill: false});
+			delete this.selectedPolygons[name];
+			this.widgetsGroup.removeLayer(this.selectedPolygonsWidgets[name]);
+			delete this.selectedPolygonsWidgets[name];
 		}
 		this._updateGrid();
 	},
@@ -549,19 +542,19 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 	},
 
 	_hidePathsByMeridians: function (widget) {
-		this._doHidePathsByMeridians = this._hideOrShowLayer(widget, this.pathsByMeridians);
+		this._doHidePathsByMeridians = this._hideOrShowLayer(widget, this["pathsByMeridians"]);
 		this._updateGrid();
 	},
 
 	_hidePathsByParallels: function (widget) {
-		this._doHidePathsByParallels = this._hideOrShowLayer(widget, this.pathsByParallels);
+		this._doHidePathsByParallels = this._hideOrShowLayer(widget, this["pathsByParallels"]);
 		this._updateGrid();
 	},
 
 	/**
 	 * Hides or shows layer.
 	 * @param checkbox {L.ALS.Widgets.Checkbox} Checkbox that indicates whether layer should be hidden or not
-	 * @param layer {L.ALS.Layer} Layer to show or hide
+	 * @param layer {Layer} Layer to show or hide
 	 * @return {boolean} If true, layer has been hidden. False otherwise.
 	 * @private
 	 */
@@ -585,14 +578,10 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 		return "p_" + this.toFixed(firstPoint.lat) + "_" + this.toFixed(firstPoint.lng);
 	},
 
-	statics: {
-		wizard: new L.ALS.SynthGridWizard()
-	},
-
 	_setAirportLatLng: function() {
 		this._airportMarker.setLatLng([
-			this.getControlById("airportLat").getValue(),
-			this.getControlById("airportLng").getValue()
+			this.getWidgetById("airportLat").getValue(),
+			this.getWidgetById("airportLng").getValue()
 		]);
 		this._drawPaths();
 	},
@@ -610,10 +599,10 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 			let layer = this.selectedPolygons[name];
 			let widgetContainer = this.selectedPolygonsWidgets[name];
 
-			layer.minHeight = widgetContainer.getControlById("minHeight").getValue();
-			layer.maxHeight = widgetContainer.getControlById("maxHeight").getValue();
+			layer.minHeight = widgetContainer.getWidgetById("minHeight").getValue();
+			layer.maxHeight = widgetContainer.getWidgetById("maxHeight").getValue();
 
-			let errorLabel = widgetContainer.getControlById("error");
+			let errorLabel = widgetContainer.getWidgetById("error");
 			if (layer.minHeight > layer.maxHeight) {
 				errorLabel.setValue("Min height should be less than or equal to max height!");
 				continue;
@@ -631,10 +620,10 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 				let value;
 				try { value = this.toFixed(layer[name]); }
 				catch (e) { value = layer[name]; }
-				widgetContainer.getControlById(name).setValue(value);
+				widgetContainer.getWidgetById(name).setValue(value);
 			}
 		}
-		this.getControlById("selectedArea").setValue(this.selectedArea);
+		this.getWidgetById("selectedArea").setValue(this.selectedArea);
 
 		// Draw thick borders around selected polygons
 		this.bordersGroup.clearLayers();
@@ -657,10 +646,10 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 	calculateParameters: function () {// Get values from inputs
 		let parameters = ["cameraWidth", "cameraHeight", "pixelWidth", "focalLength", "imageScale", "overlayBetweenPaths", "overlayBetweenImages", "aircraftSpeed"];
 		for (let param of parameters)
-			this[param] = this.getControlById(param).getValue();
-		this.flightHeight = this.imageScale * this.focalLength;
+			this[param] = this.getWidgetById(param).getValue();
+		this.flightHeight = this["imageScale"] * this["focalLength"];
 
-		let cameraParametersWarning = this.getControlById("cameraParametersWarning");
+		let cameraParametersWarning = this.getWidgetById("cameraParametersWarning");
 		if (this["cameraHeight"] > this["cameraWidth"])
 			cameraParametersWarning.setValue("Camera height is greater than camera width!");
 		else
@@ -670,7 +659,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 		let focalLength = this["focalLength"] * 0.001;
 
 		this.ly = this["cameraWidth"] * pixelWidth; // Image size in meters
-		this.Ly = this.ly * this.imageScale // Image width on the ground
+		this.Ly = this.ly * this["imageScale"] // Image width on the ground
 		this.By = this.Ly * (100 - this["overlayBetweenPaths"]) / 100; // Distance between paths
 
 		let latLngs = ["lat", "lng"];
@@ -683,16 +672,16 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 			this[sizeName] = cellSize;
 			this[countName] = pathsCount;
 
-			this.getControlById(sizeName).setValue(this.toFixed(cellSize));
-			this.getControlById(countName).setValue(pathsCount);
+			this.getWidgetById(sizeName).setValue(this.toFixed(cellSize));
+			this.getWidgetById(countName).setValue(pathsCount);
 		}
 
 		this.lx = this["cameraHeight"] * pixelWidth; // Image height
-		this.Lx = this.lx * this.imageScale; // Image height on the ground
+		this.Lx = this.lx * this["imageScale"]; // Image height on the ground
 		this.Bx = this.Lx * (100 - this["overlayBetweenImages"]) / 100; // Capture basis, distance between images' centers
 		this.doubleBasis = turfHelpers.lengthToDegrees(this.Bx, "meters") * 2;
 
-		this.GSI = pixelWidth * this.imageScale;
+		this.GSI = pixelWidth * this["imageScale"];
 		this.IFOV = pixelWidth / focalLength * 1e6;
 		this.GIFOV = this.GSI;
 		this.FOV = this["cameraWidth"] * this.IFOV;
@@ -705,7 +694,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 			let value;
 			try { value = this.toFixed(this[name]); }
 			catch (e) { value = this[name]; }
-			this.getControlById(name).setValue(value);
+			this.getWidgetById(name).setValue(value);
 		}
 
 		this._drawPaths(); // Redraw paths
@@ -733,7 +722,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 
 		// Validate parameters
 
-		let errorLabel = this.getControlById("calculateParametersError");
+		let errorLabel = this.getWidgetById("calculateParametersError");
 		let parallelsPathsCount = this["lngPathsCount"];
 		let meridiansPathsCount = this["latPathsCount"];
 
@@ -926,7 +915,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 		for (let param of params) {
 			let value = param[2];
 			this[pathName][param[0]] = value;
-			this.getControlById(nameForOutput + param[1]).setValue(value);
+			this.getWidgetById(nameForOutput + param[1]).setValue(value);
 		}
 
 		if (hideEverything)
@@ -940,7 +929,6 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 			this.pathsWithoutConnectionsGroup.remove();
 			this.map.addLayer(this[pathName]);
 		}
-		this.addLayers(this[pathName]);
 	},
 
 	/**
@@ -1036,6 +1024,91 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 		}
 
 		return geojsonMerge.merge(jsons);
-	}
+	},
+
+	/**
+	 * Loops over pathsByParallels and pathsByMeridians and calls callback
+	 * @param callback {function(Polyline)} Callback function that accepts polyline (path)
+	 */
+	forEachPath: function (callback) {
+		let groups = ["pathsByParallels", "pathsByMeridians"];
+		for (let group of groups)
+			callback(this[group]);
+	},
+
+	onHide: function () {
+		this.forEachPath((path) => {
+			path.remove();
+		});
+	},
+
+	onShow: function () {
+		this.forEachPath((path) => {
+			this.map.addLayer(path);
+		});
+		this._updateGrid(); // Update grid upon showing
+	},
+
+	onDelete: function () {
+		this.onHide();
+	},
+
+	serialize: function (seenObjects) {
+		if (!this.serializationID) {
+			this.serializationID = L.ALS.Helpers.generateID();
+		}
+		if (!seenObjects[this.serializationID])
+			seenObjects[this.serializationID] = this;
+
+		let serialized = {
+			serializableClassName: "L.ALS.SynthGridLayer",
+			constructorArguments: this.serializeConstructorArguments(seenObjects),
+			widgets: this.serializeWidgets(seenObjects),
+			selectedPolygonsWidgets: L.ALS.Serializable.serializeAnyObject(this.selectedPolygonsWidgets, seenObjects),
+			selectedPolygons: {},
+			serializationID: this.serializationID,
+		};
+
+		// Gather selected polygons' coordinates
+		for (let name in this.selectedPolygons) {
+			if (!this.selectedPolygons.hasOwnProperty(name))
+				continue;
+			serialized.selectedPolygons[name] = this.selectedPolygons[name].getLatLngs();
+		}
+
+		this.serializeImportantProperties(serialized);
+		return serialized;
+	},
+
+	statics: {
+		wizard: new L.ALS.SynthGridWizard(),
+
+		_toUpdateColors: ["gridBorderColor", "gridFillColor", "meridiansColor", "parallelsColor"],
+
+		deserialize: function (serialized, layerSystem, seenObjects) {
+			serialized.constructorArguments = [layerSystem, serialized.constructorArguments[0]];
+			let object = L.ALS.Serializable.getObjectFromSerialized(serialized, seenObjects);
+			L.ALS.Layer.deserializeImportantProperties(serialized, object);
+			object.deserializeWidgets(serialized.widgets, seenObjects);
+
+			for (let prop in serialized.selectedPolygons)
+				object.selectedPolygons[prop] = L.polygon(serialized.selectedPolygons[prop]);
+
+			object.selectedPolygonsWidgets = L.ALS.Serializable.deserialize(serialized.selectedPolygonsWidgets, seenObjects);
+
+			for (let prop in object.selectedPolygonsWidgets) {
+				if (object.selectedPolygonsWidgets[prop].addTo)
+					object.widgetsGroup.addLayer(object.selectedPolygonsWidgets[prop]);
+			}
+
+			for (let color of this._toUpdateColors)
+				object._setColor(object.getWidgetById(color));
+
+			object._setAirportLatLng();
+			object._updateGrid();
+
+			return object;
+		}
+	},
 
 });

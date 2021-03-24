@@ -2,8 +2,9 @@ require("jscolor");
 
 L.ALS.Widgets.Color = L.ALS.Widgets.BaseWidget.extend({
 
-	initialize: function (id, label, objectToControl, callback, attributes) {
+	initialize: function (id, label, objectToControl = undefined, callback = "", attributes= {}) {
 		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "color", id, label, objectToControl, callback, ["edit", "change"], attributes);
+		this.setConstructorArguments(arguments);
 		this._waitForElementToBeAdded();
 	},
 

@@ -1,12 +1,14 @@
 /**
- * Root object containing all AdvancedLayerSystem stuff.
+ * Root object containing all AdvancedLayerSystem stuff
  */
 L.ALS = {};
 
 const Sortable = require("sortablejs");
 const JSZip = require("jszip");
 const saveAs = require("file-saver");
+require("./InteractiveLayerPatch.js");
 require("./Helpers.js");
+require("./Serializable.js");
 require("./Widgetable.js");
 require("./Wizard.js");
 require("./Layer.js");
@@ -19,12 +21,16 @@ require("./LeafletLayers/LeafletLayers.js");
  *
  * Usage:
  * ```JS
+ * require("AdvancedLayerSystem.js"); // Require this plugin or add it to your .html page via "script" tag
+ * require("./MyALSModule.js"); // Require your custom ALS modules such as layers, widgets, etc.
+ *
+ * L.ALS.System.initializeSystem(); // Initialize system. This method MUST be called after all Leaflet and ALS imports.
+ *
  * let map = L.map("map", { // Create a map
  *     preferCanvas: true, // Use it to improve performance
  *     keyboard: false // Setting this option to false is a MANDATORY! If you don't do that, you'll encounter problems when using L.ALS.LeafletLayers.WidgetLayer!
  * })
- * require("AdvancedLayerSystem.js"); // Require this plugin or add it to your .html page via "script" tag
- * require("./MyLayerType.js"); // Require your custom layer types
+ *
  * let layerSystem = new L.Control.LeafletAdvancedLayerSystem(map); // Create an instance of this class
  * let baseLayer = ...; // Create some base layers
  * layerSystem.addBaseLayer(baseLayer, "My Base Layer"); // Add your base layers to the system
@@ -36,6 +42,9 @@ require("./LeafletLayers/LeafletLayers.js");
  * Start by extending L.AdvancedLayer (if you imported this, you have that already) and reading docs on it.
  */
 L.ALS.System = L.Control.extend({
+
+	skipSerialization: true,
+	skipDeserialization: true,
 
 	/**
 	 * Constructor for the layer system.
@@ -105,9 +114,38 @@ L.ALS.System = L.Control.extend({
 			this._saveProject();
 		});
 
-		this._loadButton = document.getElementById("adv-lyr-sys-load-button");
-		this._loadButton.addEventListener("click", () => {
-			this._loadProject();
+		// Points to input, not to a button in the menu
+		this._loadButton = document.getElementById("adv-lyr-sys-load-input");
+		this._loadButton.addEventListener("change", () => {
+
+			if (!window.FileReader && !L.ALS.Helpers.isIElte9) { // !FileReader throws exception in IE9
+				window.alert("Sorry, your browser doesn't support project loading. However, you still can create a new project, save it and open it later in a newer browser.");
+				this._loadButton.value = "";
+				return;
+			}
+
+			if (!L.ALS.Helpers.isObjectEmpty(this._layers) && !window.confirm("You already have an opened project. Are you sure you wan't to load another one?")) {
+				this._loadButton.value = "";
+				return;
+			}
+
+			if (L.ALS.Helpers.isIElte9) {
+				let fso = new ActiveXObject("Scripting.FileSystemObject");
+				let file = fso.openTextFile(this._loadButton.value);
+				let content = file.readAll();
+				file.close();
+				this._loadProject(content);
+				this._loadButton.value = "";
+				return;
+			}
+
+			let fileReader = new FileReader();
+			fileReader.onloadend = () => {
+				this._loadProject(fileReader.result);
+				this._loadButton.value = "";
+			}
+			fileReader.readAsText(this._loadButton.files[0]);
+
 		});
 
 		this._exportButton = document.getElementById("adv-lyr-sys-export-button");
@@ -129,10 +167,13 @@ L.ALS.System = L.Control.extend({
 		});
 
 		// Make layers sortable. We have to reorder layers when their widgets has been reordered and when map state changes. See _reorderLayers() implementation.
+		// noinspection JSUnusedGlobalSymbols
 		new Sortable(this._layerContainer, {
 			handle: ".layer-handle",
 			animation: 250,
-			onEnd: () => { this._reorderLayers(); }
+			onEnd: () => {
+				this._reorderLayers();
+			}
 		});
 	},
 
@@ -210,100 +251,20 @@ L.ALS.System = L.Control.extend({
 	// Layers-related stuff
 
 	/**
-	 * Creates new layer, acts as factory. Will be called when user adds layer through the wizard.
+	 * Creates new layer from wizard, acts as factory. Will be called when user adds layer through the wizard.
 	 * @private
 	 */
 	_createLayer: function () {
 		let type = this._layerTypes[this._wizardMenu.value].layerType;
-
-		// Gather all properties
-		let properties = {};
+		// Gather arguments from wizard
+		let args = {};
 		for (let property in type.wizard._widgets) {
 			if (!type.wizard._widgets.hasOwnProperty(property))
 				continue;
 			let widget = type.wizard._widgets[property];
-			properties[widget.id] = widget.getValue();
+			args[widget.id] = widget.getValue();
 		}
-
-		// Create layer
-		let layer = new type(this.map, this);
-		this._layers[layer.id] = layer;
-
-		// Build layer's widget
-
-		// Handle
-		let handle = document.createElement("i");
-		handle.className = "layer-handle fas fa-arrows-alt";
-
-		// Editable label containing layer's name
-		let label = document.createElement("p");
-		label.className = "layer-label";
-		label.innerHTML = layer.defaultName;
-
-		// Make it editable on double click
-		label.addEventListener("dblclick", function () {
-			this.contentEditable = "true";
-			this.focus();
-		});
-
-		// Make it not editable when user leaves
-		label.addEventListener("blur", (event) => {
-			let target = event.target;
-			target.contentEditable = "false";
-			layer.setName(target.innerHTML);
-		});
-
-		// Make it end editing when user presses Enter
-		label.addEventListener("keydown", function (event) {
-			if (event.key === "Enter") {
-				event.preventDefault();
-				this.blur();
-			}
-		})
-
-		// Drop-down menu button
-		let menuButton = document.createElement("i");
-		menuButton.className = "fas fa-cog";
-
-		// Menu itself
-		let menu = layer.container;
-		this._makeHideable(menuButton, menu, () => {
-			menu.style.height = "0";
-		}, () => {
-			menu.style.height = menu.scrollHeight + "px";
-		});
-
-		// Hide/show button
-		let hideButton = document.createElement("i");
-		hideButton.className = "fas fa-eye";
-		this._makeHideable(hideButton, undefined, () => {
-			hideButton.className = "fas fa-eye-slash";
-			layer._onHide();
-			layer.onHide();
-		}, () => {
-			hideButton.className = "fas fa-eye";
-			layer._onShow();
-			layer.onShow();
-		}, false);
-
-		let layerWidget = document.createElement("div");
-		layerWidget.className = "layer-container";
-		layerWidget.id = layer.id;
-
-		let controlsContainer = document.createElement("div");
-		controlsContainer.className = "controls-row-set";
-		let elements = [handle, label, menuButton, hideButton];
-		for (let e of elements)
-			controlsContainer.appendChild(e);
-		layerWidget.appendChild(controlsContainer);
-		layerWidget.appendChild(menu);
-		layerWidget.addEventListener("click", () => { this._selectLayer(layer.id); });
-
-		this._layerContainer.appendChild(layerWidget);
-		this._selectLayer(layer.id); // Select new layer
-		this._closeWizard();
-		layer._nameLabel = label;
-		layer.init(properties); // Initialize layer and pass all the properties
+		new type(this, args);
 	},
 
 	/**
@@ -317,13 +278,43 @@ L.ALS.System = L.Control.extend({
 			this._selectedLayer.onDeselect();
 		}
 
-		// Deselect other layers and select given layer
-		for (let layer in this._layers) {
-			this._layers[layer].isSelected = false;
+		// Deselect other layers, remove interactive and dragging abilities, and select given layer
+		for (let prop in this._layers) {
+			let layer = this._layers[prop];
+			layer.isSelected = false;
+			if (!layer.layers)
+				continue;
+			layer.layers.eachLayer((leafletLayer) => {
+				if (leafletLayer.wasInteractive === undefined && leafletLayer.getInteractive)
+					leafletLayer.wasInteractive = leafletLayer.getInteractive();
+
+				if (leafletLayer.setInteractive)
+					leafletLayer.setInteractive(false);
+
+				if (leafletLayer.dragging) {
+					if (leafletLayer.wasDraggable === undefined)
+						leafletLayer.wasDraggable = leafletLayer.dragging.enabled();
+					leafletLayer.dragging.disable();
+				}
+			});
 		}
 
 		this._layers[layerId].isSelected = true;
 		this._selectedLayer = this._layers[layerId];
+
+		if (this._selectedLayer.layers) {
+			this._selectedLayer.layers.eachLayer((leafletLayer) => {
+				if (leafletLayer.setInteractive && leafletLayer.wasInteractive)
+					leafletLayer.setInteractive(true);
+
+				if (leafletLayer.wasDraggable && leafletLayer.dragging)
+					leafletLayer.dragging.enable();
+
+				delete leafletLayer.wasInteractive;
+				delete leafletLayer.wasDraggable;
+			});
+		}
+
 		this._selectedLayer.onSelect();
 
 		// Do the same for HTML elements
@@ -340,6 +331,8 @@ L.ALS.System = L.Control.extend({
 	_deleteLayer: function (shouldAskUser = true) {
 		if (this._selectedLayer === undefined || (shouldAskUser && !window.confirm("Are you sure you want to delete this layer?")))
 			return;
+
+		this._selectedLayer.onDelete();
 
 		// Remove layer's widget
 		let widget = document.getElementById(this._selectedLayer.id);
@@ -370,12 +363,22 @@ L.ALS.System = L.Control.extend({
 	 * @private
 	 */
 	_reorderLayers: function () {
+		this.forEachLayer(function (layer) {
+			layer.layers.bringToBack();
+		});
+	},
+
+	/**
+	 * Loops through each layer in menu position order and calls callback.
+	 * @param callback {function(L.ALS.Layer)} Function to call on each layer
+	 */
+	forEachLayer: function (callback) {
 		let children = this._layerContainer.childNodes;
 		for (let i = 0; i <= children.length; i++) {
 			let child = children[i];
 			if (child === undefined)
 				continue;
-			this._layers[child.id].layers.bringToBack();
+			callback(this._layers[child.id]);
 		}
 	},
 
@@ -408,22 +411,10 @@ L.ALS.System = L.Control.extend({
 	 * @private
 	 */
 	_exportProject: function () {
-		let inconvenienceText = "Sorry for the inconvenience. Please, update your browser, so this and many other things on the web won't happen.\n\n" +
-			"Your download will start after you'll close this window.";
-
-		// Will be false in Chrome 7 which does not support DataURL
-		let supportsDataURL = !L.ALS.Helpers.isIElte9 && ((window.URL && window.URL.createObjectURL) || (window.webkitURL && window.webkitURL.createObjectURL));
-
+		L.ALS.System.notifyIfDataURLIsNotSupported();
+		// Gather GeoJSON representation of all layers and either build zip or download as text
 		let filenames = {};
 		let zip = new JSZip();
-		if (!supportsDataURL) {
-			let firstLine = "Please, manually save text form all tabs that will open to \".geojson\" files.";
-			if (L.ALS.Helpers.isIElte9)
-				firstLine = "Please, download all the files and manually set their extensions to \".geojson\"";
-			window.alert(firstLine + "\n" + inconvenienceText);
-		}
-
-		// Gather GeoJSON representation of all layers and either build zip or download as text
 		for (let name in this._layers) {
 			if (!this._layers.hasOwnProperty(name))
 				continue;
@@ -439,50 +430,86 @@ L.ALS.System = L.Control.extend({
 			let json = JSON.stringify(layer.toGeoJSON());
 			let filename = layer.name + postfix + ".geojson";
 
-			if (supportsDataURL) { // Any normal browser
+			if (L.ALS.Helpers.supportsDataURL) // Any normal browser
 				zip.file(filename, json);
-				continue;
-			}
-			// Chrome 7 and IE9
-			let fileWindow = window.open("", "_blank");
-			fileWindow.document.open('text/plain');
-			fileWindow.document.write(json);
-			if (L.ALS.Helpers.isIElte9) {
-				fileWindow.document.execCommand('SaveAs', true, filename + ".txt");
-				fileWindow.close();
-			}
+			else
+				L.ALS.System.saveAsText(json, filename);
 		}
 
-		if (!supportsDataURL)
+		if (!L.ALS.Helpers.supportsDataURL)
 			return;
 
 		// FileSaver doesn't work correctly with older Chrome versions (around v14). So we have to perform following check:
-		let isBlob = JSZip.support.blob && (!window.webkitURL || (window.URL && window.URL.createObjectURL));
-		let type = isBlob ? "blob" : "base64";
-		zip.generateAsync({ type: type }).then((data) => {
+		let type = L.ALS.System.supportsBlob ? "blob" : "base64";
+		zip.generateAsync({type: type}).then((data) => {
 			let filename = "SynthFlightProject.zip";
-			if (isBlob) {
-				saveAs(data, filename);
-				return;
-			}
-			let link = document.createElement("a");
-			if (link.download === undefined)
-				window.alert("Please, manually change extension of the downloaded file to \"zip\".\n" + inconvenienceText);
-			link.download = filename;
-			link.href = "data:application/zip;base64," + data;
-			L.ALS.Helpers.dispatchEvent(link, "click"); // link.click() is not implemented in some older browsers
-		}).catch((reason) => { console.log(reason); });
-	},
-
-	_loadProject: function () {
-		window.alert("Sorry, projects loading is not implemented yet");
-	},
-	_openSettings: function () {
-		window.alert("Sorry, settings are not implemented yet");
+			if (L.ALS.System.supportsBlob)
+				saveAs(data, filename)
+			else
+				L.ALS.System.createDataURL(filename, "application/zip", "base64", data);
+		}).catch((reason) => {
+			console.log(reason);
+		});
 	},
 
 	_saveProject: function () {
-		window.alert("Sorry, projects saving is not implemented yet");
+		let json = { layerOrder: [] };
+
+		this.forEachLayer((layer) => {
+			json.layerOrder.push(layer.id);
+		})
+
+		let seenObjects = {};
+		for (let id in this._layers) {
+			let layer = this._layers[id];
+			json[layer.id] = layer.serialize(seenObjects);
+		}
+		L.ALS.Serializable.cleanUp(seenObjects);
+		L.ALS.System.saveAsText(JSON.stringify(json), "SynthFlightProject.json");
+	},
+
+	_loadProject: function (json) {
+		try { this._loadProjectWorker(json); }
+		catch (e) {
+			// TODO: Add mechanism to change program name and link to the program's page
+			// TODO: Remove "pre-alpha state" notice when project will come out of alpha state
+			window.alert("File that you try to load is not SynthFlight project. If you're sure that everything's correct, please, open Developer Tools and create an issue with displayed error message at https://github.com/matafokka/SynthFlight.\n\nKeep in mind that SynthFlight is in pre-alpha state, so your old projects just might be not supported in a newer version.");
+			console.log(e);
+		}
+	},
+
+	_loadProjectWorker: function (json) {
+		let serializedJson = JSON.parse(json); // Do it here so layers won't be removed if user have chosen wrong file
+
+		// Remove all current layers
+		for (let id in this._layers)
+			this._layers[id].deleteLayer();
+		this._layers = {};
+
+		let selectedLayerID;
+		let seenObjects = {};
+		for (let id of serializedJson.layerOrder) {
+			if (!serializedJson.hasOwnProperty(id))
+				continue;
+
+			let serialized = serializedJson[id];
+			let constructor = L.ALS.Serializable.getSerializableConstructor(serialized.serializableClassName);
+			let layer = constructor.deserialize(serialized, this, seenObjects);
+
+			if (!layer.isShown)
+				L.ALS.Helpers.dispatchEvent(layer._hideButton, "click");
+
+			if (layer.isSelected)
+				selectedLayerID = layer.id;
+		}
+		if (selectedLayerID !== undefined)
+			this._selectLayer(selectedLayerID);
+
+		L.ALS.Serializable.cleanUp(seenObjects);
+	},
+
+	_openSettings: function () {
+		window.alert("Sorry, settings are not implemented yet");
 	},
 
 	// Helpers
@@ -546,6 +573,112 @@ L.ALS.System = L.Control.extend({
 		else
 			this.menu.classList.remove(name);
 		return this;
+	},
+
+	statics: {
+
+		inconvenienceText: "Sorry for the inconvenience. Please, update your browser, so this and many other things on the web won't happen.\n\nYour download will start after you'll close this window.",
+
+		supportsBlob: !!(JSZip.support.blob && (!window.webkitURL || (window.URL && window.URL.createObjectURL))),
+
+		notifyIfDataURLIsNotSupported: function (extension = "geojson") {
+			if (L.ALS.Helpers.supportsDataURL)
+				return;
+
+			let firstLine;
+			if (L.ALS.Helpers.isIElte9) {
+				firstLine = "Please, download all the files"
+				if (extension !== "")
+					firstLine += " and manually set their extensions to \"" + extension + "\"";
+			} else {
+				firstLine = "Please, manually save text form all tabs that will open ";
+				if (extension === "")
+					firstLine += "after you'll close this window";
+				else
+					firstLine += "to \"" + extension + "\" files.";
+			}
+			window.alert(firstLine + "\n" + L.ALS.System.inconvenienceText);
+		},
+
+		createDataURL: function (filename, mediatype, encoding, data, notifyIfCantKeepExtension = true) {
+			let link = document.createElement("a");
+			if (!link.download && notifyIfCantKeepExtension) {
+				let ext = L.ALS.Helpers.getFileExtension(filename);
+				if (ext.length !== 0)
+					window.alert("Please, manually change extension of the downloaded file to \"" + ext + "\".\n" + L.ALS.System.inconvenienceText);
+			}
+			link.download = filename;
+			link.href = "data:" + mediatype + ";" + encoding + "," + data;
+			if (link.click)
+				link.click();
+			else // link.click() is not implemented in some older browsers
+				L.ALS.Helpers.dispatchEvent(link, "click");
+		},
+
+		saveAsText: function (string, filename) {
+			if (L.ALS.System.supportsBlob) {
+				saveAs(new Blob([string], {type: 'text/plain'}), filename);
+				return;
+			}
+			if (L.ALS.Helpers.supportsDataURL) {
+				this.createDataURL(filename, "text/plain", "base64",
+					// Taken from https://attacomsian.com/blog/javascript-base64-encode-decode
+					btoa(encodeURIComponent(string).replace(/%([0-9A-F]{2})/g,
+						function (match, p1) {
+							return String.fromCharCode('0x' + p1);
+						})), false);
+				return;
+			}
+
+			if (!L.ALS.Helpers.isIElte9)
+				this.notifyIfDataURLIsNotSupported(L.ALS.Helpers.getFileExtension(filename));
+
+			// Chrome 7 and IE9
+			let fileWindow = window.open("", "_blank");
+			fileWindow.document.open('text/plain');
+			fileWindow.document.write(string);
+			if (L.ALS.Helpers.isIElte9) {
+				fileWindow.document.execCommand('SaveAs', true, filename + ".txt");
+				fileWindow.close();
+			}
+		},
+
+		/**
+		 * Performs some important operations. Must be called after all Leaflet and ALS imports.
+		 * @param scaleUIForPhoneUsers {boolean} If set to true, UI for phone users will be scaled automatically. Otherwise UI size will stay the same. Scaling is done by increasing root font size to 36pt.
+		 */
+		initializeSystem: function (scaleUIForPhoneUsers = true) {
+
+			// If user's device is a phone, make UI a bit bigger
+			if (scaleUIForPhoneUsers && L.ALS.Helpers.isMobile)
+				document.querySelector(":root").style.fontSize = "36pt";
+
+			// Add class names to all Leaflet and ALS classes for serialization
+			let addClassName = function (object, scope) {
+				for (let prop in object) {
+					let newObject = object[prop];
+					let brackets = (!(newObject instanceof Object) || newObject instanceof Array);
+					if (!object.hasOwnProperty(prop) || newObject === null || newObject === undefined ||
+						(newObject.serializableClassName !== undefined) ||
+						brackets
+					)
+						continue;
+					let newScope = scope + "." + prop;
+
+					if (newObject.addInitHook !== undefined) {
+						newObject.addInitHook(function () {
+							this.serializableClassName = newScope;
+						});
+					}
+
+					if (newObject.prototype !== undefined)
+						newObject.prototype.serializableClassName = newScope;
+
+					addClassName(newObject, newScope);
+				}
+			}
+			addClassName(L, "L");
+		}
 	}
 
 });

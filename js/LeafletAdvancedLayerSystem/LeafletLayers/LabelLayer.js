@@ -18,11 +18,13 @@
  */
 
 /**
- * A fast label rendering layer. Works well with LOADS (50K-100K) of labels on a mid-class PC. Based on L.ALS.LeafletLayers.Canvas.
+ * A fast label rendering layer. Works well with LOADS (50K-100K) of labels on a mid-class PC. Based on L.ALS.LeafletLayers.Canvas. Also extends L.ALS.Serializable.
  *
  * This is preferable option for rendering labels. Use it instead of `L.ALS.LeafletLayers.WidgetLayer`.
  */
 L.ALS.LeafletLayers.LabelLayer = L.ALS.LeafletLayers.CanvasLayer.extend({
+
+	includes: L.ALS.Serializable.prototype,
 
 	/**
 	 * Font size in pixels. You can extend this class and modify it, but it's not recommended because it will introduce inconsistency between everything.
@@ -40,6 +42,9 @@ L.ALS.LeafletLayers.LabelLayer = L.ALS.LeafletLayers.CanvasLayer.extend({
 	 */
 	initialize: function (automaticallyRedraw = true) {
 		L.ALS.LeafletLayers.CanvasLayer.prototype.initialize.call(this);
+		L.ALS.Serializable.prototype.initialize.call(this);
+		this.serializationIgnoreList.push("getLabelProperties", "_map", "_canvas", "_frame");
+
 		this._defaultLabelOptions = {
 			id: "", text: "", latLng: undefined,
 			backgroundColor: "white",
@@ -269,6 +274,10 @@ L.ALS.LeafletLayers.LabelLayer = L.ALS.LeafletLayers.CanvasLayer.extend({
 	},
 
 	statics: {
+
+		deserialize: function (serialized, seenObjects) {
+			return L.ALS.Serializable.deserialize(serialized, seenObjects);
+		},
 
 		/**
 		 * Display options to match ALS style

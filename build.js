@@ -64,8 +64,8 @@ for (let file of files) {
 
 	if (!debug) {
 		build = build
-			.plugin('common-shakeify')
-			.transform('uglifyify', {
+			.plugin("common-shakeify")
+			.transform("uglifyify", {
 				global: true,
 				ie8: true,
 			});
