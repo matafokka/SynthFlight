@@ -1,11 +1,12 @@
 /**
- * Root object containing all AdvancedLayerSystem stuff.
+ * Root object containing all AdvancedLayerSystem stuff
  */
 L.ALS = {};
 
 const Sortable = require("sortablejs");
 const JSZip = require("jszip");
 const saveAs = require("file-saver");
+require("./InteractiveLayerPatch.js");
 require("./Helpers.js");
 require("./Serializable.js");
 require("./Widgetable.js");
@@ -277,13 +278,43 @@ L.ALS.System = L.Control.extend({
 			this._selectedLayer.onDeselect();
 		}
 
-		// Deselect other layers and select given layer
-		for (let layer in this._layers) {
-			this._layers[layer].isSelected = false;
+		// Deselect other layers, remove interactive and dragging abilities, and select given layer
+		for (let prop in this._layers) {
+			let layer = this._layers[prop];
+			layer.isSelected = false;
+			if (!layer.layers)
+				continue;
+			layer.layers.eachLayer((leafletLayer) => {
+				if (leafletLayer.wasInteractive === undefined && leafletLayer.getInteractive)
+					leafletLayer.wasInteractive = leafletLayer.getInteractive();
+
+				if (leafletLayer.setInteractive)
+					leafletLayer.setInteractive(false);
+
+				if (leafletLayer.dragging) {
+					if (leafletLayer.wasDraggable === undefined)
+						leafletLayer.wasDraggable = leafletLayer.dragging.enabled();
+					leafletLayer.dragging.disable();
+				}
+			});
 		}
 
 		this._layers[layerId].isSelected = true;
 		this._selectedLayer = this._layers[layerId];
+
+		if (this._selectedLayer.layers) {
+			this._selectedLayer.layers.eachLayer((leafletLayer) => {
+				if (leafletLayer.setInteractive && leafletLayer.wasInteractive)
+					leafletLayer.setInteractive(true);
+
+				if (leafletLayer.wasDraggable && leafletLayer.dragging)
+					leafletLayer.dragging.enable();
+
+				delete leafletLayer.wasInteractive;
+				delete leafletLayer.wasDraggable;
+			});
+		}
+
 		this._selectedLayer.onSelect();
 
 		// Do the same for HTML elements
