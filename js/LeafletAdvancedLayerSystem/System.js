@@ -469,13 +469,24 @@ L.ALS.System = L.Control.extend({
 	},
 
 	_loadProject: function (json) {
+		try { this._loadProjectWorker(json); }
+		catch (e) {
+			// TODO: Add mechanism to change program name and link to the program's page
+			// TODO: Remove "pre-alpha state" notice when project will come out of alpha state
+			window.alert("File that you try to load is not SynthFlight project. If you're sure that everything's correct, please, open Developer Tools and create an issue with displayed error message at https://github.com/matafokka/SynthFlight.\n\nKeep in mind that SynthFlight is in pre-alpha state, so your old projects just might be not supported in a newer version.");
+			console.log(e);
+		}
+	},
+
+	_loadProjectWorker: function (json) {
+		let serializedJson = JSON.parse(json); // Do it here so layers won't be removed if user have chosen wrong file
+
 		// Remove all current layers
 		for (let id in this._layers)
 			this._layers[id].deleteLayer();
 		this._layers = {};
 
 		let selectedLayerID;
-		let serializedJson = JSON.parse(json);
 		let seenObjects = {};
 		for (let id of serializedJson.layerOrder) {
 			if (!serializedJson.hasOwnProperty(id))
