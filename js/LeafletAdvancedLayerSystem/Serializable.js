@@ -153,9 +153,9 @@ L.ALS.Serializable = L.Class.extend({
 		 */
 		serializePrimitive: function (primitive) {
 			let part = "";
-			if (BigInt && typeof primitive === "bigint")
+			if (typeof primitive === "bigint")
 				part = L.ALS.Serializable.bigIntPrefix + primitive.toString();
-			else if (Symbol && typeof primitive === "symbol") {
+			else if (typeof primitive === "symbol") {
 				let s = primitive.toString();
 				part = L.ALS.Serializable.symbolPrefix + [s.slice(7, s.length - 1)] // Symbol.toString() returns "Symbol(your_string)". So we slice it to get "your_string"
 			}

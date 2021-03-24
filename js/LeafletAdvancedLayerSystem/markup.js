@@ -5,6 +5,7 @@ module.exports = function () {
 	let parsedDom = document.implementation.createHTMLDocument("title");
 	parsedDom.body.innerHTML += `
 
+<input type="file" id="adv-lyr-sys-load-input" />
 <div id="menu">
 	<!-- Top panel -->
 	<div id="top-panel-wrapper">
@@ -23,7 +24,7 @@ module.exports = function () {
 	<div id="bottom-panel-wrapper">
 		<div id="adv-lyr-sys-menu-bottom-panel" class="controls-row-set">
 			<div id="adv-lyr-sys-save-button" class="button-base">Save</div>
-			<div id="adv-lyr-sys-load-button" class="button-base">Load</div>
+			<label for="adv-lyr-sys-load-input" id="adv-lyr-sys-load-button" class="button-base">Load</label>
 			<div id="adv-lyr-sys-export-button" class="button-base">Export</div>
 			<div id="adv-lyr-sys-settings-button" class="button-base">Settings</div>
 		</div>

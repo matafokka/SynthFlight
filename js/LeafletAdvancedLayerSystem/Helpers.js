@@ -52,6 +52,19 @@ L.ALS.Helpers = {
 	},
 
 	/**
+	 * Checks if given object is empty
+	 * @param object {Object} Object to check
+	 * @return {boolean} True, if object is empty. False otherwise.
+	 */
+	isObjectEmpty: function (object) {
+		for (let prop in object) {
+			if (object.hasOwnProperty(prop))
+				return false;
+		}
+		return true;
+	},
+
+	/**
 	 * Merges two options into one object without modifying them. It checks if property is present in the `defaultOptions`, `defaultOptions` should contain ALL the needed properties.
 	 * @param defaultOptions {Object} Object containing all default options
 	 * @param newOptions {Object} Options passed by the user

@@ -113,33 +113,37 @@ L.ALS.System = L.Control.extend({
 			this._saveProject();
 		});
 
-		this._loadButton = document.getElementById("adv-lyr-sys-load-button");
-		this._loadButton.addEventListener("click", () => {
-			if (!FileReader && !L.ALS.Helpers.isIElte9) {
+		// Points to input, not to a button in the menu
+		this._loadButton = document.getElementById("adv-lyr-sys-load-input");
+		this._loadButton.addEventListener("change", () => {
+
+			if (!window.FileReader && !L.ALS.Helpers.isIElte9) { // !FileReader throws exception in IE9
 				window.alert("Sorry, your browser doesn't support project loading. However, you still can create a new project, save it and open it later in a newer browser.");
+				this._loadButton.value = "";
 				return;
 			}
 
-			let input = document.createElement("input");
-			input.type = "file";
-			input.addEventListener("change", () => {
-				if (L.ALS.Helpers.isIElte9) {
-					let fso = new ActiveXObject("Scripting.FileSystemObject");
-					let file = fso.openTextFile(input.value);
-					let content = file.readAll();
-					file.close();
-					this._loadProject(content);
-					return;
-				}
+			if (!L.ALS.Helpers.isObjectEmpty(this._layers) && !window.confirm("You already have an opened project. Are you sure you wan't to load another one?")) {
+				this._loadButton.value = "";
+				return;
+			}
 
-				let fileReader = new FileReader();
-				fileReader.addEventListener("loadend", () => {
-					this._loadProject(fileReader.result);
-				})
-				fileReader.readAsText(input.files[0]);
-			});
+			if (L.ALS.Helpers.isIElte9) {
+				let fso = new ActiveXObject("Scripting.FileSystemObject");
+				let file = fso.openTextFile(this._loadButton.value);
+				let content = file.readAll();
+				file.close();
+				this._loadProject(content);
+				this._loadButton.value = "";
+				return;
+			}
 
-			L.ALS.Helpers.dispatchEvent(input, "click");
+			let fileReader = new FileReader();
+			fileReader.onloadend = () => {
+				this._loadProject(fileReader.result);
+				this._loadButton.value = "";
+			}
+			fileReader.readAsText(this._loadButton.files[0]);
 
 		});
 
@@ -166,7 +170,9 @@ L.ALS.System = L.Control.extend({
 		new Sortable(this._layerContainer, {
 			handle: ".layer-handle",
 			animation: 250,
-			onEnd: () => { this._reorderLayers(); }
+			onEnd: () => {
+				this._reorderLayers();
+			}
 		});
 	},
 
@@ -393,15 +399,16 @@ L.ALS.System = L.Control.extend({
 			return;
 
 		// FileSaver doesn't work correctly with older Chrome versions (around v14). So we have to perform following check:
-		let isBlob = JSZip.support.blob && (!window.webkitURL || (window.URL && window.URL.createObjectURL));
-		let type = isBlob ? "blob" : "base64";
-		zip.generateAsync({ type: type }).then((data) => {
+		let type = L.ALS.System.supportsBlob ? "blob" : "base64";
+		zip.generateAsync({type: type}).then((data) => {
 			let filename = "SynthFlightProject.zip";
-			if (isBlob)
+			if (L.ALS.System.supportsBlob)
 				saveAs(data, filename)
 			else
 				L.ALS.System.createDataURL(filename, "application/zip", "base64", data);
-		}).catch((reason) => { console.log(reason); });
+		}).catch((reason) => {
+			console.log(reason);
+		});
 	},
 
 	_saveProject: function () {
@@ -411,24 +418,21 @@ L.ALS.System = L.Control.extend({
 			json[layer.name] = layer.serialize(seenObjects);
 		}
 		L.ALS.Serializable.cleanUp(seenObjects);
-		L.ALS.System.saveAsText(JSON.stringify(json), "SynthFlightProject.json", false);
+		L.ALS.System.saveAsText(JSON.stringify(json), "SynthFlightProject.json");
 	},
 
-	_loadProject: function (serializedJson) {
-		if (this._layers.length !== 0 && !window.confirm("You already have open project. Are you sure you wan't to load another one?"))
-			return;
-
+	_loadProject: function (json) {
 		// Remove all current layers
-		for(let id in this._layers)
+		for (let id in this._layers)
 			this._layers[id].deleteLayer();
 		this._layers = {};
 
 		let firstID;
-		let serialized = JSON.parse(serializedJson);
+		let serializedJson = JSON.parse(json);
 		let seenObjects = {};
 		// TODO: Count "isShown" in
-		for (let name in serialized) {
-			let serialized = serialized[name];
+		for (let name in serializedJson) {
+			let serialized = serializedJson[name];
 			let constructor = L.ALS.Serializable.getSerializableConstructor(serialized.serializableClassName);
 			let layer = constructor.deserialize(serialized, this, seenObjects);
 			if (firstID === undefined)
@@ -511,6 +515,8 @@ L.ALS.System = L.Control.extend({
 
 		inconvenienceText: "Sorry for the inconvenience. Please, update your browser, so this and many other things on the web won't happen.\n\nYour download will start after you'll close this window.",
 
+		supportsBlob: !!(JSZip.support.blob && (!window.webkitURL || (window.URL && window.URL.createObjectURL))),
+
 		notifyIfDataURLIsNotSupported: function (extension = "geojson") {
 			if (L.ALS.Helpers.supportsDataURL)
 				return;
@@ -518,11 +524,11 @@ L.ALS.System = L.Control.extend({
 			let firstLine;
 			if (L.ALS.Helpers.isIElte9) {
 				firstLine = "Please, download all the files"
-				if (extension.length === 0)
+				if (extension !== "")
 					firstLine += " and manually set their extensions to \"" + extension + "\"";
 			} else {
 				firstLine = "Please, manually save text form all tabs that will open ";
-				if (extension.length === 0)
+				if (extension === "")
 					firstLine += "after you'll close this window";
 				else
 					firstLine += "to \"" + extension + "\" files.";
@@ -539,16 +545,28 @@ L.ALS.System = L.Control.extend({
 			}
 			link.download = filename;
 			link.href = "data:" + mediatype + ";" + encoding + "," + data;
-			L.ALS.Helpers.dispatchEvent(link, "click"); // link.click() is not implemented in some older browsers
+			if (link.click)
+				link.click();
+			else // link.click() is not implemented in some older browsers
+				L.ALS.Helpers.dispatchEvent(link, "click");
 		},
 
-		saveAsText: function (string, filename, notifyIfDataURLIsNotSupported = true) {
+		saveAsText: function (string, filename) {
+			if (L.ALS.System.supportsBlob) {
+				saveAs(new Blob([string], {type: 'text/plain'}), filename);
+				return;
+			}
 			if (L.ALS.Helpers.supportsDataURL) {
-				this.createDataURL(filename, "text/plain", "charset=UTF8", string, false);
+				this.createDataURL(filename, "text/plain", "base64",
+					// Taken from https://attacomsian.com/blog/javascript-base64-encode-decode
+					btoa(encodeURIComponent(string).replace(/%([0-9A-F]{2})/g,
+						function (match, p1) {
+							return String.fromCharCode('0x' + p1);
+						})), false);
 				return;
 			}
 
-			if (notifyIfDataURLIsNotSupported)
+			if (!L.ALS.Helpers.isIElte9)
 				this.notifyIfDataURLIsNotSupported(L.ALS.Helpers.getFileExtension(filename));
 
 			// Chrome 7 and IE9
