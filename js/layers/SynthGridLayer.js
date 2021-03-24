@@ -458,11 +458,6 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 		this._onMapPan(); // Redraw polygons
 	},
 
-	onShow: function () {
-		L.ALS.Layer.prototype.onShow.call(this);
-		this._updateGrid(); // Update grid upon showing
-	},
-
 	/**
 	 * Selects or deselects polygon upon double click and redraws flight paths
 	 * @param event
@@ -1031,10 +1026,31 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 		return geojsonMerge.merge(jsons);
 	},
 
-	onDelete: function () {
+	/**
+	 * Loops over pathsByParallels and pathsByMeridians and calls callback
+	 * @param callback {function(Polyline)} Callback function that accepts polyline (path)
+	 */
+	forEachPath: function (callback) {
 		let groups = ["pathsByParallels", "pathsByMeridians"];
 		for (let group of groups)
-			this[group].remove();
+			callback(this[group]);
+	},
+
+	onHide: function () {
+		this.forEachPath((path) => {
+			path.remove();
+		});
+	},
+
+	onShow: function () {
+		this.forEachPath((path) => {
+			this.map.addLayer(path);
+		});
+		this._updateGrid(); // Update grid upon showing
+	},
+
+	onDelete: function () {
+		this.onHide();
 	},
 
 	serialize: function (seenObjects) {
@@ -1060,15 +1076,19 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 			serialized.selectedPolygons[name] = this.selectedPolygons[name].getLatLngs();
 		}
 
+		this.serializeImportantProperties(serialized);
 		return serialized;
 	},
 
 	statics: {
 		wizard: new L.ALS.SynthGridWizard(),
 
+		_toUpdateColors: ["gridBorderColor", "gridFillColor", "meridiansColor", "parallelsColor"],
+
 		deserialize: function (serialized, layerSystem, seenObjects) {
 			serialized.constructorArguments = [layerSystem, serialized.constructorArguments[0]];
 			let object = L.ALS.Serializable.getObjectFromSerialized(serialized, seenObjects);
+			L.ALS.Layer.deserializeImportantProperties(serialized, object);
 			object.deserializeWidgets(serialized.widgets, seenObjects);
 
 			for (let prop in serialized.selectedPolygons)
@@ -1080,8 +1100,13 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 				if (object.selectedPolygonsWidgets[prop].addTo)
 					object.widgetsGroup.addLayer(object.selectedPolygonsWidgets[prop]);
 			}
+
+			for (let color of this._toUpdateColors)
+				object._setColor(object.getWidgetById(color));
+
 			object._setAirportLatLng();
 			object._updateGrid();
+
 			return object;
 		}
 	},

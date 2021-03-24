@@ -332,12 +332,22 @@ L.ALS.System = L.Control.extend({
 	 * @private
 	 */
 	_reorderLayers: function () {
+		this.forEachLayer(function (layer) {
+			layer.layers.bringToBack();
+		});
+	},
+
+	/**
+	 * Loops through each layer in menu position order and calls callback.
+	 * @param callback {function(L.ALS.Layer)} Function to call on each layer
+	 */
+	forEachLayer: function (callback) {
 		let children = this._layerContainer.childNodes;
 		for (let i = 0; i <= children.length; i++) {
 			let child = children[i];
 			if (child === undefined)
 				continue;
-			this._layers[child.id].layers.bringToBack();
+			callback(this._layers[child.id]);
 		}
 	},
 
@@ -412,10 +422,16 @@ L.ALS.System = L.Control.extend({
 	},
 
 	_saveProject: function () {
-		let json = {}, seenObjects = {};
+		let json = { layerOrder: [] };
+
+		this.forEachLayer((layer) => {
+			json.layerOrder.push(layer.id);
+		})
+
+		let seenObjects = {};
 		for (let id in this._layers) {
 			let layer = this._layers[id];
-			json[layer.name] = layer.serialize(seenObjects);
+			json[layer.id] = layer.serialize(seenObjects);
 		}
 		L.ALS.Serializable.cleanUp(seenObjects);
 		L.ALS.System.saveAsText(JSON.stringify(json), "SynthFlightProject.json");
@@ -427,19 +443,25 @@ L.ALS.System = L.Control.extend({
 			this._layers[id].deleteLayer();
 		this._layers = {};
 
-		let firstID;
+		let selectedLayerID;
 		let serializedJson = JSON.parse(json);
 		let seenObjects = {};
-		// TODO: Count "isShown" in
-		for (let name in serializedJson) {
-			let serialized = serializedJson[name];
+		for (let id of serializedJson.layerOrder) {
+			if (!serializedJson.hasOwnProperty(id))
+				continue;
+
+			let serialized = serializedJson[id];
 			let constructor = L.ALS.Serializable.getSerializableConstructor(serialized.serializableClassName);
 			let layer = constructor.deserialize(serialized, this, seenObjects);
-			if (firstID === undefined)
-				firstID = layer.id;
+
+			if (!layer.isShown)
+				L.ALS.Helpers.dispatchEvent(layer._hideButton, "click");
+
+			if (layer.isSelected)
+				selectedLayerID = layer.id;
 		}
-		if (firstID !== undefined)
-			this._selectLayer(firstID);
+		if (selectedLayerID !== undefined)
+			this._selectLayer(selectedLayerID);
 
 		L.ALS.Serializable.cleanUp(seenObjects);
 	},

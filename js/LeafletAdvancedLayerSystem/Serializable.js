@@ -114,7 +114,7 @@ L.ALS.Serializable = L.Class.extend({
 		/**
 		 * List of custom properties to ignore when deserializing arrays
 		 */
-		arrayIgnoreList: ["_alsSerializableArray", "serializationID"],
+		arrayIgnoreList: ["alsSerializableArray", "serializationID"],
 
 		/**
 		 * Checks if property should be ignored when serializing or deserializing
@@ -348,7 +348,7 @@ L.ALS.Serializable = L.Class.extend({
 						// This is also needed because JSON.stringify() removes custom array properties.
 						if (property instanceof Array) {
 							let newProperty = {
-								_alsSerializableArray: true,
+								alsSerializableArray: true,
 								serializationID: property.serializationID
 							};
 							for (let i in property)
@@ -396,7 +396,7 @@ L.ALS.Serializable = L.Class.extend({
 					else if (property instanceof Object) { // Objects and arrays
 						// Preparations for deserializing arrays
 						let oldProperty = property;
-						if (property._alsSerializableArray) {
+						if (property.alsSerializableArray) {
 							property = [];
 							property.serializationID = oldProperty.serializationID;
 						}
@@ -406,7 +406,7 @@ L.ALS.Serializable = L.Class.extend({
 							property.serializationID = L.ALS.Helpers.generateID();
 						seenObjects[property.serializationID] = property;
 
-						if (oldProperty._alsSerializableArray) { // Arrays
+						if (oldProperty.alsSerializableArray) { // Arrays
 							for (let i in oldProperty) {
 								if (!L.ALS.Serializable.arrayIgnoreList.includes(i))
 									property[i] = deserialize({item: oldProperty[i]}).item; // Keeps both items and custom properties while preserving array type

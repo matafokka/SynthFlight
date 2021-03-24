@@ -123,14 +123,14 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 		});
 
 		// Hide/show button
-		let hideButton = document.createElement("i");
-		hideButton.className = "fas fa-eye";
-		this._layerSystem._makeHideable(hideButton, undefined, () => {
-			hideButton.className = "fas fa-eye-slash";
+		this._hideButton = document.createElement("i");
+		this._hideButton.className = "fas fa-eye";
+		this._layerSystem._makeHideable(this._hideButton, undefined, () => {
+			this._hideButton.className = "fas fa-eye-slash";
 			this._onHide();
 			this.onHide();
 		}, () => {
-			hideButton.className = "fas fa-eye";
+			this._hideButton.className = "fas fa-eye";
 			this._onShow();
 			this.onShow();
 		}, false);
@@ -141,7 +141,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 
 		let controlsContainer = document.createElement("div");
 		controlsContainer.className = "controls-row-set";
-		let elements = [handle, label, menuButton, hideButton];
+		let elements = [handle, label, menuButton, this._hideButton];
 		for (let e of elements)
 			controlsContainer.appendChild(e);
 		layerWidget.appendChild(controlsContainer);
@@ -424,12 +424,47 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 		return this.layers.toGeoJSON();
 	},
 
+	/**
+	 * Serializes some important properties. Must be called at `serialize()` in any layer!
+	 * @param serialized {Object} Your serialized object
+	 */
+	serializeImportantProperties: function (serialized) {
+		let props = ["name", "isShown", "isSelected"]
+		for (let prop of props)
+			serialized[prop] = this[prop];
+	},
+
+	serialize: function (seenObjects) {
+		let serialized = L.ALS.Widgetable.prototype.serialize.call(this, seenObjects);
+		this.serializeImportantProperties(serialized);
+		return serialized;
+	},
+
 	statics: {
+
+		/**
+		 * Wizard which gives a layer it's initial properties
+		 * @type {L.ALS.Wizard}
+		 */
 		wizard: new L.ALS.Wizard(),
+
+		/**
+		 * Deserializes some important properties. Must be called at `deserialize` in any layer!
+		 * @param serialized {Object} Serialized object
+		 * @param instance {L.ALS.Layer|Object} New instance of your layer
+		 */
+		deserializeImportantProperties: function (serialized, instance) {
+			instance.setName(serialized.name);
+			let props = ["isShown", "isSelected"];
+			for (let prop of props)
+				instance[prop] = serialized[prop];
+		},
 
 		deserialize: function (serialized, layerSystem, seenObjects) {
 			serialized.constructorArguments = [layerSystem, serialized.constructorArguments[0]];
-			return L.ALS.Widgetable.deserialize(serialized, seenObjects);
+			let instance = L.ALS.Widgetable.deserialize(serialized, seenObjects);
+			L.ALS.Layer.deserializeImportantProperties(serialized, instance);
+			return instance;
 		}
 	},
 
