@@ -1,6 +1,3 @@
-require("./Widgetable.js");
-require("./widgets/Widgets.js");
-
 /**
  * Base class for all layers for LeafletAdvancedLayerSystem.
  *
@@ -116,7 +113,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 		menuButton.className = "fas fa-cog";
 
 		// Menu itself
-		this._layerSystem._makeHideable(menuButton, this.container, () => {
+		L.ALS.Helpers.makeHideable(menuButton, this.container, () => {
 			this.container.style.height = "0";
 		}, () => {
 			this.container.style.height = this.container.scrollHeight + "px";
@@ -125,7 +122,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 		// Hide/show button
 		this._hideButton = document.createElement("i");
 		this._hideButton.className = "fas fa-eye";
-		this._layerSystem._makeHideable(this._hideButton, undefined, () => {
+		L.ALS.Helpers.makeHideable(this._hideButton, undefined, () => {
 			this._hideButton.className = "fas fa-eye-slash";
 			this._onHide();
 			this.onHide();
@@ -151,7 +148,6 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 		this._layerSystem._layerContainer.appendChild(layerWidget);
 		this._layerSystem._layers[this.id] = this;
 		this._layerSystem._selectLayer(this.id); // Select new layer
-		this._layerSystem._closeWizard();
 		this._nameLabel = label;
 		this.init(args); // Initialize layer and pass all the properties
 	},

@@ -11,6 +11,8 @@
  */
 L.ALS.Widgets.ValueLabel = L.ALS.Widgets.SimpleLabel.extend({
 
+	undoable: false,
+
 	/**
 	 * Constructs label with value
 	 * @param id {string} ID of this label

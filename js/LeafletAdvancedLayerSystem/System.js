@@ -1,7 +1,13 @@
 /**
  * Root object containing all AdvancedLayerSystem stuff
  */
-L.ALS = {};
+L.ALS = {
+
+	/**
+	 * Contains classes for internal use. Should not be used outside of the system.
+	 */
+	_service: {}
+};
 
 const Sortable = require("sortablejs");
 const JSZip = require("jszip");
@@ -10,6 +16,10 @@ require("./InteractiveLayerPatch.js");
 require("./Helpers.js");
 require("./Serializable.js");
 require("./Widgetable.js");
+require("./widgets/Widgets.js");
+require("./WidgetableWindow.js");
+require("./_service/SidebarWindow.js");
+require("./_service/WizardWindow.js");
 require("./Wizard.js");
 require("./Layer.js");
 require("./LeafletLayers/LeafletLayers.js");
@@ -77,23 +87,16 @@ L.ALS.System = L.Control.extend({
 
 		this.map = map;
 
-		require("./markup.js")();
+		require("./_service/markup.js");
 
 		// Wizard-related stuff
+		this.wizardWindow = new L.ALS._service.WizardWindow(document.getElementById("menu-add"));
+		document.body.appendChild(this.wizardWindow.windowContainer);
 
-		this._wizardContainer = document.getElementById("wizard-container");
-		this._wizardContent = document.getElementById("wizard-content");
 		this._wizardMenu = document.getElementById("wizard-menu");
 		this._layerContainer = document.getElementById("menu-items");
 
-		this._wizardMenu.addEventListener("change", (event) => {
-			this._displayWizardControls(event);
-		});
-
-		// Add event listeners to "Cancel" and "Add" buttons
-		document.getElementById("wizard-cancel-button").addEventListener("click", () => {
-			this._closeWizard();
-		});
+		// Add event listeners to "Add" button
 		document.getElementById("wizard-add-button").addEventListener("click", () => {
 			this._createLayer();
 		});
@@ -102,7 +105,7 @@ L.ALS.System = L.Control.extend({
 		this.menu = document.getElementById("menu");
 		if (L.ALS.Helpers.isMobile)
 			this.menu.classList.add("menu-mobile");
-		this._makeHideable(document.getElementById("menu-close"), this.menu);
+		L.ALS.Helpers.makeHideable(document.getElementById("menu-close"), this.menu);
 
 		this._baseLayerMenu = document.getElementById("menu-maps-select");
 		this._baseLayerMenu.addEventListener("change", (event) => {
@@ -118,7 +121,7 @@ L.ALS.System = L.Control.extend({
 		this._loadButton = document.getElementById("adv-lyr-sys-load-input");
 		this._loadButton.addEventListener("change", () => {
 
-			if (!window.FileReader && !L.ALS.Helpers.isIElte9) { // !FileReader throws exception in IE9
+			if (!window.FileReader && !L.ALS.Helpers.isIElte9) { // "!FileReader" throws exception in IE9
 				window.alert("Sorry, your browser doesn't support project loading. However, you still can create a new project, save it and open it later in a newer browser.");
 				this._loadButton.value = "";
 				return;
@@ -158,10 +161,6 @@ L.ALS.System = L.Control.extend({
 			this._openSettings();
 		});
 
-		// Add event listeners to "Add" and "Delete" buttons
-		document.getElementById("menu-add").addEventListener("click", () => {
-			this._showWizard();
-		});
 		document.getElementById("menu-delete").addEventListener("click", () => {
 			this._deleteLayer();
 		});
@@ -216,36 +215,11 @@ L.ALS.System = L.Control.extend({
 	 */
 	addLayerType: function (layerType) {
 		let name = layerType.wizard.displayName;
-		let option = document.createElement("option");
-		option.text = name;
-		this._wizardMenu.appendChild(option);
-
-		let container = layerType.wizard.container;
-		this._wizardContent.appendChild(container);
-
+		this.wizardWindow.addItem(name, layerType.wizard);
 		this._layerTypes[name] = {
 			layerType: layerType,
-			container: container
+			container: layerType.wizard.container
 		};
-
-		// Menu will display all added controls, so we gotta fire change event and by doing that calling displayWizardControls()
-		L.ALS.Helpers.dispatchEvent(this._wizardMenu, "change");
-	},
-
-	// Wizard-related stuff
-
-	_showWizard: function () {
-		this._wizardContainer.setAttribute("data-hidden", "0");
-	},
-
-	_closeWizard: function () {
-		this._wizardContainer.setAttribute("data-hidden", "1");
-	},
-
-	_displayWizardControls: function (event) {
-		for (let child of this._wizardContent.children)
-			child.setAttribute("data-hidden", "1");
-		this._layerTypes[event.target.value].container.setAttribute("data-hidden", "0");
 	},
 
 	// Layers-related stuff
@@ -512,47 +486,11 @@ L.ALS.System = L.Control.extend({
 		window.alert("Sorry, settings are not implemented yet");
 	},
 
-	// Helpers
-
-	/**
-	 * Makes button hide or show element on click. Both button and element will have attribute "data-hidden" equal to 0 or 1.
-	 * @param button {HTMLElement} Button that will control visibility of the element.
-	 * @param element {HTMLElement} Element that will be controlled
-	 * @param onHideCallback {function} Function to call on hiding
-	 * @param onShowCallback {function} Function to call on showing
-	 * @param clickAfter {boolean} If set to true, button will be clicked after all the things will be applied. You may want to set it to false if your callbacks affects unfinished stuff.
-	 * @private
-	 */
-	_makeHideable: function (button, element = undefined, onHideCallback = undefined, onShowCallback = undefined, clickAfter = true) {
-		let dataHidden = "data-hidden";
-		let e = element === undefined ? button : element;
-
-		if (!e.hasAttribute(dataHidden))
-			e.setAttribute(dataHidden, "1");
-
-		button.addEventListener("click", function () {
-			let newValue, callback;
-			if (e.getAttribute(dataHidden) === "1") {
-				newValue = "0";
-				callback = onHideCallback;
-			} else {
-				newValue = "1";
-				callback = onShowCallback;
-			}
-			e.setAttribute(dataHidden, newValue);
-
-			if (callback !== undefined)
-				callback();
-		});
-		if (clickAfter)
-			L.ALS.Helpers.dispatchEvent(button, "click");
-	},
-
 	onAdd: function () {
 		let button = document.createElement("a");
 		button.id = "menu-button";
 		button.className = "button-base icon-button fas fa-bars";
-		this._makeHideable(button, this.menu);
+		L.ALS.Helpers.makeHideable(button, this.menu);
 
 		let container = document.createElement("div");
 		container.className = "leaflet-bar leaflet-control";

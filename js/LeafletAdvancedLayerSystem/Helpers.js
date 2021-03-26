@@ -98,6 +98,55 @@ L.ALS.Helpers = {
 	},
 
 	/**
+	 * Makes button hide or show element on click. Both button and element will have attribute "data-hidden" equal to 0 or 1.
+	 * @param button {HTMLElement} Button that will control visibility of the element.
+	 * @param element {HTMLElement} Element that will be controlled
+	 * @param onHideCallback {function} Function to call on hiding
+	 * @param onShowCallback {function} Function to call on showing
+	 * @param clickAfter {boolean} If set to true, button will be clicked after all the things will be applied. You may want to set it to false if your callbacks affects unfinished stuff.
+	 * @private
+	 */
+	makeHideable: function (button, element = undefined, onHideCallback = undefined, onShowCallback = undefined, clickAfter = true) {
+		let dataHidden = "data-hidden";
+		let e = element === undefined ? button : element;
+
+		if (!e.hasAttribute(dataHidden))
+			e.setAttribute(dataHidden, "1");
+
+		button.addEventListener("click", function () {
+			let newValue, callback;
+			if (e.getAttribute(dataHidden) === "1") {
+				newValue = "0";
+				callback = onHideCallback;
+			} else {
+				newValue = "1";
+				callback = onShowCallback;
+			}
+			e.setAttribute(dataHidden, newValue);
+
+			if (callback !== undefined)
+				callback();
+		});
+		if (clickAfter)
+			L.ALS.Helpers.dispatchEvent(button, "click");
+	},
+
+	/**
+	 * Parses given HTML and appends it to given element as a child
+	 * @param html {string} HTML to parse
+	 * @param appendTo {Element} Element to append parsed HTML to
+	 * @constructor
+	 */
+	HTMLToElement: function (html, appendTo = document.body) {
+		let parsedDom = document.implementation.createHTMLDocument("title");
+		parsedDom.body.innerHTML += html;
+		while (parsedDom.body.hasChildNodes()) {
+			appendTo.appendChild(parsedDom.body.firstChild.cloneNode(true));
+			parsedDom.body.removeChild(parsedDom.body.firstChild);
+		}
+	},
+
+	/**
 	 * @type {"desktop"|"phone"|"tablet"}
 	 * Contains user's device type. This detection has been performed using only user agent. If you want to implement something that relies on actual device type, consider performing feature detection by yourself. Otherwise, use this property to maintain consistent look and feel.
 	 */

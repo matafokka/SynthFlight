@@ -1,4 +1,7 @@
 L.ALS.Widgets.Divider = L.ALS.Widgets.BaseWidget.extend({
+
+	undoable: false,
+
 	initialize: function (id) {
 		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "", id, "");
 		this.setConstructorArguments(id);

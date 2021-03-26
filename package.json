@@ -57,6 +57,7 @@
     "@turf/union": "^6.0.3",
     "classlist": "github:eligrey/classList.js",
     "core-js": "^3.7.0",
+    "debounce": "^1.2.1",
     "file-saver": "^2.0.5",
     "ie8": "^0.8.1",
     "jscolor": "github:EastDesire/jscolor#2.1.1",
