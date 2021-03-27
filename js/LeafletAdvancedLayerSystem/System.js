@@ -17,11 +17,14 @@ require("./Helpers.js");
 require("./Serializable.js");
 require("./Widgetable.js");
 require("./widgets/Widgets.js");
+require("./Wizard.js");
+require("./Settings.js");
+require("./Layer.js");
+require("./_service/GeneralSettings.js");
 require("./WidgetableWindow.js");
 require("./_service/SidebarWindow.js");
 require("./_service/WizardWindow.js");
-require("./Wizard.js");
-require("./Layer.js");
+require("./_service/SettingsWindow.js");
 require("./LeafletLayers/LeafletLayers.js");
 
 /**
@@ -61,8 +64,9 @@ L.ALS.System = L.Control.extend({
 	 *
 	 * @param map - Leaflet map object to manage
 	 * @param enableProjectSystem {boolean} - If set to true, will enable project system. User will be able to save and restore projects, but you have to do extra work. You might want to implement your own system yourself.
+	 * @param aboutHTML {string} HTML that will be displayed in "About" section in settings
 	 */
-	initialize: function (map, enableProjectSystem = true) {
+	initialize: function (map, enableProjectSystem = true, aboutHTML = undefined) {
 		L.Control.prototype.initialize.call(this);
 
 		/**
@@ -90,8 +94,7 @@ L.ALS.System = L.Control.extend({
 		require("./_service/markup.js");
 
 		// Wizard-related stuff
-		this.wizardWindow = new L.ALS._service.WizardWindow(document.getElementById("menu-add"));
-		document.body.appendChild(this.wizardWindow.windowContainer);
+		this._wizardWindow = new L.ALS._service.WizardWindow(document.getElementById("menu-add"));
 
 		this._wizardMenu = document.getElementById("wizard-menu");
 		this._layerContainer = document.getElementById("menu-items");
@@ -121,33 +124,14 @@ L.ALS.System = L.Control.extend({
 		this._loadButton = document.getElementById("adv-lyr-sys-load-input");
 		this._loadButton.addEventListener("change", () => {
 
-			if (!window.FileReader && !L.ALS.Helpers.isIElte9) { // "!FileReader" throws exception in IE9
-				window.alert("Sorry, your browser doesn't support project loading. However, you still can create a new project, save it and open it later in a newer browser.");
-				this._loadButton.value = "";
-				return;
-			}
-
 			if (!L.ALS.Helpers.isObjectEmpty(this._layers) && !window.confirm("You already have an opened project. Are you sure you wan't to load another one?")) {
 				this._loadButton.value = "";
 				return;
 			}
 
-			if (L.ALS.Helpers.isIElte9) {
-				let fso = new ActiveXObject("Scripting.FileSystemObject");
-				let file = fso.openTextFile(this._loadButton.value);
-				let content = file.readAll();
-				file.close();
-				this._loadProject(content);
-				this._loadButton.value = "";
-				return;
-			}
-
-			let fileReader = new FileReader();
-			fileReader.onloadend = () => {
-				this._loadProject(fileReader.result);
-				this._loadButton.value = "";
-			}
-			fileReader.readAsText(this._loadButton.files[0]);
+			L.ALS.Helpers.readTextFile(this._loadButton,
+				"Sorry, your browser doesn't support project loading. However, you still can create a new project, save it and open it later in a newer browser.",
+				(text) => { this._loadProject(text); });
 
 		});
 
@@ -157,9 +141,8 @@ L.ALS.System = L.Control.extend({
 		});
 
 		this._settingsButton = document.getElementById("adv-lyr-sys-settings-button");
-		this._settingsButton.addEventListener("click", () => {
-			this._openSettings();
-		});
+		this._settingsWindow = new L.ALS._service.SettingsWindow(this._settingsButton, () => { this.applyNewSettings(); }, aboutHTML);
+		this._settingsWindow.addItem("General Settings", new L.ALS._service.GeneralSettings());
 
 		document.getElementById("menu-delete").addEventListener("click", () => {
 			this._deleteLayer();
@@ -215,10 +198,12 @@ L.ALS.System = L.Control.extend({
 	 */
 	addLayerType: function (layerType) {
 		let name = layerType.wizard.displayName;
-		this.wizardWindow.addItem(name, layerType.wizard);
+		this._wizardWindow.addItem(name, layerType.wizard);
+		this._settingsWindow.addItem(name, layerType.settings);
 		this._layerTypes[name] = {
 			layerType: layerType,
-			container: layerType.wizard.container
+			container: layerType.wizard.container,
+			settings: layerType.settings,
 		};
 	},
 
@@ -238,7 +223,7 @@ L.ALS.System = L.Control.extend({
 			let widget = type.wizard._widgets[property];
 			args[widget.id] = widget.getValue();
 		}
-		new type(this, args);
+		new type(this, args, type.settings.getSettings());
 	},
 
 	/**
@@ -385,7 +370,7 @@ L.ALS.System = L.Control.extend({
 	 * @private
 	 */
 	_exportProject: function () {
-		L.ALS.System.notifyIfDataURLIsNotSupported();
+		L.ALS.Helpers.notifyIfDataURLIsNotSupported();
 		// Gather GeoJSON representation of all layers and either build zip or download as text
 		let filenames = {};
 		let zip = new JSZip();
@@ -407,20 +392,20 @@ L.ALS.System = L.Control.extend({
 			if (L.ALS.Helpers.supportsDataURL) // Any normal browser
 				zip.file(filename, json);
 			else
-				L.ALS.System.saveAsText(json, filename);
+				L.ALS.Helpers.saveAsText(json, filename);
 		}
 
 		if (!L.ALS.Helpers.supportsDataURL)
 			return;
 
 		// FileSaver doesn't work correctly with older Chrome versions (around v14). So we have to perform following check:
-		let type = L.ALS.System.supportsBlob ? "blob" : "base64";
+		let type = L.ALS.Helpers.supportsBlob ? "blob" : "base64";
 		zip.generateAsync({type: type}).then((data) => {
 			let filename = "SynthFlightProject.zip";
-			if (L.ALS.System.supportsBlob)
+			if (L.ALS.Helpers.supportsBlob)
 				saveAs(data, filename)
 			else
-				L.ALS.System.createDataURL(filename, "application/zip", "base64", data);
+				L.ALS.Helpers.createDataURL(filename, "application/zip", "base64", data);
 		}).catch((reason) => {
 			console.log(reason);
 		});
@@ -439,7 +424,7 @@ L.ALS.System = L.Control.extend({
 			json[layer.id] = layer.serialize(seenObjects);
 		}
 		L.ALS.Serializable.cleanUp(seenObjects);
-		L.ALS.System.saveAsText(JSON.stringify(json), "SynthFlightProject.json");
+		L.ALS.Helpers.saveAsText(JSON.stringify(json), "SynthFlightProject.json");
 	},
 
 	_loadProject: function (json) {
@@ -468,7 +453,7 @@ L.ALS.System = L.Control.extend({
 
 			let serialized = serializedJson[id];
 			let constructor = L.ALS.Serializable.getSerializableConstructor(serialized.serializableClassName);
-			let layer = constructor.deserialize(serialized, this, seenObjects);
+			let layer = constructor.deserialize(serialized, this, constructor.settings.getSettings(), seenObjects);
 
 			if (!layer.isShown)
 				L.ALS.Helpers.dispatchEvent(layer._hideButton, "click");
@@ -480,10 +465,6 @@ L.ALS.System = L.Control.extend({
 			this._selectLayer(selectedLayerID);
 
 		L.ALS.Serializable.cleanUp(seenObjects);
-	},
-
-	_openSettings: function () {
-		window.alert("Sorry, settings are not implemented yet");
 	},
 
 	onAdd: function () {
@@ -513,73 +494,19 @@ L.ALS.System = L.Control.extend({
 		return this;
 	},
 
+	/**
+	 * Gathers all settings and passes it to the added layers
+	 */
+	applyNewSettings: function () {
+		for (let name in this._layers) {
+			let layer = this._layers[name];
+			layer.applyNewSettings(
+				this._settingsWindow.getItem(layer.__proto__.defaultName).getSettings()
+			);
+		}
+	},
+
 	statics: {
-
-		inconvenienceText: "Sorry for the inconvenience. Please, update your browser, so this and many other things on the web won't happen.\n\nYour download will start after you'll close this window.",
-
-		supportsBlob: !!(JSZip.support.blob && (!window.webkitURL || (window.URL && window.URL.createObjectURL))),
-
-		notifyIfDataURLIsNotSupported: function (extension = "geojson") {
-			if (L.ALS.Helpers.supportsDataURL)
-				return;
-
-			let firstLine;
-			if (L.ALS.Helpers.isIElte9) {
-				firstLine = "Please, download all the files"
-				if (extension !== "")
-					firstLine += " and manually set their extensions to \"" + extension + "\"";
-			} else {
-				firstLine = "Please, manually save text form all tabs that will open ";
-				if (extension === "")
-					firstLine += "after you'll close this window";
-				else
-					firstLine += "to \"" + extension + "\" files.";
-			}
-			window.alert(firstLine + "\n" + L.ALS.System.inconvenienceText);
-		},
-
-		createDataURL: function (filename, mediatype, encoding, data, notifyIfCantKeepExtension = true) {
-			let link = document.createElement("a");
-			if (!link.download && notifyIfCantKeepExtension) {
-				let ext = L.ALS.Helpers.getFileExtension(filename);
-				if (ext.length !== 0)
-					window.alert("Please, manually change extension of the downloaded file to \"" + ext + "\".\n" + L.ALS.System.inconvenienceText);
-			}
-			link.download = filename;
-			link.href = "data:" + mediatype + ";" + encoding + "," + data;
-			if (link.click)
-				link.click();
-			else // link.click() is not implemented in some older browsers
-				L.ALS.Helpers.dispatchEvent(link, "click");
-		},
-
-		saveAsText: function (string, filename) {
-			if (L.ALS.System.supportsBlob) {
-				saveAs(new Blob([string], {type: 'text/plain'}), filename);
-				return;
-			}
-			if (L.ALS.Helpers.supportsDataURL) {
-				this.createDataURL(filename, "text/plain", "base64",
-					// Taken from https://attacomsian.com/blog/javascript-base64-encode-decode
-					btoa(encodeURIComponent(string).replace(/%([0-9A-F]{2})/g,
-						function (match, p1) {
-							return String.fromCharCode('0x' + p1);
-						})), false);
-				return;
-			}
-
-			if (!L.ALS.Helpers.isIElte9)
-				this.notifyIfDataURLIsNotSupported(L.ALS.Helpers.getFileExtension(filename));
-
-			// Chrome 7 and IE9
-			let fileWindow = window.open("", "_blank");
-			fileWindow.document.open('text/plain');
-			fileWindow.document.write(string);
-			if (L.ALS.Helpers.isIElte9) {
-				fileWindow.document.execCommand('SaveAs', true, filename + ".txt");
-				fileWindow.close();
-			}
-		},
 
 		/**
 		 * Performs some important operations. Must be called after all Leaflet and ALS imports.

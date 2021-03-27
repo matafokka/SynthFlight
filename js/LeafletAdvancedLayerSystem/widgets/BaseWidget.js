@@ -140,6 +140,8 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend({
 		for (let attr in attributes) {
 			if (attributes.hasOwnProperty(attr))
 				this.input.setAttribute(attr, attributes[attr]);
+			if (attr === "defaultValue") // Exception for default values
+				this.attributes.defaultValue = attributes[attr];
 		}
 	},
 

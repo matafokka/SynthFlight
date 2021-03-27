@@ -90,10 +90,7 @@ body {
 	align-items: center;
 	text-align: center;
 	transition: background 0.2s;
-}
-
-.fas {
-	max-width: 2rem;
+	user-select: none;
 }
 
 .button-base:hover, input[type="button"]:hover, select:hover, .fas:hover, .leaflet-control > a:hover, .jscolor-btn-close:hover {
@@ -109,9 +106,20 @@ body {
 }
 
 .fas {
+	max-width: 2rem;
 	font-size: 1.6rem;
 	width: 2rem;
 	user-select: none;
+}
+
+/* Revert button in settings */
+.revert-button {
+	width: 0.7rem;
+	height: 0.7rem;
+	padding: 0.15rem;
+	font-size: 0.7rem;
+	margin-left: 0.2rem;
+	color: goldenrod;
 }
 
 input, select {
@@ -323,13 +331,14 @@ select > * {
 	transition: top 0.4s;
 }
 
-#wizard-menu, .adv-lyr-sys-window-select, #menu-maps-select {
+.adv-lyr-sys-window-select, #menu-maps-select {
 	height: 2rem !important;
 	font-size: 1rem;
 	text-align-last: center
 }
 
-#wizard-menu {
+.adv-lyr-sys-window-select {
+	width: 100%;
 	border: none;
 	border-bottom: 1px solid #ccc;
 }
@@ -344,12 +353,78 @@ select > * {
 	background: white;
 }
 
-#wizard-content > *[data-hidden="1"] {
+/* Sidebar window */
+
+.adv-lyr-sys-sidebar-window {
+	overflow: hidden;
+	box-sizing: border-box;
+}
+
+.adv-lyr-sys-sidebar-window *[data-hidden="1"] {
 	display: none;
 }
 
-#wizard-buttons > * {
-	width: 50%;
+.adv-lyr-sys-sidebar-window .adv-lyr-sys-window-content {
+	padding-bottom: 2rem;
+}
+
+.adv-lyr-sys-sidebar-window-content-wrapper {
+	display: table-cell;
+	width: 100%;
+}
+
+.adv-lyr-sys-sidebar-window-content-wrapper > .adv-lyr-sys-window-content {
+	width: 100%;
+}
+
+.adv-lyr-sys-sidebar-window-content-wrapper > .adv-lyr-sys-window-content > * {
+	width: 100%;
+}
+
+.adv-lyr-sys-sidebar-window-wrapper {
+	overflow: auto;
+	max-height: 100%;
+}
+
+.adv-lyr-sys-sidebar {
+	display: table-cell;
+	min-width: 10rem;
+	background: #f8f8f8;
+	border-right: 1px solid #ccc;
+	box-sizing: border-box;
+	user-select: none;
+}
+
+.adv-lyr-sys-sidebar > * {
+	width: 100%;
+	height: auto;
+	padding: 0.2rem;
+	box-sizing: border-box;
+	white-space: nowrap;
+	text-align: left;
+	border: none;
+	border-bottom: 1px solid #ccc;
+	background: #f8f8f8;
+}
+
+.adv-lyr-sys-sidebar > *[data-is-selected="1"] {
+	background: #e2e2e2;
+	transition: background 0.3s;
+}
+
+.adv-lyr-sys-window-sidebar-title {
+	padding: 0.2rem;
+	text-align: center;
+	background: #eee;
+	border-bottom: 1px solid #ccc;
+	white-space: normal;
+	box-sizing: border-box;
+	user-select: none;
+}
+
+.adv-lyr-sys-sidebar-window-button-container {
+	position: fixed;
+	bottom: 0;
 }
 
 /* Layers */
@@ -639,89 +714,32 @@ select > * {
 	cursor: move;
 }
 
-.adv-lyr-sys-sidebar-window {
-	overflow: hidden;
+/* About section */
+.adv-lyr-sys-about-container h1, .adv-lyr-sys-about-container h2, .adv-lyr-sys-about-container h3, .adv-lyr-sys-about-container h4 {
+	text-align: center;
+	margin: 1rem;
 }
 
-.adv-lyr-sys-sidebar-window-content-wrapper {
-	display: table-cell;
-	width: 100%;
+.adv-lyr-sys-about-container {
 }
 
-.adv-lyr-sys-sidebar-window-content-wrapper > .adv-lyr-sys-window-content {
-	width: 100%;
-}
-
-.adv-lyr-sys-sidebar-window-content-wrapper > .adv-lyr-sys-window-content > * {
-	width: 100%;
-}
-
-.adv-lyr-sys-window-select {
-	width: 100%;
-	border: none;
-	border-bottom: 1px solid #ccc;
-}
-
-/*Sidebar window */
-
-.adv-lyr-sys-sidebar-window {
-	box-sizing: border-box;
-	padding-bottom: 2rem;
-}
-
-.adv-lyr-sys-sidebar-window *[data-hidden="1"] {
-	display: none;
-}
-
-.adv-lyr-sys-sidebar-window-wrapper {
-	overflow: auto;
-	max-height: 100%;
-}
-
-.adv-lyr-sys-sidebar-window-content-wrapper {
-	display: table-cell;
-}
-
-.adv-lyr-sys-sidebar {
-	display: table-cell;
-	min-width: 10rem;
-	width: 10rem;
-	max-width: 10rem;
-	background: #f8f8f8;
-	border-right: 1px solid #ccc;
+.adv-lyr-sys-about-wrapper {
+	padding: 1rem;
 	box-sizing: border-box;
 }
 
-.adv-lyr-sys-sidebar > * {
+.adv-lyr-sys-about-container footer {
+	position: fixed;
+	bottom: 2rem;
+	right: 0;
 	width: 100%;
-	height: auto;
 	padding: 0.2rem;
 	box-sizing: border-box;
-	white-space: nowrap;
-	overflow: hidden;
-	text-align: left;
-	border: none;
-	border-bottom: 1px solid #ccc;
-	background: #f8f8f8;
-}
-
-.adv-lyr-sys-sidebar > *[data-is-selected="1"] {
-	background: #e2e2e2;
-	transition: background 0.3s;
-}
-
-.adv-lyr-sys-window-sidebar-title {
-	padding: 0.2rem;
 	text-align: center;
 	background: #eee;
-	border-bottom: 1px solid #ccc;
-	white-space: normal;
-	box-sizing: border-box;
-}
-
-.adv-lyr-sys-sidebar-window-button-container {
-	position: fixed;
-	bottom: 0;
+	border: 1px solid #ccc;
+	border-left: none;
+	border-right: none;
 }
 
 /* IE11 hacks */

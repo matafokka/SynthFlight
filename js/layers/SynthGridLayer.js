@@ -5,20 +5,11 @@ const MathTools = require("../MathTools.js");
 const RomanNumerals = require("roman-numerals");
 const geojsonMerge = require("@mapbox/geojson-merge"); // Using this since turfHelpers.featureCollection() discards previously defined properties.
 require("./SynthGridWizard.js");
+require("./SynthGridSettings.js");
 
 L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 
 	defaultName: "Grid Layer",
-
-	gridBorderColor: "#6495ed",
-
-	gridFillColor: "#6495ed",
-
-	meridiansColor: "#ad0000",
-
-	parallelsColor: "#007800",
-
-	lineThickness: 2,
 
 	_alphabet: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
 
@@ -36,7 +27,9 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 	_doHidePathsByParallels: false,
 	_doHidePathsNumbers: false,
 
-	init: function (wizardResults) {
+	init: function (wizardResults, settings) {
+		this.copySettingsToThis(settings);
+
 		this.selectedPolygons = {};
 		this.selectedPolygonsWidgets = {};
 		this.serializationIgnoreList.push("selectedPolygons", "_airportMarker", "lngDistance", "latDistance", "_currentStandardScale");
@@ -169,7 +162,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 			this._currentStandardScale = parseInt(scaleWithoutSpaces);
 		} else
 			this._currentStandardScale = Infinity;
-		this.hidingThreshold = this._currentStandardScale === Infinity ? 15 : 70; // If grid will have labels, on lower zoom levels map will become both messy and unusably slow. So we have to set higher hiding threshold.
+		this.calculateThreshold(settings); // Update hiding threshold
 
 		// To optimize the grid and reduce visual clutter, let's:
 		// 1. Display only visible polygons. If we'll render the whole thing, user will need from couple of MBs to TBs of RAM.
@@ -1053,6 +1046,20 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 		this.onHide();
 	},
 
+	calculateThreshold: function(settings) {
+		let multiplier = (settings.gridHidingFactor - 5) / 5; // Factor is in range [1..10]. Let's make it [-1...1]
+		this.minThreshold = 15 + 10 * multiplier;
+		this.maxThreshold = 60 + 60 * multiplier;
+
+		// If grid will have labels, on lower zoom levels map will become both messy and unusably slow. So we have to set higher hiding threshold.
+		this.hidingThreshold = this._currentStandardScale === Infinity ? this.minThreshold : this.maxThreshold;
+	},
+
+	applyNewSettings: function (settings) {
+		this.calculateThreshold(settings);
+		this._updateGrid();
+	},
+
 	serialize: function (seenObjects) {
 		if (!this.serializationID) {
 			this.serializationID = L.ALS.Helpers.generateID();
@@ -1082,11 +1089,12 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 
 	statics: {
 		wizard: new L.ALS.SynthGridWizard(),
+		settings: new L.ALS.SynthGridSettings(),
 
 		_toUpdateColors: ["gridBorderColor", "gridFillColor", "meridiansColor", "parallelsColor"],
 
-		deserialize: function (serialized, layerSystem, seenObjects) {
-			serialized.constructorArguments = [layerSystem, serialized.constructorArguments[0]];
+		deserialize: function (serialized, layerSystem, settings, seenObjects) {
+			serialized.constructorArguments = [layerSystem, serialized.constructorArguments[0], settings];
 			let object = L.ALS.Serializable.getObjectFromSerialized(serialized, seenObjects);
 			L.ALS.Layer.deserializeImportantProperties(serialized, object);
 			object.deserializeWidgets(serialized.widgets, seenObjects);

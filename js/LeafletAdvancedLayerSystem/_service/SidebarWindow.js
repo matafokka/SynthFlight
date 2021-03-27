@@ -62,6 +62,7 @@ L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend({
 			this.updateWindowHeight();
 		}
 		window.addEventListener("resize", debounce(onResize, 200));
+		document.body.appendChild(this.windowContainer);
 
 		(async () => {
 			// Wait until window will be added
@@ -79,7 +80,6 @@ L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend({
 	 * @param item {L.ALS.Widgetable} Item to add
 	 */
 	addItem: function (name, item) {
-		console.log("Called addItem");
 		let option = document.createElement("option");
 		option.text = name;
 		this.select.appendChild(option);
@@ -97,10 +97,33 @@ L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend({
 
 		this.items[name] = {
 			container: container,
-			sidebarItem: sidebarItem
+			sidebarItem: sidebarItem,
+			selectItem: option,
+			widgetable: item
 		};
 
 		debounce(() => { this.updateWindowHeight(); }, 200)();
+	},
+
+	/**
+	 * Removes item from this window
+	 */
+	removeItem: function (name) {
+		let item = this.items[name];
+		if (!item)
+			return;
+		this.select.removeChild(item.selectItem);
+		this.sidebar.removeChild(item.sidebarItem);
+		this.container.removeChild(item.container);
+	},
+
+	/**
+	 * Gets item's widgetable by item's name
+	 * @param name {string} name of the item
+	 * @return {L.ALS.Widgetable} Item's widgetable
+	 */
+	getItem: function (name) {
+		return this.items[name].widgetable;
 	},
 
 	displayItem: function (name) {
@@ -123,7 +146,6 @@ L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend({
 	},
 
 	updateWindowHeight: async function () {
-		console.log("Called updateWindowHeight");
 		while (!this.isWindowVisible())
 			await new Promise(resolve => setTimeout(resolve, 0));
 

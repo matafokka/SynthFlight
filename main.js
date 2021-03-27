@@ -81,4 +81,3 @@ layerSystem.addBaseLayer(L.tileLayer(""), "Empty");
 // Add layer types
 layerSystem.addLayerType(L.ALS.SynthGridLayer);
 layerSystem.addLayerType(L.ALS.SynthShapefileLayer);
-layerSystem.addLayerType(L.ALS.Layer);

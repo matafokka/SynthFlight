@@ -1,5 +1,6 @@
 L.ALS.Helpers.HTMLToElement(`
 <input type="file" id="adv-lyr-sys-load-input" />
+<input type="file" id="adv-lyr-sys-load-settings-input" />
 <div id="menu">
 	<!-- Top panel -->
 	<div id="top-panel-wrapper">
