@@ -1,6 +1,3 @@
-require("./Widgetable.js");
-require("./widgets/Widgets.js");
-
 /**
  * Base class for all layers for LeafletAdvancedLayerSystem.
  *
@@ -51,8 +48,9 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 	 * SynthLayer's constructor. Do NOT override it! Use init() method instead!
 	 * @param layerSystem Layer system that creates this layer
 	 * @param args {*[]} Arguments to pass to `init()`
+	 * @param settings {Object} Settings to pass to `init()`
 	 */
-	initialize: function(layerSystem, args) {
+	initialize: function(layerSystem, args, settings) {
 		L.ALS.Widgetable.prototype.initialize.call(this, "layer-menu");
 		this.setConstructorArguments([args]);
 		this.serializationIgnoreList.push("_layerSystem", "map", "_nameLabel", "layers", "_mapEvents", "getBounds", "isSelected");
@@ -116,7 +114,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 		menuButton.className = "fas fa-cog";
 
 		// Menu itself
-		this._layerSystem._makeHideable(menuButton, this.container, () => {
+		L.ALS.Helpers.makeHideable(menuButton, this.container, () => {
 			this.container.style.height = "0";
 		}, () => {
 			this.container.style.height = this.container.scrollHeight + "px";
@@ -125,7 +123,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 		// Hide/show button
 		this._hideButton = document.createElement("i");
 		this._hideButton.className = "fas fa-eye";
-		this._layerSystem._makeHideable(this._hideButton, undefined, () => {
+		L.ALS.Helpers.makeHideable(this._hideButton, undefined, () => {
 			this._hideButton.className = "fas fa-eye-slash";
 			this._onHide();
 			this.onHide();
@@ -151,9 +149,8 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 		this._layerSystem._layerContainer.appendChild(layerWidget);
 		this._layerSystem._layers[this.id] = this;
 		this._layerSystem._selectLayer(this.id); // Select new layer
-		this._layerSystem._closeWizard();
 		this._nameLabel = label;
-		this.init(args); // Initialize layer and pass all the properties
+		this.init(args, settings); // Initialize layer and pass all the properties
 	},
 
 	/**
@@ -350,7 +347,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 	 * Use it instead of constructor.
 	 * @param wizardResults Results compiled from the wizard. It is an object who's keys are IDs of your controls and values are values of your controls.
 	 */
-	init: function(wizardResults) {},
+	init: function(wizardResults, settings) {},
 
 	/**
 	 * Deletes this layer
@@ -425,6 +422,24 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 	},
 
 	/**
+	 * Copies settings to this layer as properties
+	 * @param settings {Object} `settings` argument passed to `init()`
+	 */
+	copySettingsToThis: function (settings) {
+		for (let s in settings) {
+			if (s !== "skipSerialization" && s !== "skipDeserialization")
+				this[s] = settings[s];
+		}
+	},
+
+
+	/**
+	 * Being called when user updates the settings. Use it to update your layer depending on changed settings.
+	 * @param settings {Object} Same as settings passed to `init()`
+	 */
+	applyNewSettings: function (settings) {},
+
+	/**
 	 * Serializes some important properties. Must be called at `serialize()` in any layer!
 	 * @param serialized {Object} Your serialized object
 	 */
@@ -443,10 +458,16 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 	statics: {
 
 		/**
-		 * Wizard which gives a layer it's initial properties
+		 * Wizard instance which gives a layer it's initial properties
 		 * @type {L.ALS.Wizard}
 		 */
 		wizard: new L.ALS.Wizard(),
+
+		/**
+		 * Settings instance
+		 * @type {L.ALS.Settings}
+		 */
+		settings: new L.ALS.Settings(),
 
 		/**
 		 * Deserializes some important properties. Must be called at `deserialize` in any layer!
@@ -460,8 +481,8 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 				instance[prop] = serialized[prop];
 		},
 
-		deserialize: function (serialized, layerSystem, seenObjects) {
-			serialized.constructorArguments = [layerSystem, serialized.constructorArguments[0]];
+		deserialize: function (serialized, layerSystem, settings, seenObjects) {
+			serialized.constructorArguments = [layerSystem, serialized.constructorArguments[0], settings];
 			let instance = L.ALS.Widgetable.deserialize(serialized, seenObjects);
 			L.ALS.Layer.deserializeImportantProperties(serialized, instance);
 			return instance;

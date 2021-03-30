@@ -10,6 +10,11 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend({
 	customWrapperClassName: "",
 
 	/**
+	 * Indicates whether this widget can revert back to it's default value. If this widget is undoable, an undo button will be appended to it at settings window.
+	 */
+	undoable: true,
+
+	/**
 	 * Constructs this widget.
 	 * @param type {string} Type of input
 	 * @param id {string} ID of this input. You can select this object using this ID.
@@ -135,6 +140,8 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend({
 		for (let attr in attributes) {
 			if (attributes.hasOwnProperty(attr))
 				this.input.setAttribute(attr, attributes[attr]);
+			if (attr === "defaultValue") // Exception for default values
+				this.attributes.defaultValue = attributes[attr];
 		}
 	},
 

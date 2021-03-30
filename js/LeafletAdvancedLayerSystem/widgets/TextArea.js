@@ -3,6 +3,8 @@
  */
 L.ALS.Widgets.TextArea = L.ALS.Widgets.BaseWidget.extend({
 
+	undoable: false,
+
 	/**
 	 * Constructs text widget
 	 * @param id {string} ID of this text widget

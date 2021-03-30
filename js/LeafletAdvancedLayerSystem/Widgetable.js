@@ -1,5 +1,7 @@
 /**
  * Base class for all classes that can have widgets.
+ *
+ * Has property `container` which is container for the widgets. Add it to the page.
  * @type {Widgetable}
  */
 L.ALS.Widgetable = L.ALS.Serializable.extend({
@@ -12,6 +14,10 @@ L.ALS.Widgetable = L.ALS.Serializable.extend({
 		L.ALS.Serializable.prototype.initialize.call(this, className);
 		this.setConstructorArguments(arguments);
 
+		/**
+		 * Container to add widgets to
+		 * @type {HTMLDivElement}
+		 */
 		this.container = document.createElement("div");
 		if (className !== "")
 			this.container.className = className;

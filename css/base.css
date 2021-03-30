@@ -2,6 +2,30 @@
 	font-size: 12pt;
 }
 
+::-webkit-scrollbar-thumb:window-inactive {
+	background: #dcdcdc;
+}
+
+::-webkit-scrollbar {
+	width: 0.7rem;
+}
+
+::-webkit-scrollbar-track {
+	background: #eee;
+	border-left: 1px solid #ccc;
+}
+
+::-webkit-scrollbar-thumb {
+	background: #ccc;
+	border-left: 1px solid #ccc;
+	transition: background 0.2s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: #afafaf;
+	transition: background 0.2s;
+}
+
 body {
 	padding: 0;
 	margin: 0;
@@ -66,10 +90,7 @@ body {
 	align-items: center;
 	text-align: center;
 	transition: background 0.2s;
-}
-
-.fas {
-	max-width: 2rem;
+	user-select: none;
 }
 
 .button-base:hover, input[type="button"]:hover, select:hover, .fas:hover, .leaflet-control > a:hover, .jscolor-btn-close:hover {
@@ -85,9 +106,20 @@ body {
 }
 
 .fas {
+	max-width: 2rem;
 	font-size: 1.6rem;
 	width: 2rem;
 	user-select: none;
+}
+
+/* Revert button in settings */
+.revert-button {
+	width: 0.7rem;
+	height: 0.7rem;
+	padding: 0.15rem;
+	font-size: 0.7rem;
+	margin-left: 0.2rem;
+	color: goldenrod;
 }
 
 input, select {
@@ -147,7 +179,7 @@ select > * {
 
 /* JSColor */
 .jscolor-picker-wrap {
-	z-index: 99999 !important;
+	z-index: 999999 !important;
 }
 
 /* Make map take up whole space */
@@ -264,7 +296,7 @@ select > * {
 
 /* Wizard */
 
-#wizard-container {
+.adv-lyr-sys-window-background {
 	display: block;
 	position: fixed;
 	z-index: 999999;
@@ -276,14 +308,14 @@ select > * {
 	transition: opacity 0.3s;
 }
 
-#wizard-container[data-hidden="1"] {
+.adv-lyr-sys-window-background[data-hidden="1"] {
 	width: 0;
 	height: 0;
 	opacity: 0;
 	transition: all 0s 0.3s, opacity 0.3s;
 }
 
-#wizard-window {
+.adv-lyr-sys-window-window {
 	position: relative;
 	display: block;
 	max-width: 50rem;
@@ -294,36 +326,100 @@ select > * {
 	transition: top 0.3s;
 }
 
-#wizard-container[data-hidden="1"] > #wizard-window {
+.adv-lyr-sys-window-background[data-hidden="1"] > .adv-lyr-sys-window-window {
 	top: 25%;
 	transition: top 0.4s;
 }
 
-#wizard-window > * {
-	width: 100%;
-}
-
-#wizard-menu, #menu-maps-select {
+.adv-lyr-sys-window-select, #menu-maps-select {
 	height: 2rem !important;
 	font-size: 1rem;
 	text-align-last: center
 }
 
-#wizard-menu {
+.adv-lyr-sys-window-select {
+	width: 100%;
 	border: none;
 	border-bottom: 1px solid #ccc;
 }
 
-#wizard-content > * {
-	width: 100%;
+.adv-lyr-sys-window-window {
+	max-height: 95% !important;
+	overflow-y: auto;
 }
 
-#wizard-content > *[data-hidden="1"] {
+.adv-lyr-sys-window-content > * {
+	width: 100%;
+	background: white;
+}
+
+/* Sidebar window */
+
+.adv-lyr-sys-sidebar-window {
+	overflow: hidden;
+	box-sizing: border-box;
+}
+
+.adv-lyr-sys-sidebar-window *[data-hidden="1"] {
 	display: none;
 }
 
-#wizard-buttons > * {
-	width: 50%;
+.adv-lyr-sys-sidebar-window .adv-lyr-sys-window-content {
+	padding-bottom: 2rem;
+}
+
+.adv-lyr-sys-sidebar-window-content-wrapper {
+	display: table-cell;
+	width: 100%;
+}
+
+.adv-lyr-sys-sidebar-window-content-wrapper > .adv-lyr-sys-window-content {
+	width: 100%;
+}
+
+.adv-lyr-sys-sidebar-window-content-wrapper > .adv-lyr-sys-window-content > * {
+	width: 100%;
+}
+
+.adv-lyr-sys-sidebar-window-wrapper {
+	overflow: auto;
+	max-height: 100%;
+}
+
+.adv-lyr-sys-sidebar {
+	display: table-cell;
+	min-width: 10rem;
+	background: #f8f8f8;
+	border-right: 1px solid #ccc;
+	box-sizing: border-box;
+	user-select: none;
+}
+
+.adv-lyr-sys-sidebar > * {
+	width: 100%;
+	height: auto;
+	padding: 0.2rem;
+	box-sizing: border-box;
+	white-space: nowrap;
+	text-align: left;
+	border: none;
+	border-bottom: 1px solid #ccc;
+	background: #f8f8f8;
+}
+
+.adv-lyr-sys-sidebar > *[data-is-selected="1"] {
+	background: #e2e2e2;
+	transition: background 0.3s;
+}
+
+.adv-lyr-sys-window-sidebar-title {
+	padding: 0.2rem;
+	text-align: center;
+	background: #eee;
+	border-bottom: 1px solid #ccc;
+	white-space: normal;
+	box-sizing: border-box;
+	user-select: none;
 }
 
 /* Layers */
@@ -613,6 +709,20 @@ select > * {
 	cursor: move;
 }
 
+/* About section */
+.adv-lyr-sys-about-container h1, .adv-lyr-sys-about-container h2, .adv-lyr-sys-about-container h3, .adv-lyr-sys-about-container h4 {
+	text-align: center;
+	margin: 1rem;
+}
+
+.adv-lyr-sys-about-container {
+}
+
+.adv-lyr-sys-about-wrapper {
+	padding: 0.5rem;
+	box-sizing: border-box;
+}
+
 /* IE11 hacks */
 @media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
 	body {
@@ -620,7 +730,7 @@ select > * {
 		padding: 0;
 	}
 
-	#wizard-window {
+	.adv-lyr-sys-window-window {
 		margin: 0;
 	}
 

@@ -3,6 +3,8 @@
  */
 L.ALS.Widgets.SimpleLabel = L.ALS.Widgets.BaseWidget.extend({
 
+	undoable: false,
+
 	customWrapperClassName: "adv-lyr-sys-simple-label-wrapper",
 
 	/**

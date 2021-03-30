@@ -1,17 +1,19 @@
 require("./SynthShapefileWizard.js");
+require("./SynthShapefileSettings.js");
 const shp = require("shpjs");
 
 L.ALS.SynthShapefileLayer = L.ALS.Layer.extend({
 
 	defaultName: "Zipped Shapefile",
 
-	fillColor: "#ff9900",
+	/*fillColor: "#ff9900",
 
-	borderColor: "#8d4200",
+	borderColor: "#8d4200",*/
 
 	geometryType: undefined,
 
-	init: function (wizardResults) {
+	init: function (wizardResults, settings) {
+		this.copySettingsToThis(settings);
 		this.setConstructorArguments(["deserialized"]);
 
 		if (wizardResults === "deserialized")
@@ -102,11 +104,12 @@ L.ALS.SynthShapefileLayer = L.ALS.Layer.extend({
 
 	statics: {
 		wizard: new L.ALS.SynthShapefileWizard(),
+		settings: new L.ALS.SynthShapefileSettings(),
 
 		serializationProperties: ["serializableClassName", "type", "fillColor", "borderColor", "geometryType"],
 
-		deserialize: function (serialized, layerSystem, seenObjects) {
-			serialized.constructorArguments = [layerSystem, "deserialized"];
+		deserialize: function (serialized, layerSystem, settings, seenObjects) {
+			serialized.constructorArguments = [layerSystem, "deserialized", settings];
 			let object = L.ALS.Serializable.getObjectFromSerialized(serialized, seenObjects);
 			object.setName(serialized.name);
 			for (let prop of L.ALS.SynthShapefileLayer.serializationProperties)

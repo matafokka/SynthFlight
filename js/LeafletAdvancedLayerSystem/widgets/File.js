@@ -1,5 +1,7 @@
 L.ALS.Widgets.File = L.ALS.Widgets.BaseWidget.extend({
 
+	undoable: false,
+
 	/**
 	 * Constructs File input widget
 	 */
