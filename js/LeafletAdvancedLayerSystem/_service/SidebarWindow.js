@@ -4,6 +4,7 @@ L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend({
 
 	maxHeight: 0,
 	sidebarWidth: 0,
+	isSidebarHidden: false,
 
 	initialize: function (button, sidebarTitle, contentTitle, closeButtonTitle="Cancel", onCloseCallback = undefined) {
 		L.ALS.WidgetableWindow.prototype.initialize.call(this, button);
@@ -29,11 +30,12 @@ L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend({
 		`, this.window);
 
 		this.sidebar = this.window.querySelector("div[data-id='sidebar']");
-		let selectContainer = this.window.querySelector("div[data-id='select-container']");
+		this.selectContainer = this.window.querySelector("div[data-id='select-container']");
 		this.select = this.window.querySelector("select[data-id='select']");
 		this.closeButton = this.window.querySelector("div[data-id='close-button']");
-		let contentWrapper = this.window.querySelector("div[data-id='content-wrapper']");
-		contentWrapper.appendChild(this.container);
+		this.contentWrapper = this.window.querySelector("div[data-id='content-wrapper']");
+		this.contentWrapper.appendChild(this.container);
+		this.windowWrapper = this.window.querySelector("div[data-id='wrapper']");
 
 		this.select.addEventListener("change", (e) => {
 			this.displayItem(e.target.value);
@@ -50,14 +52,16 @@ L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend({
 				return;
 
 			let isTooWide = this.window.offsetWidth / 3 <= this.sidebarWidth;
-			if (isTooWide && selectContainer.classList.contains("hidden")) {
-				selectContainer.classList.remove("hidden");
+			if (isTooWide && this.selectContainer.classList.contains("hidden")) {
+				this.selectContainer.classList.remove("hidden");
 				this.sidebar.classList.add("hidden");
-				contentWrapper.style.display = "block";
-			} else if (!isTooWide && this.sidebar.classList.contains("hidden")) {
+				this.contentWrapper.style.display = "block";
+				this.isSidebarHidden = true;
+			} else if (!isTooWide && this.isSidebarHidden) {
 				this.sidebar.classList.remove("hidden");
-				selectContainer.classList.add("hidden");
-				contentWrapper.style.display = "table-cell";
+				this.selectContainer.classList.add("hidden");
+				this.contentWrapper.style.display = "table-cell";
+				this.isSidebarHidden = false;
 			}
 			this.updateWindowHeight();
 		}
@@ -69,6 +73,7 @@ L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend({
 			while (!this.isWindowVisible())
 				await new Promise(resolve => setTimeout(resolve, 0));
 
+			this.buttonsHeight = this.window.querySelector("div[data-id='buttons-wrapper']").offsetHeight;
 			this.sidebarWidth = this.sidebar.offsetWidth;
 			onResize();
 		})();
@@ -86,7 +91,7 @@ L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend({
 
 		let sidebarItem = document.createElement("div");
 		sidebarItem.className = "button-base";
-		sidebarItem.innerText = name;
+		sidebarItem.textContent = name;
 		sidebarItem.addEventListener("click", () => {
 			this.displayItem(name);
 		});
@@ -163,16 +168,18 @@ L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend({
 	},
 
 	setWindowHeight: function (height) {
+		let contentHeight = height;
 		if (typeof height === "number") {
 			let vh = window.innerHeight * 0.9; // 90vh
 			if (height > vh)
 				height = vh;
-			height = height + "px";
+			contentHeight = height - this.buttonsHeight - (this.isSidebarHidden ? this.selectContainer.offsetHeight : 0) + "px";
 		}
 
-		for (let item of ["window", "sidebar"]) {
-			for (let prop of ["minHeight", "height"])
-				this[item].style[prop] = height;
+		for (let prop of ["minHeight", "height"]) {
+			this.window.style[prop] = height;
+			this.windowWrapper.style[prop] = contentHeight;
+			this.sidebar.style[prop] = contentHeight;
 		}
 	},
 

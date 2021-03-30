@@ -14,7 +14,7 @@ L.ALS._service.GeneralSettings = L.ALS.Settings.extend({
 
 		let widgets = [
 			languageWidget, themeWidget,
-			new L.ALS.Widgets.SimpleLabel("warning", "Warning: global settings are not implemented yet, they're here only for testing purposes.", "justify", "warning")
+			new L.ALS.Widgets.SimpleLabel("warning", "Warning: general settings are not implemented yet, they're here only for testing purposes. All other settings are working fine.", "justify", "warning")
 		];
 
 		for (let widget of widgets)

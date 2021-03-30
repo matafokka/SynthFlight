@@ -19,12 +19,12 @@ L.ALS._service.SettingsWindow = L.ALS._service.SidebarWindow.extend({
 
 		// Create export and import buttons
 		let exportButton = document.createElement("div");
-		exportButton.innerText = "Export Settings";
+		exportButton.textContent = "Export Settings";
 		exportButton.addEventListener("click", () => { this.exportSettings(); })
 
 		let importButton = document.createElement("label");
 		importButton.htmlFor = "adv-lyr-sys-load-settings-input";
-		importButton.innerText = "Import Settings";
+		importButton.textContent = "Import Settings";
 		importButton.addEventListener("click", () => { this.importSettings(); })
 
 		for (let button of [exportButton, importButton]) {
@@ -70,7 +70,7 @@ L.ALS._service.SettingsWindow = L.ALS._service.SidebarWindow.extend({
 
 	saveSettings: function () {
 		this.forEachWidget((item, widget, key, value) => {
-			window.localStorage.setItem(key, value);
+			L.ALS.Helpers.localStorage.setItem(key, value);
 		});
 		this.onCloseCallback();
 	},
@@ -119,7 +119,7 @@ L.ALS._service.SettingsWindow = L.ALS._service.SidebarWindow.extend({
 
 	restoreSettingsFromStorage: function () {
 		this.forEachWidget((item, widget, key) => {
-			let newValue = window.localStorage.getItem(key);
+			let newValue = L.ALS.Helpers.localStorage.getItem(key);
 			if (newValue)
 				this.getItem(item).getWidgetById(widget).setValue(newValue);
 		});

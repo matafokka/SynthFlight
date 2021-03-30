@@ -179,7 +179,7 @@ select > * {
 
 /* JSColor */
 .jscolor-picker-wrap {
-	z-index: 99999 !important;
+	z-index: 999999 !important;
 }
 
 /* Make map take up whole space */
@@ -420,11 +420,6 @@ select > * {
 	white-space: normal;
 	box-sizing: border-box;
 	user-select: none;
-}
-
-.adv-lyr-sys-sidebar-window-button-container {
-	position: fixed;
-	bottom: 0;
 }
 
 /* Layers */
@@ -724,22 +719,8 @@ select > * {
 }
 
 .adv-lyr-sys-about-wrapper {
-	padding: 1rem;
+	padding: 0.5rem;
 	box-sizing: border-box;
-}
-
-.adv-lyr-sys-about-container footer {
-	position: fixed;
-	bottom: 2rem;
-	right: 0;
-	width: 100%;
-	padding: 0.2rem;
-	box-sizing: border-box;
-	text-align: center;
-	background: #eee;
-	border: 1px solid #ccc;
-	border-left: none;
-	border-right: none;
 }
 
 /* IE11 hacks */

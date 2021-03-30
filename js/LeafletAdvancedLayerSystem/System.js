@@ -144,6 +144,13 @@ L.ALS.System = L.Control.extend({
 		this._settingsWindow = new L.ALS._service.SettingsWindow(this._settingsButton, () => { this.applyNewSettings(); }, aboutHTML);
 		this._settingsWindow.addItem("General Settings", new L.ALS._service.GeneralSettings());
 
+		// IE and old browsers (which are unsupported by ALS) either doesn't implement LocalStorage or doesn't support it when app runs locally
+		if (!window.localStorage) {
+			this._settingsButton.addEventListener("click", () => {
+				window.alert("Settings can't be saved upon page refresh because your browser doesn't support it. Please, install any modern browser, so it won't happen.");
+			});
+		}
+
 		document.getElementById("menu-delete").addEventListener("click", () => {
 			this._deleteLayer();
 		});
@@ -501,7 +508,7 @@ L.ALS.System = L.Control.extend({
 		for (let name in this._layers) {
 			let layer = this._layers[name];
 			layer.applyNewSettings(
-				this._settingsWindow.getItem(layer.__proto__.defaultName).getSettings()
+				this._settingsWindow.getItem(layer.constructor.wizard.displayName).getSettings()
 			);
 		}
 	},

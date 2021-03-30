@@ -7,7 +7,7 @@ L.ALS._service.WizardWindow = L.ALS._service.SidebarWindow.extend({
 		let addButton = document.createElement("div");
 		addButton.className = "button-base";
 		addButton.id = "wizard-add-button";
-		addButton.innerText = "Add";
+		addButton.textContent = "Add";
 		this.window.querySelector("div[data-id='buttons-wrapper']").appendChild(addButton);
 		addButton.addEventListener("click", () => {
 			this.windowContainer.setAttribute("data-hidden", "1");

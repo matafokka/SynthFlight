@@ -9,13 +9,13 @@ L.ALS.SynthGridSettings = L.ALS.Settings.extend({
 	initialize: function () {
 		L.ALS.Settings.prototype.initialize.call(this);
 
-		let gridBorderColorWidget = new L.ALS.Widgets.Color("gridBorderColor", "Default grid fill color");
+		let gridBorderColorWidget = new L.ALS.Widgets.Color("gridBorderColor", "Default grid border color");
 		gridBorderColorWidget.setAttributes({
 			value: this.gridBorderColor,
 			defaultValue: this.gridBorderColor
 		});
 
-		let gridFillColorWidget = new L.ALS.Widgets.Color("gridFillColor", "Default grid border color");
+		let gridFillColorWidget = new L.ALS.Widgets.Color("gridFillColor", "Default grid fill color");
 		gridFillColorWidget.setAttributes({
 			value: this.gridFillColor,
 			defaultValue: this.gridFillColor

@@ -273,16 +273,28 @@ L.ALS.Helpers = {
 	deviceType: "desktop",
 
 	/**
-	 * @type {boolean}
 	 * Equals to `deviceType === "phone"`
+	 * @type {boolean}
 	 */
 	isMobile: true,
 
 	/**
+	 * If user's browser is IE (any version), will be true. Will be false otherwise.
+	 */
+	isIE: "ActiveXObject" in window,
+
+	/**
+	 * If user's browser is IE9 or less, will be true. Will be false otherwise.
 	 * @type {boolean}
-	 * If user's browser is IE9 or less, will be equal to true. Will be equal to false otherwise.
 	 */
 	isIElte9: window.ActiveXObject && !window.navigator.msSaveOrOpenBlob,
+
+	/**
+	 * If user's browser is IE11, will be true. Will be false otherwise.
+	 * @type {boolean}
+	 */
+	isIE11: !(window.ActiveXObject) && "ActiveXObject" in window,
+
 }
 
 /**
@@ -307,3 +319,27 @@ for (let device of devices) {
 	isTablet = true;
 }
 L.ALS.Helpers.isMobile = (L.ALS.Helpers.deviceType === "phone");
+
+/**
+ * By default, points to window.localStorage. If user's browser doesn't support LocalStorage, will use temporary "polyfill" which acts like LocalStorage but doesn't actually save anything.
+ */
+L.ALS.Helpers.localStorage = (!!window.localStorage) ? window.localStorage : {
+
+	_storage: {},
+
+	getItem(key) {
+		return this._storage[key];
+	},
+
+	setItem(key, value) {
+		this._storage[key] = value;
+	},
+
+	removeItem(key) {
+		delete this._storage[key];
+	},
+
+	clear() {
+		this._storage = {};
+	}
+}
