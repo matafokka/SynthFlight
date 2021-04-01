@@ -38,7 +38,9 @@ L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend({
 		this.windowWrapper = this.window.querySelector("div[data-id='wrapper']");
 
 		this.select.addEventListener("change", (e) => {
-			this.displayItem(e.target.value);
+			this.displayItem(
+				L.ALS.Locales.getLocalePropertyOrValue(e.target.options[e.target.selectedIndex])
+			);
 		});
 
 		this.closeButton.addEventListener("click", () => {
@@ -161,8 +163,7 @@ L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend({
 				this.maxHeight = this.window.offsetHeight;
 		}
 		this.setWindowHeight(this.maxHeight);
-		let localeString = previousOption.getAttribute("data-als-locale-property");
-		this.displayItem((localeString) ? localeString : previousOption.text);
+		this.displayItem(L.ALS.Locales.getLocalePropertyOrValue(previousOption));
 	},
 
 	setWindowHeight: function (height) {

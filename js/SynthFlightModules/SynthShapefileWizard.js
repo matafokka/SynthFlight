@@ -1,6 +1,6 @@
 L.ALS.SynthShapefileWizard = L.ALS.Wizard.extend({
 
-	displayName: "Zipped Shapefile Layer",
+	displayName: "shapefileDisplayName",
 
 	initialize: function () {
 		L.ALS.Wizard.prototype.initialize.call(this);

@@ -98,6 +98,7 @@ L.ALS._service.SettingsWindow = L.ALS._service.SidebarWindow.extend({
 						this.setWidgetValue(item, widget, json[key])
 				});
 			});
+			this.updateWindowHeight();
 		});
 	},
 
@@ -121,6 +122,7 @@ L.ALS._service.SettingsWindow = L.ALS._service.SidebarWindow.extend({
 			if (newValue)
 				this.setWidgetValue(item, widget, newValue)
 		});
+		this.updateWindowHeight();
 	},
 
 	setWidgetValue: function (item, widget, value) {

@@ -67,6 +67,21 @@ L.ALS.Locales = {
 			element[elementPropertyToLocalize] = localeProperty;
 	},
 
+	/**
+	 * Returns either locale property bound to given element (if set) or property's value
+	 * @param element {Element} Element to find property of
+	 * @return {string} Found locale property or element's value
+	 */
+	getLocalePropertyOrValue: function (element) {
+		let property = element.getAttribute("data-als-locale-property");
+		if (property)
+			return property;
+		property = element.getAttribute("data-als-locale-property-to-localize");
+		if (property)
+			return element[property];
+		return element[this._getElementPropertyToSet(element)];
+	},
+
 
 	/**
 	 * Changes current locale

@@ -62,12 +62,12 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 
 	// SynthShapefileWizard
 
-	shapefileDisplayName: "Слой со сжатым shapefile",
+	shapefileDisplayName: "Слой Shapefile",
 	zippedShapefile: "Сжатый shapefile (zip-архив)",
 
 	// SynthShapefileLayer
 
-	shapefileDefaultName: "Сжатый shapefile",
+	shapefileDefaultName: "Сжатый Shapefile",
 	shapefileNoFeatures: "Этот shapefile не содержит объектов, поэтому не будет добавлен",
 	shapefileBroken: "Экстент этого shapefile неправильный, слой не будет полностью отображен на карте. Пожалуйста, откройте его в вашей любимой ГИС и исправьте экстент",
 	shapefileNotValid: "Этот файл не является shapefile-ом",

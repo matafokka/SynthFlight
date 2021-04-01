@@ -139,7 +139,7 @@ L.ALS.System = L.Control.extend({
 
 		this._settingsButton = document.getElementById("adv-lyr-sys-settings-button");
 		this._settingsWindow = new L.ALS._service.SettingsWindow(this._settingsButton, () => { this.applyNewSettings(); }, aboutHTML);
-		this._settingsWindow.addItem("General Settings", new L.ALS._service.GeneralSettings());
+		this._settingsWindow.addItem("settingsGeneralSettings", new L.ALS._service.GeneralSettings());
 
 		// IE and old browsers (which are unsupported by ALS) either doesn't implement LocalStorage or doesn't support it when app runs locally
 		if (!window.localStorage) {

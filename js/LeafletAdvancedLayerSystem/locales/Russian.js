@@ -4,7 +4,7 @@ L.ALS.Locales["Русский"] = {
 
 	menuSaveButton: "Сохранить",
 	menuLoadButton: "Загрузить",
-	menuExportButton: "Экспортировать",
+	menuExportButton: "Экспорт",
 	menuSettingsButton: "Настройки",
 
 	// Sidebar window
@@ -32,6 +32,7 @@ L.ALS.Locales["Русский"] = {
 
 	// General settings
 
+	settingsGeneralSettings: "Общие настройки",
 	generalSettingsLanguage: "Язык",
 	generalSettingsTheme: "Тема",
 	generalSettingsLightTheme: "Светлая",

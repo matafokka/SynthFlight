@@ -19,6 +19,7 @@ L.ALS.Locales["English"] = {
 
 	// Settings
 
+	settingsGeneralSettings: "General Settings",
 	settingsSelectTitle: "Settings sections",
 	settingsContentTitle: "Settings for selected section",
 	settingsApplyButton: "Apply and Close",

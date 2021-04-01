@@ -4,7 +4,7 @@ const shp = require("shpjs");
 
 L.ALS.SynthShapefileLayer = L.ALS.Layer.extend({
 
-	defaultName: "Zipped Shapefile",
+	defaultName: "shapefileDefaultName",
 
 	geometryType: undefined,
 
@@ -15,7 +15,7 @@ L.ALS.SynthShapefileLayer = L.ALS.Layer.extend({
 		if (wizardResults === "deserialized")
 			return;
 
-		let file = wizardResults["zippedShapefile"][0]
+		let file = wizardResults["zippedShapefile"][0];
 		let fileReader = new FileReader();
 		try { fileReader.readAsArrayBuffer(file); }
 		catch (e) {
@@ -25,7 +25,7 @@ L.ALS.SynthShapefileLayer = L.ALS.Layer.extend({
 		fileReader.addEventListener("load", (event) => {
 			shp(event.target.result).then((geoJson) => {
 				if (geoJson.features.length === 0) {
-					this._deleteInvalidLayer(L.ALS.locale.shapefileInvalid);
+					this._deleteInvalidLayer(L.ALS.locale["shapefileInvalid"]);
 					return;
 				}
 
