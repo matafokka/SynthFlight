@@ -8,8 +8,10 @@
 // I've spend hours struggling with this issue, so don't try to reorganise the code, you'll fail and, as it seems, break compatibility with the older Electron versions.
 
 require("./js/LeafletAdvancedLayerSystem/System.js");
-require("./js/layers/SynthShapefileLayer.js");
-require("./js/layers/SynthGridLayer.js");
+require("./js/SynthFlightModules/locales/English.js");
+require("./js/SynthFlightModules/locales/Russian.js");
+require("./js/SynthFlightModules/SynthShapefileLayer.js");
+require("./js/SynthFlightModules/SynthGridLayer.js");
 require("./node_modules/leaflet.coordinates/dist/Leaflet.Coordinates-0.1.5.min.js")
 
 L.ALS.System.initializeSystem();

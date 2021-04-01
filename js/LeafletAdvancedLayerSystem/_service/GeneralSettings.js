@@ -2,22 +2,28 @@ L.ALS._service.GeneralSettings = L.ALS.Settings.extend({
 	initialize: function () {
 		L.ALS.Settings.prototype.initialize.call(this);
 
-		let languageWidget = new L.ALS.Widgets.DropDownList("lang", "Language");
-		for (let lang of ["English", "Gibberish", "Equestrian", "1337 5|>34|{"])
-			languageWidget.addItem(lang);
+		let languageWidget = new L.ALS.Widgets.DropDownList("lang", "generalSettingsLanguage", this, "changeLocale");
+		for (let locale in L.ALS.Locales) {
+			if (L.ALS.Locales.hasOwnProperty(locale) && typeof L.ALS.Locales[locale] !== "function")
+				languageWidget.addItem(locale);
+		}
 		languageWidget.setAttributes({ defaultValue: "English" });
+		this.addWidget(languageWidget);
 
-		let themeWidget = new L.ALS.Widgets.DropDownList("theme", "Theme");
+		// TODO: Uncomment it when themes will be ready
+		/*let themeWidget = new L.ALS.Widgets.DropDownList("theme", "generalSettingsTheme");
 		for (let theme of ["Light", "Dark", "System", "Time Range"])
 			themeWidget.addItem(theme);
 		themeWidget.setAttributes({ defaultValue: "System" });
 
-		let widgets = [
-			languageWidget, themeWidget,
-			new L.ALS.Widgets.SimpleLabel("warning", "Warning: general settings are not implemented yet, they're here only for testing purposes. All other settings are working fine.", "justify", "warning")
-		];
+		let widgets = [languageWidget, themeWidget];
 
 		for (let widget of widgets)
-			this.addWidget(widget);
-	}
+			this.addWidget(widget);*/
+	},
+
+	changeLocale: function (widget) {
+		L.ALS.Locales.changeLocale(widget.getValue());
+	},
+
 })

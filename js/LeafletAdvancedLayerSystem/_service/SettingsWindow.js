@@ -1,6 +1,6 @@
 L.ALS._service.SettingsWindow = L.ALS._service.SidebarWindow.extend({
 	initialize: function (button, onCloseCallback, aboutHTML = undefined) {
-		L.ALS._service.SidebarWindow.prototype.initialize.call(this, button, "Settings sections", "Settings for selected section", "Apply and close", () => { this.saveSettings(); });
+		L.ALS._service.SidebarWindow.prototype.initialize.call(this, button, "settingsSelectTitle", "settingsContentTitle", "settingsApplyButton", () => { this.saveSettings(); });
 		this.onCloseCallback = onCloseCallback;
 
 		// Create "About" section
@@ -13,18 +13,15 @@ L.ALS._service.SettingsWindow = L.ALS._service.SidebarWindow.extend({
 		this.aboutWidgetable.container.appendChild(wrapper);
 
 		L.ALS.Helpers.HTMLToElement(aboutHTML, wrapper);
-		let footer = this.aboutWidgetable.container.querySelector("footer");
-		if (footer)
-			this.aboutWidgetable.container.appendChild(footer);
 
 		// Create export and import buttons
 		let exportButton = document.createElement("div");
-		exportButton.textContent = "Export Settings";
+		L.ALS.Locales.localizeElement(exportButton, "settingsExportButton");
 		exportButton.addEventListener("click", () => { this.exportSettings(); })
 
 		let importButton = document.createElement("label");
 		importButton.htmlFor = "adv-lyr-sys-load-settings-input";
-		importButton.textContent = "Import Settings";
+		L.ALS.Locales.localizeElement(importButton, "settingsImportButton");
 		importButton.addEventListener("click", () => { this.importSettings(); })
 
 		for (let button of [exportButton, importButton]) {
@@ -35,7 +32,7 @@ L.ALS._service.SettingsWindow = L.ALS._service.SidebarWindow.extend({
 
 	addItem: function (name, item) {
 		L.ALS._service.SidebarWindow.prototype.addItem.call(this, name, item);
-		if (name === "About")
+		if (name === "settingsAboutItem")
 			return;
 
 		for (let i in item._widgets) {
@@ -51,11 +48,12 @@ L.ALS._service.SettingsWindow = L.ALS._service.SidebarWindow.extend({
 
 			let button = document.createElement("i");
 			button.className = "fas fa-undo revert-button";
-			button.title = "Revert back to default value";
+			L.ALS.Locales.localizeElement(button, "settingsRevertButton", "title");
 			widget.container.appendChild(button);
 
 			button.addEventListener("click", () => {
 				widget.setValue(widget.attributes.defaultValue);
+				widget.callCallback();
 			});
 
 			if (button.click)
@@ -63,8 +61,8 @@ L.ALS._service.SettingsWindow = L.ALS._service.SidebarWindow.extend({
 			else
 				L.ALS.Helpers.dispatchEvent(button, "click");
 		}
-		this.removeItem("About");
-		this.addItem("About", this.aboutWidgetable);
+		this.removeItem("settingsAboutItem");
+		this.addItem("settingsAboutItem", this.aboutWidgetable);
 		this.restoreSettingsFromStorage();
 	},
 
@@ -86,18 +84,18 @@ L.ALS._service.SettingsWindow = L.ALS._service.SidebarWindow.extend({
 	importSettings: function () {
 		let loadButton = document.getElementById("adv-lyr-sys-load-settings-input");
 		loadButton.addEventListener("change", () => {
-			L.ALS.Helpers.readTextFile(loadButton, "Sorry, your browser doesn't supprot file loading. Please, update it.", (text) => {
+			L.ALS.Helpers.readTextFile(loadButton, L.ALS.locale.settingsLoadingNotSupported, (text) => {
 
 				let json;
 				try { json = JSON.parse(text); }
 				catch (e) {
-					window.alert("File that you try to load is not SynthFlight settings file");
+					window.alert(L.ALS.locale.settingsImportError);
 					return;
 				}
 
 				this.forEachWidget((item, widget, key) => {
 					if (json[key])
-						this.getItem(item).getWidgetById(widget).setValue(json[key]);
+						this.setWidgetValue(item, widget, json[key])
 				});
 			});
 		});
@@ -105,7 +103,7 @@ L.ALS._service.SettingsWindow = L.ALS._service.SidebarWindow.extend({
 
 	forEachWidget: function (callback) {
 		for (let name in this.items) {
-			if (name === "About")
+			if (name === "settingsAboutItem")
 				continue;
 
 			let item = this.items[name].widgetable;
@@ -121,8 +119,14 @@ L.ALS._service.SettingsWindow = L.ALS._service.SidebarWindow.extend({
 		this.forEachWidget((item, widget, key) => {
 			let newValue = L.ALS.Helpers.localStorage.getItem(key);
 			if (newValue)
-				this.getItem(item).getWidgetById(widget).setValue(newValue);
+				this.setWidgetValue(item, widget, newValue)
 		});
+	},
+
+	setWidgetValue: function (item, widget, value) {
+		let w = this.getItem(item).getWidgetById(widget);
+		w.setValue(value);
+		w.callCallback();
 	}
 
 });

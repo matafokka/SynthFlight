@@ -320,6 +320,11 @@ for (let device of devices) {
 }
 L.ALS.Helpers.isMobile = (L.ALS.Helpers.deviceType === "phone");
 
+if (L.ALS.Helpers.isMobile)
+	document.body.classList.add("mobile");
+else
+	document.body.classList.add("not-mobile");
+
 /**
  * By default, points to window.localStorage. If user's browser doesn't support LocalStorage, will use temporary "polyfill" which acts like LocalStorage but doesn't actually save anything.
  */

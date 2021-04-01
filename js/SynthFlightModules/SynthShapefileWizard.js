@@ -4,7 +4,7 @@ L.ALS.SynthShapefileWizard = L.ALS.Wizard.extend({
 
 	initialize: function () {
 		L.ALS.Wizard.prototype.initialize.call(this);
-		this.addWidget(new L.ALS.Widgets.File("zippedShapefile", "Zipped shapefile"));
+		this.addWidget(new L.ALS.Widgets.File("zippedShapefile", "zippedShapefile"));
 	}
 
 });

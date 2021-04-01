@@ -25,11 +25,11 @@
  */
 L.ALS.Layer = L.ALS.Widgetable.extend({
 	/**
-	 * Name to be assigned to this layer by default
+	 * Name to be assigned to this layer by default. You can use locale property to localize it.
 	 * @type {string}
 	 * @public
 	 */
-	defaultName: "Advanced Layer",
+	defaultName: "layerDefaultName",
 
 	/**
 	 * Indicates whether this layer is shown or not. Do NOT modify!
