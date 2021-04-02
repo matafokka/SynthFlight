@@ -1,10 +1,15 @@
 require("jscolor");
+const debounce = require("debounce");
 
 L.ALS.Widgets.Color = L.ALS.Widgets.BaseWidget.extend({
 
 	initialize: function (id, label, objectToControl = undefined, callback = "", attributes= {}) {
-		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "color", id, label, objectToControl, callback, ["edit", "change"], attributes);
+		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "color", id, label, objectToControl, callback, ["change"], attributes);
 		this.setConstructorArguments(arguments);
+
+		this.input.addEventListener("input", debounce(
+			() => { this.callCallback(); },
+			50));
 		this._waitForElementToBeAdded();
 	},
 
@@ -44,4 +49,5 @@ L.ALS.Widgets.Color = L.ALS.Widgets.BaseWidget.extend({
 			});
 		}
 	},
+
 });

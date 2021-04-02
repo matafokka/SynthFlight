@@ -218,7 +218,7 @@ L.ALS.System = L.Control.extend({
 	 * @private
 	 */
 	_createLayer: function () {
-		let type = this._layerTypes[this._wizardMenu.value].layerType;
+		let type = this._layerTypes[L.ALS.Locales.getLocalePropertyOrValue(this._wizardMenu.options[this._wizardMenu.selectedIndex])].layerType;
 		// Gather arguments from wizard
 		let args = {};
 		for (let property in type.wizard._widgets) {
