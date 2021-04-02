@@ -24,11 +24,12 @@ L.ALS.Widgets.File = L.ALS.Widgets.BaseWidget.extend({
 	_updateFileArea: function () {
 		let files = this.getValue();
 		if (files === undefined || files.length === 0) {
-			this.fileArea.innerHTML = "No files selected. Click here to select some files.";
+			L.ALS.Locales.localizeElement(this.fileArea, "fileNoFilesSelected");
 			return;
 		}
 		if (!this.input.hasAttribute("multiple")) {
-			this.fileArea.innerHTML = "Selected file: " + files[0].name;
+			L.ALS.Locales.localizeElement(this.fileArea, "fileSelectedFile");
+			this.fileArea.innerText += " " + files[0].name;
 			return;
 		}
 

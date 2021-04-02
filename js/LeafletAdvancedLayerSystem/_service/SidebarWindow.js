@@ -6,7 +6,7 @@ L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend({
 	sidebarWidth: 0,
 	isSidebarHidden: false,
 
-	initialize: function (button, sidebarTitle, contentTitle, closeButtonTitle="Cancel", onCloseCallback = undefined) {
+	initialize: function (button, sidebarTitle, contentTitle, closeButtonTitle = "sidebarWindowCancelButton", onCloseCallback = undefined) {
 		L.ALS.WidgetableWindow.prototype.initialize.call(this, button);
 		this.items = {};
 		this.window.classList.add("adv-lyr-sys-sidebar-window");
@@ -14,18 +14,18 @@ L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend({
 		L.ALS.Helpers.HTMLToElement(`
 <div class="adv-lyr-sys-sidebar-window-wrapper" data-id="wrapper">
 	<div class="hidden" data-id="select-container">
-		<div class="adv-lyr-sys-window-sidebar-title">${sidebarTitle}</div>
+		<div class="adv-lyr-sys-window-sidebar-title" data-als-locale-property="${sidebarTitle}"></div>
 		<select class="adv-lyr-sys-window-select" data-id="select"></select>
 	</div>
 	<div class="adv-lyr-sys-sidebar" data-id="sidebar">
-		<div class="adv-lyr-sys-window-sidebar-title">${sidebarTitle}</div>
+		<div class="adv-lyr-sys-window-sidebar-title" data-als-locale-property="${sidebarTitle}"></div>
 	</div>
 	<div class="adv-lyr-sys-sidebar-window-content-wrapper" data-id="content-wrapper">
-		<div class="adv-lyr-sys-window-sidebar-title">${contentTitle}</div>
+		<div class="adv-lyr-sys-window-sidebar-title" data-als-locale-property="${contentTitle}"></div>
 	</div>
 </div>
 <div class="controls-row-set adv-lyr-sys-sidebar-window-button-container" data-id="buttons-wrapper">
-	<div class="button-base" data-id="close-button">${closeButtonTitle}</div>
+	<div class="button-base" data-id="close-button" data-als-locale-property="${closeButtonTitle}"></div>
 </div>
 		`, this.window);
 
@@ -38,7 +38,9 @@ L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend({
 		this.windowWrapper = this.window.querySelector("div[data-id='wrapper']");
 
 		this.select.addEventListener("change", (e) => {
-			this.displayItem(e.target.value);
+			this.displayItem(
+				L.ALS.Locales.getLocalePropertyOrValue(e.target.options[e.target.selectedIndex])
+			);
 		});
 
 		this.closeButton.addEventListener("click", () => {
@@ -81,20 +83,20 @@ L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend({
 
 	/**
 	 * Adds item to this window
-	 * @param name {string} name of the item
+	 * @param name {string} Name of the item or locale string
 	 * @param item {L.ALS.Widgetable} Item to add
 	 */
 	addItem: function (name, item) {
 		let option = document.createElement("option");
-		option.text = name;
+		L.ALS.Locales.localizeOrSetValue(option, name, "text");
 		this.select.appendChild(option);
 
 		let sidebarItem = document.createElement("div");
 		sidebarItem.className = "button-base";
-		sidebarItem.textContent = name;
 		sidebarItem.addEventListener("click", () => {
 			this.displayItem(name);
 		});
+		L.ALS.Locales.localizeOrSetValue(sidebarItem, name);
 		this.sidebar.appendChild(sidebarItem);
 
 		let container = item.container;
@@ -133,13 +135,10 @@ L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend({
 
 	displayItem: function (name) {
 		let item = this.items[name];
+		if (!item)
+			return;
 
-		for (let option of this.select.options) {
-			if (option.value === name) {
-				option.selected = "selected";
-				break;
-			}
-		}
+		item.selectItem.selected = "selected";
 
 		for (let child of this.sidebar.children)
 			child.setAttribute("data-is-selected", "0");
@@ -154,7 +153,7 @@ L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend({
 		while (!this.isWindowVisible())
 			await new Promise(resolve => setTimeout(resolve, 0));
 
-		let previousOption = this.select.value;
+		let previousOption = this.select.options[this.select.selectedIndex];
 		this.maxHeight = 0;
 		this.setWindowHeight("auto");
 		for (let option of this.select.options) {
@@ -164,7 +163,7 @@ L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend({
 				this.maxHeight = this.window.offsetHeight;
 		}
 		this.setWindowHeight(this.maxHeight);
-		this.displayItem(previousOption);
+		this.displayItem(L.ALS.Locales.getLocalePropertyOrValue(previousOption));
 	},
 
 	setWindowHeight: function (height) {

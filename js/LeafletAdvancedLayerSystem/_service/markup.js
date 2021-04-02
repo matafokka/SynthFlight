@@ -18,10 +18,10 @@ L.ALS.Helpers.HTMLToElement(`
 	<!-- Bottom panel -->
 	<div id="bottom-panel-wrapper">
 		<div id="adv-lyr-sys-menu-bottom-panel" class="controls-row-set">
-			<div id="adv-lyr-sys-save-button" class="button-base">Save</div>
-			<label for="adv-lyr-sys-load-input" id="adv-lyr-sys-load-button" class="button-base">Load</label>
-			<div id="adv-lyr-sys-export-button" class="button-base">Export</div>
-			<div id="adv-lyr-sys-settings-button" class="button-base">Settings</div>
+			<div id="adv-lyr-sys-save-button" class="button-base" data-als-locale-property="menuSaveButton"></div>
+			<label for="adv-lyr-sys-load-input" id="adv-lyr-sys-load-button" class="button-base" data-als-locale-property="menuLoadButton"></label>
+			<div id="adv-lyr-sys-export-button" class="button-base" data-als-locale-property="menuExportButton"></div>
+			<div id="adv-lyr-sys-settings-button" class="button-base" data-als-locale-property="menuSettingsButton"></div>
 		</div>
 	</div>
 </div>

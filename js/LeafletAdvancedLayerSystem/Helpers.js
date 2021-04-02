@@ -151,7 +151,7 @@ L.ALS.Helpers = {
 
 	/**
 	 * Reads file opened on fileInput as text, calls given callback and passes text to it
-	 * @param fileInput {HTMLInputElement} File input to read file from
+	 * @param fileInput {Element} File input to read file from
 	 * @param notSupportedNotification {string} If user's browser doesn't support reading text files, this notification will be presented.
 	 * @param callback {function(string)} Callback to pass text to
 	 */
@@ -319,6 +319,11 @@ for (let device of devices) {
 	isTablet = true;
 }
 L.ALS.Helpers.isMobile = (L.ALS.Helpers.deviceType === "phone");
+
+if (L.ALS.Helpers.isMobile)
+	document.body.classList.add("mobile");
+else
+	document.body.classList.add("not-mobile");
 
 /**
  * By default, points to window.localStorage. If user's browser doesn't support LocalStorage, will use temporary "polyfill" which acts like LocalStorage but doesn't actually save anything.

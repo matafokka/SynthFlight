@@ -35,7 +35,7 @@ L.ALS.Widgets.SimpleLabel = L.ALS.Widgets.BaseWidget.extend({
 	},
 
 	setValue: function (value) {
-		this.input.innerHTML = value;
+		L.ALS.Locales.localizeOrSetValue(this.input, value);
 
 		if (this.container === undefined)
 			return;

@@ -18,7 +18,7 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend({
 	 * Constructs this widget.
 	 * @param type {string} Type of input
 	 * @param id {string} ID of this input. You can select this object using this ID.
-	 * @param label {string} Label for this input
+	 * @param label {string} Label for this input. You can also pass locale property to localize the label.
 	 * @param objectToControl {Object|L.ALS.Serializable} Just pass "this". If you plan to use serialization, this object MUST be instance of L.ALS.Serializable.
 	 * @param callback {string} Name of a method of objectToControl that will be called when widget's value changes
 	 * @param events {string[]} Array containing event's names to bind to the provided callback
@@ -206,12 +206,17 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend({
 	getLabelText: function () {
 		if (!this.labelWidget) // When widget doesn't have label, labelWidget will be undefined. In this case, return empty string.
 			return "";
-		return this.labelWidget.innerHTML.slice(0, this.labelWidget.innerHTML.length - 1);
+		return this.labelWidget.textContent.slice(0, this.labelWidget.innerHTML.length - 1);
 	},
 
+	/**
+	 * Sets label text
+	 * @param text {string} Text to set. You can also pass locale property to localize the label.
+	 */
 	setLabelText: function (text) {
-		if (this.labelWidget) // See comment above
-			this.labelWidget.innerHTML = text + ":";
+		if (!this.labelWidget) // See comment above
+			return;
+		L.ALS.Locales.localizeOrSetValue(this.labelWidget, text);
 	},
 
 });

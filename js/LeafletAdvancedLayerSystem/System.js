@@ -12,6 +12,7 @@ L.ALS = {
 const Sortable = require("sortablejs");
 const JSZip = require("jszip");
 const saveAs = require("file-saver");
+require("./locales/Locales.js");
 require("./InteractiveLayerPatch.js");
 require("./Helpers.js");
 require("./Serializable.js");
@@ -106,8 +107,6 @@ L.ALS.System = L.Control.extend({
 
 		// Menu-related stuff
 		this.menu = document.getElementById("menu");
-		if (L.ALS.Helpers.isMobile)
-			this.menu.classList.add("menu-mobile");
 		L.ALS.Helpers.makeHideable(document.getElementById("menu-close"), this.menu);
 
 		this._baseLayerMenu = document.getElementById("menu-maps-select");
@@ -124,14 +123,12 @@ L.ALS.System = L.Control.extend({
 		this._loadButton = document.getElementById("adv-lyr-sys-load-input");
 		this._loadButton.addEventListener("change", () => {
 
-			if (!L.ALS.Helpers.isObjectEmpty(this._layers) && !window.confirm("You already have an opened project. Are you sure you wan't to load another one?")) {
+			if (!L.ALS.Helpers.isObjectEmpty(this._layers) && !window.confirm(L.ALS.locale.systemProjectAlreadyOpen)) {
 				this._loadButton.value = "";
 				return;
 			}
 
-			L.ALS.Helpers.readTextFile(this._loadButton,
-				"Sorry, your browser doesn't support project loading. However, you still can create a new project, save it and open it later in a newer browser.",
-				(text) => { this._loadProject(text); });
+			L.ALS.Helpers.readTextFile(this._loadButton, L.ALS.locale.systemProjectLoadingNotSupported, (text) => { this._loadProject(text); });
 
 		});
 
@@ -142,12 +139,12 @@ L.ALS.System = L.Control.extend({
 
 		this._settingsButton = document.getElementById("adv-lyr-sys-settings-button");
 		this._settingsWindow = new L.ALS._service.SettingsWindow(this._settingsButton, () => { this.applyNewSettings(); }, aboutHTML);
-		this._settingsWindow.addItem("General Settings", new L.ALS._service.GeneralSettings());
+		this._settingsWindow.addItem("settingsGeneralSettings", new L.ALS._service.GeneralSettings());
 
 		// IE and old browsers (which are unsupported by ALS) either doesn't implement LocalStorage or doesn't support it when app runs locally
 		if (!window.localStorage) {
 			this._settingsButton.addEventListener("click", () => {
-				window.alert("Settings can't be saved upon page refresh because your browser doesn't support it. Please, install any modern browser, so it won't happen.");
+				window.alert(L.ALS.locale.settingsSavingNotSupported);
 			});
 		}
 
@@ -221,7 +218,7 @@ L.ALS.System = L.Control.extend({
 	 * @private
 	 */
 	_createLayer: function () {
-		let type = this._layerTypes[this._wizardMenu.value].layerType;
+		let type = this._layerTypes[L.ALS.Locales.getLocalePropertyOrValue(this._wizardMenu.options[this._wizardMenu.selectedIndex])].layerType;
 		// Gather arguments from wizard
 		let args = {};
 		for (let property in type.wizard._widgets) {
@@ -295,7 +292,7 @@ L.ALS.System = L.Control.extend({
 	 * @param shouldAskUser {boolean} If set to true, the message asking if user wants to delete selected layer will be displayed. Otherwise, layer will be silently deleted.
 	 */
 	_deleteLayer: function (shouldAskUser = true) {
-		if (this._selectedLayer === undefined || (shouldAskUser && !window.confirm("Are you sure you want to delete this layer?")))
+		if (this._selectedLayer === undefined || (shouldAskUser && !window.confirm(L.ALS.locale.systemConfirmDeletion)))
 			return;
 
 		this._selectedLayer.onDelete();
@@ -439,7 +436,7 @@ L.ALS.System = L.Control.extend({
 		catch (e) {
 			// TODO: Add mechanism to change program name and link to the program's page
 			// TODO: Remove "pre-alpha state" notice when project will come out of alpha state
-			window.alert("File that you try to load is not SynthFlight project. If you're sure that everything's correct, please, open Developer Tools and create an issue with displayed error message at https://github.com/matafokka/SynthFlight.\n\nKeep in mind that SynthFlight is in pre-alpha state, so your old projects just might be not supported in a newer version.");
+			window.alert(L.ALS.systemNotProject);
 			console.log(e);
 		}
 	},
