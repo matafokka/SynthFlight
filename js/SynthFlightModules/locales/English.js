@@ -84,4 +84,16 @@ L.ALS.Locales.addLocaleProperties("English", {
 	shapefileDefaultFillColor: "Default fill color",
 	shapefileDefaultBorderColor: "Default border color",
 
+	// About
+
+	firstParagraph: "SynthFlight is a fully client-side software for planning aerial photography. This is a pre-alpha version, so expect bugs, crashes, errors, missing functions, API changes, etc.",
+
+	secondParagraphPart1: "Visit project's",
+	secondParagraphPart2: "GitHub page",
+	secondParagraphPart3: "for more information.",
+
+	thirdParagraph: "Developing SynthFlight is possible thanks to following open-source software:",
+
+	fourthParagraph: "Using maps is possible thanks to following geoservices:",
+
 });

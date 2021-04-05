@@ -16,7 +16,7 @@ L.ALS.Widgets.ValueLabel = L.ALS.Widgets.SimpleLabel.extend({
 	/**
 	 * Constructs label with value
 	 * @param id {string} ID of this label
-	 * @param description {string} Value description
+	 * @param description {string} Value description. You can use locale property to localize it.
 	 * @param units {string} Units for this label. If set to empty string, unitsPosition won't take an effect.
 	 * @param unitsPosition {"description"|"value"} Units position. If set to "description", units will be displayed after description. Otherwise, units will be displayed after the value.
 	 * @param formatNumbers {boolean} If set to true, value will be formatted using L.ALS.Helpers.formatNumber()
@@ -34,11 +34,18 @@ L.ALS.Widgets.ValueLabel = L.ALS.Widgets.SimpleLabel.extend({
 		this.setStyle(style);
 	},
 
+	/**
+	 * Sets description of this label
+	 * @param description {string} Value description. You can use locale property to localize it.
+	 */
 	setDescription: function (description) {
 		this.description = description;
 		this._updateValue();
 	},
 
+	/**
+	 * @return {string} Description of this label
+	 */
 	getDescription: function () {
 		return this.description;
 	},
@@ -108,7 +115,8 @@ L.ALS.Widgets.ValueLabel = L.ALS.Widgets.SimpleLabel.extend({
 	_updateValue: function () {
 		let hasUnits = this.units !== "";
 		let isDescription = this.unitsPosition === "description";
-		let value = this.description;
+		let localizedValue = L.ALS.locale[this.description];
+		let value = (localizedValue) ? localizedValue : this.description;
 		if (isDescription && hasUnits)
 			value += " (" + this.units + ")";
 		value += ": " + (this.formatNumbers ? L.ALS.Helpers.formatNumber(this._labelValue) : this._labelValue);

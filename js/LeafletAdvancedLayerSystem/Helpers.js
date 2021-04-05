@@ -259,6 +259,20 @@ L.ALS.Helpers = {
 		}
 	},
 
+	_applyButtonsIconsIfMobile: function (container) {
+		if (!this.isMobile)
+			return;
+		container.classList.add("icon-button-container");
+		for (let el of container.children) {
+			let className = el.getAttribute("data-mobile-class");
+			if (!className)
+				continue;
+			el.className += " " + className;
+			el[L.ALS.Locales._getElementPropertyToSet(el)] = "";
+			el.removeAttribute("data-als-locale-property");
+		}
+	},
+
 	_inconvenienceText: "Sorry for the inconvenience. Please, update your browser, so this and many other things on the web won't happen.\n\nYour download will start after you'll close this window.",
 
 	/**
@@ -319,11 +333,7 @@ for (let device of devices) {
 	isTablet = true;
 }
 L.ALS.Helpers.isMobile = (L.ALS.Helpers.deviceType === "phone");
-
-if (L.ALS.Helpers.isMobile)
-	document.body.classList.add("mobile");
-else
-	document.body.classList.add("not-mobile");
+document.body.classList.add((L.ALS.Helpers.isMobile) ? "mobile" : "not-mobile");
 
 /**
  * By default, points to window.localStorage. If user's browser doesn't support LocalStorage, will use temporary "polyfill" which acts like LocalStorage but doesn't actually save anything.

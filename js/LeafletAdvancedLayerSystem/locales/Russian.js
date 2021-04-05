@@ -22,8 +22,8 @@ L.ALS.Locales["Русский"] = {
 	settingsSelectTitle: "Разделы настроек",
 	settingsContentTitle: "Настройки для выбранного раздела",
 	settingsApplyButton: "Применить и Закрыть",
-	settingsExportButton: "Экспортировать Настройки",
-	settingsImportButton: "Импортировать Настройки",
+	settingsExportButton: "Экспорт Настроек",
+	settingsImportButton: "Импорт Настроек",
 	settingsRevertButton: "Вернуть к изначальному значению",
 	settingsLoadingNotSupported: "Извините, ваш браузер не поддерживает загрузку файлов. Пожалуйста, установите современный браузер, чтобы этого не происходило.",
 	settingsImportError: "Файл, который вы пытаетесь загрузить, не является файлом настроек SynthFlight",
@@ -55,6 +55,6 @@ L.ALS.Locales["Русский"] = {
 
 	// File widget
 
-	fileNoFilesSelected: "Никакие файлы не выбраны. Нажмите сюда, чтобы выбрать файлы",
+	fileNoFilesSelected: "Никакие файлы не выбраны. Нажмите сюда, чтобы выбрать файлы.",
 	fileSelectedFile: "Выбранные файлы:",
 };

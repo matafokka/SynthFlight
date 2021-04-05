@@ -17,17 +17,21 @@ L.ALS._service.SettingsWindow = L.ALS._service.SidebarWindow.extend({
 		// Create export and import buttons
 		let exportButton = document.createElement("div");
 		L.ALS.Locales.localizeElement(exportButton, "settingsExportButton");
-		exportButton.addEventListener("click", () => { this.exportSettings(); })
+		exportButton.setAttribute("data-mobile-class", "fas fa-save");
+		exportButton.addEventListener("click", () => { this.exportSettings(); });
 
 		let importButton = document.createElement("label");
 		importButton.htmlFor = "adv-lyr-sys-load-settings-input";
 		L.ALS.Locales.localizeElement(importButton, "settingsImportButton");
-		importButton.addEventListener("click", () => { this.importSettings(); })
+		importButton.setAttribute("data-mobile-class", "fas fa-folder-open");
+		importButton.addEventListener("click", () => { this.importSettings(); });
 
 		for (let button of [exportButton, importButton]) {
 			button.className = "button-base";
 			this.closeButton.parentElement.insertBefore(button, this.closeButton);
 		}
+
+		L.ALS.Helpers._applyButtonsIconsIfMobile(this.buttonsWrapper);
 	},
 
 	addItem: function (name, item) {

@@ -41,7 +41,8 @@
   },
   "scripts": {
     "start": "electron electronApp.js --debug",
-    "test": "node js/tests/runTests.js"
+    "test": "node js/tests/runTests.js",
+    "buildAndRunOnServer": "node build.js -b && http-server './dist/SynthFlight-browser' -c-1"
   },
   "keywords": [],
   "author": "matafokka",

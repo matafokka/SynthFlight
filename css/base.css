@@ -66,7 +66,6 @@ body {
 	display: inline-block !important;
 	width: 2rem !important;
 	height: 2rem !important;
-	line-height: 2rem !important;
 	font-size: 2rem !important;
 	line-height: 1.5rem !important;
 }
@@ -90,9 +89,8 @@ body {
 	vertical-align: middle;
 	box-sizing: border-box;
 	padding: 0.2rem !important;
-	overflow-wrap: anywhere !important;
+	overflow-wrap: break-word !important;
 	width: 2rem;
-	padding: 0;
 	justify-content: center;
 	align-items: center;
 	text-align: center;
@@ -196,6 +194,12 @@ select > * {
 	bottom: 0;
 	width: 100%;
 	height: 100%;
+}
+
+/* Icon button container */
+.icon-button-container > .fas {
+	width: auto;
+	max-width: 100%;
 }
 
 /* Menu */
@@ -726,9 +730,6 @@ select > * {
 .adv-lyr-sys-about-container h1, .adv-lyr-sys-about-container h2, .adv-lyr-sys-about-container h3, .adv-lyr-sys-about-container h4 {
 	text-align: center;
 	margin: 1rem;
-}
-
-.adv-lyr-sys-about-container {
 }
 
 .adv-lyr-sys-about-wrapper {

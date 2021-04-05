@@ -42,7 +42,7 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 	latFlightTime: "Время полета по меридианам",
 	lngCellSizeInMeters: "Средняя ширина ячейки",
 	latCellSizeInMeters: "Средняя высота сетки",
-	selectedArea: "Площать выделенных полигонов",
+	selectedArea: "Площадь выделенных полигонов",
 	flightHeight: "Высота полета (m)",
 	lx: "Высота изображения, lx",
 	Lx: "Высота изображения на местности, Lx",
@@ -78,5 +78,17 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 
 	shapefileDefaultFillColor: "Цвет заливки по умолчанию",
 	shapefileDefaultBorderColor: "Цвет обводки по умолчанию",
+
+	// About
+
+	firstParagraph: "SynthFlight – это полностью клиентское программное обеспечение для проектирования аэрофотосъемочных работ. Это pre-alpha версия, поэтому ожидаемы баги, ошибки, отсутсвие функциональности, изменения API и т.д.",
+
+	secondParagraphPart1: "Посетите",
+	secondParagraphPart2: "страницу проекта на GitHub",
+	secondParagraphPart3: "для дополнительной информации (на английском языке).",
+
+	thirdParagraph: "Разработка SynthFlight возможна, благодаря следующему свободному ПО:",
+
+	fourthParagraph: "Использование карт возможно, благодаря следующим геосервисам:",
 
 });

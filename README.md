@@ -93,6 +93,8 @@ You can easily host SynthFlight on your server:
 
 There's a "Development" branch which you can fork and commit to. If you plan to contribute to this project, please, notify me before doing so because I might be working on a big feature and not commit until it's ready. I'll commit more often if someone will work with me.
 
+If you speak any language other than Russian or English, you can help with the translation. Locales are located at `js/LeafletAdvancedLayerSystem/locales` and `js/SynthFlightModules/locales` directories. Locales are plain JS objects where key is being used in the program itself and value is a string that's being added to the page. Only values needs translation. Copy one of the locales to a new file, change locale name and translate all the values.
+
 You can also contribute by reporting bugs, requesting API changes, new functionality or something else. Please, create an issue and describe your request.
 
 # FAQ

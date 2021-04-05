@@ -25,7 +25,7 @@ L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend({
 	</div>
 </div>
 <div class="controls-row-set adv-lyr-sys-sidebar-window-button-container" data-id="buttons-wrapper">
-	<div class="button-base" data-id="close-button" data-als-locale-property="${closeButtonTitle}"></div>
+	<div class="button-base" data-id="close-button" data-mobile-class="fas fa-times" data-als-locale-property="${closeButtonTitle}"></div>
 </div>
 		`, this.window);
 
@@ -36,6 +36,7 @@ L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend({
 		this.contentWrapper = this.window.querySelector("div[data-id='content-wrapper']");
 		this.contentWrapper.appendChild(this.container);
 		this.windowWrapper = this.window.querySelector("div[data-id='wrapper']");
+		this.buttonsWrapper = this.window.querySelector("div[data-id='buttons-wrapper']");
 
 		this.select.addEventListener("change", (e) => {
 			this.displayItem(
@@ -75,7 +76,7 @@ L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend({
 			while (!this.isWindowVisible())
 				await new Promise(resolve => setTimeout(resolve, 0));
 
-			this.buttonsHeight = this.window.querySelector("div[data-id='buttons-wrapper']").offsetHeight;
+			this.buttonsHeight = this.buttonsWrapper.offsetHeight;
 			this.sidebarWidth = this.sidebar.offsetWidth;
 			onResize();
 		})();
@@ -184,6 +185,6 @@ L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend({
 
 	isWindowVisible: function () {
 		return this.windowContainer.parentNode !== null && this.windowContainer.getAttribute("data-hidden") !== "1";
-	}
+	},
 
 });
