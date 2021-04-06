@@ -76,8 +76,8 @@ for (let file of files) {
 // Copy styles and scripts referenced in index.html
 
 let toCopy = ["index.html", "logo.ico",
-	"node_modules/@fortawesome/fontawesome-free/css",
-	"node_modules/@fortawesome/fontawesome-free/webfonts",
+	"node_modules/line-awesome/dist/line-awesome/css/",
+	"node_modules/line-awesome/dist/line-awesome/fonts/",
 	"node_modules/leaflet/dist/leaflet.css",
 	"node_modules/leaflet/dist/leaflet.js",
 	"node_modules/leaflet.coordinates/dist/Leaflet.Coordinates-0.1.5.css",

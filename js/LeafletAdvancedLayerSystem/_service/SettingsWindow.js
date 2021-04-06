@@ -17,13 +17,13 @@ L.ALS._service.SettingsWindow = L.ALS._service.SidebarWindow.extend({
 		// Create export and import buttons
 		let exportButton = document.createElement("div");
 		L.ALS.Locales.localizeElement(exportButton, "settingsExportButton");
-		exportButton.setAttribute("data-mobile-class", "fas fa-save");
+		exportButton.setAttribute("data-mobile-class", "las la-save");
 		exportButton.addEventListener("click", () => { this.exportSettings(); });
 
 		let importButton = document.createElement("label");
 		importButton.htmlFor = "adv-lyr-sys-load-settings-input";
 		L.ALS.Locales.localizeElement(importButton, "settingsImportButton");
-		importButton.setAttribute("data-mobile-class", "fas fa-folder-open");
+		importButton.setAttribute("data-mobile-class", "las la-folder-open");
 		importButton.addEventListener("click", () => { this.importSettings(); });
 
 		for (let button of [exportButton, importButton]) {
@@ -51,7 +51,7 @@ L.ALS._service.SettingsWindow = L.ALS._service.SidebarWindow.extend({
 				throw new Error("Your widget doesn't have attributes.defaultValue set! Pass attributes argument containing value property to widget's constructor.");
 
 			let button = document.createElement("i");
-			button.className = "fas fa-undo revert-button";
+			button.className = "las la-undo revert-button";
 			L.ALS.Locales.localizeElement(button, "settingsRevertButton", "title");
 			widget.container.appendChild(button);
 

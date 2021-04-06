@@ -25,7 +25,7 @@ L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend({
 	</div>
 </div>
 <div class="controls-row-set adv-lyr-sys-sidebar-window-button-container" data-id="buttons-wrapper">
-	<div class="button-base" data-id="close-button" data-mobile-class="fas fa-times" data-als-locale-property="${closeButtonTitle}"></div>
+	<div class="button-base" data-id="close-button" data-mobile-class="las la-times" data-als-locale-property="${closeButtonTitle}"></div>
 </div>
 		`, this.window);
 

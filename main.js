@@ -19,6 +19,7 @@ L.ALS.System.initializeSystem();
 // Create map
 let map = L.map("map", {
 	attributionControl: false, // Attribution will be present in About window
+	zoomControl: false,
 	minZoom: 2, // Leaflet will hide everything below this zoom
 	maxBounds: L.latLngBounds( // This will disable infinite panning
 		L.latLng(90, -180),
@@ -29,6 +30,8 @@ let map = L.map("map", {
 	keyboard: false,
 }).setView([51.505, -0.09], 13);
 map.doubleClickZoom.disable();
+
+map.addControl(new L.ALS.ControlZoom({ position: "topleft" }));
 
 // Show coordinates via Leaflet.Control plugin. It doesn't look good on phones, so we won't add it in this case.
 if (!L.ALS.Helpers.isMobile) {

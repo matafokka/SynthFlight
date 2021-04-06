@@ -48,7 +48,7 @@ body {
 
 .leaflet-left .leaflet-control,
 .leaflet-right .leaflet-control,
-.button-base, input[type="button"], select, .fas {
+.button-base, input[type="button"], select, .las {
 	margin: 0;
 	border-radius: 0 !important;
 	color: black;
@@ -56,6 +56,14 @@ body {
 	border: 1px solid #ccc;
 	cursor: default;
 	box-shadow: none;
+}
+
+.als-zoom {
+	border: none !important;
+}
+
+.als-zoom *:first-child {
+	border-right: none;
 }
 
 .leaflet-control-zoom {
@@ -84,7 +92,7 @@ body {
 	min-height: 2rem;
 }
 
-.button-base, input[type="button"], select, .fas, .leaflet-control > a {
+.button-base, input[type="button"], select, .las, .leaflet-control > a {
 	display: inline-block;
 	vertical-align: middle;
 	box-sizing: border-box;
@@ -98,19 +106,19 @@ body {
 	user-select: none;
 }
 
-.button-base:hover, input[type="button"]:hover, select:hover, .fas:hover, .leaflet-control > a:hover, .jscolor-btn-close:hover {
+.not-mobile .button-base:hover, .not-mobile input[type="button"]:hover, .not-mobile select:hover, .not-mobile .las:hover, .not-mobile .leaflet-control > a:hover, .jscolor-btn-close:hover {
 	background: #eee;
 	transition: background 0.2s;
 }
 
 
 /* Setting background to select:active will cause bugs in older browsers, so we don't use it */
-.button-base:active, input[type="button"]:active, .fas:active, .leaflet-control > a:active, .jscolor-btn-close:active {
-	background: #ccc;
+.button-base:active, input[type="button"]:active, .las:active, .leaflet-control > a:active, .jscolor-btn-close:active {
+	background: #e2e2e2 !important;
 	transition: background 0.2s;
 }
 
-.fas {
+.las {
 	max-width: 2rem;
 	font-size: 1.6rem;
 	width: 2rem;
@@ -197,7 +205,7 @@ select > * {
 }
 
 /* Icon button container */
-.icon-button-container > .fas {
+.icon-button-container > .las {
 	width: auto;
 	max-width: 100%;
 }
@@ -219,7 +227,6 @@ select > * {
 	height: 100%;
 	overflow: hidden;
 	padding-top: 2rem;
-	padding-bottom: 2rem;
 	box-sizing: border-box;
 
 	border-left: lightgrey;
@@ -250,17 +257,22 @@ select > * {
 	right: 0;
 }
 
-#top-panel-wrapper, #bottom-panel-wrapper {
+#top-panel-wrapper {
 	position: fixed;
 	width: 100%;
 	max-width: 22rem;
-}
-
-#top-panel-wrapper {
 	top: 0;
 }
 
-.mobile #menu #top-panel-wrapper, .mobile #menu #bottom-panel-wrapper {
+#top-panel-wrapper > * > * {
+	background: #f8f8f8;
+}
+
+.not-mobile #top-panel-wrapper *:hover {
+	background: #eee;
+}
+
+.mobile #menu #top-panel-wrapper {
 	max-width: 100%;
 }
 
@@ -269,10 +281,6 @@ select > * {
 	max-height: 100%;
 	overflow-y: auto;
 	overflow-x: hidden;
-}
-
-#bottom-panel-wrapper {
-	bottom: 0;
 }
 
 .controls-row-set {
@@ -439,11 +447,26 @@ select > * {
 /* Layers */
 .layer-container {
 	width: 100%;
-	border-bottom: 1px solid #ccc;
 }
 
-.layer-container[data-is-selected = "1"] {
+.layer-menu[data-hidden="1"] {
+	border-bottom: 1px solid #ccc !important;
+}
+
+.layer-container > .controls-row-set {
+	border-bottom: 1px solid #ccc !important;
+	transition: background 0.3s;
+}
+
+.not-mobile .layer-container > .controls-row-set:hover {
+	background: #eee;
+	transition: background 0.3s;
+}
+
+.layer-container[data-is-selected = "1"] > .controls-row-set,
+.not-mobile .layer-container[data-is-selected = "1"] > .controls-row-set:hover {
 	background: #e2e2e2;
+	transition: background 0.3s;
 }
 
 .layer-container > .controls-row-set {
@@ -721,8 +744,13 @@ select > * {
 	transform: translate(-50%, -50%);
 }
 
-.grd-lyr-airport-icon:hover {
+.not-mobile .grd-lyr-airport-icon:hover {
 	background: rgba(255, 255, 255, 0.5);
+	cursor: move;
+}
+
+.grd-lyr-airport-icon:active {
+	background: rgba(255, 255, 255, 0.7) !important;
 	cursor: move;
 }
 

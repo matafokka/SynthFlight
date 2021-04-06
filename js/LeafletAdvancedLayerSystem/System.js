@@ -12,6 +12,7 @@ L.ALS = {
 const Sortable = require("sortablejs");
 const JSZip = require("jszip");
 const saveAs = require("file-saver");
+require("./ALSControlZoom.js");
 require("./locales/Locales.js");
 require("./InteractiveLayerPatch.js");
 require("./Helpers.js");
@@ -115,14 +116,14 @@ L.ALS.System = L.Control.extend({
 		});
 
 		this._saveButton = document.getElementById("adv-lyr-sys-save-button");
-		this._saveButton.setAttribute("data-mobile-class", "fas fa-save");
+		this._saveButton.setAttribute("data-mobile-class", "las la-save");
 		this._saveButton.addEventListener("click", () => {
 			this._saveProject();
 		});
 
 		// Points to input, not to a button in the menu
 		this._loadButton = document.getElementById("adv-lyr-sys-load-input");
-		document.getElementById("adv-lyr-sys-load-button").setAttribute("data-mobile-class", "fas fa-folder-open");
+		document.getElementById("adv-lyr-sys-load-button").setAttribute("data-mobile-class", "las la-folder-open");
 		this._loadButton.addEventListener("change", () => {
 
 			if (!L.ALS.Helpers.isObjectEmpty(this._layers) && !window.confirm(L.ALS.locale.systemProjectAlreadyOpen)) {
@@ -135,13 +136,13 @@ L.ALS.System = L.Control.extend({
 		});
 
 		this._exportButton = document.getElementById("adv-lyr-sys-export-button");
-		this._exportButton.setAttribute("data-mobile-class", "fas fa-share-alt");
+		this._exportButton.setAttribute("data-mobile-class", "las la-share-alt");
 		this._exportButton.addEventListener("click", () => {
 			this._exportProject();
 		});
 
 		this._settingsButton = document.getElementById("adv-lyr-sys-settings-button");
-		this._settingsButton.setAttribute("data-mobile-class", "fas fa-sliders-h");
+		this._settingsButton.setAttribute("data-mobile-class", "las la-sliders-h");
 		this._settingsWindow = new L.ALS._service.SettingsWindow(this._settingsButton, () => { this.applyNewSettings(); }, aboutHTML);
 		this._settingsWindow.addItem("settingsGeneralSettings", new L.ALS._service.GeneralSettings());
 
@@ -165,8 +166,6 @@ L.ALS.System = L.Control.extend({
 				this._reorderLayers();
 			}
 		});
-
-		L.ALS.Helpers._applyButtonsIconsIfMobile(document.getElementById("adv-lyr-sys-menu-bottom-panel"));
 	},
 
 	// Base layers
@@ -480,7 +479,7 @@ L.ALS.System = L.Control.extend({
 	onAdd: function () {
 		let button = document.createElement("a");
 		button.id = "menu-button";
-		button.className = "button-base icon-button fas fa-bars";
+		button.className = "button-base icon-button las la-bars";
 		L.ALS.Helpers.makeHideable(button, this.menu);
 
 		let container = document.createElement("div");
@@ -526,7 +525,7 @@ L.ALS.System = L.Control.extend({
 
 			// If user's device is a phone, make UI a bit bigger
 			if (scaleUIForPhoneUsers && L.ALS.Helpers.isMobile)
-				document.querySelector(":root").style.fontSize = "32pt";
+				document.querySelector(":root").style.fontSize = "16pt";
 
 			// Add class names to all Leaflet and ALS classes for serialization
 			let addClassName = function (object, scope) {

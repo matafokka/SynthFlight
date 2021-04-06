@@ -7,7 +7,7 @@ L.ALS._service.WizardWindow = L.ALS._service.SidebarWindow.extend({
 		let addButton = document.createElement("div");
 		addButton.className = "button-base";
 		addButton.id = "wizard-add-button";
-		addButton.setAttribute("data-mobile-class", "fas fa-check");
+		addButton.setAttribute("data-mobile-class", "las la-check");
 		L.ALS.Locales.localizeElement(addButton, "wizardAddButton");
 		this.window.querySelector("div[data-id='buttons-wrapper']").appendChild(addButton);
 		addButton.addEventListener("click", () => {

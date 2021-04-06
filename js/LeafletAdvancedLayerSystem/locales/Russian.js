@@ -1,11 +1,14 @@
 L.ALS.Locales["Русский"] = {
 
-	// Menu
+	// Menu buttons tooltips
 
-	menuSaveButton: "Сохранить",
-	menuLoadButton: "Загрузить",
-	menuExportButton: "Экспорт",
+	menuCloseButton: "Закрыть меню",
+	menuSaveButton: "Сохранить проект",
+	menuLoadButton: "Загрузить проект",
+	menuExportButton: "Экспортировать проект",
 	menuSettingsButton: "Настройки",
+	menuAddButton: "Добавить новый слой",
+	menuDeleteButton: "Удалить выделенный слой",
 
 	// Sidebar window
 

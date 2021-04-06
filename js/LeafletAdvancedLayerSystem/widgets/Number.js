@@ -35,11 +35,11 @@ L.ALS.Widgets.Number = L.ALS.Widgets.BaseWidget.extend({
 		}
 
 		let minusButton = document.createElement("div");
-		minusButton.className = "button-base fas fa-minus";
+		minusButton.className = "button-base las la-minus";
 		minusButton.addEventListener("click", () => { callback(-1); });
 
 		let plusButton = document.createElement("div");
-		plusButton.className = "button-base fas fa-plus";
+		plusButton.className = "button-base las la-plus";
 		plusButton.addEventListener("click", () => { callback(1); });
 
 		let wrapper = this.input.parentNode;

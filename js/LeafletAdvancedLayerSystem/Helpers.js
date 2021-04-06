@@ -335,6 +335,12 @@ for (let device of devices) {
 L.ALS.Helpers.isMobile = (L.ALS.Helpers.deviceType === "phone");
 document.body.classList.add((L.ALS.Helpers.isMobile) ? "mobile" : "not-mobile");
 
+// Fix font size on mobile devices
+let meta = document.createElement("meta");
+meta.name = "viewport";
+meta.content = "width=device-width, initial-scale=1.0";
+document.head.appendChild(meta);
+
 /**
  * By default, points to window.localStorage. If user's browser doesn't support LocalStorage, will use temporary "polyfill" which acts like LocalStorage but doesn't actually save anything.
  */

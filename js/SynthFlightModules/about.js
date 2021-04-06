@@ -76,6 +76,7 @@ module.exports = `
 	<li>keyboardevent-key-polyfill</li>
 	<li>Leaflet</li>
 	<li>Leaflet.Coordinates</li>
+	<li>Line Awesome</li>
 	<li>object-defineproperty-ie</li>
 	<li>PostCSS</li>
 	<li>postcss-preset-env</li>
