@@ -1,4 +1,8 @@
 L.ALS._service.GeneralSettings = L.ALS.Settings.extend({
+	_lightTheme: "generalSettingsLightTheme",
+	_darkTheme: "generalSettingsDarkTheme",
+	_systemTheme: "generalSettingsSystemTheme",
+
 	initialize: function () {
 		L.ALS.Settings.prototype.initialize.call(this);
 
@@ -8,22 +12,42 @@ L.ALS._service.GeneralSettings = L.ALS.Settings.extend({
 				languageWidget.addItem(locale);
 		}
 		languageWidget.setAttributes({ defaultValue: "English" });
-		this.addWidget(languageWidget);
 
-		// TODO: Uncomment it when themes will be ready
-		/*let themeWidget = new L.ALS.Widgets.DropDownList("theme", "generalSettingsTheme");
-		for (let theme of ["Light", "Dark", "System", "Time Range"])
+		let themeWidget = new L.ALS.Widgets.DropDownList("theme", "generalSettingsTheme", this, "changeTheme");
+		for (let theme of [this._lightTheme, this._darkTheme])
 			themeWidget.addItem(theme);
-		themeWidget.setAttributes({ defaultValue: "System" });
+
+		let defaultValue = this._lightTheme;
+		if (window.matchMedia) {
+			themeWidget.addItem(this._systemTheme);
+			this.systemThemeMedia = window.matchMedia("(prefers-color-scheme: dark)");
+			this.systemThemeMedia.addEventListener("change", e => {
+				if (themeWidget.getValue() === this._systemTheme)
+					this.changeThemeWorker(this._systemTheme);
+			});
+			defaultValue = this._systemTheme;
+		}
+		themeWidget.setAttributes({ defaultValue: defaultValue });
 
 		let widgets = [languageWidget, themeWidget];
-
 		for (let widget of widgets)
-			this.addWidget(widget);*/
+			this.addWidget(widget);
 	},
 
 	changeLocale: function (widget) {
 		L.ALS.Locales.changeLocale(widget.getValue());
 	},
 
+	changeTheme: function (widget) {
+		this.changeThemeWorker(widget.getValue());
+	},
+
+	changeThemeWorker: function (value) {
+		if (value === this._systemTheme)
+			this.changeThemeWorker(this.systemThemeMedia.matches ? this._darkTheme : this._lightTheme)
+		else if (value === this._darkTheme)
+			document.body.classList.add("dark");
+		else
+			document.body.classList.remove("dark");
+	},
 })

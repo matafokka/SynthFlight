@@ -6,6 +6,8 @@ const fse = require("fs-extra");
 const postcss = require("postcss");
 const postcssPresetEnv = require("postcss-preset-env");
 const cssnano = require("cssnano");
+const postcssCssVariables = require("postcss-css-variables");
+const postcssThemes = require("postcss-themes");
 
 let onlyBrowser = false, debug = false;
 
@@ -33,23 +35,29 @@ let dir = "dist/SynthFlight-browser/";
 fs.mkdirSync(dir + "css", { recursive: true });
 
 // Autoprefix and minify CSS
-let cssFiles = fs.readdirSync("css");
-for (let cssFile of cssFiles) {
-	let plugins = [postcssPresetEnv({
-		autoprefixer: { flexbox: "no-2009" }
-	})];
-	if (!debug)
-		plugins.push(cssnano());
+let plugins = [
 
-	let fileName = "css/" + cssFile;
-	let css = fs.readFileSync(fileName).toString();
-	postcss(plugins).process(css, {from: undefined}).then((result) => {
-		fs.writeFile(dir + fileName, result.css, {}, (err) => {
-			if (err !== null)
-				console.log(err);
-		});
+	postcssPresetEnv({
+		autoprefixer: { flexbox: "no-2009" }
+	}),
+
+	postcssThemes({
+		themes: { filePath: "css/dark.css" }
+	}),
+
+	postcssCssVariables()
+];
+if (!debug)
+	plugins.push(cssnano());
+
+let cssFilename = "css/base.css";
+let css = fs.readFileSync(cssFilename).toString();
+postcss(plugins).process(css, {from: undefined}).then((result) => {
+	fs.writeFile(dir + cssFilename, result.css, {}, (err) => {
+		if (err !== null)
+			console.log(err);
 	});
-}
+});
 
 // Build project
 let files = ["polyfills", "main"]; // Files to build

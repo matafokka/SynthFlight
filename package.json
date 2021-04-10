@@ -89,7 +89,9 @@
     "jsdom": "^16.5.1",
     "jsdom-global": "^3.0.2",
     "postcss": "^8.2.4",
+    "postcss-css-variables": "^0.17.0",
     "postcss-preset-env": "^6.7.0",
+    "postcss-themes": "^1.0.1",
     "uglifyify": "^5.0.2"
   }
 }

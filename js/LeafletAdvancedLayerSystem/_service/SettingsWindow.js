@@ -7,9 +7,9 @@ L.ALS._service.SettingsWindow = L.ALS._service.SidebarWindow.extend({
 		if (!aboutHTML)
 			aboutHTML = require("./aboutMarkup.js");
 
-		this.aboutWidgetable = new L.ALS.Widgetable("adv-lyr-sys-about-container");
+		this.aboutWidgetable = new L.ALS.Widgetable("als-about-container");
 		let wrapper = document.createElement("div");
-		wrapper.className = "adv-lyr-sys-about-wrapper";
+		wrapper.className = "als-about-wrapper";
 		this.aboutWidgetable.container.appendChild(wrapper);
 
 		L.ALS.Helpers.HTMLToElement(aboutHTML, wrapper);
@@ -21,7 +21,7 @@ L.ALS._service.SettingsWindow = L.ALS._service.SidebarWindow.extend({
 		exportButton.addEventListener("click", () => { this.exportSettings(); });
 
 		let importButton = document.createElement("label");
-		importButton.htmlFor = "adv-lyr-sys-load-settings-input";
+		importButton.htmlFor = "als-load-settings-input";
 		L.ALS.Locales.localizeElement(importButton, "settingsImportButton");
 		importButton.setAttribute("data-mobile-class", "las la-folder-open");
 		importButton.addEventListener("click", () => { this.importSettings(); });
@@ -86,7 +86,7 @@ L.ALS._service.SettingsWindow = L.ALS._service.SidebarWindow.extend({
 	},
 
 	importSettings: function () {
-		let loadButton = document.getElementById("adv-lyr-sys-load-settings-input");
+		let loadButton = document.getElementById("als-load-settings-input");
 		loadButton.addEventListener("change", () => {
 			L.ALS.Helpers.readTextFile(loadButton, L.ALS.locale.settingsLoadingNotSupported, (text) => {
 

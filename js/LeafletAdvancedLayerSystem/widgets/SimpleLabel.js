@@ -5,7 +5,7 @@ L.ALS.Widgets.SimpleLabel = L.ALS.Widgets.BaseWidget.extend({
 
 	undoable: false,
 
-	customWrapperClassName: "adv-lyr-sys-simple-label-wrapper",
+	customWrapperClassName: "als-simple-label-wrapper",
 
 	/**
 	 * Constructs label
@@ -30,7 +30,7 @@ L.ALS.Widgets.SimpleLabel = L.ALS.Widgets.BaseWidget.extend({
 
 	createInputElement: function () {
 		let element = document.createElement("div");
-		element.className = "adv-lyr-sys-simple-label";
+		element.className = "als-simple-label";
 		return element;
 	},
 

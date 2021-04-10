@@ -9,22 +9,22 @@ L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend({
 	initialize: function (button, sidebarTitle, contentTitle, closeButtonTitle = "sidebarWindowCancelButton", onCloseCallback = undefined) {
 		L.ALS.WidgetableWindow.prototype.initialize.call(this, button);
 		this.items = {};
-		this.window.classList.add("adv-lyr-sys-sidebar-window");
+		this.window.classList.add("als-sidebar-window");
 
 		L.ALS.Helpers.HTMLToElement(`
-<div class="adv-lyr-sys-sidebar-window-wrapper" data-id="wrapper">
+<div class="als-sidebar-window-wrapper" data-id="wrapper">
 	<div class="hidden" data-id="select-container">
-		<div class="adv-lyr-sys-window-sidebar-title" data-als-locale-property="${sidebarTitle}"></div>
-		<select class="adv-lyr-sys-window-select" data-id="select"></select>
+		<div class="als-window-sidebar-title" data-als-locale-property="${sidebarTitle}"></div>
+		<select class="als-window-select" data-id="select"></select>
 	</div>
-	<div class="adv-lyr-sys-sidebar" data-id="sidebar">
-		<div class="adv-lyr-sys-window-sidebar-title" data-als-locale-property="${sidebarTitle}"></div>
+	<div class="als-sidebar" data-id="sidebar">
+		<div class="als-window-sidebar-title" data-als-locale-property="${sidebarTitle}"></div>
 	</div>
-	<div class="adv-lyr-sys-sidebar-window-content-wrapper" data-id="content-wrapper">
-		<div class="adv-lyr-sys-window-sidebar-title" data-als-locale-property="${contentTitle}"></div>
+	<div class="als-sidebar-window-content-wrapper" data-id="content-wrapper">
+		<div class="als-window-sidebar-title" data-als-locale-property="${contentTitle}"></div>
 	</div>
 </div>
-<div class="controls-row-set adv-lyr-sys-sidebar-window-button-container" data-id="buttons-wrapper">
+<div class="controls-row-set als-sidebar-window-button-container" data-id="buttons-wrapper">
 	<div class="button-base" data-id="close-button" data-mobile-class="las la-times" data-als-locale-property="${closeButtonTitle}"></div>
 </div>
 		`, this.window);

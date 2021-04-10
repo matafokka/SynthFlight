@@ -41,7 +41,6 @@ L.ALS.Locales["English"] = {
 	generalSettingsLightTheme: "Light",
 	generalSettingsDarkTheme: "Dark",
 	generalSettingsSystemTheme: "System",
-	generalSettingsRangeTheme: "Time range",
 
 	// System
 

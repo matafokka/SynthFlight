@@ -41,7 +41,6 @@ L.ALS.Locales["Русский"] = {
 	generalSettingsLightTheme: "Светлая",
 	generalSettingsDarkTheme: "Темная",
 	generalSettingsSystemTheme: "Системная",
-	generalSettingsRangeTheme: "По временному промежутку",
 
 
 	// System

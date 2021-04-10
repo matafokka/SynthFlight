@@ -1,34 +1,34 @@
 module.exports = `
 <style>
-.adv-lyr-sys-about-container p {
+.als-about-container p {
 	text-align: justify;
 }
 
-.adv-lyr-sys-about-container a {
+.als-about-container a {
 	color: cornflowerblue;
 	transition: color 0.2s, text-shadow 0.2s;
 }
 
-.adv-lyr-sys-about-container a:hover {
+.als-about-container a:hover {
 	color: purple;
 	text-shadow: pink 0 0 5px;
 	transition: color 0.2s, text-shadow 0.2s;
 }
 
-.adv-lyr-sys-about-container ul {
+.als-about-container ul {
 	font-family: Consolas, consolas, monospace;
 	max-height: 5rem;
 	overflow: auto;
 	border: 1px solid #ccc;
 }
 
-.adv-lyr-sys-about-container h1 {
+.als-about-container h1 {
 	font-size: 2rem;
 	margin: 0;
 	word-wrap: break-word;
 }
 
-.adv-lyr-sys-about-container img {
+.als-about-container img {
 	display: inline-block;
 	vertical-align: middle;
 	margin-right: 1rem;
@@ -36,7 +36,7 @@ module.exports = `
 	height: 2.5rem;
 }
 
-.adv-lyr-sys-about-container footer {
+.als-about-container footer {
 	width: 100%;
 	padding-top: 0.2rem;
 	box-sizing: border-box;
@@ -79,7 +79,9 @@ module.exports = `
 	<li>Line Awesome</li>
 	<li>object-defineproperty-ie</li>
 	<li>PostCSS</li>
+	<li>postcss-css-variables</li>
 	<li>postcss-preset-env</li>
+	<li>postcss-themes</li>
 	<li>roman-numerals</li>
 	<li>shpjs</li>
 	<li>SortableJS</li>

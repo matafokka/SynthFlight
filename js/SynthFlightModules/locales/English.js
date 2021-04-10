@@ -56,6 +56,21 @@ L.ALS.Locales.addLocaleProperties("English", {
 	FOV: "FOV",
 	GFOV: "GFOV",
 
+	airportForLayer: "Airport for layer",
+
+	minHeight: "Min. height (m)",
+	maxHeight: "Max. height (m)",
+	meanHeight: "Mean height",
+	absoluteHeight: "Absolute height",
+	elevationDifference: "(Max. height - Min. height) / Flight height",
+	reliefType: "Relief type",
+
+	errorDistanceHasNotBeenCalculated: "Distance between paths hasn't been calculated!",
+	errorPathsCountTooBig: "Calculated paths count is too big, it should be less than 20. Please, check your values.",
+	errorCamHeight: "Camera height is greater than camera width!",
+	errorPathsCountTooSmall: "Calculated paths count is too small, it should be greater than 2. Please, check your values.",
+	errorMinHeightBiggerThanMaxHeight: "Min. height should be less than or equal to max. height!",
+
 	// SynthGridSettings
 
 	defaultGridBorderColor: "Default grid border color",

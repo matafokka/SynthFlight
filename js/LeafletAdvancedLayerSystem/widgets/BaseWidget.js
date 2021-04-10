@@ -67,7 +67,7 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend({
 	 */
 	createContainer: function () {
 		let container = document.createElement("div");
-		container.className = "adv-lyr-sys-widget-row";
+		container.className = "als-widget-row";
 		return container;
 	},
 
@@ -77,7 +77,7 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend({
 	 */
 	createLabel: function () {
 		this.labelWidget = document.createElement("label");
-		this.labelWidget.className = "adv-lyr-sys-label";
+		this.labelWidget.className = "als-label";
 		this.labelWidget.htmlFor = this._inputID;
 		this.setLabelText(this.labelText);
 		return this.labelWidget;
@@ -125,7 +125,7 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend({
 
 		// Wrap input
 		let wrapper = document.createElement("div");
-		wrapper.className = "adv-lyr-sys-input " + this.customWrapperClassName;
+		wrapper.className = "als-input " + this.customWrapperClassName;
 		wrapper.appendChild(this.input);
 		return wrapper;
 	},

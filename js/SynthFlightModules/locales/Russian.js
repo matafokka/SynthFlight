@@ -51,6 +51,21 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 	Ly: "Ширина изображения на местности, Ly",
 	By: "Расстояние между соседними маршрутами, By",
 
+	airportForLayer: "Аэропорт для слоя",
+
+	minHeight: "Мин. высота (m)",
+	maxHeight: "Макс. высота (m)",
+	meanHeight: "Ср. высота",
+	absoluteHeight: "Абс. высота",
+	elevationDifference: "(Макс. высота - Мин. высота) / Высота полета",
+	reliefType: "Тип рельефа",
+
+	errorDistanceHasNotBeenCalculated: "Расстояние между маршрутами не было вычислено!",
+	errorPathsCountTooBig: "Вычисленное количество маршрутов слишком велико, оно должно быть меньше 20. Пожалуйста, проверьте ваши значения.",
+	errorCamHeight: "Высота камеры больше ширины камеры!",
+	errorPathsCountTooSmall: "Вычисленное количество маршрутов слишком мало, оно должно быть больше 2. Пожалуйста, проверьте ваши значения",
+	errorMinHeightBiggerThanMaxHeight: "Мин. высота должна быть меньше или равна макс. высоте!",
+
 	// SynthGridSettings
 
 	defaultGridBorderColor: "Цвет обводки сетки по умолчанию",

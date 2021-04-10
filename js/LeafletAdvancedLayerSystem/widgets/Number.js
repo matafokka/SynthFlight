@@ -1,6 +1,6 @@
 L.ALS.Widgets.Number = L.ALS.Widgets.BaseWidget.extend({
 
-	customWrapperClassName: "adv-lyr-sys-number",
+	customWrapperClassName: "als-number",
 
 	initialize: function (id, label, objectToControl = undefined, callback = "", attributes = {}) {
 		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "text", id, label, objectToControl, callback, ["edit", "change", "keyup"], attributes);

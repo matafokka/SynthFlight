@@ -30,7 +30,7 @@ L.ALS.Widgets.TextArea = L.ALS.Widgets.BaseWidget.extend({
 
 	createInputElement: function () {
 		let input = document.createElement("textarea");
-		input.className = "adv-lyr-sys-textarea";
+		input.className = "als-textarea";
 		return input;
 	},
 
@@ -55,7 +55,7 @@ L.ALS.Widgets.TextArea = L.ALS.Widgets.BaseWidget.extend({
 	 * @param isMonotype {boolean} If true, textarea will use monotype font. Sans font will be used otherwise.
 	 */
 	setMonotype: function (isMonotype) {
-		let className = "adv-lyr-sys-textarea-mono";
+		let className = "als-textarea-mono";
 		if (isMonotype)
 			this.input.classList.add(className);
 		else

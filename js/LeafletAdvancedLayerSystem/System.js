@@ -115,15 +115,15 @@ L.ALS.System = L.Control.extend({
 			this._onBaseLayerChange(event);
 		});
 
-		this._saveButton = document.getElementById("adv-lyr-sys-save-button");
+		this._saveButton = document.getElementById("als-save-button");
 		this._saveButton.setAttribute("data-mobile-class", "las la-save");
 		this._saveButton.addEventListener("click", () => {
 			this._saveProject();
 		});
 
 		// Points to input, not to a button in the menu
-		this._loadButton = document.getElementById("adv-lyr-sys-load-input");
-		document.getElementById("adv-lyr-sys-load-button").setAttribute("data-mobile-class", "las la-folder-open");
+		this._loadButton = document.getElementById("als-load-input");
+		document.getElementById("als-load-button").setAttribute("data-mobile-class", "las la-folder-open");
 		this._loadButton.addEventListener("change", () => {
 
 			if (!L.ALS.Helpers.isObjectEmpty(this._layers) && !window.confirm(L.ALS.locale.systemProjectAlreadyOpen)) {
@@ -135,13 +135,13 @@ L.ALS.System = L.Control.extend({
 
 		});
 
-		this._exportButton = document.getElementById("adv-lyr-sys-export-button");
+		this._exportButton = document.getElementById("als-export-button");
 		this._exportButton.setAttribute("data-mobile-class", "las la-share-alt");
 		this._exportButton.addEventListener("click", () => {
 			this._exportProject();
 		});
 
-		this._settingsButton = document.getElementById("adv-lyr-sys-settings-button");
+		this._settingsButton = document.getElementById("als-settings-button");
 		this._settingsButton.setAttribute("data-mobile-class", "las la-sliders-h");
 		this._settingsWindow = new L.ALS._service.SettingsWindow(this._settingsButton, () => { this.applyNewSettings(); }, aboutHTML);
 		this._settingsWindow.addItem("settingsGeneralSettings", new L.ALS._service.GeneralSettings());
@@ -477,7 +477,7 @@ L.ALS.System = L.Control.extend({
 	},
 
 	onAdd: function () {
-		let button = document.createElement("a");
+		let button = document.createElement("i");
 		button.id = "menu-button";
 		button.className = "button-base icon-button las la-bars";
 		L.ALS.Helpers.makeHideable(button, this.menu);

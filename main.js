@@ -8,6 +8,7 @@
 // I've spend hours struggling with this issue, so don't try to reorganise the code, you'll fail and, as it seems, break compatibility with the older Electron versions.
 
 require("./js/LeafletAdvancedLayerSystem/System.js");
+require("./js/LeafletAdvancedLayerSystem/locales/Russian.js");
 require("./js/SynthFlightModules/locales/English.js");
 require("./js/SynthFlightModules/locales/Russian.js");
 require("./js/SynthFlightModules/SynthShapefileLayer.js");

@@ -18,7 +18,7 @@ L.ALS.Widgets.DropDownList = L.ALS.Widgets.BaseWidget.extend({
 	 */
 	addItem: function (item) {
 		let option = document.createElement("option");
-		option.text = item;
+		L.ALS.Locales.localizeOrSetValue(option, item, "text");
 		this.input.appendChild(option);
 		this.callCallback();
 	},
@@ -29,7 +29,7 @@ L.ALS.Widgets.DropDownList = L.ALS.Widgets.BaseWidget.extend({
 	 */
 	removeItem: function (item) {
 		for (let child of this.input.childNodes) {
-			if (child.text === item) {
+			if (L.ALS.Locales.getLocalePropertyOrValue(child) === item) {
 				this.input.removeChild(child);
 				return;
 			}
@@ -43,12 +43,22 @@ L.ALS.Widgets.DropDownList = L.ALS.Widgets.BaseWidget.extend({
 	selectItem: function (item) {
 		// We do this because changing HTMLSelectElement.value doesn't work in IE
 		for (let option of this.input.options) {
-			if (option.value === item) {
+			if (L.ALS.Locales.getLocalePropertyOrValue(option) === item) {
 				option.selected = "selected";
 				this.callCallback();
 				return;
 			}
 		}
-	}
+	},
+
+	getValue: function () {
+		if (this.input.selectedIndex === -1)
+			return undefined;
+		return L.ALS.Locales.getLocalePropertyOrValue(this.input.options[this.input.selectedIndex]);
+	},
+
+	setValue: function (value) {
+		this.selectItem(value);
+	},
 
 });
