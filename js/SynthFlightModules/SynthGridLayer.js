@@ -197,7 +197,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 		let icon = L.divIcon({
 			iconSize: null,
 			className: "",
-			html: "<div class='grd-lyr-airport-icon fas fa-plane'></div>"
+			html: "<div class='grd-lyr-airport-icon ri ri-flight-takeoff-line'></div>"
 		})
 
 		this._airportMarker = L.marker(this.map.getCenter(), {
@@ -222,7 +222,10 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 	},
 
 	onNameChange: function() {
-		this._airportMarker.bindPopup("Airport for layer " + this.name);
+		let popup = document.createElement("div");
+		L.ALS.Locales.localizeElement(popup, "airportForLayer", "innerText");
+		popup.innerText += " " + this.name;
+		this._airportMarker.bindPopup(popup);
 	},
 
 	/**
@@ -471,12 +474,12 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 			let errorLabel = new L.ALS.Widgets.SimpleLabel("error");
 			errorLabel.setStyle("error");
 			let widgets = [
-				new L.ALS.Widgets.Number("minHeight", "Min height (m)", this, "_calculatePolygonParameters", numberAttrs),
-				new L.ALS.Widgets.Number("maxHeight", "Max height (m)", this, "_calculatePolygonParameters", numberAttrs),
-				new L.ALS.Widgets.ValueLabel("meanHeight", "Mean height", "m"),
-				new L.ALS.Widgets.ValueLabel("absoluteHeight", "Absolute height", "m"),
-				new L.ALS.Widgets.ValueLabel("elevationDifference", "(Max height - Min height) / Flight height"),
-				new L.ALS.Widgets.ValueLabel("reliefType", "Relief type"),
+				new L.ALS.Widgets.Number("minHeight", "minHeight", this, "_calculatePolygonParameters", numberAttrs),
+				new L.ALS.Widgets.Number("maxHeight", "maxHeight", this, "_calculatePolygonParameters", numberAttrs),
+				new L.ALS.Widgets.ValueLabel("meanHeight", "meanHeight", "m"),
+				new L.ALS.Widgets.ValueLabel("absoluteHeight", "absoluteHeight", "m"),
+				new L.ALS.Widgets.ValueLabel("elevationDifference", "elevationDifference"),
+				new L.ALS.Widgets.ValueLabel("reliefType", "reliefType"),
 				errorLabel
 			];
 			for (let widget of widgets)
@@ -597,7 +600,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 
 			let errorLabel = widgetContainer.getWidgetById("error");
 			if (layer.minHeight > layer.maxHeight) {
-				errorLabel.setValue("Min height should be less than or equal to max height!");
+				errorLabel.setValue("errorMinHeightBiggerThanMaxHeight");
 				continue;
 			}
 			errorLabel.setValue("");
@@ -644,7 +647,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 
 		let cameraParametersWarning = this.getWidgetById("cameraParametersWarning");
 		if (this["cameraHeight"] > this["cameraWidth"])
-			cameraParametersWarning.setValue("Camera height is greater than camera width!");
+			cameraParametersWarning.setValue("errorCamHeight");
 		else
 			cameraParametersWarning.setValue("");
 
@@ -720,17 +723,17 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 		let meridiansPathsCount = this["latPathsCount"];
 
 		if (parallelsPathsCount === undefined) {
-			errorLabel.setValue("Distance between paths hasn't been calculated!");
+			errorLabel.setValue("errorDistanceHasNotBeenCalculated");
 			return;
 		}
 
 		if (parallelsPathsCount >= 20 || meridiansPathsCount >= 20) {
-			errorLabel.setValue("Calculated paths count is too big, it should be less than 20. Please, check your values.");
+			errorLabel.setValue("errorPathsCountTooBig");
 			return;
 		}
 
 		if (parallelsPathsCount <= 2 || meridiansPathsCount <= 2) {
-			errorLabel.setValue("Calculated paths count is too small, it should be greater than 2. Please, check your values.");
+			errorLabel.setValue("errorPathsCountTooSmall");
 			return;
 		}
 		errorLabel.setValue("");

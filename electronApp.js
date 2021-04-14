@@ -1,4 +1,5 @@
-const { app, BrowserWindow } = require("electron");
+const { app, BrowserWindow, dialog } = require("electron");
+const fs = require("fs");
 
 function createWindow () {
 	// Create the browser window.
@@ -11,7 +12,7 @@ function createWindow () {
 		}
 	});
 
-	mainWindow.loadFile('index.html');
+	mainWindow.loadFile("index.html");
 	process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = true; // Security warnings creates annoying warning about HTTP. We're using HTTP to support older browsers. So we better off with just suppressing those warnings.
 	if (process.argv.indexOf("--debug") !== -1)
 		mainWindow.webContents.openDevTools();
@@ -25,7 +26,7 @@ function createWindow () {
 app.whenReady().then(() => {
 	createWindow();
 
-	app.on('activate', function () {
+	app.on("activate", function () {
 		// On macOS it's common to re-create a window in the app when the
 		// dock icon is clicked and there are no other windows open.
 		if (BrowserWindow.getAllWindows().length === 0) createWindow();
@@ -36,5 +37,5 @@ app.whenReady().then(() => {
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
 app.on('window-all-closed', function () {
-	if (process.platform !== 'darwin') app.quit();
+	if (process.platform !== "darwin") app.quit();
 });

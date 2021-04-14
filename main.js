@@ -8,6 +8,7 @@
 // I've spend hours struggling with this issue, so don't try to reorganise the code, you'll fail and, as it seems, break compatibility with the older Electron versions.
 
 require("./js/LeafletAdvancedLayerSystem/System.js");
+require("./js/LeafletAdvancedLayerSystem/locales/Russian.js");
 require("./js/SynthFlightModules/locales/English.js");
 require("./js/SynthFlightModules/locales/Russian.js");
 require("./js/SynthFlightModules/SynthShapefileLayer.js");
@@ -19,6 +20,7 @@ L.ALS.System.initializeSystem();
 // Create map
 let map = L.map("map", {
 	attributionControl: false, // Attribution will be present in About window
+	zoomControl: false,
 	minZoom: 2, // Leaflet will hide everything below this zoom
 	maxBounds: L.latLngBounds( // This will disable infinite panning
 		L.latLng(90, -180),
@@ -29,6 +31,8 @@ let map = L.map("map", {
 	keyboard: false,
 }).setView([51.505, -0.09], 13);
 map.doubleClickZoom.disable();
+
+map.addControl(new L.ALS.ControlZoom({ position: "topleft" }));
 
 // Show coordinates via Leaflet.Control plugin. It doesn't look good on phones, so we won't add it in this case.
 if (!L.ALS.Helpers.isMobile) {
@@ -44,7 +48,7 @@ if (!L.ALS.Helpers.isMobile) {
 
 // Initialize layer system. Create and add base layers.
 
-let layerSystem = new L.ALS.System(map, true).addTo(map);
+let layerSystem = new L.ALS.System(map, true, require("./js/SynthFlightModules/about.js")).addTo(map);
 
 let osmLayer = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 	maxZoom: 19,

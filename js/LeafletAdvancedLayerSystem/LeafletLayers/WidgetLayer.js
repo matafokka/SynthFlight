@@ -18,7 +18,7 @@ L.ALS.LeafletLayers.WidgetLayer =  L.ALS.Widgetable.extend({
 	 * @param origin {"topLeft"|"topCenter"|"topRight"|"bottomLeft"|"bottomCenter"|"bottomRight"|"leftCenter"|"rightCenter"|"center"} Origin of this widget, i.e. which "part" of this widget will be at given latLng
 	 */
 	initialize: function (latLng = [52, 0], origin="center") {
-		L.ALS.Widgetable.prototype.initialize.call(this, "adv-lyr-sys-divicon");
+		L.ALS.Widgetable.prototype.initialize.call(this, "als-divicon");
 		L.Marker.prototype.initialize.call(this, latLng);
 
 		this.setConstructorArguments(arguments);
@@ -26,7 +26,7 @@ L.ALS.LeafletLayers.WidgetLayer =  L.ALS.Widgetable.extend({
 
 		let divIcon = L.divIcon({
 			iconSize: null,
-			className: "adv-lyr-sys-divicon-container",
+			className: "als-divicon-container",
 			html: this.container
 		});
 		L.Marker.prototype.setLatLng.call(this, latLng);
@@ -72,7 +72,7 @@ L.ALS.LeafletLayers.WidgetLayer =  L.ALS.Widgetable.extend({
 	 * @param origin {"topLeft"|"topCenter"|"topRight"|"bottomLeft"|"bottomCenter"|"bottomRight"|"leftCenter"|"rightCenter"|"center"} Origin to set
 	 */
 	setOrigin: function (origin) {
-		let baseName = "adv-lyr-sys-divicon-pos-";
+		let baseName = "als-divicon-pos-";
 		let names = ["topLeft", "topCenter", "topRight", "bottomLeft", "bottomCenter", "bottomRight", "leftCenter", "rightCenter", "center"];
 		for (let name of names)
 			this.container.classList.remove(baseName + name);

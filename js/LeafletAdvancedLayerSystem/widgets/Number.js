@@ -1,6 +1,6 @@
 L.ALS.Widgets.Number = L.ALS.Widgets.BaseWidget.extend({
 
-	customWrapperClassName: "adv-lyr-sys-number",
+	customWrapperClassName: "als-number",
 
 	initialize: function (id, label, objectToControl = undefined, callback = "", attributes = {}) {
 		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "text", id, label, objectToControl, callback, ["edit", "change", "keyup"], attributes);
@@ -35,11 +35,11 @@ L.ALS.Widgets.Number = L.ALS.Widgets.BaseWidget.extend({
 		}
 
 		let minusButton = document.createElement("div");
-		minusButton.className = "button-base fas fa-minus";
+		minusButton.className = "button-base ri ri-subtract-line";
 		minusButton.addEventListener("click", () => { callback(-1); });
 
 		let plusButton = document.createElement("div");
-		plusButton.className = "button-base fas fa-plus";
+		plusButton.className = "button-base ri ri-add-line";
 		plusButton.addEventListener("click", () => { callback(1); });
 
 		let wrapper = this.input.parentNode;

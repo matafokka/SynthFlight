@@ -1,42 +1,39 @@
 module.exports = `
 <style>
-.adv-lyr-sys-about-container p {
+.als-about-container p {
 	text-align: justify;
 }
 
-.adv-lyr-sys-about-container a {
+.als-about-container p.extended {
+	padding-left: 1rem;
+}
+
+.als-about-container a {
 	color: cornflowerblue;
 	transition: color 0.2s, text-shadow 0.2s;
 }
 
-.adv-lyr-sys-about-container a:hover {
+.als-about-container a:hover {
 	color: purple;
 	text-shadow: pink 0 0 5px;
 	transition: color 0.2s, text-shadow 0.2s;
 }
 
-.adv-lyr-sys-about-container ul {
-	font-family: Consolas, consolas, monospace;
-	max-height: 5rem;
-	overflow: auto;
-	border: 1px solid #ccc;
-}
-
-.adv-lyr-sys-about-container h1 {
+.als-about-container h1 {
 	font-size: 2rem;
 	margin: 0;
 	word-wrap: break-word;
 }
 
-.adv-lyr-sys-about-container img {
-	display: inline-block;
-	vertical-align: middle;
-	margin-right: 1rem;
-	width: 2.5rem;
-	height: 2.5rem;
+.als-about-container .pre, .als-about-container pre {
+	font-family: Consolas, consolas, monospace;
+	max-width: 100%;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+	color: darkblue;
 }
 
-.adv-lyr-sys-about-container footer {
+.als-about-container footer {
 	width: 100%;
 	padding-top: 0.2rem;
 	box-sizing: border-box;
@@ -46,52 +43,31 @@ module.exports = `
 
 </style>
 
-<h1><img src="logo.ico" alt="Logo" />SynthFlight Pre-Alpha</h1>
+<h1>Advanced Layer System for Leaflet</h1>
 
-<p>SynthFlight is a fully client-side software for planning aerial photography. This is a pre-alpha version, so expect bugs, crashes, errors, missing functions, API changes, etc.</p>
+<p>Welcome to Advanced Layer System and thank you for using it!</p>
 
-<p>Visit project's <a href="https://github.com/matafokka/SynthFlight">GitHub page</a> for more information.</p>
+<p>You probably want to change this text. To do so:</p>
 
-<p>Developing SynthFlight is possible thanks to following open-source software:</p>
+<p class="extended">1. Create .js file (let's call it <span class="pre">about.js</span>) looking like this:</p>
 
-<ul>
-	<li>Babel</li>
-	<li>Babelify</li>
-	<li>Browserify</li>
-	<li>chalk</li>
-	<li>classlist</li>
-	<li>common-shakeify</li>
-	<li>core-js</li>
-	<li>cssnano</li>
-	<li>debounce</li>
-	<li>Electron</li>
-	<li>electron-packager</li>
-	<li>FileSaver.js</li>
-	<li>fs-extra</li>
-	<li>gLayers.Leaflet</li>
-	<li>jscolor</li>
-	<li>jsdom</li>
-	<li>jsdom-global</li>
-	<li>JSZip</li>
-	<li>keyboardevent-key-polyfill</li>
-	<li>Leaflet</li>
-	<li>Leaflet.Coordinates</li>
-	<li>object-defineproperty-ie</li>
-	<li>PostCSS</li>
-	<li>postcss-preset-env</li>
-	<li>roman-numerals</li>
-	<li>shpjs</li>
-	<li>SortableJS</li>
-	<li>time-input-polyfill</li>
-	<li>uglifyify</li>
-</ul>
+<pre>
+module.exports = \`
 
-Using cool maps is possible thanks to following providers:
-<ul>
-	<li>OpenStreetMaps</li>
-	<li>Google Maps</li>
-	<li>Yandex Maps</li>
-</ul>
+&lt;div&gt;
+	&lt;div&gt;My HTML markup...&lt;/div&gt;
+	&lt;div data-als-locale-property="textLocalizedByLocaleProperty"&gt;\&lt;/div&gt;
+&lt;/div&gt;
+
+\`
+</pre>
+
+<p>So you're just exporting string with your HTML markup. You can also localize it by setting <span class="pre">data-als-locale-property</span> attribute as shown above.</p>
+
+<p class="extended">2. Require your file and pass it to <span class="pre">L.ALS.System</span> constructor like this:</p>
+<pre>
+let layerSystem = new L.ALS.System(map, true, require("./about.js")).addTo(map);
+</pre>
 
 <footer><a href="https://github.com/matafokka">© matafokka, ${(new Date()).getFullYear()}</a></footer>
 `;

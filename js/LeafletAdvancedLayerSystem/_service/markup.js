@@ -1,28 +1,29 @@
-L.ALS.Helpers.HTMLToElement(`
-<input type="file" id="adv-lyr-sys-load-input" />
-<input type="file" id="adv-lyr-sys-load-settings-input" />
-<div id="menu">
+module.exports = `
+<input type="file" id="als-load-input" />
+<input type="file" id="als-load-settings-input" />
+<div class="als-menu">
 	<!-- Top panel -->
-	<div id="top-panel-wrapper">
-		<div id="top-panel" class="controls-row-set">
-			<i id="menu-close" class="button-base fas fa-times"></i>
-			<select id="menu-maps-select"></select>
-			<i id="menu-add" class="fas fa-plus"></i>
-			<i id="menu-delete" class="fas fa-trash"></i>
+	<div class="als-top-panel-wrapper">
+		<div class="controls-row-set als-top-panel">
+		
+			<i class="button-base ri ri-close-line als-menu-close" data-als-locale-property="menuCloseButton" data-als-locale-property-to-localize="title"></i>
+			
+			<div class="button-base ri ri-save-3-line als-save-button" data-als-locale-property="menuSaveButton" data-als-locale-property-to-localize="title"></div>
+			
+			<label for="als-load-input" class="button-base ri ri-folder-open-line als-load-button" data-als-locale-property="menuLoadButton" data-als-locale-property-to-localize="title"></label>
+			
+			<div class="button-base ri ri-share-line als-export-button" data-als-locale-property="menuExportButton" data-als-locale-property-to-localize="title"></div>
+			
+			<div class="button-base ri ri-sound-module-line als-settings-button" data-als-locale-property="menuSettingsButton" data-als-locale-property-to-localize="title"></div>
+			
+			<select class="als-menu-maps-select"></select>
+			
+			<i class="ri ri-add-line als-menu-add" data-als-locale-property="menuAddButton" data-als-locale-property-to-localize="title"></i>
+			
+			<i class="ri ri-delete-bin-line als-menu-delete" data-als-locale-property="menuDeleteButton" data-als-locale-property-to-localize="title"></i>
 		</div>
 	</div>
-	
 	<!-- Content container -->
-	<div id="menu-items"></div>
-	
-	<!-- Bottom panel -->
-	<div id="bottom-panel-wrapper">
-		<div id="adv-lyr-sys-menu-bottom-panel" class="controls-row-set">
-			<div id="adv-lyr-sys-save-button" class="button-base" data-als-locale-property="menuSaveButton"></div>
-			<label for="adv-lyr-sys-load-input" id="adv-lyr-sys-load-button" class="button-base" data-als-locale-property="menuLoadButton"></label>
-			<div id="adv-lyr-sys-export-button" class="button-base" data-als-locale-property="menuExportButton"></div>
-			<div id="adv-lyr-sys-settings-button" class="button-base" data-als-locale-property="menuSettingsButton"></div>
-		</div>
-	</div>
+	<div class="als-menu-items"></div>
 </div>
-`);
+`

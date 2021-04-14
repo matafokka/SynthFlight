@@ -42,7 +42,7 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 	latFlightTime: "Время полета по меридианам",
 	lngCellSizeInMeters: "Средняя ширина ячейки",
 	latCellSizeInMeters: "Средняя высота сетки",
-	selectedArea: "Площать выделенных полигонов",
+	selectedArea: "Площадь выделенных полигонов",
 	flightHeight: "Высота полета (m)",
 	lx: "Высота изображения, lx",
 	Lx: "Высота изображения на местности, Lx",
@@ -50,6 +50,21 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 	ly: "Ширина изображения, ly",
 	Ly: "Ширина изображения на местности, Ly",
 	By: "Расстояние между соседними маршрутами, By",
+
+	airportForLayer: "Аэропорт для слоя",
+
+	minHeight: "Мин. высота (m)",
+	maxHeight: "Макс. высота (m)",
+	meanHeight: "Ср. высота",
+	absoluteHeight: "Абс. высота",
+	elevationDifference: "(Макс. высота - Мин. высота) / Высота полета",
+	reliefType: "Тип рельефа",
+
+	errorDistanceHasNotBeenCalculated: "Расстояние между маршрутами не было вычислено!",
+	errorPathsCountTooBig: "Вычисленное количество маршрутов слишком велико, оно должно быть меньше 20. Пожалуйста, проверьте ваши значения.",
+	errorCamHeight: "Высота камеры больше ширины камеры!",
+	errorPathsCountTooSmall: "Вычисленное количество маршрутов слишком мало, оно должно быть больше 2. Пожалуйста, проверьте ваши значения",
+	errorMinHeightBiggerThanMaxHeight: "Мин. высота должна быть меньше или равна макс. высоте!",
 
 	// SynthGridSettings
 
@@ -78,5 +93,17 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 
 	shapefileDefaultFillColor: "Цвет заливки по умолчанию",
 	shapefileDefaultBorderColor: "Цвет обводки по умолчанию",
+
+	// About
+
+	firstParagraph: "SynthFlight – это полностью клиентское программное обеспечение для проектирования аэрофотосъемочных работ. Это pre-alpha версия, поэтому ожидаемы баги, ошибки, отсутсвие функциональности, изменения API и т.д.",
+
+	secondParagraphPart1: "Посетите",
+	secondParagraphPart2: "страницу проекта на GitHub",
+	secondParagraphPart3: "для дополнительной информации (на английском языке).",
+
+	thirdParagraph: "Разработка SynthFlight возможна, благодаря следующему свободному ПО:",
+
+	fourthParagraph: "Использование карт возможно, благодаря следующим геосервисам:",
 
 });

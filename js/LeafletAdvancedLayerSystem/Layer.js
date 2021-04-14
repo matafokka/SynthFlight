@@ -81,7 +81,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 		// Build menu
 		// Handle
 		let handle = document.createElement("i");
-		handle.className = "layer-handle fas fa-arrows-alt";
+		handle.className = "layer-handle ri ri-drag-move-2-line";
 
 		// Editable label containing layer's name
 		let label = document.createElement("p");
@@ -111,7 +111,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 
 		// Drop-down menu button
 		let menuButton = document.createElement("i");
-		menuButton.className = "fas fa-cog";
+		menuButton.className = "ri ri-settings-3-line";
 
 		// Menu itself
 		L.ALS.Helpers.makeHideable(menuButton, this.container, () => {
@@ -122,13 +122,13 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 
 		// Hide/show button
 		this._hideButton = document.createElement("i");
-		this._hideButton.className = "fas fa-eye";
+		this._hideButton.className = "ri ri-eye-line";
 		L.ALS.Helpers.makeHideable(this._hideButton, undefined, () => {
-			this._hideButton.className = "fas fa-eye-slash";
+			this._hideButton.className = "ri ri-eye-off-line";
 			this._onHide();
 			this.onHide();
 		}, () => {
-			this._hideButton.className = "fas fa-eye";
+			this._hideButton.className = "ri ri-eye-line";
 			this._onShow();
 			this.onShow();
 		}, false);

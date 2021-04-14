@@ -7,9 +7,9 @@ L.ALS._service.SettingsWindow = L.ALS._service.SidebarWindow.extend({
 		if (!aboutHTML)
 			aboutHTML = require("./aboutMarkup.js");
 
-		this.aboutWidgetable = new L.ALS.Widgetable("adv-lyr-sys-about-container");
+		this.aboutWidgetable = new L.ALS.Widgetable("als-about-container");
 		let wrapper = document.createElement("div");
-		wrapper.className = "adv-lyr-sys-about-wrapper";
+		wrapper.className = "als-about-wrapper";
 		this.aboutWidgetable.container.appendChild(wrapper);
 
 		L.ALS.Helpers.HTMLToElement(aboutHTML, wrapper);
@@ -17,17 +17,21 @@ L.ALS._service.SettingsWindow = L.ALS._service.SidebarWindow.extend({
 		// Create export and import buttons
 		let exportButton = document.createElement("div");
 		L.ALS.Locales.localizeElement(exportButton, "settingsExportButton");
-		exportButton.addEventListener("click", () => { this.exportSettings(); })
+		exportButton.setAttribute("data-mobile-class", "ri ri-save-3-line");
+		exportButton.addEventListener("click", () => { this.exportSettings(); });
 
 		let importButton = document.createElement("label");
-		importButton.htmlFor = "adv-lyr-sys-load-settings-input";
+		importButton.htmlFor = "als-load-settings-input";
 		L.ALS.Locales.localizeElement(importButton, "settingsImportButton");
-		importButton.addEventListener("click", () => { this.importSettings(); })
+		importButton.setAttribute("data-mobile-class", "ri ri-folder-open-line");
+		importButton.addEventListener("click", () => { this.importSettings(); });
 
 		for (let button of [exportButton, importButton]) {
 			button.className = "button-base";
 			this.closeButton.parentElement.insertBefore(button, this.closeButton);
 		}
+
+		L.ALS.Helpers._applyButtonsIconsIfMobile(this.buttonsWrapper);
 	},
 
 	addItem: function (name, item) {
@@ -47,7 +51,7 @@ L.ALS._service.SettingsWindow = L.ALS._service.SidebarWindow.extend({
 				throw new Error("Your widget doesn't have attributes.defaultValue set! Pass attributes argument containing value property to widget's constructor.");
 
 			let button = document.createElement("i");
-			button.className = "fas fa-undo revert-button";
+			button.className = "ri ri-arrow-go-back-line revert-button";
 			L.ALS.Locales.localizeElement(button, "settingsRevertButton", "title");
 			widget.container.appendChild(button);
 
@@ -82,7 +86,7 @@ L.ALS._service.SettingsWindow = L.ALS._service.SidebarWindow.extend({
 	},
 
 	importSettings: function () {
-		let loadButton = document.getElementById("adv-lyr-sys-load-settings-input");
+		let loadButton = document.getElementById("als-load-settings-input");
 		loadButton.addEventListener("change", () => {
 			L.ALS.Helpers.readTextFile(loadButton, L.ALS.locale.settingsLoadingNotSupported, (text) => {
 

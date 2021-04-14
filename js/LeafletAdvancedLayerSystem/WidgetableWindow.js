@@ -14,7 +14,7 @@ L.ALS.WidgetableWindow = L.ALS.Widgetable.extend({
 	 * @param button {HTMLElement} Button which will activate this window
 	 */
 	initialize: function (button) {
-		L.ALS.Widgetable.prototype.initialize.call(this, "adv-lyr-sys-window-content");
+		L.ALS.Widgetable.prototype.initialize.call(this, "als-window-content");
 		this.setConstructorArguments(arguments);
 
 		/**
@@ -22,14 +22,14 @@ L.ALS.WidgetableWindow = L.ALS.Widgetable.extend({
 		 * @type {HTMLDivElement}
 		 */
 		this.windowContainer = document.createElement("div");
-		this.windowContainer.className = "adv-lyr-sys-window-background";
+		this.windowContainer.className = "als-window-background";
 
 		/**
 		 * Window which contains Widgetable's container
 		 * @type {HTMLDivElement}
 		 */
 		this.window = document.createElement("div");
-		this.window.className = "adv-lyr-sys-window-window";
+		this.window.className = "als-window-window";
 
 		this.window.appendChild(this.container);
 		this.windowContainer.appendChild(this.window);

@@ -1,11 +1,14 @@
 L.ALS.Locales["Русский"] = {
 
-	// Menu
+	// Menu buttons tooltips
 
-	menuSaveButton: "Сохранить",
-	menuLoadButton: "Загрузить",
-	menuExportButton: "Экспорт",
+	menuCloseButton: "Закрыть меню",
+	menuSaveButton: "Сохранить проект",
+	menuLoadButton: "Загрузить проект",
+	menuExportButton: "Экспортировать проект",
 	menuSettingsButton: "Настройки",
+	menuAddButton: "Добавить новый слой",
+	menuDeleteButton: "Удалить выделенный слой",
 
 	// Sidebar window
 
@@ -22,8 +25,8 @@ L.ALS.Locales["Русский"] = {
 	settingsSelectTitle: "Разделы настроек",
 	settingsContentTitle: "Настройки для выбранного раздела",
 	settingsApplyButton: "Применить и Закрыть",
-	settingsExportButton: "Экспортировать Настройки",
-	settingsImportButton: "Импортировать Настройки",
+	settingsExportButton: "Экспорт Настроек",
+	settingsImportButton: "Импорт Настроек",
 	settingsRevertButton: "Вернуть к изначальному значению",
 	settingsLoadingNotSupported: "Извините, ваш браузер не поддерживает загрузку файлов. Пожалуйста, установите современный браузер, чтобы этого не происходило.",
 	settingsImportError: "Файл, который вы пытаетесь загрузить, не является файлом настроек SynthFlight",
@@ -38,7 +41,6 @@ L.ALS.Locales["Русский"] = {
 	generalSettingsLightTheme: "Светлая",
 	generalSettingsDarkTheme: "Темная",
 	generalSettingsSystemTheme: "Системная",
-	generalSettingsRangeTheme: "По временному промежутку",
 
 
 	// System
@@ -55,6 +57,6 @@ L.ALS.Locales["Русский"] = {
 
 	// File widget
 
-	fileNoFilesSelected: "Никакие файлы не выбраны. Нажмите сюда, чтобы выбрать файлы",
+	fileNoFilesSelected: "Никакие файлы не выбраны. Нажмите сюда, чтобы выбрать файлы.",
 	fileSelectedFile: "Выбранные файлы:",
 };

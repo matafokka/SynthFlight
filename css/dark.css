@@ -1,0 +1,32 @@
+:root {
+	--background: #191919; /* Base background */
+	--text-color: #dcdcdc; /* Base text color */
+	--border: 1px solid #696969; /* Borders */
+	--hover-bg: #414141; /* Applied to every action element such as buttons */
+
+	--fixed-element-bg: #2d2d2d; /* Applies to fixed elements such as sidebar and top bar. Should be different than general background */
+	--fixed-element-selected-bg: #555555; /* Applied to selected child of a fixed element. Should be darker than the background but lighter than the borders. */
+
+	/* Scrollbars */
+	--scrollbar-hover: #696969;
+
+	/* Divider */
+	--divider-color: #696969;
+
+	/* Red delete icon */
+	--delete-color: #ff5858;
+
+	/* Error label and invalid inputs */
+	--error-bg: #8d4444;
+	--error-border: #ffbebe;
+
+	/* Other labels */
+	--message-bg: #3e4b63;
+	--message-border: #e4f7ff;
+
+	--success-bg: #498d44;
+	--success-border: #e3ffd3;
+
+	--warning-bg: #635c3e;
+	--warning-border: #fff4c3; /* Also applied to revert button */
+}

@@ -1,11 +1,14 @@
 L.ALS.Locales["English"] = {
 
-	// Menu
+	// Menu buttons tooltips
 
-	menuSaveButton: "Save",
-	menuLoadButton: "Load",
-	menuExportButton: "Export",
+	menuCloseButton: "Close menu",
+	menuSaveButton: "Save project",
+	menuLoadButton: "Load project",
+	menuExportButton: "Export project",
 	menuSettingsButton: "Settings",
+	menuAddButton: "Add new layer",
+	menuDeleteButton: "Delete selected layer",
 
 	// Sidebar window
 
@@ -38,7 +41,6 @@ L.ALS.Locales["English"] = {
 	generalSettingsLightTheme: "Light",
 	generalSettingsDarkTheme: "Dark",
 	generalSettingsSystemTheme: "System",
-	generalSettingsRangeTheme: "Time range",
 
 	// System
 

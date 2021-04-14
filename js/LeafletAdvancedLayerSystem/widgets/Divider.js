@@ -9,7 +9,7 @@ L.ALS.Widgets.Divider = L.ALS.Widgets.BaseWidget.extend({
 
 	toHtmlElement: function () {
 		let container = this.createContainer();
-		container.classList.add("adv-lyr-sys-divider");
+		container.classList.add("als-divider");
 		return container;
 	}
 });

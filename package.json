@@ -41,7 +41,8 @@
   },
   "scripts": {
     "start": "electron electronApp.js --debug",
-    "test": "node js/tests/runTests.js"
+    "test": "node js/tests/runTests.js",
+    "buildAndRun": "node build.js -b && http-server './dist/SynthFlight-browser' -c-1"
   },
   "keywords": [],
   "author": "matafokka",
@@ -50,7 +51,6 @@
   "repository": "https://github.com/matafokka/SynthFlight",
   "dependencies": {
     "@babel/runtime-corejs3": "^7.12.5",
-    "@fortawesome/fontawesome-free": "^5.15.1",
     "@mapbox/geojson-merge": "^1.1.1",
     "@turf/bbox": "^6.0.1",
     "@turf/helpers": "^6.1.4",
@@ -58,8 +58,8 @@
     "classlist": "github:eligrey/classList.js",
     "core-js": "^3.7.0",
     "debounce": "^1.2.1",
+    "feather-icons": "^4.28.0",
     "file-saver": "^2.0.5",
-    "ie8": "^0.8.1",
     "jscolor": "github:EastDesire/jscolor#2.1.1",
     "jszip": "^3.5.0",
     "keyboardevent-key-polyfill": "^1.1.0",
@@ -67,6 +67,7 @@
     "leaflet.coordinates": "~0.1.5",
     "object-defineproperty-ie": "^3.1.0",
     "regenerator-runtime": "^0.13.7",
+    "remixicon": "^2.5.0",
     "roman-numerals": "^0.3.2",
     "shpjs": "^3.6.2",
     "sortablejs": "~1.10.2",
@@ -81,6 +82,7 @@
     "browserify": "~13.3.0",
     "chalk": "^2.4.2",
     "common-shakeify": "^0.6.2",
+    "css-patch": "^1.1.2",
     "cssnano": "^4.1.10",
     "electron": "^10.1.5",
     "electron-packager": "^15.2.0",
@@ -88,6 +90,7 @@
     "jsdom": "^16.5.1",
     "jsdom-global": "^3.0.2",
     "postcss": "^8.2.4",
+    "postcss-css-variables": "^0.17.0",
     "postcss-preset-env": "^6.7.0",
     "uglifyify": "^5.0.2"
   }

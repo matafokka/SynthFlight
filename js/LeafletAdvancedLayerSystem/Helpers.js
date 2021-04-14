@@ -102,8 +102,8 @@ L.ALS.Helpers = {
 
 	/**
 	 * Makes button hide or show element on click. Both button and element will have attribute "data-hidden" equal to 0 or 1.
-	 * @param button {HTMLElement} Button that will control visibility of the element.
-	 * @param element {HTMLElement} Element that will be controlled
+	 * @param button {Element} Button that will control visibility of the element.
+	 * @param element {Element} Element that will be controlled
 	 * @param onHideCallback {function} Function to call on hiding
 	 * @param onShowCallback {function} Function to call on showing
 	 * @param clickAfter {boolean} If set to true, button will be clicked after all the things will be applied. You may want to set it to false if your callbacks affects unfinished stuff.
@@ -259,6 +259,20 @@ L.ALS.Helpers = {
 		}
 	},
 
+	_applyButtonsIconsIfMobile: function (container) {
+		if (!this.isMobile)
+			return;
+		container.classList.add("icon-button-container");
+		for (let el of container.children) {
+			let className = el.getAttribute("data-mobile-class");
+			if (!className)
+				continue;
+			el.className += " " + className;
+			el[L.ALS.Locales._getElementPropertyToSet(el)] = "";
+			el.removeAttribute("data-als-locale-property");
+		}
+	},
+
 	_inconvenienceText: "Sorry for the inconvenience. Please, update your browser, so this and many other things on the web won't happen.\n\nYour download will start after you'll close this window.",
 
 	/**
@@ -319,11 +333,13 @@ for (let device of devices) {
 	isTablet = true;
 }
 L.ALS.Helpers.isMobile = (L.ALS.Helpers.deviceType === "phone");
+document.body.classList.add((L.ALS.Helpers.isMobile) ? "mobile" : "not-mobile");
 
-if (L.ALS.Helpers.isMobile)
-	document.body.classList.add("mobile");
-else
-	document.body.classList.add("not-mobile");
+// Fix font size on mobile devices
+let meta = document.createElement("meta");
+meta.name = "viewport";
+meta.content = "width=device-width, initial-scale=1.0";
+document.head.appendChild(meta);
 
 /**
  * By default, points to window.localStorage. If user's browser doesn't support LocalStorage, will use temporary "polyfill" which acts like LocalStorage but doesn't actually save anything.

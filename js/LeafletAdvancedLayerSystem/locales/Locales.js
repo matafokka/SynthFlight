@@ -4,13 +4,13 @@
  * Structure is following:
  * ```JS
  * {
- *     "locale name (for example, "English")': {
+ *     "locale name that will be presented to the user, i.e. 'English'": {
  *         key1: "Value 1", // These keys will be used in app itself
  *         key2: "Value 2",
  *         ...
  *     },
  *
- *     "ru_RU": {
+ *     "Русский": {
  *         "key1": "Значение 1",
  *         "key2": "Значение 2",
  *         ...
@@ -137,5 +137,4 @@ L.ALS.Locales = {
 
 };
 require("./English.js");
-L.ALS.locale = L.ALS.Locales.English;
-require("./Russian.js");
+L.ALS.locale = L.ALS.Locales["English"];

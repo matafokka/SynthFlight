@@ -6,6 +6,8 @@ const fse = require("fs-extra");
 const postcss = require("postcss");
 const postcssPresetEnv = require("postcss-preset-env");
 const cssnano = require("cssnano");
+const postcssCssVariables = require("postcss-css-variables");
+const { generateCSSPatch } = require("css-patch");
 
 let onlyBrowser = false, debug = false;
 
@@ -32,21 +34,46 @@ fse.emptyDirSync("dist");
 let dir = "dist/SynthFlight-browser/";
 fs.mkdirSync(dir + "css", { recursive: true });
 
-// Autoprefix and minify CSS
-let cssFiles = fs.readdirSync("css");
-for (let cssFile of cssFiles) {
-	let plugins = [postcssPresetEnv({
-		autoprefixer: { flexbox: "no-2009" }
-	})];
-	if (!debug)
-		plugins.push(cssnano());
+// Build CSS
+let plugins = [
+	postcssCssVariables(),
 
-	let fileName = "css/" + cssFile;
-	let css = fs.readFileSync(fileName).toString();
-	postcss(plugins).process(css, {from: undefined}).then((result) => {
-		fs.writeFile(dir + fileName, result.css, {}, (err) => {
-			if (err !== null)
+	postcssPresetEnv({
+		autoprefixer: { flexbox: "no-2009" }
+	}),
+];
+if (!debug)
+	plugins.push(cssnano());
+
+let cssFilename = "css/base.css";
+let css = fs.readFileSync(cssFilename).toString();
+
+// Build dark theme css by appending new variables to the base CSS, processing it and extracting differences
+let darkCssFilename = "css/dark.css";
+let darkCss = css + fs.readFileSync(darkCssFilename).toString();
+
+let styles = [
+	[cssFilename, css],
+	[darkCssFilename, darkCss]
+];
+
+let transformedBaseCss = undefined;
+for (let style of styles) {
+	let filename = style[0];
+	postcss(plugins).process(style[1], {from: undefined}).then(async (result) => {
+
+		let newCss = result.css;
+		if (filename === darkCssFilename) {
+			while (!transformedBaseCss)
+				await new Promise(resolve => setTimeout(resolve, 0));
+			newCss = generateCSSPatch(transformedBaseCss, newCss);
+		}
+
+		fs.writeFile(dir + filename, newCss, {}, (err) => {
+			if (err)
 				console.log(err);
+			else if (filename === cssFilename)
+				transformedBaseCss = newCss;
 		});
 	});
 }
@@ -76,8 +103,7 @@ for (let file of files) {
 // Copy styles and scripts referenced in index.html
 
 let toCopy = ["index.html", "logo.ico",
-	"node_modules/@fortawesome/fontawesome-free/css",
-	"node_modules/@fortawesome/fontawesome-free/webfonts",
+	"node_modules/remixicon/fonts/",
 	"node_modules/leaflet/dist/leaflet.css",
 	"node_modules/leaflet/dist/leaflet.js",
 	"node_modules/leaflet.coordinates/dist/Leaflet.Coordinates-0.1.5.css",
