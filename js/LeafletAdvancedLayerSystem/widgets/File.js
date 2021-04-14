@@ -15,7 +15,7 @@ L.ALS.Widgets.File = L.ALS.Widgets.BaseWidget.extend({
 		let container = L.ALS.Widgets.BaseWidget.prototype.toHtmlElement.call(this);
 		this.fileArea = document.createElement("label");
 		this.fileArea.htmlFor = this.input.id;
-		this.fileArea.className = "button-base als-file-area";
+		this.fileArea.className = "als-button-base als-file-area";
 		this.input.parentNode.appendChild(this.fileArea);
 		this._updateFileArea();
 		return container;

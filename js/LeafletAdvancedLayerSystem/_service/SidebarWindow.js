@@ -24,8 +24,8 @@ L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend({
 		<div class="als-window-sidebar-title" data-als-locale-property="${contentTitle}"></div>
 	</div>
 </div>
-<div class="controls-row-set als-sidebar-window-button-container" data-id="buttons-wrapper">
-	<div class="button-base" data-id="close-button" data-mobile-class="ri ri-close-line" data-als-locale-property="${closeButtonTitle}"></div>
+<div class="als-items-row als-sidebar-window-button-container" data-id="buttons-wrapper">
+	<div class="als-button-base" data-id="close-button" data-mobile-class="ri ri-close-line" data-als-locale-property="${closeButtonTitle}"></div>
 </div>
 		`, this.window);
 
@@ -93,7 +93,7 @@ L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend({
 		this.select.appendChild(option);
 
 		let sidebarItem = document.createElement("div");
-		sidebarItem.className = "button-base";
+		sidebarItem.className = "als-button-base";
 		sidebarItem.addEventListener("click", () => {
 			this.displayItem(name);
 		});

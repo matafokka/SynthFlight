@@ -159,7 +159,7 @@ L.ALS.System = L.Control.extend({
 		// Make layers sortable. We have to reorder layers when their widgets has been reordered and when map state changes. See _reorderLayers() implementation.
 		// noinspection JSUnusedGlobalSymbols
 		new Sortable(this._layerContainer, {
-			handle: ".layer-handle",
+			handle: ".als-layer-handle",
 			animation: 250,
 			onEnd: () => {
 				this._reorderLayers();
@@ -477,7 +477,7 @@ L.ALS.System = L.Control.extend({
 
 	onAdd: function () {
 		let button = document.createElement("i");
-		button.className = "button-base icon-button ri ri-menu-line als-menu-button";
+		button.className = "als-button-base icon-button ri ri-menu-line als-menu-button";
 		L.ALS.Helpers.makeHideable(button, this.menu);
 
 		let container = document.createElement("div");

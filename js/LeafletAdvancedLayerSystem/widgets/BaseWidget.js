@@ -108,9 +108,9 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend({
 		for (let event of this.events)
 			this.input.addEventListener(event, (event) => {
 				if (!this.onChange(event))
-					this.input.classList.add("invalid-input");
+					this.input.classList.add("als-invalid-input");
 				else
-					this.input.classList.remove("invalid-input");
+					this.input.classList.remove("als-invalid-input");
 				this.callCallback();
 			});
 

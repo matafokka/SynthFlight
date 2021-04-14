@@ -262,7 +262,7 @@ L.ALS.Helpers = {
 	_applyButtonsIconsIfMobile: function (container) {
 		if (!this.isMobile)
 			return;
-		container.classList.add("icon-button-container");
+		container.classList.add("als-icon-button-container");
 		for (let el of container.children) {
 			let className = el.getAttribute("data-mobile-class");
 			if (!className)

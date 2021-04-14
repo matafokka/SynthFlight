@@ -51,7 +51,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 	 * @param settings {Object} Settings to pass to `init()`
 	 */
 	initialize: function(layerSystem, args, settings) {
-		L.ALS.Widgetable.prototype.initialize.call(this, "layer-menu");
+		L.ALS.Widgetable.prototype.initialize.call(this, "als-layer-menu");
 		this.setConstructorArguments([args]);
 		this.serializationIgnoreList.push("_layerSystem", "map", "_nameLabel", "layers", "_mapEvents", "getBounds", "isSelected");
 
@@ -81,11 +81,11 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 		// Build menu
 		// Handle
 		let handle = document.createElement("i");
-		handle.className = "layer-handle ri ri-drag-move-2-line";
+		handle.className = "als-layer-handle ri ri-drag-move-2-line";
 
 		// Editable label containing layer's name
 		let label = document.createElement("p");
-		label.className = "layer-label";
+		label.className = "als-layer-label";
 		label.innerHTML = this.defaultName;
 
 		// Make it editable on double click
@@ -134,11 +134,11 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 		}, false);
 
 		let layerWidget = document.createElement("div");
-		layerWidget.className = "layer-container";
+		layerWidget.className = "als-layer-container";
 		layerWidget.id = this.id;
 
 		let controlsContainer = document.createElement("div");
-		controlsContainer.className = "controls-row-set";
+		controlsContainer.className = "als-items-row";
 		let elements = [handle, label, menuButton, this._hideButton];
 		for (let e of elements)
 			controlsContainer.appendChild(e);
