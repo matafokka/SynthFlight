@@ -79,12 +79,13 @@ body {
 }
 
 .leaflet-container {
+	font: inherit;
 	background: var(--background);
 }
 
 .leaflet-left .leaflet-control,
 .leaflet-right .leaflet-control,
-.button-base, input[type="button"], select, .las {
+.button-base, input[type="button"], select, .ri {
 	margin: 0;
 	border-radius: 0 !important;
 	color: var(--text-color);
@@ -107,6 +108,7 @@ body {
 }
 
 .leaflet-control-coordinates .uiElement {
+	font-size: 0.75rem !important;
 	margin-top: 0;
 	margin-bottom: 0;
 }
@@ -115,7 +117,7 @@ body {
 	min-height: 2rem;
 }
 
-.button-base, input[type="button"], select, .las, .leaflet-control > a {
+.button-base, input[type="button"], select, .ri, .leaflet-control > a {
 	display: inline-block;
 	vertical-align: middle;
 	box-sizing: border-box;
@@ -129,19 +131,19 @@ body {
 	user-select: none;
 }
 
-.not-mobile .button-base:hover, .not-mobile input[type="button"]:hover, .not-mobile select:hover, .not-mobile .las:hover, .not-mobile .leaflet-control > a:hover, .jscolor-btn-close:hover {
+.not-mobile .button-base:hover, .not-mobile input[type="button"]:hover, .not-mobile select:hover, .not-mobile .ri:hover, .not-mobile .leaflet-control > a:hover, .jscolor-btn-close:hover {
 	background: var(--hover-bg);
 	transition: background 0.2s;
 }
 
 
 /* Setting background to select:active will cause bugs in older browsers, so we don't use it */
-.button-base:active, input[type="button"]:active, .las:active, .leaflet-control > a:active, .jscolor-btn-close:active {
+.button-base:active, input[type="button"]:active, .ri:active, .leaflet-control > a:active, .jscolor-btn-close:active {
 	background: var(--fixed-element-selected-bg) !important;
 	transition: background 0.2s;
 }
 
-.las {
+.ri {
 	max-width: 2rem;
 	font-size: 1.6rem;
 	width: 2rem;
@@ -228,13 +230,13 @@ select > * {
 }
 
 /* Icon button container */
-.icon-button-container > .las {
+.icon-button-container > .ri {
 	width: auto;
 	max-width: 100%;
 }
 
 /* Menu */
-#menu-button {
+.als-menu-button {
 	display: inline-block !important;
 	width: 2rem !important;
 	height: 2rem !important;
@@ -244,7 +246,27 @@ select > * {
 	line-height: 2rem !important;
 }
 
-#menu {
+/*
+Menu.
+
+Note on creating multiple system instances. Add following rules to your CSS:
+
+.als-menu {
+	position: relative;
+	top: -100%;
+	right: -100%;
+	margin-left: 1rem;
+	transition: margin-left ease-in-out 0.2s, left ease-in-out 0.2s;
+}
+
+.als-menu[data-hidden="0"] {
+	right: -100%;
+	margin-left: -22rem;
+	transition: margin-left ease-in-out 0.2s, left ease-in-out 0.2s;
+}
+
+*/
+.als-menu {
 	position: fixed;
 	top: 0;
 	right: -23rem;
@@ -253,7 +275,7 @@ select > * {
 	max-width: 100%;
 	height: 100%;
 	overflow: hidden;
-	padding-top: 2rem;
+	padding-bottom: 2rem;
 	box-sizing: border-box;
 
 	border-left: var(--border);
@@ -262,48 +284,49 @@ select > * {
 	transition: right ease-in-out 0.2s, left ease-in-out 0.2s;
 }
 
-#menu[data-hidden="0"] {
+.als-menu[data-hidden="0"] {
 	right: 0;
 	transition: right ease-in-out 0.2s, left ease-in-out 0.2s;
 }
 
-#menu.menu-left {
+.als-menu.menu-left {
 	left: -23rem;
 }
 
-#menu.menu-left[data-hidden="0"] {
+.als-menu.menu-left[data-hidden="0"] {
 	left: 0;
 }
 
-.mobile #menu {
+.mobile .als-menu {
 	width: 100%;
 	right: -100%;
+	border: none;
 }
 
-.mobile #menu[data-hidden="0"] {
+.mobile .als-menu[data-hidden="0"] {
 	right: 0;
 }
 
-#top-panel-wrapper {
-	position: fixed;
+.als-top-panel-wrapper {
+	position: relative;
 	width: 100%;
 	max-width: 22rem;
 	top: 0;
 }
 
-#top-panel-wrapper > * > * {
+.als-top-panel-wrapper > * > * {
 	background: var(--fixed-element-bg);
 }
 
-.not-mobile #top-panel-wrapper *:hover {
+.not-mobile .als-top-panel-wrapper *:hover {
 	background: var(--hover-bg);
 }
 
-.mobile #menu #top-panel-wrapper {
+.mobile .als-menu .als-top-panel-wrapper {
 	max-width: 100%;
 }
 
-#menu-items {
+.als-menu-items {
 	min-height: 100%;
 	max-height: 100%;
 	overflow-y: auto;
@@ -334,11 +357,11 @@ select > * {
 	border-right: none;
 }
 
-#menu-maps-select {
+.als-menu-maps-select {
 	width: 100%; /* Hack for older browsers */
 }
 
-#menu-delete {
+.als-menu-delete {
 	color: var(--delete-color);
 }
 
@@ -377,12 +400,17 @@ select > * {
 	border: var(--border);
 }
 
+.mobile .als-window-window {
+	border-left: none;
+	border-right: none;
+}
+
 .als-window-background[data-hidden="1"] > .als-window-window {
 	top: 25%;
 	transition: top 0.4s;
 }
 
-.als-window-select, #menu-maps-select {
+.als-window-select, .als-menu-maps-select {
 	height: 2rem !important;
 	font-size: 1rem;
 	text-align-last: center

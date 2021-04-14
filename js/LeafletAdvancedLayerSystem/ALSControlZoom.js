@@ -5,13 +5,13 @@ L.ALS.ControlZoom = L.Control.extend({
 
 	onAdd: function (map) {
 		let minusButton = document.createElement("i");
-		minusButton.className = "button-base icon-button las la-minus";
+		minusButton.className = "button-base icon-button ri ri-subtract-line";
 		minusButton.addEventListener("click", () => {
 			map.zoomOut();
 		});
 
 		let plusButton = document.createElement("i");
-		plusButton.className = "button-base icon-button las la-plus";
+		plusButton.className = "button-base icon-button ri ri-add-line";
 		plusButton.addEventListener("click", () => {
 			map.zoomIn();
 		});

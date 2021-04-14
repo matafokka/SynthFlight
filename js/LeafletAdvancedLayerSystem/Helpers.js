@@ -102,8 +102,8 @@ L.ALS.Helpers = {
 
 	/**
 	 * Makes button hide or show element on click. Both button and element will have attribute "data-hidden" equal to 0 or 1.
-	 * @param button {HTMLElement} Button that will control visibility of the element.
-	 * @param element {HTMLElement} Element that will be controlled
+	 * @param button {Element} Button that will control visibility of the element.
+	 * @param element {Element} Element that will be controlled
 	 * @param onHideCallback {function} Function to call on hiding
 	 * @param onShowCallback {function} Function to call on showing
 	 * @param clickAfter {boolean} If set to true, button will be clicked after all the things will be applied. You may want to set it to false if your callbacks affects unfinished stuff.

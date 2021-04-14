@@ -93,37 +93,38 @@ L.ALS.System = L.Control.extend({
 
 		this.map = map;
 
-		require("./_service/markup.js");
+		let mapContainer = this.map.getContainer().parentElement;
+		L.ALS.Helpers.HTMLToElement(require("./_service/markup.js"), mapContainer);
 
 		// Wizard-related stuff
-		this._wizardWindow = new L.ALS._service.WizardWindow(document.getElementById("menu-add"));
+		this._wizardWindow = new L.ALS._service.WizardWindow(mapContainer.getElementsByClassName("als-menu-add")[0]);
+		let wizardWindow = this._wizardWindow.window;
 
-		this._wizardMenu = document.getElementById("wizard-menu");
-		this._layerContainer = document.getElementById("menu-items");
+		this._wizardMenu = wizardWindow.getElementsByClassName("als-wizard-menu")[0];
+		this._layerContainer = mapContainer.getElementsByClassName("als-menu-items")[0];
 
 		// Add event listeners to "Add" button
-		document.getElementById("wizard-add-button").addEventListener("click", () => {
+		wizardWindow.getElementsByClassName("als-wizard-add-button")[0].addEventListener("click", () => {
 			this._createLayer();
 		});
 
 		// Menu-related stuff
-		this.menu = document.getElementById("menu");
-		L.ALS.Helpers.makeHideable(document.getElementById("menu-close"), this.menu);
+		this.menu = mapContainer.getElementsByClassName("als-menu")[0];
+		L.ALS.Helpers.makeHideable(mapContainer.getElementsByClassName("als-menu-close")[0], this.menu);
 
-		this._baseLayerMenu = document.getElementById("menu-maps-select");
+		this._baseLayerMenu = mapContainer.getElementsByClassName("als-menu-maps-select")[0];
 		this._baseLayerMenu.addEventListener("change", (event) => {
 			this._onBaseLayerChange(event);
 		});
 
-		this._saveButton = document.getElementById("als-save-button");
-		this._saveButton.setAttribute("data-mobile-class", "las la-save");
+		this._saveButton = mapContainer.getElementsByClassName("als-save-button")[0];
+		this._saveButton.setAttribute("data-mobile-class", "ri ri-save-3-line");
 		this._saveButton.addEventListener("click", () => {
 			this._saveProject();
 		});
 
 		// Points to input, not to a button in the menu
 		this._loadButton = document.getElementById("als-load-input");
-		document.getElementById("als-load-button").setAttribute("data-mobile-class", "las la-folder-open");
 		this._loadButton.addEventListener("change", () => {
 
 			if (!L.ALS.Helpers.isObjectEmpty(this._layers) && !window.confirm(L.ALS.locale.systemProjectAlreadyOpen)) {
@@ -135,14 +136,12 @@ L.ALS.System = L.Control.extend({
 
 		});
 
-		this._exportButton = document.getElementById("als-export-button");
-		this._exportButton.setAttribute("data-mobile-class", "las la-share-alt");
+		this._exportButton = mapContainer.getElementsByClassName("als-export-button")[0];
 		this._exportButton.addEventListener("click", () => {
 			this._exportProject();
 		});
 
-		this._settingsButton = document.getElementById("als-settings-button");
-		this._settingsButton.setAttribute("data-mobile-class", "las la-sliders-h");
+		this._settingsButton = mapContainer.getElementsByClassName("als-settings-button")[0];
 		this._settingsWindow = new L.ALS._service.SettingsWindow(this._settingsButton, () => { this.applyNewSettings(); }, aboutHTML);
 		this._settingsWindow.addItem("settingsGeneralSettings", new L.ALS._service.GeneralSettings());
 
@@ -153,7 +152,7 @@ L.ALS.System = L.Control.extend({
 			});
 		}
 
-		document.getElementById("menu-delete").addEventListener("click", () => {
+		mapContainer.getElementsByClassName("als-menu-delete")[0].addEventListener("click", () => {
 			this._deleteLayer();
 		});
 
@@ -478,8 +477,7 @@ L.ALS.System = L.Control.extend({
 
 	onAdd: function () {
 		let button = document.createElement("i");
-		button.id = "menu-button";
-		button.className = "button-base icon-button las la-bars";
+		button.className = "button-base icon-button ri ri-menu-line als-menu-button";
 		L.ALS.Helpers.makeHideable(button, this.menu);
 
 		let container = document.createElement("div");

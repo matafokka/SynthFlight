@@ -197,7 +197,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 		let icon = L.divIcon({
 			iconSize: null,
 			className: "",
-			html: "<div class='grd-lyr-airport-icon las la-plane'></div>"
+			html: "<div class='grd-lyr-airport-icon ri ri-flight-takeoff-line'></div>"
 		})
 
 		this._airportMarker = L.marker(this.map.getCenter(), {

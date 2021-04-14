@@ -18,21 +18,6 @@ function createWindow () {
 		mainWindow.webContents.openDevTools();
 	mainWindow.removeMenu();
 	mainWindow.maximize();
-
-	// Insert dark theme CSS
-	let cssPath = "css/dark.css";
-	let css = fs.readFileSync(cssPath).toString();
-	let toReplace = ":root"; // Replace root selector with .dark selector
-	css = "body.dark" + css.substring(css.indexOf(toReplace) + toReplace.length, css.length);
-	mainWindow.webContents.on("did-finish-load", () =>  {
-		mainWindow.webContents.insertCSS(css).catch((reason => {
-			dialog.showMessageBoxSync({
-				message: `File "${path.normalize(__dirname + "/" + cssPath)}" either doesn't exist or corrupted.
-				Please, download the program again.`
-			});
-			process.exit(1);
-		}));
-	});
 }
 
 // This method will be called when Electron has finished

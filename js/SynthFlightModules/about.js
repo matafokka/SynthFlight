@@ -62,6 +62,7 @@ module.exports = `
 	<li>classlist</li>
 	<li>common-shakeify</li>
 	<li>core-js</li>
+	<li>css-patch</li>
 	<li>cssnano</li>
 	<li>debounce</li>
 	<li>Electron</li>
@@ -76,12 +77,11 @@ module.exports = `
 	<li>keyboardevent-key-polyfill</li>
 	<li>Leaflet</li>
 	<li>Leaflet.Coordinates</li>
-	<li>Line Awesome</li>
 	<li>object-defineproperty-ie</li>
 	<li>PostCSS</li>
 	<li>postcss-css-variables</li>
 	<li>postcss-preset-env</li>
-	<li>postcss-themes</li>
+	<li>Remix Icon</li>
 	<li>roman-numerals</li>
 	<li>shpjs</li>
 	<li>SortableJS</li>
