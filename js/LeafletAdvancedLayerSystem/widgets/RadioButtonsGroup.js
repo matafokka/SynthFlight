@@ -1,8 +1,5 @@
-L.ALS.Widgets.RadioButtonGroup = L.ALS.Widgets.BaseWidget.extend({
+L.ALS.Widgets.RadioButtonsGroup = L.ALS.Widgets.ItemsWidgetInterface.extend({
 
-	/**
-	 * Constructs DropDownList
-	 */
 	initialize: function (id, label, objectToControl, callback) {
 		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "", id, label, objectToControl, callback, ["change"]);
 		this.radioNames = L.ALS.Helpers.generateID();
@@ -20,10 +17,6 @@ L.ALS.Widgets.RadioButtonGroup = L.ALS.Widgets.BaseWidget.extend({
 		return container;
 	},
 
-	/**
-	 * Adds item to this list
-	 * @param item {string} Content of the item
-	 */
 	addItem: function (item) {
 		let itemWrapper = document.createElement("div");
 		itemWrapper.className = "als-widget-row";
@@ -63,10 +56,6 @@ L.ALS.Widgets.RadioButtonGroup = L.ALS.Widgets.BaseWidget.extend({
 		this.callCallback();
 	},
 
-	/**
-	 * Removes item from this list, if it exists
-	 * @param item {string} Content of the item
-	 */
 	removeItem: function (item) {
 		let container = this._getContainer(item);
 		if (!container)
@@ -74,10 +63,6 @@ L.ALS.Widgets.RadioButtonGroup = L.ALS.Widgets.BaseWidget.extend({
 		this.container.removeChild(container);
 	},
 
-	/**
-	 * Selects specific item.
-	 * @param item {string} String that you've passed to addItem().
-	 */
 	selectItem: function (item) {
 		let container = this._getContainer(item);
 		if (!container)
@@ -90,10 +75,6 @@ L.ALS.Widgets.RadioButtonGroup = L.ALS.Widgets.BaseWidget.extend({
 			if (child.checked)
 				return L.ALS.Locales.getLocalePropertyOrValue(this.container.querySelector(`label[data-radio-id="${child.getAttribute("data-radio-id")}"]`));
 		}
-	},
-
-	setValue: function (value) {
-		this.selectItem(value);
 	},
 
 	_getContainer: function (item) {

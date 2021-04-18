@@ -5,13 +5,14 @@ L.ALS.Widgets = {};
 
 require("./BaseWidget.js");
 require("./Time.js");
+require("./ItemsWidgetInterface.js");
 require("./DropDownList.js");
+require("./RadioButtonsGroup.js");
 require("./SimpleLabel.js");
 require("./ValueLabel.js");
 require("./TextArea.js");
 require("./Number.js");
 require("./Checkbox.js");
-require("./RadioButtonGroup.js");
 require("./Divider.js");
 require("./File.js");
 require("./Color.js");
