@@ -39,6 +39,7 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend({
 		this.callback = callback;
 		this.attributes = attributes;
 		this.container = this.toHtmlElement();
+		this.containerForRevertButton = this.container;
 	},
 
 	/**
@@ -135,10 +136,8 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend({
 	 * @param attributes Object containing attributes
 	 */
 	setAttributes: function (attributes) {
-		if (this.input === undefined)
-			return; // In some cases widgets doesn't have an input
 		for (let attr in attributes) {
-			if (attributes.hasOwnProperty(attr))
+			if (this.input && attributes.hasOwnProperty(attr))
 				this.input.setAttribute(attr, attributes[attr]);
 			if (attr === "defaultValue") // Exception for default values
 				this.attributes.defaultValue = attributes[attr];

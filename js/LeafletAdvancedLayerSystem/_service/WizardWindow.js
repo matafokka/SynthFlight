@@ -1,7 +1,7 @@
 L.ALS._service.WizardWindow = L.ALS._service.SidebarWindow.extend({
 	initialize: function (button) {
 		L.ALS._service.SidebarWindow.prototype.initialize.call(this, button, "wizardSelectTitle", "wizardContentTitle");
-		this.select.className = "als-wizard-menu";
+		this.select.classList.add("als-wizard-menu");
 
 		let addButton = document.createElement("div");
 		addButton.className = "als-button-base als-wizard-add-button";

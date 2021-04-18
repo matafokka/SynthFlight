@@ -358,6 +358,7 @@ Note on creating multiple system instances. Add following rules to your CSS:
 }
 
 .als-menu-maps-select {
+	text-overflow: ellipsis;
 	width: 100%; /* Hack for older browsers */
 }
 
@@ -603,13 +604,20 @@ Note on creating multiple system instances. Add following rules to your CSS:
 
 /* Checkbox */
 .als-checkbox-wrapper {
-	width: 1rem !important;
+	display: inline-block;
+	display: flex;
+	align-items: center;
+	vertical-align: middle;
+	width: 1.2rem;
 	flex: none;
 }
 
+.als-checkbox-wrapper > input:checked + .ri {
+	color: var(--text-color) !important;
+	transition: color 0.2s, background 0.2s;
+}
+
 .als-checkbox-wrapper > .ri {
-	display: inline-block !important;
-	vertical-align: middle !important;
 	min-width: 1rem !important;
 	width: 1rem !important;
 	height: 1rem !important;
@@ -619,6 +627,31 @@ Note on creating multiple system instances. Add following rules to your CSS:
 	font-weight: 700;
 	margin: 0 !important;
 	padding: 0 !important;
+	color: transparent !important;
+	transition: color 0.2s, background 0.2s;
+}
+
+/* Radio buttons */
+.als-radio-group-wrapper {
+	display: block;
+}
+
+.als-radio-group-wrapper > .als-widget-row { /* Parent .als-widget-row overrides display of this one, so we gotta restore it */
+	display: block;
+	display: flex;
+	padding-left: 1rem;
+}
+
+.als-radio-group-wrapper > .als-label {
+	margin-bottom: 0.5rem;
+}
+
+.als-radio-group-wrapper input + .ri {
+	border-radius: 100% !important;
+}
+
+.als-radio-label-wrapper > .ri {
+	margin-left: 1rem;
 }
 
 /* Number input */
@@ -628,6 +661,7 @@ Note on creating multiple system instances. Add following rules to your CSS:
 }
 
 .als-number > input {
+	vertical-align: middle;
 	width: 4rem; /* Hack for older browsers */
 	flex: 1 1;
 }
@@ -636,7 +670,7 @@ Note on creating multiple system instances. Add following rules to your CSS:
 	width: 2rem; /* Hack for older browsers */
 }
 
-.als-number > div {
+.als-number > .ri {
 	min-width: 1.2rem;
 	max-width: 1.2rem;
 	min-height: 1.2rem;
@@ -749,6 +783,7 @@ Note on creating multiple system instances. Add following rules to your CSS:
 
 .als-simple-label-wrapper {
 	width: 100% !important;
+	width: 1.2rem !important;
 }
 
 .als-simple-label {

@@ -23,7 +23,7 @@ L.ALS._service.GeneralSettings = L.ALS.Settings.extend({
 		languageWidget.setAttributes({ defaultValue: "English" });
 
 		// Build theme widget
-		let themeWidget = new L.ALS.Widgets.DropDownList("theme", "generalSettingsTheme", this, "changeTheme");
+		let themeWidget = new L.ALS.Widgets.RadioButtonGroup("theme", "generalSettingsTheme", this, "changeTheme");
 		for (let theme of [this._lightTheme, this._darkTheme])
 			themeWidget.addItem(theme);
 

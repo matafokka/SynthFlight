@@ -11,12 +11,19 @@ L.ALS.Widgets.Checkbox = L.ALS.Widgets.BaseWidget.extend({
 		this.setValue(false);
 
 		// Build checkbox
+
+	},
+
+	toHtmlElement: function () {
+		let container = this.createContainer();
+		container.appendChild(this._createInput());
 		this.input.className = "hidden";
 		this.visualElement = document.createElement("label");
 		this.visualElement.htmlFor = this.input.id;
-		this.visualElement.className = "als-button-base ri";
+		this.visualElement.className = "als-button-base ri ri-check-line";
 		this.input.parentElement.appendChild(this.visualElement);
-
+		container.appendChild(this.createLabel());
+		return container;
 	},
 
 	getValue: function () {
@@ -29,7 +36,6 @@ L.ALS.Widgets.Checkbox = L.ALS.Widgets.BaseWidget.extend({
 	 */
 	setValue: function (value) {
 		this.input.checked = value;
-		this._updateVisualElement();
 	},
 
 	/**
@@ -47,19 +53,5 @@ L.ALS.Widgets.Checkbox = L.ALS.Widgets.BaseWidget.extend({
 	isChecked: function () {
 		return this.getValue();
 	},
-
-	callCallback: function () {
-		this._updateVisualElement();
-		L.ALS.Widgets.BaseWidget.prototype.callCallback.call(this);
-	},
-
-	_updateVisualElement: function () {
-		if (!this.visualElement) // setValue() is being called at parent's constructor, so we gotta create this check
-			return;
-		if (this.input.checked)
-			this.visualElement.classList.add("ri-check-line");
-		else
-			this.visualElement.classList.remove("ri-check-line");
-	}
 
 });

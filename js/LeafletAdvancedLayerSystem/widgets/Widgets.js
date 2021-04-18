@@ -11,6 +11,7 @@ require("./ValueLabel.js");
 require("./TextArea.js");
 require("./Number.js");
 require("./Checkbox.js");
+require("./RadioButtonGroup.js");
 require("./Divider.js");
 require("./File.js");
 require("./Color.js");
