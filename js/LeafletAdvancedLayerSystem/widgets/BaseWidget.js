@@ -213,9 +213,8 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend({
 	 * @param text {string} Text to set. You can also pass locale property to localize the label.
 	 */
 	setLabelText: function (text) {
-		if (!this.labelWidget) // See comment above
-			return;
-		L.ALS.Locales.localizeOrSetValue(this.labelWidget, text);
+		if (this.labelWidget) // See comment above
+			L.ALS.Locales.localizeOrSetValue(this.labelWidget, text);
 	},
 
 });

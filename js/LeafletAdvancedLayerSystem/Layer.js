@@ -114,11 +114,30 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 		menuButton.className = "ri ri-settings-3-line";
 
 		// Menu itself
-		L.ALS.Helpers.makeHideable(menuButton, this.container, () => {
-			this.container.style.height = "0";
-		}, () => {
-			this.container.style.height = this.container.scrollHeight + "px";
-		});
+
+
+		let hideFn, showFn;
+		// Old chrome can't deal with animations below, so in this case we'll just change display property.
+		if (!L.ALS.Helpers.supportsFlexbox && L.ALS.Helpers.isChrome) {
+			hideFn = () => { this.container.style.display = "none"; };
+			showFn = () => { this.container.style.display = ""; };
+		} else {
+			hideFn = () => {
+				this.container.style.height = this.container.scrollHeight + "px";
+				setTimeout(() => {
+				if (this.container.getAttribute("data-hidden") === "1") // Seems like it prevents bugs when user clicks button continuously
+						this.container.style.height = "0";
+				}, 10); // Wait for height to apply
+			};
+			showFn = () => {
+				this.container.style.height = this.container.scrollHeight + "px";
+				setTimeout(() => {
+					if (this.container.getAttribute("data-hidden") === "0") // Same as above
+						this.container.style.height = "auto";
+				}, 300); // Await animation end
+			}
+		}
+		L.ALS.Helpers.makeHideable(menuButton, this.container, hideFn, showFn);
 
 		// Hide/show button
 		this._hideButton = document.createElement("i");

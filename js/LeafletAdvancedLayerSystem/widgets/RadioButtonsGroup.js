@@ -33,7 +33,7 @@ L.ALS.Widgets.RadioButtonsGroup = L.ALS.Widgets.ItemsWidgetInterface.extend({
 
 		let radioVisualElement = document.createElement("label");
 		radioVisualElement.htmlFor = radio.id;
-		radioVisualElement.className = "als-button-base ri ri-check-line";
+		radioVisualElement.className = "ri ri-check-line";
 		radioWrapper.appendChild(radioVisualElement);
 
 		let label = document.createElement("label");

@@ -160,11 +160,6 @@ class MathTools {
 	 * @return {*[]|undefined} One of: Array of intersections or, if lines doesn't intersect, undefined
 	 */
 	static linesIntersection(line1, line2) {
-		/*
-		// Stuff for other algorithm, not needed now. TODO: Remove it if there will be no bugs found.
-		let y1 = p11[1], x2 = p12[0], y2 = p12[1], y3 = p21[1], x4 = p22[0], y4 = p22[1];
-		let p12 = line1[0],  p22 = line2[1];
-		 */
 		let p11 = line1[0], p21 = line2[0];
 		let x1 = p11[0], x3 = p21[0];
 

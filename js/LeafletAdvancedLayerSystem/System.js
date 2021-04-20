@@ -439,7 +439,6 @@ L.ALS.System = L.Control.extend({
 		try { this._loadProjectWorker(json); }
 		catch (e) {
 			// TODO: Add mechanism to change program name and link to the program's page
-			// TODO: Remove "pre-alpha state" notice when project will come out of alpha state
 			window.alert(L.ALS.systemNotProject);
 			console.log(e);
 		}

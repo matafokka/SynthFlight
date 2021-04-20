@@ -20,7 +20,7 @@ L.ALS.Widgets.Checkbox = L.ALS.Widgets.BaseWidget.extend({
 		this.input.className = "hidden";
 		this.visualElement = document.createElement("label");
 		this.visualElement.htmlFor = this.input.id;
-		this.visualElement.className = "als-button-base ri ri-check-line";
+		this.visualElement.className = "ri ri-check-line";
 		this.input.parentElement.appendChild(this.visualElement);
 		container.appendChild(this.createLabel());
 		return container;

@@ -1,13 +1,30 @@
 /**
  * Contains widgets to add to `Widgetable`s
  */
-L.ALS.Widgets = {};
+L.ALS.Widgets = {
+	/**
+	 * A simple text input widget
+	 */
+	Text: undefined,
+
+	/**
+	 * Default email input
+	 */
+	Email: undefined,
+
+	/**
+	 * Password input widget
+	 */
+	Password: undefined,
+};
 
 require("./BaseWidget.js");
 require("./Time.js");
+require("./Button.js");
 require("./ItemsWidgetInterface.js");
 require("./DropDownList.js");
 require("./RadioButtonsGroup.js");
+require("./ButtonsGroup.js");
 require("./SimpleLabel.js");
 require("./ValueLabel.js");
 require("./TextArea.js");

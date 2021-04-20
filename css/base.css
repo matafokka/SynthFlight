@@ -358,6 +358,7 @@ Note on creating multiple system instances. Add following rules to your CSS:
 }
 
 .als-menu-maps-select {
+	white-space: nowrap;
 	text-overflow: ellipsis;
 	width: 100%; /* Hack for older browsers */
 }
@@ -511,7 +512,7 @@ Note on creating multiple system instances. Add following rules to your CSS:
 	width: 100%;
 }
 
-.als-layer-menu[data-hidden="1"] {
+.als-layer-menu[data-hidden="0"] {
 	border-bottom: var(--border) !important;
 }
 
@@ -604,10 +605,6 @@ Note on creating multiple system instances. Add following rules to your CSS:
 
 /* Checkbox */
 .als-checkbox-wrapper {
-	display: inline-block;
-	display: flex;
-	align-items: center;
-	vertical-align: middle;
 	width: 1.2rem;
 	flex: none;
 }
@@ -618,11 +615,9 @@ Note on creating multiple system instances. Add following rules to your CSS:
 }
 
 .als-checkbox-wrapper > .ri {
+	display: table-cell !important;
 	min-width: 1rem !important;
 	width: 1rem !important;
-	height: 1rem !important;
-	min-height: 1rem !important;
-	max-height: 1rem !important;
 	font-size: 0.9rem !important;
 	font-weight: 700;
 	margin: 0 !important;
@@ -637,16 +632,23 @@ Note on creating multiple system instances. Add following rules to your CSS:
 }
 
 .als-radio-group-wrapper > .als-widget-row { /* Parent .als-widget-row overrides display of this one, so we gotta restore it */
-	display: block;
-	display: flex;
+	display: table;
+	vertical-align: middle;
 	padding-left: 1rem;
 }
 
-.als-radio-group-wrapper > .als-label {
-	margin-bottom: 0.5rem;
+.als-radio-group-wrapper .als-checkbox-wrapper {
+	display: table-cell;
+	vertical-align: middle;
+}
+
+.als-radio-group-wrapper .als-checkbox-wrapper + .als-label {
+	vertical-align: middle;
 }
 
 .als-radio-group-wrapper input + .ri {
+	display: table-cell !important;
+	vertical-align: middle;
 	border-radius: 100% !important;
 }
 
@@ -687,6 +689,44 @@ Note on creating multiple system instances. Add following rules to your CSS:
 
 .als-number > *:last-child {
 	border-right: var(--border);
+}
+
+/* Single button */
+.als-buttons-wrapper {
+	display: table;
+	width: 100%;
+}
+
+.als-buttons-wrapper .als-button-base {
+	display: table-cell;
+	height: 2rem;
+}
+
+/* Buttons group */
+.als-buttons-group-wrapper {
+	display: block;
+	display: flex !important;
+	flex-flow: row wrap !important;
+	justify-content: stretch;
+	padding: 0;
+}
+
+.als-buttons-group-wrapper .als-widget-row {
+	width: 100%;
+	flex: 1 1 6rem;
+	height: auto !important;
+	align-self: stretch;
+}
+
+.als-buttons-group-wrapper .als-input {
+	width: 100%;
+	max-width: 100% !important;
+	height: 100% !important;
+	box-sizing: border-box;
+}
+
+.als-buttons-group-wrapper .als-icon-button-container {
+	flex: 0 0 2rem;
 }
 
 /* Divider */
@@ -783,7 +823,6 @@ Note on creating multiple system instances. Add following rules to your CSS:
 
 .als-simple-label-wrapper {
 	width: 100% !important;
-	width: 1.2rem !important;
 }
 
 .als-simple-label {

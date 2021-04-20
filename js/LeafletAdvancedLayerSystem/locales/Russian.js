@@ -16,8 +16,8 @@ L.ALS.Locales["Русский"] = {
 
 	// Wizard
 
-	wizardSelectTitle: "Выберите тип слоя для добавления",
-	wizardContentTitle: "Установите изначальные параметры типа слоя",
+	wizardSelectTitle: "Тип слоя для добавления",
+	wizardContentTitle: "Параметры нового слоя",
 	wizardAddButton: "Добавить",
 
 	// Settings
