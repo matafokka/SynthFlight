@@ -1,10 +1,10 @@
 L.ALS._service.WizardWindow = L.ALS._service.SidebarWindow.extend({
 	initialize: function (button) {
 		L.ALS._service.SidebarWindow.prototype.initialize.call(this, button, "wizardSelectTitle", "wizardContentTitle");
-		this.select.className = "als-wizard-menu";
+		this.select.classList.add("als-wizard-menu");
 
 		let addButton = document.createElement("div");
-		addButton.className = "button-base als-wizard-add-button";
+		addButton.className = "als-button-base als-wizard-add-button";
 		addButton.setAttribute("data-mobile-class", "ri ri-check-line");
 		L.ALS.Locales.localizeElement(addButton, "wizardAddButton");
 		this.window.querySelector("div[data-id='buttons-wrapper']").appendChild(addButton);

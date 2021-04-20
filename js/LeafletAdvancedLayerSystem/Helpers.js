@@ -120,10 +120,10 @@ L.ALS.Helpers = {
 			let newValue, callback;
 			if (e.getAttribute(dataHidden) === "1") {
 				newValue = "0";
-				callback = onHideCallback;
+				callback = onShowCallback;
 			} else {
 				newValue = "1";
-				callback = onShowCallback;
+				callback = onHideCallback;
 			}
 			e.setAttribute(dataHidden, newValue);
 
@@ -241,7 +241,7 @@ L.ALS.Helpers = {
 				// Taken from https://attacomsian.com/blog/javascript-base64-encode-decode
 				btoa(encodeURIComponent(string).replace(/%([0-9A-F]{2})/g,
 					function (match, p1) {
-						return String.fromCharCode('0x' + p1);
+						return String.fromCharCode("0x" + p1);
 					})), false);
 			return;
 		}
@@ -262,12 +262,10 @@ L.ALS.Helpers = {
 	_applyButtonsIconsIfMobile: function (container) {
 		if (!this.isMobile)
 			return;
-		container.classList.add("icon-button-container");
-		for (let el of container.children) {
-			let className = el.getAttribute("data-mobile-class");
-			if (!className)
-				continue;
-			el.className += " " + className;
+		container.classList.add("als-icon-button-container");
+		let children = container.querySelectorAll("*[data-mobile-class]");
+		for (let el of children) {
+			el.className += " " + el.getAttribute("data-mobile-class");
 			el[L.ALS.Locales._getElementPropertyToSet(el)] = "";
 			el.removeAttribute("data-als-locale-property");
 		}
@@ -309,6 +307,18 @@ L.ALS.Helpers = {
 	 */
 	isIE11: !(window.ActiveXObject) && "ActiveXObject" in window,
 
+	/**
+	 * If user's browser supports flexbox, will be set to true. Will be false otherwise.
+	 * @type {boolean}
+	 */
+	supportsFlexbox: true,
+
+	/**
+	 * If user's browser is Chrome, will be set to true. Will be false otherwise.
+	 * @type {boolean}
+	 */
+	isChrome: !!window.chrome,
+
 }
 
 /**
@@ -334,6 +344,12 @@ for (let device of devices) {
 }
 L.ALS.Helpers.isMobile = (L.ALS.Helpers.deviceType === "phone");
 document.body.classList.add((L.ALS.Helpers.isMobile) ? "mobile" : "not-mobile");
+
+// Detect flexbox support
+let p = document.createElement("p");
+p.style.display = "flex";
+if (p.style.display !== "flex")
+	L.ALS.Helpers.supportsFlexbox = false;
 
 // Fix font size on mobile devices
 let meta = document.createElement("meta");

@@ -16,8 +16,8 @@ L.ALS.Locales["English"] = {
 
 	// Wizard
 
-	wizardSelectTitle: "Select layer type to add",
-	wizardContentTitle: "Set initial layer parameters",
+	wizardSelectTitle: "Layer type to add",
+	wizardContentTitle: "New layer options",
 	wizardAddButton: "Add",
 
 	// Settings

@@ -9,6 +9,21 @@ L.ALS.Widgets.Checkbox = L.ALS.Widgets.BaseWidget.extend({
 		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "checkbox", id, label, objectToControl, callback, ["change"], {});
 		this.setConstructorArguments(arguments);
 		this.setValue(false);
+
+		// Build checkbox
+
+	},
+
+	toHtmlElement: function () {
+		let container = this.createContainer();
+		container.appendChild(this._createInput());
+		this.input.className = "hidden";
+		this.visualElement = document.createElement("label");
+		this.visualElement.htmlFor = this.input.id;
+		this.visualElement.className = "ri ri-check-line";
+		this.input.parentElement.appendChild(this.visualElement);
+		container.appendChild(this.createLabel());
+		return container;
 	},
 
 	getValue: function () {
@@ -28,7 +43,7 @@ L.ALS.Widgets.Checkbox = L.ALS.Widgets.BaseWidget.extend({
 	 * @param isChecked {boolean} Check (true) or uncheck (false) this checkbox
 	 */
 	setChecked: function (isChecked) {
-		this.setChecked(isChecked);
+		this.setValue(isChecked);
 	},
 
 	/**
@@ -37,6 +52,6 @@ L.ALS.Widgets.Checkbox = L.ALS.Widgets.BaseWidget.extend({
 	 */
 	isChecked: function () {
 		return this.getValue();
-	}
+	},
 
 });

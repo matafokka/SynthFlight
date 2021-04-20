@@ -85,7 +85,7 @@ body {
 
 .leaflet-left .leaflet-control,
 .leaflet-right .leaflet-control,
-.button-base, input[type="button"], select, .ri {
+.als-button-base, select, .ri {
 	margin: 0;
 	border-radius: 0 !important;
 	color: var(--text-color);
@@ -113,11 +113,11 @@ body {
 	margin-bottom: 0;
 }
 
-.button-base {
+.als-button-base {
 	min-height: 2rem;
 }
 
-.button-base, input[type="button"], select, .ri, .leaflet-control > a {
+.als-button-base, select, .ri {
 	display: inline-block;
 	vertical-align: middle;
 	box-sizing: border-box;
@@ -131,14 +131,14 @@ body {
 	user-select: none;
 }
 
-.not-mobile .button-base:hover, .not-mobile input[type="button"]:hover, .not-mobile select:hover, .not-mobile .ri:hover, .not-mobile .leaflet-control > a:hover, .jscolor-btn-close:hover {
+.not-mobile .als-button-base:hover, .not-mobile select:hover, .not-mobile .ri:hover, .jscolor-btn-close:hover {
 	background: var(--hover-bg);
 	transition: background 0.2s;
 }
 
 
 /* Setting background to select:active will cause bugs in older browsers, so we don't use it */
-.button-base:active, input[type="button"]:active, .ri:active, .leaflet-control > a:active, .jscolor-btn-close:active {
+.als-button-base:active, .ri:active, .jscolor-btn-close:active {
 	background: var(--fixed-element-selected-bg) !important;
 	transition: background 0.2s;
 }
@@ -151,7 +151,7 @@ body {
 }
 
 /* Revert button in settings */
-.revert-button {
+.als-revert-button {
 	width: 1.5rem;
 	height: 1.5rem;
 	font-size: 0.7rem;
@@ -168,7 +168,7 @@ input, select {
 	border: var(--border);
 }
 
-.invalid-input {
+.als-invalid-input {
 	background: var(--error-bg);
 	border: 1px solid var(--error-border);
 }
@@ -230,7 +230,7 @@ select > * {
 }
 
 /* Icon button container */
-.icon-button-container > .ri {
+.als-icon-button-container > .ri {
 	width: auto;
 	max-width: 100%;
 }
@@ -333,7 +333,7 @@ Note on creating multiple system instances. Add following rules to your CSS:
 	overflow-x: hidden;
 }
 
-.controls-row-set {
+.als-items-row {
 	display: table; /* Hack for older browsers */
 	table-layout: fixed;
 	display: flex;
@@ -344,7 +344,7 @@ Note on creating multiple system instances. Add following rules to your CSS:
 	border-bottom: var(--border);
 }
 
-.controls-row-set > * {
+.als-items-row > * {
 	display: table-cell !important;
 	display: flex !important;
 	border: none !important;
@@ -353,11 +353,13 @@ Note on creating multiple system instances. Add following rules to your CSS:
 	flex: 1;
 }
 
-.controls-row-set > *:last-child {
+.als-items-row > *:last-child {
 	border-right: none;
 }
 
 .als-menu-maps-select {
+	white-space: nowrap;
+	text-overflow: ellipsis;
 	width: 100%; /* Hack for older browsers */
 }
 
@@ -506,35 +508,35 @@ Note on creating multiple system instances. Add following rules to your CSS:
 }
 
 /* Layers */
-.layer-container {
+.als-layer-container {
 	width: 100%;
 }
 
-.layer-menu[data-hidden="1"] {
+.als-layer-menu[data-hidden="0"] {
 	border-bottom: var(--border) !important;
 }
 
-.layer-container > .controls-row-set {
+.als-layer-container > .als-items-row {
 	border-bottom: var(--border) !important;
 	transition: background 0.3s;
 }
 
-.not-mobile .layer-container > .controls-row-set:hover {
+.not-mobile .als-layer-container > .als-items-row:hover {
 	background: var(--hover-bg);
 	transition: background 0.3s;
 }
 
-.layer-container[data-is-selected = "1"] > .controls-row-set,
-.not-mobile .layer-container[data-is-selected = "1"] > .controls-row-set:hover {
+.als-layer-container[data-is-selected = "1"] > .als-items-row,
+.not-mobile .als-layer-container[data-is-selected = "1"] > .als-items-row:hover {
 	background: var(--fixed-element-selected-bg);
 	transition: background 0.3s;
 }
 
-.layer-container > .controls-row-set {
+.als-layer-container > .als-items-row {
 	border: none;
 }
 
-.layer-label {
+.als-layer-label {
 	display: inline-block;
 	vertical-align: middle;
 	display: flex;
@@ -546,15 +548,15 @@ Note on creating multiple system instances. Add following rules to your CSS:
 	overflow: hidden;
 }
 
-.layer-label[contenteditable = "true"] {
+.als-layer-label[contenteditable = "true"] {
 	text-decoration: underline;
 }
 
-.layer-handle {
+.als-layer-handle {
 	cursor: move;
 }
 
-.layer-menu {
+.als-layer-menu {
 	display: block;
 	width: 100%;
 	border: none;
@@ -603,17 +605,55 @@ Note on creating multiple system instances. Add following rules to your CSS:
 
 /* Checkbox */
 .als-checkbox-wrapper {
-	width: 1rem !important;
+	width: 1.2rem;
 	flex: none;
 }
 
-.als-checkbox-wrapper > * {
-	display: inline-block !important;
-	vertical-align: middle !important;
+.als-checkbox-wrapper > input:checked + .ri {
+	color: var(--text-color) !important;
+	transition: color 0.2s, background 0.2s;
+}
+
+.als-checkbox-wrapper > .ri {
+	display: table-cell !important;
 	min-width: 1rem !important;
 	width: 1rem !important;
+	font-size: 0.9rem !important;
+	font-weight: 700;
 	margin: 0 !important;
 	padding: 0 !important;
+	color: transparent !important;
+	transition: color 0.2s, background 0.2s;
+}
+
+/* Radio buttons */
+.als-radio-group-wrapper {
+	display: block;
+}
+
+.als-radio-group-wrapper > .als-widget-row { /* Parent .als-widget-row overrides display of this one, so we gotta restore it */
+	display: table;
+	vertical-align: middle;
+	padding-left: 1rem;
+}
+
+.als-radio-group-wrapper .als-checkbox-wrapper {
+	display: table-cell;
+	vertical-align: middle;
+}
+
+.als-radio-group-wrapper .als-checkbox-wrapper + .als-label {
+	vertical-align: middle;
+}
+
+.als-radio-group-wrapper input + .ri {
+	display: table-cell !important;
+	vertical-align: middle;
+	border-radius: 100% !important;
+}
+
+.als-radio-label-wrapper > .ri {
+	margin-left: 1rem;
 }
 
 /* Number input */
@@ -623,6 +663,7 @@ Note on creating multiple system instances. Add following rules to your CSS:
 }
 
 .als-number > input {
+	vertical-align: middle;
 	width: 4rem; /* Hack for older browsers */
 	flex: 1 1;
 }
@@ -631,12 +672,13 @@ Note on creating multiple system instances. Add following rules to your CSS:
 	width: 2rem; /* Hack for older browsers */
 }
 
-.als-number > div {
+.als-number > .ri {
 	min-width: 1.2rem;
 	max-width: 1.2rem;
 	min-height: 1.2rem;
 	height: 1.2rem;
 	font-size: 1rem;
+	font-weight: 700;
 	line-height: 1.2rem;
 	padding: 0 !important;
 }
@@ -647,6 +689,44 @@ Note on creating multiple system instances. Add following rules to your CSS:
 
 .als-number > *:last-child {
 	border-right: var(--border);
+}
+
+/* Single button */
+.als-buttons-wrapper {
+	display: table;
+	width: 100%;
+}
+
+.als-buttons-wrapper .als-button-base {
+	display: table-cell;
+	height: 2rem;
+}
+
+/* Buttons group */
+.als-buttons-group-wrapper {
+	display: block;
+	display: flex !important;
+	flex-flow: row wrap !important;
+	justify-content: stretch;
+	padding: 0;
+}
+
+.als-buttons-group-wrapper .als-widget-row {
+	width: 100%;
+	flex: 1 1 6rem;
+	height: auto !important;
+	align-self: stretch;
+}
+
+.als-buttons-group-wrapper .als-input {
+	width: 100%;
+	max-width: 100% !important;
+	height: 100% !important;
+	box-sizing: border-box;
+}
+
+.als-buttons-group-wrapper .als-icon-button-container {
+	flex: 0 0 2rem;
 }
 
 /* Divider */

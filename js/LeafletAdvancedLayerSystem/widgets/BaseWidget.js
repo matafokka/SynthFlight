@@ -39,6 +39,7 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend({
 		this.callback = callback;
 		this.attributes = attributes;
 		this.container = this.toHtmlElement();
+		this.containerForRevertButton = this.container;
 	},
 
 	/**
@@ -108,9 +109,9 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend({
 		for (let event of this.events)
 			this.input.addEventListener(event, (event) => {
 				if (!this.onChange(event))
-					this.input.classList.add("invalid-input");
+					this.input.classList.add("als-invalid-input");
 				else
-					this.input.classList.remove("invalid-input");
+					this.input.classList.remove("als-invalid-input");
 				this.callCallback();
 			});
 
@@ -135,10 +136,8 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend({
 	 * @param attributes Object containing attributes
 	 */
 	setAttributes: function (attributes) {
-		if (this.input === undefined)
-			return; // In some cases widgets doesn't have an input
 		for (let attr in attributes) {
-			if (attributes.hasOwnProperty(attr))
+			if (this.input && attributes.hasOwnProperty(attr))
 				this.input.setAttribute(attr, attributes[attr]);
 			if (attr === "defaultValue") // Exception for default values
 				this.attributes.defaultValue = attributes[attr];
@@ -214,9 +213,8 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend({
 	 * @param text {string} Text to set. You can also pass locale property to localize the label.
 	 */
 	setLabelText: function (text) {
-		if (!this.labelWidget) // See comment above
-			return;
-		L.ALS.Locales.localizeOrSetValue(this.labelWidget, text);
+		if (this.labelWidget) // See comment above
+			L.ALS.Locales.localizeOrSetValue(this.labelWidget, text);
 	},
 
 });

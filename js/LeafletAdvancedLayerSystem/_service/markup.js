@@ -4,17 +4,17 @@ module.exports = `
 <div class="als-menu">
 	<!-- Top panel -->
 	<div class="als-top-panel-wrapper">
-		<div class="controls-row-set als-top-panel">
+		<div class="als-items-row als-top-panel">
 		
-			<i class="button-base ri ri-close-line als-menu-close" data-als-locale-property="menuCloseButton" data-als-locale-property-to-localize="title"></i>
+			<i class="als-button-base ri ri-close-line als-menu-close" data-als-locale-property="menuCloseButton" data-als-locale-property-to-localize="title"></i>
 			
-			<div class="button-base ri ri-save-3-line als-save-button" data-als-locale-property="menuSaveButton" data-als-locale-property-to-localize="title"></div>
+			<div class="als-button-base ri ri-save-3-line als-save-button" data-als-locale-property="menuSaveButton" data-als-locale-property-to-localize="title"></div>
 			
-			<label for="als-load-input" class="button-base ri ri-folder-open-line als-load-button" data-als-locale-property="menuLoadButton" data-als-locale-property-to-localize="title"></label>
+			<label for="als-load-input" class="als-button-base ri ri-folder-open-line als-load-button" data-als-locale-property="menuLoadButton" data-als-locale-property-to-localize="title"></label>
 			
-			<div class="button-base ri ri-share-line als-export-button" data-als-locale-property="menuExportButton" data-als-locale-property-to-localize="title"></div>
+			<div class="als-button-base ri ri-share-line als-export-button" data-als-locale-property="menuExportButton" data-als-locale-property-to-localize="title"></div>
 			
-			<div class="button-base ri ri-sound-module-line als-settings-button" data-als-locale-property="menuSettingsButton" data-als-locale-property-to-localize="title"></div>
+			<div class="als-button-base ri ri-sound-module-line als-settings-button" data-als-locale-property="menuSettingsButton" data-als-locale-property-to-localize="title"></div>
 			
 			<select class="als-menu-maps-select"></select>
 			
