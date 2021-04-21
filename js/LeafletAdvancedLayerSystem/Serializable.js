@@ -36,10 +36,12 @@
  * 1. Put your custom arguments to `serialized.constructorArguments` in such order that constructor requires.
  * 1. Pass your `serialized` object to the default mechanism: `L.ALS.Serializable.deserialize(serialized);`
  *
- * @type {L.ALS.Serializable}
+ * @class
+ * @extends L.Class
  */
-L.ALS.Serializable = L.Class.extend({
+L.ALS.Serializable = L.Class.extend( /** @lends L.ALS.Serializable.prototype */ {
 
+	/** @constructs */
 	initialize: function () {
 
 		/**
@@ -71,6 +73,7 @@ L.ALS.Serializable = L.Class.extend({
 	 * return json; // Finally return JSON
 	 * ```
 	 *
+	 * @param seenObjects {Object} Already seen objects
 	 * @return {{}} This serialized object
 	 */
 	serialize: function (seenObjects) {
@@ -98,21 +101,25 @@ L.ALS.Serializable = L.Class.extend({
 
 		/**
 		 * Prefix added when serializing unsupported types such as NaN or Infinity
+		 * @static
 		 */
 		unsupportedTypesPrefix: "alsSerializable__",
 
 		/**
 		 * Prefix added to BigInts when serializing
+		 * @static
 		 */
 		bigIntPrefix: "BigInt__",
 
 		/**
 		 * Prefix added to Symbols when serializing
+		 * @static
 		 */
 		symbolPrefix: "Sym__",
 
 		/**
 		 * List of custom properties to ignore when deserializing arrays
+		 * @static
 		 */
 		arrayIgnoreList: ["alsSerializableArray", "serializationID"],
 
@@ -122,6 +129,7 @@ L.ALS.Serializable = L.Class.extend({
 		 * @param objectWithIgnoreLists {L.ALS.Serializable|Object} Object containing ignore lists
 		 * @param isGetter {boolean} Indicates whether given property is getter or not
 		 * @return {boolean} True, if property is in ignore lists. False otherwise.
+		 * @static
 		 */
 		shouldIgnoreProperty: function (property, objectWithIgnoreLists, isGetter = false) {
 			let obj = objectWithIgnoreLists[property];
@@ -136,7 +144,7 @@ L.ALS.Serializable = L.Class.extend({
 		/**
 		 * Cleans up seen objects. Must be called after first call of `serialize()`, `serializeAnyObjects()` or `deserialize()`. Should not be called in the middle of serialization or deserialization, for example, at `serialize()`.
 		 * @param seenObjects {Object} `seenObjects` argument that you've passed to serialization and deserialization methods
-		 * @public
+		 * @static
 		 */
 		cleanUp: function (seenObjects) {
 			for (let prop in seenObjects) {
@@ -150,6 +158,7 @@ L.ALS.Serializable = L.Class.extend({
 		 * Serializes primitives including types unsupported by JSON
 		 * @param primitive Primitive to serialize
 		 * @return Serialized primitive
+		 * @static
 		 */
 		serializePrimitive: function (primitive) {
 			let part = "";
@@ -172,6 +181,12 @@ L.ALS.Serializable = L.Class.extend({
 			return L.ALS.Serializable.unsupportedTypesPrefix + part;
 		},
 
+		/**
+		 * Deserializes primitives including types unsupported by JSON
+		 * @param primitive Primitive to deserialize
+		 * @return {bigint|number|*} Deserialized primitive
+		 * @static
+		 */
 		deserializePrimitive: function (primitive) {
 			if (typeof primitive !== "string" || !primitive.startsWith(L.ALS.Serializable.unsupportedTypesPrefix))
 				return primitive;
@@ -194,7 +209,8 @@ L.ALS.Serializable = L.Class.extend({
 		/**
 		 * Finds a constructor by given class name
 		 * @param className {string} Full class name. Just pass serialized.serializableClassName.
-		 * @return {function|undefined} Found constructor or undefined
+		 * @return {ObjectConstructor|undefined} Found constructor or undefined
+		 * @static
 		 */
 		getSerializableConstructor: function (className) {
 			className += ".";
@@ -215,6 +231,7 @@ L.ALS.Serializable = L.Class.extend({
 		 * @param serialized {Object} Serialized Serializable object
 		 * @param seenObjects Already seen objects' ids. Intended only for internal use.
 		 * @return {L.ALS.Serializable|Object} Instance of given object or `serialized` argument if constructor hasn't been found
+		 * @static
 		 */
 		getObjectFromSerialized: function (serialized, seenObjects) {
 			let constructor = L.ALS.Serializable.getSerializableConstructor(serialized.serializableClassName);
@@ -251,6 +268,7 @@ L.ALS.Serializable = L.Class.extend({
 		 * @param property {string} Property name
 		 * @param object {Object} Object to find getter or setter in
 		 * @return {string|undefined} Either getter or setter name or undefined if nothing has been found
+		 * @static
 		 * @protected
 		 */
 		_findGetterOrSetter: function (isGetter, property, object) {
@@ -270,6 +288,7 @@ L.ALS.Serializable = L.Class.extend({
 		 * @param property {string} Property name
 		 * @param object {Object} Object to find getter in
 		 * @return {string|undefined} Either getter name or undefined if nothing has been found
+		 * @static
 		 */
 		findGetter: function (property, object) {
 			return L.ALS.Serializable._findGetterOrSetter(true, property, object);
@@ -280,6 +299,7 @@ L.ALS.Serializable = L.Class.extend({
 		 * @param property {string} Property name
 		 * @param object {Object} Object to find setter in
 		 * @return {string|undefined} Either setter name or undefined if nothing has been found
+		 * @static
 		 */
 		findSetter: function (property, object) {
 			return L.ALS.Serializable._findGetterOrSetter(false, property, object);
@@ -290,6 +310,7 @@ L.ALS.Serializable = L.Class.extend({
 		 * @param object Any object or primitive to serialize
 		 * @param seenObjects Already seen objects' ids. Intended only for internal use.
 		 * @return Serialized object or primitive
+		 * @static
 		 */
 		serializeAnyObject: function (object, seenObjects) {
 			if (!(object instanceof Object))
@@ -368,6 +389,7 @@ L.ALS.Serializable = L.Class.extend({
 		 * @param serialized {Object} Serialized object or primitive
 		 * @param seenObjects Already seen objects' ids. Intended only for internal use.
 		 * @return Deserialized object or primitive
+		 * @static
 		 */
 		deserialize: function (serialized, seenObjects) {
 			if (!(serialized instanceof Object))
@@ -441,14 +463,8 @@ L.ALS.Serializable = L.Class.extend({
 
 // Monkey-patch certain types to be serializable
 
-// TODO: If won't patch other classes, move it directly to RegExp
-let _types = [RegExp];
-for (let type of _types) {
-	if (type) {
-		type.deserialize = function (serialized, seenObjects) {
-			return L.ALS.Serializable.deserialize(serialized, seenObjects);
-		}
-	}
+RegExp.prototype.deserialize = function (serialized, seenObjects) {
+	return L.ALS.Serializable.deserialize(serialized, seenObjects);
 }
 
 RegExp.prototype.serialize = function (seenObjects) {

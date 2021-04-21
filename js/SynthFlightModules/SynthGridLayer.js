@@ -7,7 +7,12 @@ const geojsonMerge = require("@mapbox/geojson-merge"); // Using this since turfH
 require("./SynthGridWizard.js");
 require("./SynthGridSettings.js");
 
-L.ALS.SynthGridLayer = L.ALS.Layer.extend({
+/**
+ * Layer that allows users to plan aerial photography using grid
+ * @class
+ * @extends L.ALS.Layer
+ */
+L.ALS.SynthGridLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGridLayer.prototype */ {
 
 	defaultName: "Grid Layer",
 
@@ -27,6 +32,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 	_doHidePathsByParallels: false,
 	_doHidePathsNumbers: false,
 
+	/** @constructs */
 	init: function (wizardResults, settings) {
 		this.copySettingsToThis(settings);
 

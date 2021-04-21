@@ -1,9 +1,22 @@
-L.ALS.Widgets.Number = L.ALS.Widgets.BaseWidget.extend({
+/**
+ * Number input widget
+ *
+ * @param id {string} ID of this input. You can select this object using this ID.
+ * @param label {string} Label for this input. You can also pass locale property to localize the label.
+ * @param callbackObject {Object|L.ALS.Serializable} Object which contains callback. Just pass "this". If you plan to use serialization, this object MUST be instance of L.ALS.Serializable.
+ * @param callback {string} Name of the method of callbackObject that will be called when widget's value changes
+ * @param attributes {Object} Attributes of an input, such as min, max, etc in format `{attributeName1: attributeValue1, attributeName2: attributeValue2, ...}`
+ *
+ * @class
+ * @extends L.ALS.Widgets.BaseWidget
+ */
+L.ALS.Widgets.Number = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widgets.Number.prototype */ {
 
 	customWrapperClassName: "als-number",
 
-	initialize: function (id, label, objectToControl = undefined, callback = "", attributes = {}) {
-		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "text", id, label, objectToControl, callback, ["edit", "change", "keyup"], attributes);
+	/** @constructs */
+	initialize: function (id, label, callbackObject = undefined, callback = "", attributes = {}) {
+		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "text", id, label, callbackObject, callback, ["edit", "change", "keyup"], attributes);
 		this.setConstructorArguments(arguments);
 
 		this.input.addEventListener("keydown", (event) => {

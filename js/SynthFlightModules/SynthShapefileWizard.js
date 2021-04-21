@@ -1,4 +1,9 @@
-L.ALS.SynthShapefileWizard = L.ALS.Wizard.extend({
+/**
+ * Wizard for SynthShapefileLayer
+ * @class
+ * @extends L.ALS.Wizard
+ */
+L.ALS.SynthShapefileWizard = L.ALS.Wizard.extend( /** @lends L.ALS.SynthShapefileWizard.prototype */ {
 
 	displayName: "shapefileDisplayName",
 

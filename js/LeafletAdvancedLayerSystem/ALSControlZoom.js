@@ -1,7 +1,9 @@
 /**
- * Custom zoom control which looks and works better than Leaflet's. Also matches ALS aesthetics.
+ * Custom zoom control which matches ALS aesthetics.
+ * @class
+ * @extends L.Control
  */
-L.ALS.ControlZoom = L.Control.extend({
+L.ALS.ControlZoom = L.Control.extend( /** @lends L.ALS.ControlZoom.prototype */{
 
 	onAdd: function (map) {
 		let minusButton = document.createElement("i");

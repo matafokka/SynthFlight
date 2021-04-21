@@ -1,4 +1,12 @@
-L.ALS.Widgets.Divider = L.ALS.Widgets.BaseWidget.extend({
+/**
+ * A vertical divider
+ *
+ * @param id {string} ID of this widget
+ *
+ * @class
+ * @extends L.ALS.Widgets.BaseWidget
+ */
+L.ALS.Widgets.Divider = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widgets.Divider.prototype */ {
 
 	undoable: false,
 

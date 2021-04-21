@@ -1,11 +1,24 @@
 const debounce = require("debounce");
 
-L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend({
+/**
+ * A sidebar window with ability to add items to it
+ *
+ * @param button {Element} Button which will activate this window
+ * @param sidebarTitle {string} Title of the sidebar. You can pass locale property to localize it.
+ * @param contentTitle {string} Title of the content. You can pass locale property to localize it.
+ * @param closeButtonTitle {string} Title of the close button. You can pass locale property to localize it.
+ * @param onCloseCallback {Function} Function that will be called when user will close the window.
+ *
+ * @class
+ * @extends L.ALS.WidgetableWindow
+ */
+L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend( /** @lends L.ALS._service.SidebarWindow.prototype */ {
 
 	maxHeight: 0,
 	sidebarWidth: 0,
 	isSidebarHidden: false,
 
+	/** @constructs */
 	initialize: function (button, sidebarTitle, contentTitle, closeButtonTitle = "sidebarWindowCancelButton", onCloseCallback = undefined) {
 		L.ALS.WidgetableWindow.prototype.initialize.call(this, button);
 		this.items = {};
@@ -29,8 +42,8 @@ L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend({
 </div>
 		`, this.window);
 
-		this.sidebar = this.window.querySelector("div[data-id='sidebar']");
-		this.selectContainer = this.window.querySelector("div[data-id='select-container']");
+		this._sidebar = this.window.querySelector("div[data-id='sidebar']");
+		this._selectContainer = this.window.querySelector("div[data-id='select-container']");
 		this.select = this.window.querySelector("select[data-id='select']");
 		this.closeButton = this.window.querySelector("div[data-id='close-button']");
 		this.contentWrapper = this.window.querySelector("div[data-id='content-wrapper']");
@@ -51,18 +64,18 @@ L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend({
 		})
 
 		let onResize = () => {
-			if (this.sidebarWidth === 0 || this.windowContainer.getAttribute("data-hidden") !== "0")
+			if (this._sidebarWidth === 0 || this.windowContainer.getAttribute("data-hidden") !== "0")
 				return;
 
-			let isTooWide = this.window.offsetWidth / 3 <= this.sidebarWidth;
-			if (isTooWide && this.selectContainer.classList.contains("hidden")) {
-				this.selectContainer.classList.remove("hidden");
-				this.sidebar.classList.add("hidden");
+			let isTooWide = this.window.offsetWidth / 3 <= this._sidebarWidth;
+			if (isTooWide && this._selectContainer.classList.contains("hidden")) {
+				this._selectContainer.classList.remove("hidden");
+				this._sidebar.classList.add("hidden");
 				this.contentWrapper.style.display = "block";
 				this.isSidebarHidden = true;
 			} else if (!isTooWide && this.isSidebarHidden) {
-				this.sidebar.classList.remove("hidden");
-				this.selectContainer.classList.add("hidden");
+				this._sidebar.classList.remove("hidden");
+				this._selectContainer.classList.add("hidden");
 				this.contentWrapper.style.display = "table-cell";
 				this.isSidebarHidden = false;
 			}
@@ -77,7 +90,7 @@ L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend({
 				await new Promise(resolve => setTimeout(resolve, 0));
 
 			this.buttonsHeight = this.buttonsWrapper.offsetHeight;
-			this.sidebarWidth = this.sidebar.offsetWidth;
+			this._sidebarWidth = this._sidebar.offsetWidth;
 			onResize();
 		})();
 	},
@@ -98,7 +111,7 @@ L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend({
 			this.displayItem(name);
 		});
 		L.ALS.Locales.localizeOrSetValue(sidebarItem, name);
-		this.sidebar.appendChild(sidebarItem);
+		this._sidebar.appendChild(sidebarItem);
 
 		let container = item.container;
 		this.container.appendChild(container);
@@ -121,7 +134,7 @@ L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend({
 		if (!item)
 			return;
 		this.select.removeChild(item.selectItem);
-		this.sidebar.removeChild(item.sidebarItem);
+		this._sidebar.removeChild(item.sidebarItem);
 		this.container.removeChild(item.container);
 	},
 
@@ -134,6 +147,10 @@ L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend({
 		return this.items[name].widgetable;
 	},
 
+	/**
+	 * Displays item with given name
+	 * @param name {string} Item to display
+	 */
 	displayItem: function (name) {
 		let item = this.items[name];
 		if (!item)
@@ -141,7 +158,7 @@ L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend({
 
 		item.selectItem.selected = "selected";
 
-		for (let child of this.sidebar.children)
+		for (let child of this._sidebar.children)
 			child.setAttribute("data-is-selected", "0");
 		item.sidebarItem.setAttribute("data-is-selected", "1");
 
@@ -150,6 +167,10 @@ L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend({
 		item.container.setAttribute("data-hidden", "0");
 	},
 
+	/**
+	 * Updates window height
+	 * @return {VoidFunction}
+	 */
 	updateWindowHeight: async function () {
 		while (!this.isWindowVisible())
 			await new Promise(resolve => setTimeout(resolve, 0));
@@ -167,22 +188,30 @@ L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend({
 		this.displayItem(L.ALS.Locales.getLocalePropertyOrValue(previousOption));
 	},
 
+	/**
+	 * Sets window height
+	 * @param height {number|"auto"} Height to set
+	 */
 	setWindowHeight: function (height) {
 		let contentHeight = height;
 		if (typeof height === "number") {
 			let vh = window.innerHeight * 0.9; // 90vh
 			if (height > vh)
 				height = vh;
-			contentHeight = height - this.buttonsHeight - (this.isSidebarHidden ? this.selectContainer.offsetHeight : 0) + "px";
+			contentHeight = height - this.buttonsHeight - (this.isSidebarHidden ? this._selectContainer.offsetHeight : 0) + "px";
 		}
 
 		for (let prop of ["minHeight", "height"]) {
 			this.window.style[prop] = height;
 			this.windowWrapper.style[prop] = contentHeight;
-			this.sidebar.style[prop] = contentHeight;
+			this._sidebar.style[prop] = contentHeight;
 		}
 	},
 
+	/**
+	 * Indicates if window has been opened.
+	 * @return {boolean} True, if window is now open.
+	 */
 	isWindowVisible: function () {
 		return this.windowContainer.parentNode !== null && this.windowContainer.getAttribute("data-hidden") !== "1";
 	},

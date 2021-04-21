@@ -1,8 +1,33 @@
-L.ALS._service.GeneralSettings = L.ALS.Settings.extend({
+/**
+ * General application settings
+ *
+ * @class
+ * @extends L.ALS.Settings
+ */
+L.ALS._service.GeneralSettings = L.ALS.Settings.extend( /** @lends L.ALS._service.GeneralSettings.prototype */ {
+
+	/**
+	 * Light theme radio button ID
+	 * @type {string}
+	 * @private
+	 */
 	_lightTheme: "generalSettingsLightTheme",
+
+	/**
+	 * Dark theme radio button ID
+	 * @type {string}
+	 * @private
+	 */
 	_darkTheme: "generalSettingsDarkTheme",
+
+	/**
+	 * System theme radio button ID
+	 * @type {string}
+	 * @private
+	 */
 	_systemTheme: "generalSettingsSystemTheme",
 
+	/** @constructs */
 	initialize: function () {
 		L.ALS.Settings.prototype.initialize.call(this);
 
@@ -32,10 +57,16 @@ L.ALS._service.GeneralSettings = L.ALS.Settings.extend({
 		let mediaQuery = "(prefers-color-scheme: dark)";
 		if (window.matchMedia && window.matchMedia(mediaQuery).media === mediaQuery) {
 			themeWidget.addItem(this._systemTheme);
-			this.systemThemeMedia = window.matchMedia(mediaQuery);
-			this.systemThemeMedia.addEventListener("change", () => {
+
+			/**
+			 * Media query to detect browser's theme
+			 * @type {MediaQueryList|undefined}
+			 * @private
+			 */
+			this._systemThemeMedia = window.matchMedia(mediaQuery);
+			this._systemThemeMedia.addEventListener("change", () => {
 				if (themeWidget.getValue() === this._systemTheme)
-					this.changeThemeWorker(this._systemTheme);
+					this._changeThemeWorker(this._systemTheme);
 			});
 			defaultValue = this._systemTheme;
 		}
@@ -47,17 +78,30 @@ L.ALS._service.GeneralSettings = L.ALS.Settings.extend({
 			this.addWidget(widget);
 	},
 
+	/**
+	 * Changes application's locale
+	 * @param widget {L.ALS.Widgets.DropDownList}
+	 */
 	changeLocale: function (widget) {
 		L.ALS.Locales.changeLocale(widget.getValue());
 	},
 
+	/**
+	 * Changes application's theme
+	 * @param widget {L.ALS.Widgets.RadioButtonsGroup}
+	 */
 	changeTheme: function (widget) {
-		this.changeThemeWorker(widget.getValue());
+		this._changeThemeWorker(widget.getValue());
 	},
 
-	changeThemeWorker: function (value) {
+	/**
+	 * Actually changes theme
+	 * @param value {string} Theme name to set
+	 * @private
+	 */
+	_changeThemeWorker: function (value) {
 		if (value === this._systemTheme)
-			this.changeThemeWorker(this.systemThemeMedia.matches ? this._darkTheme : this._lightTheme)
+			this._changeThemeWorker(this._systemThemeMedia.matches ? this._darkTheme : this._lightTheme)
 		else
 			this._darkThemeSheet.disabled = (value !== this._darkTheme);
 	},

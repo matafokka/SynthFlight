@@ -2,7 +2,12 @@ require("./SynthShapefileWizard.js");
 require("./SynthShapefileSettings.js");
 const shp = require("shpjs");
 
-L.ALS.SynthShapefileLayer = L.ALS.Layer.extend({
+/**
+ * Shapefile layer
+ * @class
+ * @extends L.ALS.Layer
+ */
+L.ALS.SynthShapefileLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthShapefileLayer.prototype */ {
 
 	defaultName: "shapefileDefaultName",
 

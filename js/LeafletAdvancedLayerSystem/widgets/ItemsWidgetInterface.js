@@ -1,8 +1,9 @@
 /**
  * Defines methods for implementing widgets that can have multiple items, for example, drop-down lists and sets of radio buttons.
- *
+ * @interface
+ * @extends L.ALS.Widgets.BaseWidget
  */
-L.ALS.Widgets.ItemsWidgetInterface = L.ALS.Widgets.BaseWidget.extend({
+L.ALS.Widgets.ItemsWidgetInterface = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widgets.ItemsWidgetInterface.prototype */ {
 
 	/**
 	 * Adds item to this widget

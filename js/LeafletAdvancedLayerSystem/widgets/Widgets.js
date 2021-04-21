@@ -4,16 +4,22 @@
 L.ALS.Widgets = {
 	/**
 	 * A simple text input widget
+	 * @class
+	 * @extends L.ALS.Widgets.BaseWidget
 	 */
 	Text: undefined,
 
 	/**
 	 * Default email input
+	 * @class
+	 * @extends L.ALS.Widgets.BaseWidget
 	 */
 	Email: undefined,
 
 	/**
 	 * Password input widget
+	 * @class
+	 * @extends L.ALS.Widgets.BaseWidget
 	 */
 	Password: undefined,
 };
@@ -38,8 +44,8 @@ require("./Color.js");
 let types = ["Text", "Email", "Password"];
 for (let type of types) {
 	L.ALS.Widgets[type] = L.ALS.Widgets.BaseWidget.extend({
-		initialize: function (id, label, objectToControl = undefined, callback = "", attributes = {}) {
-			L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, type, id, label, objectToControl, callback, ["edit", "change"], attributes);
+		initialize: function (id, label, callbackObject = undefined, callback = "", attributes = {}) {
+			L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, type, id, label, callbackObject, callback, ["edit", "change"], attributes);
 			this.setConstructorArguments(arguments);
 		}
 	});

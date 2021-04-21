@@ -1,7 +1,18 @@
-L.ALS.Widgets.RadioButtonsGroup = L.ALS.Widgets.ItemsWidgetInterface.extend({
+/**
+ * Represents set of radio buttons.
+ *
+ * @param id {string} ID of this input. You can select this object using this ID.
+ * @param label {string} Label for this input. You can also pass locale property to localize the label.
+ * @param callbackObject {Object|L.ALS.Serializable} Object which contains callback. Just pass "this". If you plan to use serialization, this object MUST be instance of L.ALS.Serializable.
+ * @param callback {string} Name of the method of callbackObject that will be called when widget's value changes
+ *
+ * @class
+ * @implements L.ALS.Widgets.ItemsWidgetInterface
+ */
+L.ALS.Widgets.RadioButtonsGroup = L.ALS.Widgets.ItemsWidgetInterface.extend( /** @lends L.ALS.Widgets.RadioButtonsGroup.prototype */ {
 
-	initialize: function (id, label, objectToControl, callback) {
-		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "", id, label, objectToControl, callback, ["change"]);
+	initialize: function (id, label, callbackObject, callback) {
+		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "", id, label, callbackObject, callback, ["change"]);
 		this.radioNames = L.ALS.Helpers.generateID();
 		this.containerForRevertButton = this.container.getElementsByClassName("als-radio-label-wrapper")[0];
 		this.setConstructorArguments(arguments);

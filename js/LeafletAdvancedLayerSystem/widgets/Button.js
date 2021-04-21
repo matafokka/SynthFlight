@@ -1,22 +1,24 @@
 /**
  * A button. Always takes up the whole width of the container.
+ *
+ * @class
+ * @extends L.ALS.Widgets.BaseWidget
+ *
+ * @param id {string} ID of this input. You can select this object using this ID.
+ * @param text {string} Text for the button. You can also pass locale property to localize the text.
+ * @param callbackObject {Object|L.ALS.Serializable} Just pass "this". If you plan to use serialization, this object MUST be instance of L.ALS.Serializable.
+ * @param callback {string} Name of a method of callbackObject that will be called when button will be pressed.
+ * @param mobileIcon {string} class appended to this button if user's device is a phone. Can be used for setting an icon instead of text to save up space and avoid word wrapping. You can use Remix Icon classes to do so. Or you can install your own icon pack (not recommended due to inconsistency) and use it this way.
  */
-L.ALS.Widgets.Button = L.ALS.Widgets.BaseWidget.extend({
+L.ALS.Widgets.Button = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widgets.Button.prototype */ {
 
 	customWrapperClassName: "als-buttons-wrapper",
 	undoable: false,
 
-	/**
-	 * Constructs the button
-	 * @param id {string} ID of this input. You can select this object using this ID.
-	 * @param text {string} Text for the button. You can also pass locale property to localize the text.
-	 * @param objectToControl {Object|L.ALS.Serializable} Just pass "this". If you plan to use serialization, this object MUST be instance of L.ALS.Serializable.
-	 * @param callback {string} Name of a method of objectToControl that will be called when button will be pressed.
-	 * @param mobileIcon {string} class appended to this button if user's device is a phone. Can be used for setting an icon instead of text to save up space and avoid word wrapping. You can use Remix Icon classes to do so. Or you can install your own icon pack (not recommended due to inconsistency) and use it this way.
-	 */
-	initialize: function (id, text, objectToControl = undefined, callback = "", mobileIcon = "") {
+	/** @constructs */
+	initialize: function (id, text, callbackObject = undefined, callback = "", mobileIcon = "") {
 		this._mobileIcon = mobileIcon;
-		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "", id, "", objectToControl, callback, ["click"], {});
+		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "", id, "", callbackObject, callback, ["click"], {});
 		this.setButtonText(text);
 		this.setConstructorArguments(arguments);
 	},
@@ -52,6 +54,11 @@ L.ALS.Widgets.Button = L.ALS.Widgets.BaseWidget.extend({
 		return L.ALS.Locales.getLocalePropertyOrValue(this.input);
 	},
 
+	/**
+	 * Waits for button to be added and applies mobile icon
+	 * @return {VoidFunction}
+	 * @private
+	 */
 	_waitForElementToBeAdded: async function () {
 		while (!this.container || this.container.parentNode === null)
 			await new Promise(resolve => setTimeout(resolve, 0)); // Infinite loop hangs the script. Timeout prevents it.

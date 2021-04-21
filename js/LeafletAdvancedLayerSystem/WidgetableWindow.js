@@ -1,18 +1,20 @@
 /**
- * Customizable widgetable window.
+ * Customizable widgetable window. Creation of the window is a very slow process, so please, reuse existing windows as much as possible.
  *
  * Some important properties:
  *
  * 1. `windowContainer` -- container for the window which should be added to the page
  * 1. `window` -- actual window. It contains only one child: widgetable's container (`container` property). You can add custom elements to the window using it's methods.
  * 1. `container` -- Widgetable's container.
+ *
+ * @param button {Element} Button which will activate this window
+ *
+ * @class
+ * @extends L.ALS.Widgetable
  */
-L.ALS.WidgetableWindow = L.ALS.Widgetable.extend({
+L.ALS.WidgetableWindow = L.ALS.Widgetable.extend( /** @lends L.ALS.WidgetableWindow.prototype */ {
 
-	/**
-	 * Initializes widgetable window
-	 * @param button {HTMLElement} Button which will activate this window
-	 */
+	/** @constructs */
 	initialize: function (button) {
 		L.ALS.Widgetable.prototype.initialize.call(this, "als-window-content");
 		this.setConstructorArguments(arguments);

@@ -32,12 +32,102 @@ require("./LeafletLayers/LeafletLayers.js");
 /**
  * Advanced extensible layer system for Leaflet. Manages things like layer creation, ordering, deletion and much more for you.
  *
- * Just add it, implement your layers, register them, and you're good to go.
+ * Just add it, implement your layer types by extending `L.ALS.Layer`, register them, and you're good to go.
  *
- * Usage:
- * ```JS
- * require("AdvancedLayerSystem.js"); // Require this plugin or add it to your .html page via "script" tag
- * require("./MyALSModule.js"); // Require your custom ALS modules such as layers, widgets, etc.
+ * @example Create a basic project with custom layer, wizard and settings.
+ *
+ * // Project's structure:
+ * // ./path/to/System.js - Directory with the system
+ * // ./main.js - Entry point. Initialize system, add layers, etc here
+ * // ./MyLayerWizard.js - Contains layer's wizard
+ * // ./MyLayerSettings.js - Contains layer's settings
+ * // ./MyLayer.js - Contains layer itself
+ *
+ * // File "MyLayerWizard.js"
+ *
+ * // Wizard's values will be passed to the layer's constructor.
+ *
+ * L.ALS.MyLayerWizard = L.ALS.Wizard.extend({
+ *
+ *     initialize: function () {
+ *          L.ALS.Wizard.prototype.initialize.call(this); // Call parent constructor
+ *
+ *         // Add some widgets to the wizard
+ *         this.addWidget(new L.ALS.Color("myColorId", "Select a color"));
+ *
+ *         // Let's assign a callback to this one
+ *         this.addWidget(new L.ALS.Number("myNumberId", "Enter a number", this, "numberInputCallback"));
+ *     }
+ *
+ *     // Implement a callback
+ *
+ *     numberInputCallback: function (widget) {
+ *         window.alert("Your number is: " + widget.getValue());
+ *     }
+ *
+ * });
+ *
+ * // File "MyLayerSettings.js"
+ *
+ * // Settings also will be passed to the layer's constructor. When settings are changed, L.ALS.Layer.applyNewSettings() method will be called.
+ *
+ * L.ALS.MyLayerSettings = L.ALS.Settings.extend({
+ *
+ *     initialize: function () {
+ *         L.ALS.Settings.prototype.initialize.call(this); // Call parent constructor
+ *
+ *         // Let's add a checkbox to out settings
+ *         let checkbox = new L.ALS.Checkbox("myCheckboxId", "Checkbox");
+ *         checkbox.setAttributes({ defaultValue: true }); // Assign default value to the widget
+ *         this.addWidget(checkbox);
+ *     }
+ *
+ * });
+ *
+ * // File "MyLayer.js"
+ *
+ * // Require wizard and settings
+ * require("./MyLayerWizard.js");
+ * require("./MyLayerSettings.js");
+ *
+ * L.ALS.MyLayer = L.ALS.Layer.extend({
+ *
+ *     // Note: we're overriding init() instead of initialize(). Do NOT override initialize()!
+ *     init: function(wizardResults, settings) {
+ *         // this.copySettingsToThis(settings); // If you need to copy settings to layer's properties, use copySettingsToThis()
+ *
+ *         // Build a menu for the layer. Let's create labels with wizard results and manage their appearance by the checkbox in the settings
+ *
+ *         this._colorLabel = new L.ALS.SimpleLabel("colorLabel", "Color value from the wizard");
+ *         this._numberLabel = new L.ALS.SimpleLabel("numberLabel", "Number value from the wizard");
+ *         this.addWidget(this._colorLabel);
+ *         this.addWidget(this._numberLabel);
+ *         this.applyNewSettings(settings); // Apply the settings
+ *     },
+ *
+ *     // Override method for applying new settings
+ *
+ *     applyNewSettings: function (settings) {
+ *         // Define labels' style based on checkbox
+ *         let style = (settings.MyCheckboxId) ? "success" : "error";
+ *
+ *         // Set this style to the labels
+ *         this._colorLabel.setStyle(style);
+ *         this._numberLabel.setStyle(style);
+ *     },
+ *
+ *     statics: {
+ *         // Assign wizard and settings to the layer
+ *         wizard: new L.ALS.MyLayerWizard(),
+ *         settings: new L.ALS.MyLayerSettings(),
+ *     },
+ *
+ * })
+ *
+ * // File "main.js"
+ *
+ * require("./path/to/System.js"); // Require this plugin or add it to your .html page via "script" tag
+ * require("./MyLayer.js"); // Require layer
  *
  * L.ALS.System.initializeSystem(); // Initialize system. This method MUST be called after all Leaflet and ALS imports.
  *
@@ -46,51 +136,68 @@ require("./LeafletLayers/LeafletLayers.js");
  *     keyboard: false // Setting this option to false is a MANDATORY! If you don't do that, you'll encounter problems when using L.ALS.LeafletLayers.WidgetLayer!
  * })
  *
- * let layerSystem = new L.Control.LeafletAdvancedLayerSystem(map); // Create an instance of this class
+ * let layerSystem = new L.ALS.System(map); // Create an instance of this class
  * let baseLayer = ...; // Create some base layers
  * layerSystem.addBaseLayer(baseLayer, "My Base Layer"); // Add your base layers to the system
  * layerSystem.addLayerType(L.MyLayerType); // Add your layer types
- * ```
  *
- * So all you have to do is to implement your layer types. They should do whatever you do with Leaflet. The layer system will do the rest.
+ * @param map {Map} Leaflet map object to manage
+ * @param enableProjectSystem {boolean} - If set to true, will enable project system. User will be able to save and restore projects, but you have to do extra work. You might want to implement your own system yourself.
+ * @param aboutHTML {string} HTML that will be displayed in "About" section in settings
  *
- * Start by extending L.AdvancedLayer (if you imported this, you have that already) and reading docs on it.
+ * @class
+ * @extends L.Control
  */
-L.ALS.System = L.Control.extend({
-
-	skipSerialization: true,
-	skipDeserialization: true,
+L.ALS.System = L.Control.extend( /** @lends L.ALS.System.prototype */ {
 
 	/**
-	 * Constructor for the layer system.
-	 *
-	 * @param map - Leaflet map object to manage
-	 * @param enableProjectSystem {boolean} - If set to true, will enable project system. User will be able to save and restore projects, but you have to do extra work. You might want to implement your own system yourself.
-	 * @param aboutHTML {string} HTML that will be displayed in "About" section in settings
+	 * @private
 	 */
+	skipSerialization: true,
+
+	/**
+	 * @private
+	 */
+	skipDeserialization: true,
+
+	/** @constructs */
 	initialize: function (map, enableProjectSystem = true, aboutHTML = undefined) {
 		L.Control.prototype.initialize.call(this);
 
 		/**
 		 * Contains base layers. Layers will be added in format: "Name": layer object. addBaseLayer() will update this object.
+		 * @private
 		 */
 		this._baseLayers = {};
 
 		/**
-		 * Contains layers' types.
+		 * Contains layers' types, containers and settings
+		 * @type{{
+		 *     layerType: L.ALS.Layer.prototype,
+		 *     container: Element
+		 *     settings: L.ALS.Layer.prototype.settings
+		 * }}
 		 */
 		this._layerTypes = {};
 
 		/**
 		 * Contains all added layers. Needed to track z-Index changes.
+		 * @type {Object<string, L.ALS.Layer>}
+		 * @package
 		 */
 		this._layers = {};
 
 		/**
 		 * Currently selected layer
+		 * @type {L.ALS.Layer}
 		 */
 		this._selectedLayer = undefined;
 
+		/**
+		 * A map passed to the constructor
+		 * @type {L.Map}
+		 * @public
+		 */
 		this.map = map;
 
 		let mapContainer = this.map.getContainer().parentElement;
@@ -101,6 +208,12 @@ L.ALS.System = L.Control.extend({
 		let wizardWindow = this._wizardWindow.window;
 
 		this._wizardMenu = wizardWindow.getElementsByClassName("als-wizard-menu")[0];
+
+		/**
+		 * Container for the layers
+		 * @type {Element}
+		 * @package
+		 */
 		this._layerContainer = mapContainer.getElementsByClassName("als-menu-items")[0];
 
 		// Add event listeners to "Add" button
@@ -109,8 +222,8 @@ L.ALS.System = L.Control.extend({
 		});
 
 		// Menu-related stuff
-		this.menu = mapContainer.getElementsByClassName("als-menu")[0];
-		L.ALS.Helpers.makeHideable(mapContainer.getElementsByClassName("als-menu-close")[0], this.menu);
+		this._menu = mapContainer.getElementsByClassName("als-menu")[0];
+		L.ALS.Helpers.makeHideable(mapContainer.getElementsByClassName("als-menu-close")[0], this._menu);
 
 		this._baseLayerMenu = mapContainer.getElementsByClassName("als-menu-maps-select")[0];
 		this._baseLayerMenu.addEventListener("change", (event) => {
@@ -142,7 +255,7 @@ L.ALS.System = L.Control.extend({
 		});
 
 		this._settingsButton = mapContainer.getElementsByClassName("als-settings-button")[0];
-		this._settingsWindow = new L.ALS._service.SettingsWindow(this._settingsButton, () => { this.applyNewSettings(); }, aboutHTML);
+		this._settingsWindow = new L.ALS._service.SettingsWindow(this._settingsButton, () => { this._applyNewSettings(); }, aboutHTML);
 		this._settingsWindow.addItem("settingsGeneralSettings", new L.ALS._service.GeneralSettings());
 
 		// IE and old browsers (which are unsupported by ALS) either doesn't implement LocalStorage or doesn't support it when app runs locally
@@ -237,6 +350,7 @@ L.ALS.System = L.Control.extend({
 	/**
 	 * Selects layer with given ID. This has been bound in SynthLayer.
 	 * @param layerId ID of a layer to select.
+	 * @package
 	 */
 	_selectLayer: function (layerId) {
 		if (this._selectedLayer !== undefined) {
@@ -249,9 +363,9 @@ L.ALS.System = L.Control.extend({
 		for (let prop in this._layers) {
 			let layer = this._layers[prop];
 			layer.isSelected = false;
-			if (!layer.layers)
+			if (!layer._leafletLayers)
 				continue;
-			layer.layers.eachLayer((leafletLayer) => {
+			layer._leafletLayers.eachLayer((leafletLayer) => {
 				if (leafletLayer.wasInteractive === undefined && leafletLayer.getInteractive)
 					leafletLayer.wasInteractive = leafletLayer.getInteractive();
 
@@ -269,8 +383,8 @@ L.ALS.System = L.Control.extend({
 		this._layers[layerId].isSelected = true;
 		this._selectedLayer = this._layers[layerId];
 
-		if (this._selectedLayer.layers) {
-			this._selectedLayer.layers.eachLayer((leafletLayer) => {
+		if (this._selectedLayer._leafletLayers) {
+			this._selectedLayer._leafletLayers.eachLayer((leafletLayer) => {
 				if (leafletLayer.setInteractive && leafletLayer.wasInteractive)
 					leafletLayer.setInteractive(true);
 
@@ -294,6 +408,7 @@ L.ALS.System = L.Control.extend({
 	/**
 	 * Deletes selected layer and LITERALLY everything related to it
 	 * @param shouldAskUser {boolean} If set to true, the message asking if user wants to delete selected layer will be displayed. Otherwise, layer will be silently deleted.
+	 * @package
 	 */
 	_deleteLayer: function (shouldAskUser = true) {
 		if (this._selectedLayer === undefined || (shouldAskUser && !window.confirm(L.ALS.locale.systemConfirmDeletion)))
@@ -306,7 +421,7 @@ L.ALS.System = L.Control.extend({
 		widget.parentNode.removeChild(widget);
 
 		// Remove layer from the map
-		this._selectedLayer.layers.remove();
+		this._selectedLayer._leafletLayers.remove();
 		this._selectedLayer._removeAllMapEventListeners();
 
 		// Remove every property, so there will be no references and event handlers
@@ -327,19 +442,20 @@ L.ALS.System = L.Control.extend({
 
 	/**
 	 * Reorders layers. Will be called upon actual reordering and when it's needed to change Z-indices and bring everything back to normal;
-	 * @private
+	 * @package
 	 */
 	_reorderLayers: function () {
-		this.forEachLayer(function (layer) {
-			layer.layers.bringToBack();
+		this._forEachLayer(function (layer) {
+			layer._leafletLayers.bringToBack();
 		});
 	},
 
 	/**
 	 * Loops through each layer in menu position order and calls callback.
 	 * @param callback {function(L.ALS.Layer)} Function to call on each layer
+	 * @private
 	 */
-	forEachLayer: function (callback) {
+	_forEachLayer: function (callback) {
 		let children = this._layerContainer.childNodes;
 		for (let i = 0; i <= children.length; i++) {
 			let child = children[i];
@@ -358,10 +474,11 @@ L.ALS.System = L.Control.extend({
 	 * This method does exactly that.
 	 *
 	 * @param event Event to be passed
+	 * @package
 	 */
 	_passEvent: function (event) {
 
-		this._selectedLayer.layers.bringToFront(); // Bring selected layer to the front
+		this._selectedLayer._leafletLayers.bringToFront(); // Bring selected layer to the front
 
 		// Refire DOM event.
 		// Recursively passing an event to the group's children is costly and hard.
@@ -419,10 +536,14 @@ L.ALS.System = L.Control.extend({
 		});
 	},
 
+	/**
+	 * Saves the project
+	 * @private
+	 */
 	_saveProject: function () {
 		let json = { layerOrder: [] };
 
-		this.forEachLayer((layer) => {
+		this._forEachLayer((layer) => {
 			json.layerOrder.push(layer.id);
 		})
 
@@ -435,6 +556,11 @@ L.ALS.System = L.Control.extend({
 		L.ALS.Helpers.saveAsText(JSON.stringify(json), "SynthFlightProject.json");
 	},
 
+	/**
+	 * Loads the project
+	 * @param json {string} JSON from read file
+	 * @private
+	 */
 	_loadProject: function (json) {
 		try { this._loadProjectWorker(json); }
 		catch (e) {
@@ -444,6 +570,11 @@ L.ALS.System = L.Control.extend({
 		}
 	},
 
+	/**
+	 * Actual project loading mechanism
+	 * @param json {string} JSON from read file
+	 * @private
+	 */
 	_loadProjectWorker: function (json) {
 		let serializedJson = JSON.parse(json); // Do it here so layers won't be removed if user have chosen wrong file
 
@@ -477,7 +608,7 @@ L.ALS.System = L.Control.extend({
 	onAdd: function () {
 		let button = document.createElement("i");
 		button.className = "als-button-base icon-button ri ri-menu-line als-menu-button";
-		L.ALS.Helpers.makeHideable(button, this.menu);
+		L.ALS.Helpers.makeHideable(button, this._menu);
 
 		let container = document.createElement("div");
 		container.className = "leaflet-bar leaflet-control";
@@ -494,16 +625,16 @@ L.ALS.System = L.Control.extend({
 		L.Control.prototype.setPosition.call(this, position);
 		let name = "menu-left";
 		if (position === "topleft" || position === "bottomleft")
-			this.menu.classList.add(name);
+			this._menu.classList.add(name);
 		else
-			this.menu.classList.remove(name);
+			this._menu.classList.remove(name);
 		return this;
 	},
 
 	/**
 	 * Gathers all settings and passes it to the added layers
 	 */
-	applyNewSettings: function () {
+	_applyNewSettings: function () {
 		for (let name in this._layers) {
 			let layer = this._layers[name];
 			layer.applyNewSettings(
@@ -517,6 +648,7 @@ L.ALS.System = L.Control.extend({
 		/**
 		 * Performs some important operations. Must be called after all Leaflet and ALS imports.
 		 * @param scaleUIForPhoneUsers {boolean} If set to true, UI for phone users will be scaled automatically. Otherwise UI size will stay the same. Scaling is done by increasing root font size to 36pt.
+		 * @static
 		 */
 		initializeSystem: function (scaleUIForPhoneUsers = true) {
 

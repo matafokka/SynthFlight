@@ -1,4 +1,10 @@
-L.ALS.SynthGridSettings = L.ALS.Settings.extend({
+/**
+ * Settings for SynthGridLayer
+ *
+ * @class
+ * @extends L.ALS.Settings
+ */
+L.ALS.SynthGridSettings = L.ALS.Settings.extend( /** @lends L.ALS.SynthGridSettings.prototype */ {
 
 	gridBorderColor: "#6495ed",
 	gridFillColor: "#6495ed",
@@ -6,6 +12,7 @@ L.ALS.SynthGridSettings = L.ALS.Settings.extend({
 	parallelsColor: "#007800",
 	lineThickness: 2,
 
+	/** @constructs */
 	initialize: function () {
 		L.ALS.Settings.prototype.initialize.call(this);
 

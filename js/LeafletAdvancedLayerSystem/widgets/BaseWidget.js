@@ -1,44 +1,98 @@
 /**
- * Base class for all widgets. This class should NOT be instantiated!
- * @type {Input}
+ * Base class for all widgets.
+ *
+ * @param type {string} Type of input
+ * @param id {string} ID of this input. You can select this object using this ID.
+ * @param label {string} Label for this input. You can also pass locale property to localize the label.
+ * @param callbackObject {Object|L.ALS.Serializable} Object which contains callback. Just pass "this". If you plan to use serialization, this object MUST be instance of L.ALS.Serializable.
+ * @param callback {string} Name of the method of callbackObject that will be called when widget's value changes
+ * @param events {string[]} Array of event's names to bind to the provided callback
+ * @param attributes {Object} Attributes of an input, such as min, max, etc in format `{attributeName1: attributeValue1, attributeName2: attributeValue2, ...}`
+ *
+ * @class
+ * @extends L.ALS.Serializable
  */
-L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend({
+L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend( /** @lends L.ALS.Widgets.BaseWidget.prototype */ {
 
 	/**
-	 * Custom classname for an input wrapper. Should NOT be changed from outside.
+	 * Custom classname for an input wrapper. Should NOT be modified from outside.
+	 * @readonly
 	 */
 	customWrapperClassName: "",
 
 	/**
 	 * Indicates whether this widget can revert back to it's default value. If this widget is undoable, an undo button will be appended to it at settings window.
+	 * @readonly
 	 */
 	undoable: true,
 
-	/**
-	 * Constructs this widget.
-	 * @param type {string} Type of input
-	 * @param id {string} ID of this input. You can select this object using this ID.
-	 * @param label {string} Label for this input. You can also pass locale property to localize the label.
-	 * @param objectToControl {Object|L.ALS.Serializable} Just pass "this". If you plan to use serialization, this object MUST be instance of L.ALS.Serializable.
-	 * @param callback {string} Name of a method of objectToControl that will be called when widget's value changes
-	 * @param events {string[]} Array containing event's names to bind to the provided callback
-	 * @param attributes {Object} Attributes of an input, such as min, max, etc in format `{attributeName1: attributeValue1, attributeName2: attributeValue2, ...}`
-	 */
-	initialize: function (type, id, label, objectToControl = undefined, callback = "", events = [], attributes = {}) {
+	/** @constructs */
+	initialize: function (type, id, label, callbackObject = undefined, callback = "", events = [], attributes = {}) {
 		L.ALS.Serializable.prototype.initialize.call(this);
 		this.setConstructorArguments(arguments);
 		this.serializationIgnoreList.push("getContainer");
 
-		this.objectToControl = objectToControl;
-		this.events = events;
+		/**
+		 * Object which contains callback
+		 * @type {Object} @private
+		 */
+		this._callbackObject = callbackObject;
+
+		/**
+		 * Events to bind
+		 * @type {string[]}
+		 * @private
+		 */
+		this._events = events;
+
+		/**
+		 * Inner ID of an input element
+		 * @type {string}
+		 * @private
+		 */
 		this._inputID = "adv-lyr_sys_input" + L.ALS.Helpers.generateID();
 
-		this.type = type;
+		/**
+		 * Input type
+		 * @type {string}
+		 * @private
+		 */
+		this._type = type;
+
+		/**
+		 * This widget's ID
+		 */
 		this.id = id;
-		this.labelText = label;
-		this.callback = callback;
+
+		/**
+		 * This widget's initial label text
+		 * @private
+		 */
+		this._labelText = label;
+
+		/**
+		 * Callback function name
+		 * @type {string}
+		 * @private
+		 */
+		this._callback = callback;
+
+		/**
+		 * Attributes of this widget's input
+		 * @type {{}}
+		 */
 		this.attributes = attributes;
+
+		/**
+		 * Container of this widget
+		 * @type {HTMLDivElement}
+		 */
 		this.container = this.toHtmlElement();
+
+		/**
+		 * Container to place revert button to. Used by the settings
+		 * @type Element
+		 */
 		this.containerForRevertButton = this.container;
 	},
 
@@ -80,7 +134,7 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend({
 		this.labelWidget = document.createElement("label");
 		this.labelWidget.className = "als-label";
 		this.labelWidget.htmlFor = this._inputID;
-		this.setLabelText(this.labelText);
+		this.setLabelText(this._labelText);
 		return this.labelWidget;
 	},
 
@@ -90,7 +144,7 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend({
 	 */
 	createInputElement: function () {
 		let input = document.createElement("input");
-		input.setAttribute("type", this.type);
+		input.setAttribute("type", this._type);
 		return input;
 	},
 
@@ -100,13 +154,17 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend({
 	 * @protected
 	 */
 	_createInput: function () {
-		// Create input
+		/**
+		 * Input element controlled by this widget
+		 * @type {HTMLElement}
+		 * @protected
+		 */
 		this.input = this.createInputElement();
 		this.input.id = this._inputID;
 		this.input.setAttribute("data-id", this.id);
 
 		// Bind events
-		for (let event of this.events)
+		for (let event of this._events)
 			this.input.addEventListener(event, (event) => {
 				if (!this.onChange(event))
 					this.input.classList.add("als-invalid-input");
@@ -149,7 +207,7 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend({
 	 *
 	 * Default implementation just returns true.
 	 *
-	 * @param event Event fired by input
+	 * @param event {Event} Event fired by input
 	 * @return {boolean} If true, the attached callback will be called. If false, attached callback won't be called.
 	 */
 	onChange: function (event) {
@@ -160,14 +218,20 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend({
 	 * Calls callback attached to this widget
 	 */
 	callCallback: function () {
-		if (this.objectToControl !== undefined && this.callback !== "")
-			this.objectToControl[this.callback](this);
+		if (this._callbackObject !== undefined && this._callback !== "")
+			this._callbackObject[this._callback](this);
 	},
 
+	/**
+	 * @return {string} ID of this widget
+	 */
 	getId: function () {
 		return this.id;
 	},
 
+	/**
+	 * @return {*} Value of this widget
+	 */
 	getValue: function () {
 		if (!this.input) // In some cases widget (like label) won't have input. In this case return undefined.
 			return undefined;
@@ -187,21 +251,34 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend({
 			this.input.value = value;
 	},
 
+	/**
+	 * @return {boolean} True, if this widget is enabled. False otherwise.
+	 */
 	getEnabled: function () {
 		if (!this.input)
 			return true;
 		return (this.input.disabled !== "true");
 	},
 
+	/**
+	 * Sets whether this widget should be enabled or not
+	 * @param isEnabled {boolean}
+	 */
 	setEnabled: function (isEnabled) {
 		if (this.input)
 			this.input.disabled = !isEnabled;
 	},
 
+	/**
+	 * @return {Element} Container of this widget
+	 */
 	getContainer: function () {
 		return this.container;
 	},
 
+	/**
+	 * @return {string} Text of the label of this widget
+	 */
 	getLabelText: function () {
 		if (!this.labelWidget) // When widget doesn't have label, labelWidget will be undefined. In this case, return empty string.
 			return "";

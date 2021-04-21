@@ -1,19 +1,21 @@
 /**
- * Very configurable textarea widget
+ * Very configurable text area widget
+ *
+ * @param id {string} ID of this text widget
+ * @param placeholder {string} Placeholder for this widget
+ * @param callbackObject {Object|L.ALS.Serializable} Object which contains callback. Just pass "this". If you plan to use serialization, this object MUST be instance of L.ALS.Serializable.
+ * @param callback {string} Name of the method of callbackObject that will be called when widget's value changes
+ *
+ * @class
+ * @extends L.ALS.Widgets.BaseWidget
  */
-L.ALS.Widgets.TextArea = L.ALS.Widgets.BaseWidget.extend({
+L.ALS.Widgets.TextArea = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widgets.TextArea.prototype */ {
 
 	undoable: false,
 
-	/**
-	 * Constructs text widget
-	 * @param id {string} ID of this text widget
-	 * @param placeholder {string} Placeholder for this widget
-	 * @param objectToControl {object}
-	 * @param callback {string}
-	 */
-	initialize: function (id, placeholder = "", objectToControl = undefined, callback = "") {
-		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "", id, "", objectToControl, callback, ["edit"], {
+	/** @constructs */
+	initialize: function (id, placeholder = "", callbackObject = undefined, callback = "") {
+		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "", id, "", callbackObject, callback, ["edit"], {
 			autocomplete: "off",
 			wrap: "soft",
 			placeholder: placeholder
@@ -34,29 +36,36 @@ L.ALS.Widgets.TextArea = L.ALS.Widgets.BaseWidget.extend({
 		return input;
 	},
 
+	/**
+	 * Sets whether this text area should be editable by the user
+	 * @param isEditable {boolean} If true, text area will be editable.
+	 */
 	setEditable: function(isEditable) {
 		this.setEnabled(isEditable);
 	},
 
-	getEditable: function(isEditable) {
+	/**
+	 * @return {boolean} True, if this text area is editable by the user.
+	 */
+	getEditable: function() {
 		return this.getEnabled();
 	},
 
 	/**
 	 * Sets maximum height (in rows) of this widget.
-	 * @param rowsCount {int} Height of this widget. Set to 0 or less to disable height limit.
+	 * @param rowsCount {number} Height of this widget. Set to 0 or less to disable height limit.
 	 */
 	setMaxHeight: function (rowsCount) {
 		this.input.setAttribute("rows", rowsCount);
 	},
 
 	/**
-	 * Sets whether this textarea will use monotype or sans font
-	 * @param isMonotype {boolean} If true, textarea will use monotype font. Sans font will be used otherwise.
+	 * Sets whether this textarea will use monospace or sans font
+	 * @param isMonospace {boolean} If true, textarea will use monospace font. Sans font will be used otherwise.
 	 */
-	setMonotype: function (isMonotype) {
+	setMonospace: function (isMonospace) {
 		let className = "als-textarea-mono";
-		if (isMonotype)
+		if (isMonospace)
 			this.input.classList.add(className);
 		else
 			this.input.classList.remove(className);
@@ -103,11 +112,12 @@ L.ALS.Widgets.TextArea = L.ALS.Widgets.BaseWidget.extend({
 		 * @param id {string} ID of a console
 		 * @param rowCount {int} Maximum height of the console in number of rows
 		 * @return {L.ALS.Widgets.TextArea} Textarea widget that looks like a console
+		 * @static
 		 */
 		createConsole(id = "console", rowCount = 0) {
 			let consoleWidget = new L.ALS.Widgets.TextArea("console", "");
 			consoleWidget.setEditable(false);
-			consoleWidget.setMonotype(true);
+			consoleWidget.setMonospace(true);
 			consoleWidget.setMaxHeight(rowCount);
 			return consoleWidget;
 		}

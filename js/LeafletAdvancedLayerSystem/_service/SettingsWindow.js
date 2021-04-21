@@ -1,4 +1,12 @@
-L.ALS._service.SettingsWindow = L.ALS._service.SidebarWindow.extend({
+/**
+ * Application settings window
+ *
+ * @class
+ * @extends L.ALS._service.SidebarWindow
+ */
+L.ALS._service.SettingsWindow = L.ALS._service.SidebarWindow.extend( /** @lends L.ALS._service.SettingsWindow.prototype */ {
+
+	/** @constructs */
 	initialize: function (button, onCloseCallback, aboutHTML = undefined) {
 		L.ALS._service.SidebarWindow.prototype.initialize.call(this, button, "settingsSelectTitle", "settingsContentTitle", "settingsApplyButton", () => { this.saveSettings(); });
 		this.onCloseCallback = onCloseCallback;

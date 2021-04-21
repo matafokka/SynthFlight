@@ -2,14 +2,14 @@
  * Base class for all classes that can have widgets.
  *
  * Has property `container` which is container for the widgets. Add it to the page.
- * @type {Widgetable}
+ * @class
+ * @extends L.ALS.Serializable
+ *
+ * @param className {string} Class name for the container
  */
-L.ALS.Widgetable = L.ALS.Serializable.extend({
+L.ALS.Widgetable = L.ALS.Serializable.extend( /** @lends L.ALS.Widgetable.prototype */ {
 
-	/**
-	 * Initializes this object.
-	 * @param className {string} Class name for the container
-	 */
+	/** @constructs */
 	initialize: function (className = "") {
 		L.ALS.Serializable.prototype.initialize.call(this, className);
 		this.setConstructorArguments(arguments);
@@ -21,21 +21,27 @@ L.ALS.Widgetable = L.ALS.Serializable.extend({
 		this.container = document.createElement("div");
 		if (className !== "")
 			this.container.className = className;
+
+		/**
+		 * Maps widgets' IDs to widgets themselves
+		 * @type {Object<string, L.ALS.Widgets.BaseWidget>}
+		 * @private
+		 */
 		this._widgets = {}
 	},
 
 	/**
 	 * Adds widget to the container
-	 * @param widget Control to add
+	 * @param widget {L.ALS.Widgets.BaseWidget} Widget to add
 	 */
 	addWidget: function (widget) {
-		this.container.appendChild(widget.container);
-		this._widgets[widget.id] = widget;
+		this.container.appendChild(widget.getContainer());
+		this._widgets[widget.getId()] = widget;
 	},
 
 	/**
 	 * Removes widget from the container
-	 * @param id
+	 * @param id {string} ID of a widget to remove
 	 */
 	removeWidget: function (id) {
 		let container = this._widgets[id].getContainer();
@@ -53,9 +59,9 @@ L.ALS.Widgetable = L.ALS.Serializable.extend({
 	},
 
 	/**
-	 * Finds control for this layer by id
-	 * @param id id of a control to find
-	 * @return {HTMLInputElement} Control with given id.
+	 * Finds widget by ID
+	 * @param id {string} ID of a control to find
+	 * @return {L.ALS.Widgets.BaseWidget} Widget with given ID.
 	 */
 	getWidgetById: function(id) {
 		return this._widgets[id];
@@ -63,8 +69,8 @@ L.ALS.Widgetable = L.ALS.Serializable.extend({
 
 	/**
 	 * Serializes widgets. Use this if you want to serialize only widgets in your own Widgetable.
-	 * @param seenObjects Already seen objects' ids. Intended only for internal use.
-	 * @return {{}} Object where keys are widget's ids and values are serialized widgets themselves
+	 * @param seenObjects {Object} Already seen objects' ids. Intended only for internal use.
+	 * @return {Object} Object where keys are widget's ids and values are serialized widgets themselves
 	 */
 	serializeWidgets: function (seenObjects) {
 		let json = {};
@@ -78,7 +84,7 @@ L.ALS.Widgetable = L.ALS.Serializable.extend({
 	/**
 	 * Deserializes widgets and adds them to this object. Removes all previously added widgets. Use this if you want to deserialize only widgets in your own Widgetable.
 	 * @param serializedWidgets {Object} Result of `serializedWidgets()`
-	 * @param seenObjects Already seen objects' ids. Intended only for internal use.
+	 * @param seenObjects {Object} Already seen objects' ids. Intended only for internal use.
 	 */
 	deserializeWidgets: function (serializedWidgets, seenObjects) {
 		this.removeAllWidgets();

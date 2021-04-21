@@ -1,19 +1,21 @@
 /**
  * Simple label that displays text
+ *
+ * @param id {string} ID of this label
+ * @param value {string} Initial text for this label
+ * @param textAlign {"left"|"right"|"center"|"justify"} Initial text align
+ * @param style {"nostyle"|"message"|"success"|"warning"|"error"} Style of this label
+ *
+ * @class
+ * @extends L.ALS.Widgets.BaseWidget
  */
-L.ALS.Widgets.SimpleLabel = L.ALS.Widgets.BaseWidget.extend({
+L.ALS.Widgets.SimpleLabel = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widgets.SimpleLabel.prototype */ {
 
 	undoable: false,
 
 	customWrapperClassName: "als-simple-label-wrapper",
 
-	/**
-	 * Constructs label
-	 * @param id {string} ID of this label
-	 * @param value {string} Initial text for this label
-	 * @param textAlign {"left"|"right"|"center"|"justify"} Initial text align
-	 * @param style {"nostyle"|"message"|"success"|"warning"|"error"} Style of this label
-	 */
+	/** @constructs */
 	initialize: function (id, value ="", textAlign= "left", style="nostyle") {
 		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "", id, "");
 		this.setConstructorArguments(arguments);

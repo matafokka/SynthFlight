@@ -1,17 +1,29 @@
 const supportsTime = require('time-input-polyfill/supportsTime');
 const TimePolyfill = require('time-input-polyfill');
 
-L.ALS.Widgets.Time = L.ALS.Widgets.BaseWidget.extend({
+/**
+ * Time input widget
+ *
+ * @param id {string} ID of this input. You can select this object using this ID.
+ * @param label {string} Label for this input. You can also pass locale property to localize the label.
+ * @param callbackObject {Object|L.ALS.Serializable} Object which contains callback. Just pass "this". If you plan to use serialization, this object MUST be instance of L.ALS.Serializable.
+ * @param callback {string} Name of the method of callbackObject that will be called when widget's value changes
+ * @param attributes {Object} Attributes of an input, such as min, max, etc in format `{attributeName1: attributeValue1, attributeName2: attributeValue2, ...}`
+ *
+ * @class
+ * @extends L.ALS.Widgets.BaseWidget
+ */
+L.ALS.Widgets.Time = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widgets.Time.prototype */ {
 
-	initialize: function (id, label, objectToControl, callback, attributes) {
-		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "time", id, label, objectToControl, ["edit", "change"], ["edit", "change"], attributes);
+	initialize: function (id, label, callbackObject, callback, attributes) {
+		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "time", id, label, callbackObject, ["edit", "change"], ["edit", "change"], attributes);
 		this.setConstructorArguments(arguments);
 		this._waitForElementToBeAdded();
 	},
 
 	/**
 	 * Waits until widget will be added and applies TimePolyfill
-	 * @return {Promise<void>}
+	 * @return {VoidFunction}
 	 * @private
 	 */
 	_waitForElementToBeAdded: async function () {

@@ -1,8 +1,12 @@
 /**
  * Base class for all settings. Basically, `Widgetable` without constructor arguments and with `getSettings()` additional method.
+ *
+ * @class L.ALS.Settings
+ * @extends L.ALS.Widgetable
  */
-L.ALS.Settings = L.ALS.Widgetable.extend({
+L.ALS.Settings = L.ALS.Widgetable.extend( /** @lends L.ALS.Settings.prototype */ {
 
+	/** @constructs */
 	initialize: function () {
 		L.ALS.Widgetable.prototype.initialize.call(this);
 	},

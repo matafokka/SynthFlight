@@ -1,4 +1,9 @@
-L.ALS.SynthGridWizard = L.ALS.Wizard.extend({
+/**
+ * Wizard for SynthGridLayer
+ * @class
+ * @extends L.ALS.Wizard
+ */
+L.ALS.SynthGridWizard = L.ALS.Wizard.extend( /** @lends L.ALS.SynthGridWizard.prototype */ {
 
 	displayName: "gridLayerDefaultName",
 

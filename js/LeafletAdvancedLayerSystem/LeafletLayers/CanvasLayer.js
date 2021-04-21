@@ -29,10 +29,9 @@ L.DomUtil.setTransform = L.DomUtil.setTransform || function (el, offset, scale) 
  *
  * Override `draw()` method and implement your stuff here.
  *
- * Typical usage:
- * ```JS
- * // Extend this class
+ * @example Typical usage:
  * let points = [] // Imagine that there're some points
+ * // Extend this class
  * let MyCanvas = L.ALS.LeafletLayers.CanvasLayer.extend({
  *     // Override `draw()` method
  *     draw: function (data) {
@@ -55,9 +54,11 @@ L.DomUtil.setTransform = L.DomUtil.setTransform || function (el, offset, scale) 
  *     }
  * });
  * let canvas = new MyCanvas().addTo(map); // Add canvas to the map
- * ```
+ *
+ * @class
+ * @extends L.Layer
  */
-L.ALS.LeafletLayers.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend({
+L.ALS.LeafletLayers.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend( /** @lends L.ALS.LeafletLayers.CanvasLayer.prototype */ {
 
 	/**
 	 * Constructs CanvasLayer.
@@ -199,4 +200,8 @@ L.ALS.LeafletLayers.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend({
 
 });
 
+/**
+ * Alias for `L.ALS.LeafletLayers.CanvasLayer`
+ * @see L.ALS.LeafletLayers.CanvasLayer
+ */
 L.CanvasLayer = L.ALS.LeafletLayers.CanvasLayer;

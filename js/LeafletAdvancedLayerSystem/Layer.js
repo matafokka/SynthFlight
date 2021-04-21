@@ -1,54 +1,61 @@
 /**
- * Base class for all layers for LeafletAdvancedLayerSystem.
+ * Base class for all layers for the Layer System.
  *
  * Basically, it's a wrapper around FeatureGroup. It doesn't provide all of it's methods because they're used internally in the layer system, and their usage will break it. So do NOT touch the actual FeatureGroup object.
  *
  * Usage:
  *
- * 0. Set defaultName property to the default name of your layer.
- *
+ * 1. Set defaultName property to the default name of your layer.
  * 1. Assign statics.wizard object to an instance of your wizard.
+ * 1. If you need to implement settings for the layer, assign statics.settings object to an instance of your settings.
+ * 1. Implement init() method. It's used as a constructor.
+ * 1. Implement your own methods or extend current ones. Basically, make it work :D
  *
- * 2. Implement init() method. It's used instead of a constructor.
- *
- * 3. Implement your own methods or extend current ones. Basically, make it work :D
- *
- * Please, read the docs on each public method, you might need to (if not should) override most of them.
+ * Please, read the docs for each public method, you might need to (if not should) override most of them.
  *
  * Some usage notes:
  *
- * 1. Use addLayer() and removeLayers() to add and remove layers. To hide layer from the map, use this.map.remove() and this.map.add().
- * 2. Use addEventListenerTo() and removeEventListenerFrom() to add and remove event listeners from objects and map
- * 3. NEVER use L.LayerGroup because it breaks layer system! Use L.FeatureGroup instead.
+ * 1. Use addLayer() and removeLayers() to add and remove layers.
+ * 1. To hide layer from the map, use this.map.remove() and this.map.add().
+ * 1. Use addEventListenerTo() and removeEventListenerFrom() to add and remove event listeners from objects and map.
+ * 1. NEVER use L.LayerGroup because it breaks layer system!
+ * 1. Unless your layer is super simple, you'll most likely need to implement custom serialization and deserialization mechanisms. Please, refer to the `L.ALS.Serializable` docs and example project for this: https://github.com/matafokka/SynthFlight
  *
- * @type {Layer}
+ * @param wizardResults {Object} Results compiled from the wizard. It is an object who's keys are IDs of your controls and values are values of your controls.
+ * @param settings {Object} Current layer settings.
+ *
+ * @class
+ * @extends L.ALS.Widgetable
+ *
  */
-L.ALS.Layer = L.ALS.Widgetable.extend({
+L.ALS.Layer = L.ALS.Widgetable.extend( /** @lends L.ALS.Layer.prototype */ {
+
 	/**
 	 * Name to be assigned to this layer by default. You can use locale property to localize it.
 	 * @type {string}
-	 * @public
 	 */
 	defaultName: "layerDefaultName",
 
 	/**
 	 * Indicates whether this layer is shown or not. Do NOT modify!
 	 * @type {boolean}
-	 * @public
+	 * @readonly
 	 */
 	isShown: true,
 
 	/**
 	 * Indicates whether this layer is selected or not. Should not be modified!
 	 * @type {boolean}
+	 * @readonly
 	 */
 	isSelected: false,
 
 	/**
 	 * SynthLayer's constructor. Do NOT override it! Use init() method instead!
-	 * @param layerSystem Layer system that creates this layer
+	 * @param layerSystem {L.ALS.System} Layer system that creates this layer
 	 * @param args {*[]} Arguments to pass to `init()`
 	 * @param settings {Object} Settings to pass to `init()`
+	 * @private
 	 */
 	initialize: function(layerSystem, args, settings) {
 		L.ALS.Widgetable.prototype.initialize.call(this, "als-layer-menu");
@@ -68,14 +75,52 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 		 *     ...
 		 * }
 		 * ```
+		 * @private
 		 */
 		this._eventsForObjects = {};
 
+		/**
+		 * Contains map events bound to this layer
+		 * @type {[{
+		 *     type: string,
+		 *     handler: Object,
+		 *     handlerFunction: Function
+		 * }]}
+		 * @private
+		 */
 		this._mapEvents = [];
+
+		/**
+		 * Layer system managing this layer
+		 * @type {L.ALS.System}
+		 * @private
+		 */
 		this._layerSystem = layerSystem;
+
+		/**
+		 * Map on which this layer is being added
+		 * @type {L.Map}
+		 * @public
+		 */
 		this.map = this._layerSystem.map;
+
+		/**
+		 * Unique ID of this layer
+		 * @type {string}
+		 */
 		this.id = "SynthLayer" + L.ALS.Helpers.generateID();
-		this.layers = L.featureGroup();
+
+		/**
+		 * Contains added Leaflet layers
+		 * @type {L.FeatureGroup}
+		 * @package
+		 */
+		this._leafletLayers = L.featureGroup();
+
+		/**
+		 * Current name of this layer
+		 * @type {string}
+		 */
 		this.name = this.defaultName;
 
 		// Build menu
@@ -91,6 +136,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 		// Make it editable on double click
 		label.addEventListener("dblclick", function () {
 			this.contentEditable = "true";
+			// noinspection JSValidateTypes
 			this.focus();
 		});
 
@@ -105,6 +151,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 		label.addEventListener("keydown", function (event) {
 			if (event.key === "Enter") {
 				event.preventDefault();
+			// noinspection JSValidateTypes
 				this.blur();
 			}
 		})
@@ -114,7 +161,6 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 		menuButton.className = "ri ri-settings-3-line";
 
 		// Menu itself
-
 
 		let hideFn, showFn;
 		// Old chrome can't deal with animations below, so in this case we'll just change display property.
@@ -262,7 +308,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 
 	/**
 	 * Removes all event listeners bounded to the map by this layer. This method is intended ONLY for internal use. Do NOT call it!
-	 * @private
+	 * @package
 	 */
 	_removeAllMapEventListeners: function () {
 		for (let handlerObject of this._mapEvents)
@@ -276,7 +322,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 	 * @private
 	 */
 	_onShow: function () {
-		this.layers.addTo(this.map);
+		this._leafletLayers.addTo(this.map);
 		this.isShown = true
 	},
 
@@ -287,7 +333,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 	 * @private
 	 */
 	_onHide: function () {
-		this.layers.remove();
+		this._leafletLayers.remove();
 		this.isShown = false;
 	},
 
@@ -329,7 +375,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 	 */
 	addLayers: function(...layers) {
 		for (let layer of layers)
-			this.layers.addLayer(layer);
+			this._leafletLayers.addLayer(layer);
 
 		if (this.isShown)
 			this._onShow();
@@ -338,8 +384,8 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 	},
 
 	/**
-	 * Removes given layers with it's event handlers.
-	 * @param layers - Layers to be removed. If layer extends LayerGroup, will also remove layers contained in it.
+	 * Removes added Leaflet layers with it's event handlers.
+	 * @param layers {L.Layer} Layers to remove. If layer extends LayerGroup, will also remove Leaflet layers contained in it.
 	 */
 	removeLayers: function(...layers) {
 		for (let layer of layers) {
@@ -357,15 +403,12 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 			}
 
 			// Remove layer from both group and map
-			this.layers.removeLayer(layer);
+			this._leafletLayers.removeLayer(layer);
 			layer.remove();
 		}
 	},
 
-	/**
-	 * Use it instead of constructor.
-	 * @param wizardResults Results compiled from the wizard. It is an object who's keys are IDs of your controls and values are values of your controls.
-	 */
+	/** @constructs */
 	init: function(wizardResults, settings) {},
 
 	/**
@@ -389,7 +432,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 	 * @return {L.ALS.Layer} this
 	 */
 	setStyle: function (style) {
-		this.layers.setStyle(style);
+		this._leafletLayers.setStyle(style);
 		return this;
 	},
 
@@ -397,7 +440,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 	 * @see FeatureGroup.getBounds
 	 */
 	getBounds: function () {
-		return this.layers.getBounds();
+		return this._leafletLayers.getBounds();
 	},
 
 	/**
@@ -405,7 +448,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 	 * @return {L.ALS.Layer} this
 	 */
 	eachLayer: function (fn, context) {
-		this.layers.eachLayer(fn, context);
+		this._leafletLayers.eachLayer(fn, context);
 		return this;
 	},
 
@@ -431,18 +474,19 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 	 *
 	 * Default implementation is:
 	 * ```JS
-	 * return this.layers.toGeoJSON();
+	 * return this._leafletLayers.toGeoJSON();
 	 * ```
 	 *
 	 * @see L.FeatureGroup.toGeoJSON
 	 */
 	toGeoJSON: function () {
-		return this.layers.toGeoJSON();
+		return this._leafletLayers.toGeoJSON();
 	},
 
 	/**
 	 * Copies settings to this layer as properties
 	 * @param settings {Object} `settings` argument passed to `init()`
+	 * @protected
 	 */
 	copySettingsToThis: function (settings) {
 		for (let s in settings) {
@@ -468,6 +512,19 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 			serialized[prop] = this[prop];
 	},
 
+	/**
+	 * Serializes this layer.
+	 *
+	 * Default implementation is:
+	 * ```JS
+	 * let serialized = L.ALS.Widgetable.prototype.serialize.call(this, seenObjects);
+	 * this.serializeImportantProperties(serialized);
+	 * return serialized;
+	 * ```
+	 *
+	 * @param seenObjects {Object} Already seen objects
+	 * @return {Object}
+	 */
 	serialize: function (seenObjects) {
 		let serialized = L.ALS.Widgetable.prototype.serialize.call(this, seenObjects);
 		this.serializeImportantProperties(serialized);
@@ -479,12 +536,14 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 		/**
 		 * Wizard instance which gives a layer it's initial properties
 		 * @type {L.ALS.Wizard}
+		 * @static
 		 */
 		wizard: new L.ALS.Wizard(),
 
 		/**
 		 * Settings instance
 		 * @type {L.ALS.Settings}
+		 * @static
 		 */
 		settings: new L.ALS.Settings(),
 
@@ -492,6 +551,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend({
 		 * Deserializes some important properties. Must be called at `deserialize` in any layer!
 		 * @param serialized {Object} Serialized object
 		 * @param instance {L.ALS.Layer|Object} New instance of your layer
+		 * @static
 		 */
 		deserializeImportantProperties: function (serialized, instance) {
 			instance.setName(serialized.name);

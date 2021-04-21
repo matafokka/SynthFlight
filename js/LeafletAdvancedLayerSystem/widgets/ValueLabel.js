@@ -8,21 +8,23 @@
  * or
  *
  * `Wall width (m): 10` - When unitsPosition set to "description"
+ *
+ * @param id {string} ID of this label
+ * @param description {string} Value description. You can use locale property to localize it.
+ * @param units {string} Units for this label. If set to empty string, unitsPosition won't take an effect.
+ * @param unitsPosition {"description"|"value"} Units position. If set to "description", units will be displayed after description. Otherwise, units will be displayed after the value.
+ * @param formatNumbers {boolean} If set to true, value will be formatted using L.ALS.Helpers.formatNumber()
+ * @param style {"nostyle"|"message"|"success"|"warning"|"error"} Style of this label
+ * @param initialValue {string} Initial value of this label
+ *
+ * @class
+ * @extends L.ALS.Widgets.SimpleLabel
  */
-L.ALS.Widgets.ValueLabel = L.ALS.Widgets.SimpleLabel.extend({
+L.ALS.Widgets.ValueLabel = L.ALS.Widgets.SimpleLabel.extend( /** @lends L.ALS.Widgets.ValueLabel.prototype */ {
 
 	undoable: false,
 
-	/**
-	 * Constructs label with value
-	 * @param id {string} ID of this label
-	 * @param description {string} Value description. You can use locale property to localize it.
-	 * @param units {string} Units for this label. If set to empty string, unitsPosition won't take an effect.
-	 * @param unitsPosition {"description"|"value"} Units position. If set to "description", units will be displayed after description. Otherwise, units will be displayed after the value.
-	 * @param formatNumbers {boolean} If set to true, value will be formatted using L.ALS.Helpers.formatNumber()
-	 * @param style {"nostyle"|"message"|"success"|"warning"|"error"} Style of this label
-	 * @param initialValue {string} Initial value of this label
-	 */
+	/** @constructs */
 	initialize: function (id, description, units = "", unitsPosition = "description", formatNumbers = false, style="nostyle", initialValue = "") {
 		L.ALS.Widgets.SimpleLabel.prototype.initialize.call(this, id, "");
 		this.setConstructorArguments(arguments);
@@ -39,7 +41,12 @@ L.ALS.Widgets.ValueLabel = L.ALS.Widgets.SimpleLabel.extend({
 	 * @param description {string} Value description. You can use locale property to localize it.
 	 */
 	setDescription: function (description) {
-		this.description = description;
+		/**
+		 * Description of this label
+		 * @type {string}
+		 * @private
+		 */
+		this._description = description;
 		this._updateValue();
 	},
 
@@ -47,7 +54,7 @@ L.ALS.Widgets.ValueLabel = L.ALS.Widgets.SimpleLabel.extend({
 	 * @return {string} Description of this label
 	 */
 	getDescription: function () {
-		return this.description;
+		return this._description;
 	},
 
 	/**
@@ -55,7 +62,12 @@ L.ALS.Widgets.ValueLabel = L.ALS.Widgets.SimpleLabel.extend({
 	 * @param formatNumbers {boolean} If true, this label will automatically format numbers.
 	 */
 	setFormatNumbers: function (formatNumbers) {
-		this.formatNumbers = formatNumbers;
+		/**
+		 * Defines whether this label should format numbers
+		 * @type {boolean}
+		 * @private
+		 */
+		this._formatNumbers = formatNumbers;
 		this._updateValue();
 	},
 
@@ -63,7 +75,7 @@ L.ALS.Widgets.ValueLabel = L.ALS.Widgets.SimpleLabel.extend({
 	 * @return {boolean} If true, this label automatically formats numbers.
 	 */
 	getFormatNumbers: function () {
-		return this.formatNumbers;
+		return this._formatNumbers;
 	},
 
 	/**
@@ -83,13 +95,25 @@ L.ALS.Widgets.ValueLabel = L.ALS.Widgets.SimpleLabel.extend({
 		return this._labelValue;
 	},
 
+	/**
+	 * Sets units for this label
+	 * @param units {string} Units to set
+	 */
 	setUnits: function (units) {
-		this.units = units;
+		/**
+		 * Units set to this label
+		 * @type {string}
+		 * @private
+		 */
+		this._units = units;
 		this._updateValue();
 	},
 
+	/**
+	 * @return {string} Units set to this label
+	 */
 	getUnits: function () {
-		return this.units;
+		return this._units;
 	},
 
 	/**
@@ -97,7 +121,12 @@ L.ALS.Widgets.ValueLabel = L.ALS.Widgets.SimpleLabel.extend({
 	 * @param position  {"description"|"value"} Units position. If set to "description", units will be displayed after description. Otherwise, units will be displayed after the value.
 	 */
 	setUnitsPosition: function (position) {
-		this.unitsPosition = position;
+		/**
+		 * Units' position set to this lable
+		 * @type {"description"|"value"}
+		 * @private
+		 */
+		this._unitsPosition = position;
 		this._updateValue();
 	},
 
@@ -105,7 +134,7 @@ L.ALS.Widgets.ValueLabel = L.ALS.Widgets.SimpleLabel.extend({
 	 * @return {"description"|"value"} Units position of this label
 	 */
 	getUnitsPosition: function () {
-		return this.unitsPosition;
+		return this._unitsPosition;
 	},
 
 	/**
@@ -113,15 +142,15 @@ L.ALS.Widgets.ValueLabel = L.ALS.Widgets.SimpleLabel.extend({
 	 * @private
 	 */
 	_updateValue: function () {
-		let hasUnits = this.units !== "";
-		let isDescription = this.unitsPosition === "description";
-		let localizedValue = L.ALS.locale[this.description];
-		let value = (localizedValue) ? localizedValue : this.description;
+		let hasUnits = this._units !== "";
+		let isDescription = this._unitsPosition === "description";
+		let localizedValue = L.ALS.locale[this._description];
+		let value = (localizedValue) ? localizedValue : this._description;
 		if (isDescription && hasUnits)
-			value += " (" + this.units + ")";
-		value += ": " + (this.formatNumbers ? L.ALS.Helpers.formatNumber(this._labelValue) : this._labelValue);
+			value += " (" + this._units + ")";
+		value += ": " + (this._formatNumbers ? L.ALS.Helpers.formatNumber(this._labelValue) : this._labelValue);
 		if (!isDescription && hasUnits)
-			value += " " + this.units;
+			value += " " + this._units;
 		L.ALS.Widgets.SimpleLabel.prototype.setValue.call(this, value);
 	},
 
@@ -129,7 +158,7 @@ L.ALS.Widgets.ValueLabel = L.ALS.Widgets.SimpleLabel.extend({
 	 * @return {string} Whole text of this label, i.e. result of SimpleLabel.getValue()
 	 */
 	getActualValue: function () {
-		return this.value;
+		return L.ALS.Widgets.SimpleLabel.prototype.getValue.call(this);
 	}
 
 });
