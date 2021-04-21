@@ -4,7 +4,7 @@
 L.ALS = {
 
 	/**
-	 * Contains classes for internal use. Only for system's internal use. Docs and architecture here sucks. I warned you.
+	 * Contains classes only for system's internal use. Docs and architecture here sucks. I warned you.
 	 */
 	_service: {}
 };
