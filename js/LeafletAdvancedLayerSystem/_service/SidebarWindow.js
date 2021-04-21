@@ -42,13 +42,49 @@ L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend( /** @lends L.ALS._
 </div>
 		`, this.window);
 
+		/**
+		 * Sidebar element
+		 * @type {HTMLDivElement}
+		 * @private
+		 */
 		this._sidebar = this.window.querySelector("div[data-id='sidebar']");
+
+		/**
+		 * Select element container
+		 * @type {HTMLDivElement}
+		 * @private
+		 */
 		this._selectContainer = this.window.querySelector("div[data-id='select-container']");
+
+		/**
+		 * Select element
+		 * @type {HTMLSelectElement}
+		 */
 		this.select = this.window.querySelector("select[data-id='select']");
+
+		/**
+		 * Close button
+		 * @type {HTMLDivElement}
+		 */
 		this.closeButton = this.window.querySelector("div[data-id='close-button']");
+
+		/**
+		 * Div that wraps content
+		 * @type {HTMLDivElement}
+		 */
 		this.contentWrapper = this.window.querySelector("div[data-id='content-wrapper']");
 		this.contentWrapper.appendChild(this.container);
+
+		/**
+		 * Div that wraps entire window
+		 * @type {HTMLDivElement}
+		 */
 		this.windowWrapper = this.window.querySelector("div[data-id='wrapper']");
+
+		/**
+		 * Div that contains buttons
+		 * @type {HTMLDivElement}
+		 */
 		this.buttonsWrapper = this.window.querySelector("div[data-id='buttons-wrapper']");
 
 		this.select.addEventListener("change", (e) => {
@@ -89,8 +125,20 @@ L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend( /** @lends L.ALS._
 			while (!this.isWindowVisible())
 				await new Promise(resolve => setTimeout(resolve, 0));
 
-			this.buttonsHeight = this.buttonsWrapper.offsetHeight;
+			/**
+			 * Buttons' height
+			 * @type {number}
+			 * @private
+			 */
+			this._buttonsHeight = this.buttonsWrapper.offsetHeight;
+
+			/**
+			 * Sidebar width
+			 * @type {number}
+			 * @private
+			 */
 			this._sidebarWidth = this._sidebar.offsetWidth;
+
 			onResize();
 		})();
 	},
@@ -128,6 +176,7 @@ L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend( /** @lends L.ALS._
 
 	/**
 	 * Removes item from this window
+	 * @param name {string} Name of the item to remove
 	 */
 	removeItem: function (name) {
 		let item = this.items[name];
@@ -198,7 +247,7 @@ L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend( /** @lends L.ALS._
 			let vh = window.innerHeight * 0.9; // 90vh
 			if (height > vh)
 				height = vh;
-			contentHeight = height - this.buttonsHeight - (this.isSidebarHidden ? this._selectContainer.offsetHeight : 0) + "px";
+			contentHeight = height - this._buttonsHeight - (this.isSidebarHidden ? this._selectContainer.offsetHeight : 0) + "px";
 		}
 
 		for (let prop of ["minHeight", "height"]) {

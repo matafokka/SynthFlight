@@ -78,6 +78,9 @@ L.ALS._service.SettingsWindow = L.ALS._service.SidebarWindow.extend( /** @lends 
 		this.restoreSettingsFromStorage();
 	},
 
+	/**
+	 * Saves settings
+	 */
 	saveSettings: function () {
 		this.forEachWidget((item, widget, key, value) => {
 			L.ALS.Helpers.localStorage.setItem(key, value);
@@ -85,6 +88,9 @@ L.ALS._service.SettingsWindow = L.ALS._service.SidebarWindow.extend( /** @lends 
 		this.onCloseCallback();
 	},
 
+	/**
+	 * Saves settings as a text file. Being called when user presses the button.
+	 */
 	exportSettings: function () {
 		let json = {};
 		this.forEachWidget((item, widget, key, value) => {
@@ -93,6 +99,9 @@ L.ALS._service.SettingsWindow = L.ALS._service.SidebarWindow.extend( /** @lends 
 		L.ALS.Helpers.saveAsText(JSON.stringify(json), "SynthFlightSettings.json");
 	},
 
+	/**
+	 * Imports settings from a text file. Being called when user presses the button.
+	 */
 	importSettings: function () {
 		let loadButton = document.getElementById("als-load-settings-input");
 		loadButton.addEventListener("change", () => {
@@ -114,6 +123,10 @@ L.ALS._service.SettingsWindow = L.ALS._service.SidebarWindow.extend( /** @lends 
 		});
 	},
 
+	/**
+	 * Loops through each widget and calls given callback
+	 * @param callback {function(string, L.ALS.Widgets.BaseWidget, string, *)} Callback to call
+	 */
 	forEachWidget: function (callback) {
 		for (let name in this.items) {
 			if (name === "settingsAboutItem")
@@ -128,6 +141,9 @@ L.ALS._service.SettingsWindow = L.ALS._service.SidebarWindow.extend( /** @lends 
 		}
 	},
 
+	/**
+	 * Restores settings from local storage when app's being loaded
+	 */
 	restoreSettingsFromStorage: function () {
 		this.forEachWidget((item, widget, key) => {
 			let newValue = L.ALS.Helpers.localStorage.getItem(key);
@@ -137,6 +153,12 @@ L.ALS._service.SettingsWindow = L.ALS._service.SidebarWindow.extend( /** @lends 
 		this.updateWindowHeight();
 	},
 
+	/**
+	 * Sets widget's value
+	 * @param item {string} Name of the item (widgetable)
+	 * @param widget {string} Name of the widget in the item
+	 * @param value {*} Value to set
+	 */
 	setWidgetValue: function (item, widget, value) {
 		let w = this.getItem(item).getWidgetById(widget);
 		w.setValue(value);
