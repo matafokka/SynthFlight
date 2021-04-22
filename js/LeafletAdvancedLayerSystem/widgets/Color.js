@@ -8,7 +8,6 @@ const debounce = require("debounce");
  * @param label {string} Label for this input. You can also pass locale property to localize the label.
  * @param callbackObject {Object|L.ALS.Serializable} Object which contains callback. Just pass "this". If you plan to use serialization, this object MUST be instance of L.ALS.Serializable.
  * @param callback {string} Name of the method of callbackObject that will be called when widget's value changes
- * @param attributes {Object} Attributes of an input, such as min, max, etc in format `{attributeName1: attributeValue1, attributeName2: attributeValue2, ...}`
  *
  * @class
  * @extends L.ALS.Widgets.BaseWidget
@@ -16,8 +15,8 @@ const debounce = require("debounce");
 L.ALS.Widgets.Color = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widgets.Color.prototype */ {
 
 	/** @constructs */
-	initialize: function (id, label, callbackObject = undefined, callback = "", attributes= {}) {
-		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "color", id, label, callbackObject, callback, ["change"], attributes);
+	initialize: function (id, label, callbackObject = undefined, callback = "") {
+		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "color", id, label, callbackObject, callback, ["change"]);
 		this.setConstructorArguments(arguments);
 
 		this.input.addEventListener("input", debounce(
@@ -29,11 +28,13 @@ L.ALS.Widgets.Color = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widgets.
 	/**
 	 * Sets value of this widget
 	 * @param value {string} Color in format that CSS can read
+	 * @return {L.ALS.Widgets.Color} This
 	 */
 	setValue: function (value) {
 		L.ALS.Widgets.BaseWidget.prototype.setValue.call(this, value);
 		if (this.input.jscolor)
 			this.input.jscolor.fromString(value);
+		return this;
 	},
 
 	/**

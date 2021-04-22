@@ -45,6 +45,7 @@ L.ALS.Widgets.SimpleLabel = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Wi
 		if (value === "")
 			display = "none";
 		this.container.style.display = display;
+		return this;
 	},
 
 	getValue: function () {
@@ -53,9 +54,11 @@ L.ALS.Widgets.SimpleLabel = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Wi
 
 	/**
 	 * @param textAlign {"left"|"right"|"center"|"justify"} Text align
+	 * @return {L.ALS.Widgets.SimpleLabel} This
 	 */
 	setTextAlign: function (textAlign) {
 		this.input.style.textAlign = textAlign;
+		return this;
 	},
 
 	getTextAlign: function () {
@@ -65,17 +68,15 @@ L.ALS.Widgets.SimpleLabel = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Wi
 	/**
 	 * Sets style of this label
 	 * @param style {"nostyle"|"message"|"success"|"warning"|"error"} Style of this label
+	 * @return {L.ALS.Widgets.SimpleLabel} This
 	 */
 	setStyle: function (style) {
-		for (let s of L.ALS.Widgets.SimpleLabel.styleNames)
+		for (let s of ["message", "success", "warning", "error"])
 			this.input.classList.remove(s);
 		if (style === "nostyle")
-			return;
+			return this;
 		this.input.classList.add(style);
+		return this;
 	},
-
-	statics: {
-		styleNames: ["message", "success", "warning", "error"]
-	}
 
 })

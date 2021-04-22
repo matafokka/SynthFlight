@@ -317,9 +317,13 @@ Note on creating multiple system instances. Add following rules to your CSS:
 .als-top-panel-wrapper > * > * {
 	background: var(--fixed-element-bg);
 }
-
+/* TODO: Probably, remove it
 .not-mobile .als-top-panel-wrapper *:hover {
 	background: var(--hover-bg);
+}*/
+
+.als-no-layer-switching > .ri {
+	max-width: none;
 }
 
 .mobile .als-menu .als-top-panel-wrapper {
@@ -514,6 +518,10 @@ Note on creating multiple system instances. Add following rules to your CSS:
 
 .als-layer-menu[data-hidden="0"] {
 	border-bottom: var(--border) !important;
+}
+
+.als-only-one-layer[data-hidden="0"] { /* Don't add border when there's only one layer */
+	border: none !important;
 }
 
 .als-layer-container > .als-items-row {

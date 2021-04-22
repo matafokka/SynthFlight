@@ -7,16 +7,19 @@
  *
  * ***Warning:*** *If you want to use this only for labels, consider using L.ALS.LeafletLayers.LabelLayer since it's way faster than WidgetLayer.*
  *
+ * @param latLng Position of this object.
+ * @param origin {"topLeft"|"topCenter"|"topRight"|"bottomLeft"|"bottomCenter"|"bottomRight"|"leftCenter"|"rightCenter"|"center"} Origin of this widget, i.e. which "part" of this widget will be at given latLng
+ *
+ * @class
+ * @extends L.ALS.Widgetable
+ * @mixes L.Marker
+ *
  */
-L.ALS.LeafletLayers.WidgetLayer =  L.ALS.Widgetable.extend({
+L.ALS.LeafletLayers.WidgetLayer =  L.ALS.Widgetable.extend( /** @lends L.ALS.LeafletLayers.WidgetLayer.prototype */ {
 
 	includes: L.Marker.prototype,
 
-	/**
-	 * Constructs this class.
-	 * @param latLng Position of this object.
-	 * @param origin {"topLeft"|"topCenter"|"topRight"|"bottomLeft"|"bottomCenter"|"bottomRight"|"leftCenter"|"rightCenter"|"center"} Origin of this widget, i.e. which "part" of this widget will be at given latLng
-	 */
+	/** @constructs */
 	initialize: function (latLng = [52, 0], origin="center") {
 		L.ALS.Widgetable.prototype.initialize.call(this, "als-divicon");
 		L.Marker.prototype.initialize.call(this, latLng);
@@ -37,16 +40,19 @@ L.ALS.LeafletLayers.WidgetLayer =  L.ALS.Widgetable.extend({
 	addWidget: function (widget) {
 		L.ALS.Widgetable.prototype.addWidget.call(this, widget);
 		this._checkWidgets();
+		return this;
 	},
 
 	removeWidget: function (id) {
 		L.ALS.Widgetable.prototype.removeWidget.call(this, id);
 		this._checkWidgets();
+		return this;
 	},
 
 	removeAllWidgets: function () {
 		L.ALS.Widgetable.prototype.removeAllWidgets.call(this);
 		this._checkWidgets();
+		return this;
 	},
 
 	_checkWidgets: function () {
@@ -70,6 +76,7 @@ L.ALS.LeafletLayers.WidgetLayer =  L.ALS.Widgetable.extend({
 	/**
 	 * Sets origin of this layer
 	 * @param origin {"topLeft"|"topCenter"|"topRight"|"bottomLeft"|"bottomCenter"|"bottomRight"|"leftCenter"|"rightCenter"|"center"} Origin to set
+	 * @return {L.ALS.LeafletLayers.WidgetLayer} This
 	 */
 	setOrigin: function (origin) {
 		let baseName = "als-divicon-pos-";
@@ -77,6 +84,7 @@ L.ALS.LeafletLayers.WidgetLayer =  L.ALS.Widgetable.extend({
 		for (let name of names)
 			this.container.classList.remove(baseName + name);
 		this.container.classList.add(baseName + origin);
+		return this;
 	}
 
 });

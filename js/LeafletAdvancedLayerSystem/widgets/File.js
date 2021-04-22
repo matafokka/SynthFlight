@@ -62,6 +62,7 @@ L.ALS.Widgets.File = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widgets.F
 	/**
 	 * Sets whether this file widget should allow selecting multiple files or not.
 	 * @param isMultiple {boolean} If true, user will be able to select multiple files.
+	 * @return {L.ALS.Widgets.File} This
 	 */
 	setMultiple: function (isMultiple) {
 		if (isMultiple)
@@ -69,6 +70,7 @@ L.ALS.Widgets.File = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widgets.F
 		else
 			this.input.removeAttribute("multiple");
 		this._updateFileArea();
+		return this;
 	},
 
 	/**
@@ -80,8 +82,11 @@ L.ALS.Widgets.File = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widgets.F
 
 	/**
 	 * Does nothing
+	 * @return {L.ALS.Widgets.File} This
 	 */
-	setValue: function () {},
+	setValue: function () {
+		return this;
+	},
 
 	/**
 	 * @return {FileList} FileList object containing all selected files

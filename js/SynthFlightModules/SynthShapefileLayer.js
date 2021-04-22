@@ -49,8 +49,8 @@ L.ALS.SynthShapefileLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthShapefileL
 	},
 
 	_displayShapefile: function (geoJson) {
-		let borderColor = new L.ALS.Widgets.Color("borderColor", "shapefileBorderColor", this, "_setColor", { "value": this.borderColor });
-		let fillColor = new L.ALS.Widgets.Color("fillColor", "shapefileFillColor", this, "_setColor", { "value": this.fillColor });
+		let borderColor = (new L.ALS.Widgets.Color("borderColor", "shapefileBorderColor", this, "_setColor")).setValue(this.borderColor);
+		let fillColor = (new L.ALS.Widgets.Color("fillColor", "shapefileFillColor", this, "_setColor")).setValue(this.fillColor);
 
 		this.type = geoJson.features[0].geometry.type;
 		let menu = [];

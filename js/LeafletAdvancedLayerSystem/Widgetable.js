@@ -2,10 +2,12 @@
  * Base class for all classes that can have widgets.
  *
  * Has property `container` which is container for the widgets. Add it to the page.
+ *
+ * @param className {string} Class name for the container
+ *
  * @class
  * @extends L.ALS.Serializable
  *
- * @param className {string} Class name for the container
  */
 L.ALS.Widgetable = L.ALS.Serializable.extend( /** @lends L.ALS.Widgetable.prototype */ {
 
@@ -31,31 +33,50 @@ L.ALS.Widgetable = L.ALS.Serializable.extend( /** @lends L.ALS.Widgetable.protot
 	},
 
 	/**
-	 * Adds widget to the container
+	 * Adds widget to this widgetable
 	 * @param widget {L.ALS.Widgets.BaseWidget} Widget to add
+	 * @return {L.ALS.Widgetable} This
 	 */
 	addWidget: function (widget) {
 		this.container.appendChild(widget.getContainer());
-		this._widgets[widget.getId()] = widget;
+		this._widgets[widget.id] = widget;
+		widget._isAdded = true;
+		return this;
+	},
+
+	/**
+	 * Adds all widgets to this widgetable
+	 * @param widgets {L.ALS.Widgets.BaseWidget} Widgets to add
+	 * @return {L.ALS.Widgetable} This
+	 */
+	addWidgets: function (...widgets) {
+		for (let widget of widgets)
+			this.addWidget(widget);
+		return this;
 	},
 
 	/**
 	 * Removes widget from the container
 	 * @param id {string} ID of a widget to remove
+	 * @return {L.ALS.Widgetable} This
 	 */
 	removeWidget: function (id) {
 		let container = this._widgets[id].getContainer();
 		container.parentNode.removeChild(container);
 		delete this._widgets[id];
+		this._widgets[id]._isAdded = false;
+		return this;
 	},
 
 	/**
 	 * Removes all widgets from the container
+	 * @return {L.ALS.Widgetable} This
 	 */
 	removeAllWidgets: function () {
 		while (this.container.hasChildNodes())
 			this.container.removeChild(this.container.firstChild);
 		this._widgets = {};
+		return this;
 	},
 
 	/**

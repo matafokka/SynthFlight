@@ -1,5 +1,18 @@
 /**
- * Contains widgets to add to `Widgetable`s
+ * Contains widgets to add to `L.ALS.Widgetable`s.
+ *
+ * @example Code style to add multiple widgets at one time.
+ *
+ * // This code goes inside of some widgetable
+ * this.addWidgets(
+ *      // We can instantiate a widget and set it's properties at the same time by chaining all of that. Each setter returns the same widget.
+ *      (new L.ALS.Widgets.Number("myNumber0", "Number 0", this, "someCallback0")).setMin(0).setMax(100).setStep(2).setValue(50),
+ *
+ *      // addWidgets() accepts numerous widgets. So let's add some more.
+ *      (new L.ALS.Widgets.Number("myNumber1", "Number 1", this, "someCallback1")).setMin(0).setMax(1).setStep(0.1).setValue(0),
+ *      (new L.ALS.Widgets.Color("myColor", "Color", this, "someCallback2")).setValue("red"),
+ * );
+ *
  */
 L.ALS.Widgets = {
 	/**
@@ -27,7 +40,7 @@ L.ALS.Widgets = {
 require("./BaseWidget.js");
 require("./Time.js");
 require("./Button.js");
-require("./ItemsWidgetInterface.js");
+require("./BaseItemsWidget.js");
 require("./DropDownList.js");
 require("./RadioButtonsGroup.js");
 require("./ButtonsGroup.js");

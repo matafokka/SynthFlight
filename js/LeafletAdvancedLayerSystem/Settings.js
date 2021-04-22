@@ -12,6 +12,26 @@ L.ALS.Settings = L.ALS.Widgetable.extend( /** @lends L.ALS.Settings.prototype */
 	},
 
 	/**
+	 * Adds widget to this widgetable
+	 * @param widget {L.ALS.Widgets.BaseWidget} Widget to add
+	 * @param defaultValue {*} Value that will be set to the widget when user will press revert button
+	 * @return {L.ALS.Settings} This
+	 */
+	addWidget: function (widget, defaultValue) {
+		widget._defaultSettingsValue = defaultValue;
+		L.ALS.Widgetable.prototype.addWidget.call(this, widget);
+		return this;
+	},
+
+	/**
+	 * Does nothing, just call addWidget() multiple times
+	 * @return {L.ALS.Settings} This
+	 */
+	addWidgets: function() {
+		return this;
+	},
+
+	/**
 	 * @return {Object} Settings as {name: value} pairs
 	 */
 	getSettings: function () {

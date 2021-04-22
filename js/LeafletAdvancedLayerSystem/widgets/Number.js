@@ -15,8 +15,8 @@ L.ALS.Widgets.Number = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widgets
 	customWrapperClassName: "als-number",
 
 	/** @constructs */
-	initialize: function (id, label, callbackObject = undefined, callback = "", attributes = {}) {
-		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "text", id, label, callbackObject, callback, ["edit", "change", "keyup"], attributes);
+	initialize: function (id, label, callbackObject = undefined, callback = "") {
+		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "text", id, label, callbackObject, callback, ["edit", "change", "keyup"]);
 		this.setConstructorArguments(arguments);
 
 		this.input.addEventListener("keydown", (event) => {
@@ -72,10 +72,12 @@ L.ALS.Widgets.Number = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widgets
 	/**
 	 * Sets value of this widget. If provided value is not valid, will not do anything.
 	 * @param value {string|number} Value to set
+	 * @return {L.ALS.Widgets.Number} This
 	 */
 	setValue: function (value) {
 		if (this._validateValue(parseFloat(value)))
 			this.input.value = value;
+		return this;
 	},
 
 	onChange: function (event) {
@@ -107,9 +109,80 @@ L.ALS.Widgets.Number = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widgets
 	 * @private
 	 */
 	_validateValue: function (value) {
-		let min = parseFloat(this.input.getAttribute("min"));
-		let max = parseFloat(this.input.getAttribute("max"));
+		let min = parseFloat(this.input.min);
+		let max = parseFloat(this.input.max);
 		return !(isNaN(value) || (!isNaN(min) && value < min) || (!isNaN(max) && value > max))
-	}
+	},
+
+	/**
+	 * Sets input's constraint (property) such as min, max and step
+	 * @param name {string} Constraint (property) name
+	 * @param value {number} Constraint (property) value. Pass undefined to remove a constraint.
+	 * @return {L.ALS.Widgets.Number} This
+	 * @private
+	 */
+	_setConstraint: function (name, value) {
+		value = (value === undefined) ? "" : value;
+		this.input[name] = value;
+		return this;
+	},
+
+	/**
+	 * Finds constraint set to this widget
+	 * @param name {string} Constraint (property) name
+	 * @return {number|NaN} A constraint value or NaN if no constraint has been set
+	 * @private
+	 */
+	_getConstraint: function (name) {
+		return parseFloat(this.input[name]);
+	},
+
+	/**
+	 * Sets minimum value of this widget
+	 * @param min {number} Minimum value to set. Pass undefined to remove this constraint.
+	 * @return {L.ALS.Widgets.Number} This
+	 */
+	setMin: function (min) {
+		return this._setConstraint("min", min);
+	},
+
+	/**
+	 * @return {number|NaN} Minimum value of this widget or NaN if no value has been set
+	 */
+	getMin: function () {
+		return this._getConstraint("min");
+	},
+
+	/**
+	 * Sets maximum value of this widget
+	 * @param max {number} Maximum value to set. Pass undefined to remove this constraint.
+	 * @return {L.ALS.Widgets.Number} This
+	 */
+	setMax: function (max) {
+		return this._setConstraint("max", max);
+	},
+
+	/**
+	 * @return {number|NaN} Maximum value of this widget or NaN if no value has been set
+	 */
+	getMax: function () {
+		return this._getConstraint("max");
+	},
+
+	/**
+	 * Sets step of this widget, i.e. number that will be added/subtracted from the current value when user presses minus/plus button
+	 * @param step {number} Step to set. Pass undefined to remove the step.
+	 * @return {L.ALS.Widgets.Number} This
+	 */
+	setStep: function (step) {
+		return this._setConstraint("step", step);
+	},
+
+	/**
+	 * @return {number|NaN} Step of this widget or NaN if no value has been set
+	 */
+	getStep: function () {
+		return this._getConstraint("step");
+	},
 
 });

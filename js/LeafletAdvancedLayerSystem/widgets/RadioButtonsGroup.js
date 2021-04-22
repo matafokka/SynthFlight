@@ -7,11 +7,11 @@
  * @param callback {string} Name of the method of callbackObject that will be called when widget's value changes
  *
  * @class
- * @implements L.ALS.Widgets.ItemsWidgetInterface
+ * @extends L.ALS.Widgets.BaseItemsWidget
  */
-L.ALS.Widgets.RadioButtonsGroup = L.ALS.Widgets.ItemsWidgetInterface.extend( /** @lends L.ALS.Widgets.RadioButtonsGroup.prototype */ {
+L.ALS.Widgets.RadioButtonsGroup = L.ALS.Widgets.BaseItemsWidget.extend( /** @lends L.ALS.Widgets.RadioButtonsGroup.prototype */ {
 
-	initialize: function (id, label, callbackObject, callback) {
+	initialize: function (id, label, callbackObject = undefined, callback = "") {
 		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "", id, label, callbackObject, callback, ["change"]);
 		this.radioNames = L.ALS.Helpers.generateID();
 		this.containerForRevertButton = this.container.getElementsByClassName("als-radio-label-wrapper")[0];
@@ -65,6 +65,7 @@ L.ALS.Widgets.RadioButtonsGroup = L.ALS.Widgets.ItemsWidgetInterface.extend( /**
 			e.setAttribute("data-radio-id", item);
 
 		this.callCallback();
+		return this;
 	},
 
 	removeItem: function (item) {
@@ -72,6 +73,7 @@ L.ALS.Widgets.RadioButtonsGroup = L.ALS.Widgets.ItemsWidgetInterface.extend( /**
 		if (!container)
 			return;
 		this.container.removeChild(container);
+		return this;
 	},
 
 	selectItem: function (item) {
@@ -79,6 +81,7 @@ L.ALS.Widgets.RadioButtonsGroup = L.ALS.Widgets.ItemsWidgetInterface.extend( /**
 		if (!container)
 			return;
 		container.getElementsByTagName("input")[0].checked = true;
+		return this;
 	},
 
 	getValue: function () {

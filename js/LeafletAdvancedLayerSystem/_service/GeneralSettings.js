@@ -1,6 +1,8 @@
 /**
  * General application settings
  *
+ * @param defaultLocale {string} Locale to use by default
+ *
  * @class
  * @extends L.ALS.Settings
  */
@@ -28,7 +30,7 @@ L.ALS._service.GeneralSettings = L.ALS.Settings.extend( /** @lends L.ALS._servic
 	_systemTheme: "generalSettingsSystemTheme",
 
 	/** @constructs */
-	initialize: function () {
+	initialize: function (defaultLocale = "English") {
 		L.ALS.Settings.prototype.initialize.call(this);
 
 		// Find dark theme stylesheet
@@ -45,7 +47,7 @@ L.ALS._service.GeneralSettings = L.ALS.Settings.extend( /** @lends L.ALS._servic
 			if (L.ALS.Locales.hasOwnProperty(locale) && typeof L.ALS.Locales[locale] !== "function")
 				languageWidget.addItem(locale);
 		}
-		languageWidget.setAttributes({ defaultValue: "English" });
+		this.addWidget(languageWidget, defaultLocale);
 
 		// Build theme widget
 		let themeWidget = new L.ALS.Widgets.RadioButtonsGroup("theme", "generalSettingsTheme", this, "changeTheme");
@@ -70,12 +72,7 @@ L.ALS._service.GeneralSettings = L.ALS.Settings.extend( /** @lends L.ALS._servic
 			});
 			defaultValue = this._systemTheme;
 		}
-		themeWidget.setAttributes({ defaultValue: defaultValue });
-
-		// Add those widgets to this widgetable
-		let widgets = [languageWidget, themeWidget];
-		for (let widget of widgets)
-			this.addWidget(widget);
+		this.addWidget(themeWidget, defaultValue);
 	},
 
 	/**

@@ -15,7 +15,7 @@ L.ALS.Widgets.Checkbox = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widge
 
 	/** @constructs */
 	initialize: function (id, label, callbackObject = undefined, callback = "") {
-		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "checkbox", id, label, callbackObject, callback, ["change"], {});
+		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "checkbox", id, label, callbackObject, callback, ["change"]);
 		this.setConstructorArguments(arguments);
 		this.setValue(false);
 	},
@@ -39,17 +39,21 @@ L.ALS.Widgets.Checkbox = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widge
 	/**
 	 * Sets value of this checkbox
 	 * @param value {boolean | "true" | "false"} Value to set
+	 * @return {L.ALS.Widgets.Checkbox} This
 	 */
 	setValue: function (value) {
 		this.input.checked = value;
+		return this;
 	},
 
 	/**
 	 * Alias for setValue()
 	 * @param isChecked {boolean} Check (true) or uncheck (false) this checkbox
+	 * @return {L.ALS.Widgets.Checkbox} This
 	 */
 	setChecked: function (isChecked) {
 		this.setValue(isChecked);
+		return this;
 	},
 
 	/**

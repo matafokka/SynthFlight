@@ -151,7 +151,7 @@ L.ALS.Helpers = {
 
 	/**
 	 * Reads file opened on fileInput as text, calls given callback and passes text to it
-	 * @param fileInput {HTMLInputElement} File input to read file from
+	 * @param fileInput {HTMLElement} File input to read file from
 	 * @param notSupportedNotification {string} If user's browser doesn't support reading text files, this notification will be presented.
 	 * @param callback {function(string)} Callback to pass text to
 	 */

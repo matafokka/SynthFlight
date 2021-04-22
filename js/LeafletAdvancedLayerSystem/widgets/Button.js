@@ -8,7 +8,6 @@
  * @param text {string} Text for the button. You can also pass locale property to localize the text.
  * @param callbackObject {Object|L.ALS.Serializable} Just pass "this". If you plan to use serialization, this object MUST be instance of L.ALS.Serializable.
  * @param callback {string} Name of a method of callbackObject that will be called when button will be pressed.
- * @param mobileIcon {string} class appended to this button if user's device is a phone. Can be used for setting an icon instead of text to save up space and avoid word wrapping. You can use Remix Icon classes to do so. Or you can install your own icon pack (not recommended due to inconsistency) and use it this way.
  */
 L.ALS.Widgets.Button = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widgets.Button.prototype */ {
 
@@ -16,9 +15,8 @@ L.ALS.Widgets.Button = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widgets
 	undoable: false,
 
 	/** @constructs */
-	initialize: function (id, text, callbackObject = undefined, callback = "", mobileIcon = "") {
-		this._mobileIcon = mobileIcon;
-		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "", id, "", callbackObject, callback, ["click"], {});
+	initialize: function (id, text, callbackObject = undefined, callback = "") {
+		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "", id, "", callbackObject, callback, ["click"]);
 		this.setButtonText(text);
 		this.setConstructorArguments(arguments);
 	},
@@ -32,19 +30,17 @@ L.ALS.Widgets.Button = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widgets
 	createInputElement: function () {
 		let button = document.createElement("div");
 		button.className = "als-button-base";
-		if (this._mobileIcon !== "") {
-			button.setAttribute("data-mobile-class", "ri " + this._mobileIcon);
-			this._waitForElementToBeAdded();
-		}
 		return button;
 	},
 
 	/**
 	 * Sets button text
 	 * @param text {string} text to set. Can be a locale property.
+	 * @return {L.ALS.Widgets.Button} This
 	 */
 	setButtonText: function (text) {
 		L.ALS.Locales.localizeOrSetValue(this.input, text);
+		return this;
 	},
 
 	/**
@@ -65,7 +61,53 @@ L.ALS.Widgets.Button = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widgets
 		L.ALS.Helpers._applyButtonsIconsIfMobile(this.container);
 	},
 
-	getValue: function () {},
-	setValue: function () {},
+	/**
+	 * Sets mobile icon - a class appended to this button if user's device is a phone.
+	 *
+	 * Can be used for setting an icon instead of text to save up space and avoid word wrapping.
+	 *
+	 * You can use Remix Icon classes to do so. Or you can install your own icon pack (not recommended due to inconsistency) and use it this way.
+	 *
+	 * To remove a mobile icon, pass an empty string.
+	 *
+	 * @param mobileIcon {string} Icon to set
+	 * @return {L.ALS.Widgets.Button} This
+	 */
+	setMobileIcon: function (mobileIcon) {
+		if (mobileIcon === "") {
+			this.input.removeAttribute("data-mobile-class")
+			return this;
+		}
+		this.input.setAttribute("data-mobile-class", "ri " + mobileIcon);
+		this._waitForElementToBeAdded();
+		return this;
+	},
+
+	/**
+	 * @return {string} Mobile icon of this button. If no mobile icon has been set, returns empty string.
+	 */
+	getMobileIcon: function () {
+		let icon = this.input.getAttribute("data-mobile-class");
+		if (!icon)
+			return "";
+		return icon;
+	},
+
+	/**
+	 * Alias for `getButtonText()`
+	 * @return {string} Button's text
+	 */
+	getValue: function () {
+		return this.getButtonText();
+	},
+
+	/**
+	 * Alias for `setButtonText()`
+	 * @param value {string} Text to set
+	 * @return {L.ALS.Widgets.Button} This
+	 */
+	setValue: function (value) {
+		return this.setButtonText(value);
+	},
 
 })

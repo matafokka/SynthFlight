@@ -207,7 +207,10 @@ L.ALS.Layer = L.ALS.Widgetable.extend( /** @lends L.ALS.Layer.prototype */ {
 		let elements = [handle, label, menuButton, this._hideButton];
 		for (let e of elements)
 			controlsContainer.appendChild(e);
-		layerWidget.appendChild(controlsContainer);
+		if (!this._layerSystem._useOnlyOneLayer)
+			layerWidget.appendChild(controlsContainer);
+		else
+			this.container.classList.add("als-only-one-layer");
 		layerWidget.appendChild(this.container);
 		layerWidget.addEventListener("click", () => { this._layerSystem._selectLayer(this.id); });
 

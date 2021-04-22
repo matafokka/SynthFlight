@@ -1,16 +1,16 @@
 /**
  * Display options for a label
  * @typedef {Object} DisplayOptions
- * @property backgroundColor {string} Background color in format which Canvas can read. Defaults to "white".
- * @property borderColor {string} Border color in format which Canvas can read. Defaults to "#ccc".
- * @property fontColor {string} Font color in format which Canvas can read. Defaults to "black".
- * @property textAlign {"left"|"center"|"right"} Text alignment. Defaults to "left".
- * @property origin {"topLeft"|"topCenter"|"topRight"|"bottomLeft"|"bottomCenter"|"bottomRight"|"leftCenter"|"rightCenter"|"center"} Origin of a label, i.e. which "part" of it will be at given latLng. Defaults to "center".
- * @property maxWidth {integer} Maximum width of a label in number of characters per line. If label will exceed this parameter, it will be wrapped. If it's less than 1, label width will not be limited. Defaults to 0.
+ * @property {string} [backgroundColor="white"] Background color in format which Canvas can read. Defaults to "white".
+ * @property {string} [borderColor="#ccc"] Border color in format which Canvas can read. Defaults to "#ccc".
+ * @property {string} [fontColor="black"] Font color in format which Canvas can read. Defaults to "black".
+ * @property {"left"|"center"|"right"} [textAlignText="left"] alignment. Defaults to "left".
+ * @property {"topLeft"|"topCenter"|"topRight"|"bottomLeft"|"bottomCenter"|"bottomRight"|"leftCenter"|"rightCenter"|"center"} [origin="center"] Origin of a label, i.e. which "part" of it will be at given latLng. Defaults to "center".
+ * @property {number} [maxWidth=0] Maximum width of a label in number of characters per line. If label will exceed this parameter, it will be wrapped. If it's less than 1, label width will not be limited. Must be an integer. Defaults to 0.
  */
 
 /**
- * Object that represents label
+ * Object that represents label. Not linked to the actual label in any way, won't be updated over time, can be freely modified.
  * @typedef {Object & DisplayOptions} LabelProperties
  * @property id {string} ID of a label
  * @property text {string} Text of a label

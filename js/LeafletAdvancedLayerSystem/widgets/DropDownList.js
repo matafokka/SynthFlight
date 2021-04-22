@@ -7,12 +7,12 @@
  * @param callback {string} Name of the method of callbackObject that will be called when widget's value changes
  *
  * @class
- * @implements L.ALS.Widgets.ItemsWidgetInterface
+ * @extends L.ALS.Widgets.BaseItemsWidget
  */
-L.ALS.Widgets.DropDownList = L.ALS.Widgets.ItemsWidgetInterface.extend( /** @lends L.ALS.Widgets.DropDownList.prototype */ {
+L.ALS.Widgets.DropDownList = L.ALS.Widgets.BaseItemsWidget.extend( /** @lends L.ALS.Widgets.DropDownList.prototype */ {
 
 	/** @constructs */
-	initialize: function (id, label, callbackObject, callback) {
+	initialize: function (id, label, callbackObject = undefined, callback = "") {
 		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "", id, label, callbackObject, callback, ["change"]);
 		this.setConstructorArguments(arguments);
 	},
@@ -26,15 +26,17 @@ L.ALS.Widgets.DropDownList = L.ALS.Widgets.ItemsWidgetInterface.extend( /** @len
 		L.ALS.Locales.localizeOrSetValue(option, item, "text");
 		this.input.appendChild(option);
 		this.callCallback();
+		return this;
 	},
 
 	removeItem: function (item) {
 		for (let child of this.input.childNodes) {
 			if (L.ALS.Locales.getLocalePropertyOrValue(child) === item) {
 				this.input.removeChild(child);
-				return;
+				return this;
 			}
 		}
+		return this;
 	},
 
 	selectItem: function (item) {
@@ -43,9 +45,10 @@ L.ALS.Widgets.DropDownList = L.ALS.Widgets.ItemsWidgetInterface.extend( /** @len
 			if (L.ALS.Locales.getLocalePropertyOrValue(option) === item) {
 				option.selected = "selected";
 				this.callCallback();
-				return;
+				return this;
 			}
 		}
+		return this;
 	},
 
 	getValue: function () {

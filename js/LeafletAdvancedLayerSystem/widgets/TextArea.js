@@ -39,9 +39,11 @@ L.ALS.Widgets.TextArea = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widge
 	/**
 	 * Sets whether this text area should be editable by the user
 	 * @param isEditable {boolean} If true, text area will be editable.
+	 * @return {L.ALS.Widgets.TextArea} This
 	 */
 	setEditable: function(isEditable) {
 		this.setEnabled(isEditable);
+		return this;
 	},
 
 	/**
@@ -54,14 +56,17 @@ L.ALS.Widgets.TextArea = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widge
 	/**
 	 * Sets maximum height (in rows) of this widget.
 	 * @param rowsCount {number} Height of this widget. Set to 0 or less to disable height limit.
+	 * @return {L.ALS.Widgets.TextArea} This
 	 */
 	setMaxHeight: function (rowsCount) {
 		this.input.setAttribute("rows", rowsCount);
+		return this;
 	},
 
 	/**
 	 * Sets whether this textarea will use monospace or sans font
 	 * @param isMonospace {boolean} If true, textarea will use monospace font. Sans font will be used otherwise.
+	 * @return {L.ALS.Widgets.TextArea} This
 	 */
 	setMonospace: function (isMonospace) {
 		let className = "als-textarea-mono";
@@ -69,14 +74,17 @@ L.ALS.Widgets.TextArea = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widge
 			this.input.classList.add(className);
 		else
 			this.input.classList.remove(className);
+		return this;
 	},
 
 	/**
 	 * Alias for setValue()
 	 * @param text {string} Text to set to this textarea
+	 * @return {L.ALS.Widgets.TextArea} This
 	 */
 	setText: function (text) {
 		this.setValue(text);
+		return this; // IDE is mad at type mismatch. Oh, boy, do I hate when I can't just write "@return {this}"
 	},
 
 	/**
@@ -90,20 +98,24 @@ L.ALS.Widgets.TextArea = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widge
 	/**
 	 * Appends text to this textarea. This is convenience function for setText(getText() + text);
 	 * @param text {string} Text to append
+	 * @return {L.ALS.Widgets.TextArea} This
 	 */
 	appendText: function (text) {
 		this.input.value += text;
+		return this;
 	},
 
 	/**
 	 * Appends row to this textarea. This is a convenience function.
 	 * @param text {string} Text to append in a new row
 	 * @param insertLineBreak {boolean} If set to true, will additionally append a line break after the given text
+	 * @return {L.ALS.Widgets.TextArea} This
 	 */
 	appendRow: function (text, insertLineBreak = false) {
 		this.input.value += "\n" + text;
 		if (insertLineBreak)
 			this.input.value += "\n";
+		return this;
 	},
 
 	statics: {

@@ -39,6 +39,7 @@ L.ALS.Widgets.ValueLabel = L.ALS.Widgets.SimpleLabel.extend( /** @lends L.ALS.Wi
 	/**
 	 * Sets description of this label
 	 * @param description {string} Value description. You can use locale property to localize it.
+	 * @return {L.ALS.Widgets.ValueLabel} This
 	 */
 	setDescription: function (description) {
 		/**
@@ -48,6 +49,7 @@ L.ALS.Widgets.ValueLabel = L.ALS.Widgets.SimpleLabel.extend( /** @lends L.ALS.Wi
 		 */
 		this._description = description;
 		this._updateValue();
+		return this;
 	},
 
 	/**
@@ -60,6 +62,7 @@ L.ALS.Widgets.ValueLabel = L.ALS.Widgets.SimpleLabel.extend( /** @lends L.ALS.Wi
 	/**
 	 * Sets whether this label will automatically format numbers using L.ALS.Helpers.formatNumber()
 	 * @param formatNumbers {boolean} If true, this label will automatically format numbers.
+	 * @return {L.ALS.Widgets.ValueLabel} This
 	 */
 	setFormatNumbers: function (formatNumbers) {
 		/**
@@ -69,6 +72,7 @@ L.ALS.Widgets.ValueLabel = L.ALS.Widgets.SimpleLabel.extend( /** @lends L.ALS.Wi
 		 */
 		this._formatNumbers = formatNumbers;
 		this._updateValue();
+		return this;
 	},
 
 	/**
@@ -81,14 +85,15 @@ L.ALS.Widgets.ValueLabel = L.ALS.Widgets.SimpleLabel.extend( /** @lends L.ALS.Wi
 	/**
 	 * Sets value of this label. It's not an alias for SimpleLabel.setValue()! There's no alias for this method.
 	 * @param value Value to set
+	 * @return {L.ALS.Widgets.ValueLabel} This
 	 */
 	setValue: function (value) {
 		this._labelValue = value;
 		this._updateValue();
+		return this;
 	},
 
 	/**
-	 *
 	 * @return Value of this label. It doesn't return the whole text! To get whole text, use getActualValue().
 	 */
 	getValue: function () {
@@ -98,6 +103,7 @@ L.ALS.Widgets.ValueLabel = L.ALS.Widgets.SimpleLabel.extend( /** @lends L.ALS.Wi
 	/**
 	 * Sets units for this label
 	 * @param units {string} Units to set
+	 * @return {L.ALS.Widgets.ValueLabel} This
 	 */
 	setUnits: function (units) {
 		/**
@@ -107,6 +113,7 @@ L.ALS.Widgets.ValueLabel = L.ALS.Widgets.SimpleLabel.extend( /** @lends L.ALS.Wi
 		 */
 		this._units = units;
 		this._updateValue();
+		return this;
 	},
 
 	/**
@@ -119,6 +126,7 @@ L.ALS.Widgets.ValueLabel = L.ALS.Widgets.SimpleLabel.extend( /** @lends L.ALS.Wi
 	/**
 	 * Sets units position.
 	 * @param position  {"description"|"value"} Units position. If set to "description", units will be displayed after description. Otherwise, units will be displayed after the value.
+	 * @return {L.ALS.Widgets.ValueLabel} This
 	 */
 	setUnitsPosition: function (position) {
 		/**
@@ -128,6 +136,7 @@ L.ALS.Widgets.ValueLabel = L.ALS.Widgets.SimpleLabel.extend( /** @lends L.ALS.Wi
 		 */
 		this._unitsPosition = position;
 		this._updateValue();
+		return this;
 	},
 
 	/**

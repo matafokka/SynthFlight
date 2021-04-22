@@ -1,5 +1,5 @@
 /**
- * Root object containing all AdvancedLayerSystem stuff
+ * Root object containing all Layer System stuff
  */
 L.ALS = {
 
@@ -28,6 +28,19 @@ require("./_service/SidebarWindow.js");
 require("./_service/WizardWindow.js");
 require("./_service/SettingsWindow.js");
 require("./LeafletLayers/LeafletLayers.js");
+
+/**
+ * Options for the Layer System
+ * @typedef {Object} SystemOptions
+ * @property {string} [aboutHTML=undefined] HTML that will be displayed in "About" section in settings. Defaults to undefined.
+ * @property {string} [defaultLocale="English"] Locale to use by default. Defaults to "English".
+ * @property {boolean} [enableSettings=true] If set to true, user will be able to set up your application using built-in settings system. If you don't need it, set this property to false. However, you'll need to implement theme and locale switching yourself. System doesn't provide any API for that, so disabling this option is not recommended. Defaults to true.
+ * @property {boolean} [enableProjects=true] If set to true, user will be able to save and load projects using built-in serialization system. If you don't need it, set this property to false. Defaults to true.
+ * @property {boolean} [enableExport=true] If set to true, user will be able to export project. If you don't need it, set this property to false. Defaults to true.
+ * @property {boolean} [enableBaseLayerSwitching=true] If set to true, user will be able to switch Leaflet base layers (i.e. map providers). If you don't need it, set this property to false. Defaults to true.
+ * @property {"topleft"|"topright"|"bottomleft"|"bottomright"} [position="topright"] Position of the menu button. If set to topleft or bottom left, menu itself will be on the left side. Defaults to "topright".
+ * @property {ObjectConstructor<L.ALS.Layer>} [useOnlyThisLayer=undefined] If you need to display only one layer and disable ability to add other layers, pass your layer's class here. At the end you'll end up with pretty much static menu. Defaults to undefined.
+ */
 
 /**
  * Advanced extensible layer system for Leaflet. Manages things like layer creation, ordering, deletion and much more for you.
@@ -78,7 +91,7 @@ require("./LeafletLayers/LeafletLayers.js");
  *
  *         // Let's add a checkbox to out settings
  *         let checkbox = new L.ALS.Checkbox("myCheckboxId", "Checkbox");
- *         checkbox.setAttributes({ defaultValue: true }); // Assign default value to the widget
+ *         checkbox._setAttributes({ defaultValue: true }); // Assign default value to the widget
  *         this.addWidget(checkbox);
  *     }
  *
@@ -142,27 +155,43 @@ require("./LeafletLayers/LeafletLayers.js");
  * layerSystem.addLayerType(L.MyLayerType); // Add your layer types
  *
  * @param map {Map} Leaflet map object to manage
- * @param enableProjectSystem {boolean} - If set to true, will enable project system. User will be able to save and restore projects, but you have to do extra work. You might want to implement your own system yourself.
- * @param aboutHTML {string} HTML that will be displayed in "About" section in settings
+ * @param options {SystemOptions} Options
  *
  * @class
  * @extends L.Control
  */
 L.ALS.System = L.Control.extend( /** @lends L.ALS.System.prototype */ {
 
-	/**
-	 * @private
-	 */
+	/** @private */
 	skipSerialization: true,
 
-	/**
-	 * @private
-	 */
+	/** @private */
 	skipDeserialization: true,
 
+	/**
+	 * Indicates whether system should only one single layer or not
+	 * @package
+	 */
+	_useOnlyOneLayer: false,
+
 	/** @constructs */
-	initialize: function (map, enableProjectSystem = true, aboutHTML = undefined) {
+	initialize: function (map, options) {
 		L.Control.prototype.initialize.call(this);
+
+		/** @type {SystemOptions} */
+		let defaultOptions = {
+			aboutHTML: undefined,
+			defaultLocale: "English",
+			enableSettings: true,
+			enableProjects: true,
+			enableExport: true,
+			enableBaseLayerSwitching: true,
+			position: "topright",
+			useOnlyThisLayer: undefined,
+		}
+
+		/** @type {SystemOptions} */
+		let newOptions = L.ALS.Helpers.mergeOptions(defaultOptions, options);
 
 		/**
 		 * Contains base layers. Layers will be added in format: "Name": layer object. addBaseLayer() will update this object.
@@ -204,7 +233,8 @@ L.ALS.System = L.Control.extend( /** @lends L.ALS.System.prototype */ {
 		L.ALS.Helpers.HTMLToElement(require("./_service/markup.js"), mapContainer);
 
 		// Wizard-related stuff
-		this._wizardWindow = new L.ALS._service.WizardWindow(mapContainer.getElementsByClassName("als-menu-add")[0]);
+		let addButton = mapContainer.getElementsByClassName("als-menu-add")[0];
+		this._wizardWindow = new L.ALS._service.WizardWindow(addButton);
 		let wizardWindow = this._wizardWindow.window;
 
 		this._wizardMenu = wizardWindow.getElementsByClassName("als-wizard-menu")[0];
@@ -255,8 +285,8 @@ L.ALS.System = L.Control.extend( /** @lends L.ALS.System.prototype */ {
 		});
 
 		this._settingsButton = mapContainer.getElementsByClassName("als-settings-button")[0];
-		this._settingsWindow = new L.ALS._service.SettingsWindow(this._settingsButton, () => { this._applyNewSettings(); }, aboutHTML);
-		this._settingsWindow.addItem("settingsGeneralSettings", new L.ALS._service.GeneralSettings());
+		this._settingsWindow = new L.ALS._service.SettingsWindow(this._settingsButton, () => { this._applyNewSettings(); }, newOptions.aboutHTML);
+		this._settingsWindow.addItem("settingsGeneralSettings", new L.ALS._service.GeneralSettings(newOptions.defaultLocale));
 
 		// IE and old browsers (which are unsupported by ALS) either doesn't implement LocalStorage or doesn't support it when app runs locally
 		if (!window.localStorage) {
@@ -265,7 +295,8 @@ L.ALS.System = L.Control.extend( /** @lends L.ALS.System.prototype */ {
 			});
 		}
 
-		mapContainer.getElementsByClassName("als-menu-delete")[0].addEventListener("click", () => {
+		let deleteButton = mapContainer.getElementsByClassName("als-menu-delete")[0];
+		deleteButton.addEventListener("click", () => {
 			this._deleteLayer();
 		});
 
@@ -278,6 +309,31 @@ L.ALS.System = L.Control.extend( /** @lends L.ALS.System.prototype */ {
 				this._reorderLayers();
 			}
 		});
+
+		this.setPosition(newOptions.position);
+
+		// Remove unused items from the menu. Doing this after adding all the stuff is way easier and cleaner than writing ifs above :D
+
+		let topPanel = this._menu.getElementsByClassName("als-top-panel")[0];
+		if (!newOptions.enableBaseLayerSwitching) {
+			topPanel.removeChild(this._baseLayerMenu);
+			topPanel.classList.add("als-no-layer-switching");
+		}
+		if (!newOptions.enableExport)
+			topPanel.removeChild(this._exportButton);
+		if (!newOptions.enableProjects) {
+			topPanel.removeChild(this._saveButton);
+			topPanel.removeChild(topPanel.getElementsByClassName("als-load-button")[0]);
+		}
+		if (!newOptions.enableSettings)
+			topPanel.removeChild(this._settingsButton);
+
+		if (!newOptions.useOnlyThisLayer)
+			return;
+		topPanel.removeChild(addButton);
+		topPanel.removeChild(deleteButton);
+		this._useOnlyOneLayer = true;
+		new newOptions.useOnlyThisLayer(this, {}, newOptions.useOnlyThisLayer.settings);
 	},
 
 	// Base layers
@@ -434,10 +490,10 @@ L.ALS.System = L.Control.extend( /** @lends L.ALS.System.prototype */ {
 
 		// Select first added layers or make selected layer undefined. That will remove the last reference to it.
 		let firstChild = this._layerContainer.firstElementChild;
-		if (firstChild !== null)
-			this._selectLayer(firstChild.id);
-		else
+		if (!firstChild)
 			this._selectedLayer = undefined;
+		else
+			this._selectLayer(firstChild.id);
 	},
 
 	/**

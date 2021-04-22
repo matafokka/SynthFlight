@@ -55,21 +55,18 @@ L.ALS._service.SettingsWindow = L.ALS._service.SidebarWindow.extend( /** @lends 
 			if (!widget.undoable)
 				continue;
 
-			if (!widget.attributes.defaultValue)
-				throw new Error("Your widget doesn't have attributes.defaultValue set! Pass attributes argument containing value property to widget's constructor.");
-
 			let button = document.createElement("i");
 			button.className = "ri ri-arrow-go-back-line als-revert-button";
 			L.ALS.Locales.localizeElement(button, "settingsRevertButton", "title");
 			widget.containerForRevertButton.appendChild(button);
 
 			button.addEventListener("click", () => {
-				widget.setValue(widget.attributes.defaultValue);
+				widget.setValue(widget._defaultSettingsValue);
 				widget.callCallback();
 			});
 
 			if (button.click)
-				button.click()
+				button.click();
 			else
 				L.ALS.Helpers.dispatchEvent(button, "click");
 		}
@@ -125,7 +122,7 @@ L.ALS._service.SettingsWindow = L.ALS._service.SidebarWindow.extend( /** @lends 
 
 	/**
 	 * Loops through each widget and calls given callback
-	 * @param callback {function(string, L.ALS.Widgets.BaseWidget, string, *)} Callback to call
+	 * @param callback {function(string, string, string, *)} Callback to call
 	 */
 	forEachWidget: function (callback) {
 		for (let name in this.items) {

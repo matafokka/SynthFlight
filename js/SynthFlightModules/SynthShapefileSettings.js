@@ -22,20 +22,15 @@ L.ALS.SynthShapefileSettings = L.ALS.Settings.extend( /** @lends L.ALS.SynthShap
 	initialize: function () {
 		L.ALS.Settings.prototype.initialize.call(this);
 
-		let fillColor = new L.ALS.Widgets.Color("fillColor", "shapefileDefaultFillColor");
-		fillColor.setAttributes({
-			value: this.fillColor,
-			defaultValue: this.fillColor
-		});
+		this.addWidget(
+			(new L.ALS.Widgets.Color("fillColor", "shapefileDefaultFillColor")).setValue(this.fillColor),
+			this.fillColor
+		);
 
-		let borderColor = new L.ALS.Widgets.Color("borderColor", "shapefileDefaultBorderColor");
-		borderColor.setAttributes({
-			value: this.borderColor,
-			defaultValue: this.borderColor
-		});
-
-		for (let widget of [fillColor, borderColor])
-			this.addWidget(widget);
+		this.addWidget(
+			(new L.ALS.Widgets.Color("borderColor", "shapefileDefaultBorderColor")).setValue(this.borderColor),
+			this.borderColor
+		);
 	}
 
 });

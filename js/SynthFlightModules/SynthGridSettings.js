@@ -16,48 +16,32 @@ L.ALS.SynthGridSettings = L.ALS.Settings.extend( /** @lends L.ALS.SynthGridSetti
 	initialize: function () {
 		L.ALS.Settings.prototype.initialize.call(this);
 
-		let gridBorderColorWidget = new L.ALS.Widgets.Color("gridBorderColor", "defaultGridBorderColor");
-		gridBorderColorWidget.setAttributes({
-			value: this.gridBorderColor,
-			defaultValue: this.gridBorderColor
-		});
+		this.addWidget(
+			(new L.ALS.Widgets.Color("gridBorderColor", "defaultGridBorderColor")).setValue(this.gridBorderColor),
+			this.gridBorderColor
+		);
 
-		let gridFillColorWidget = new L.ALS.Widgets.Color("gridFillColor", "defaultGridFillColor");
-		gridFillColorWidget.setAttributes({
-			value: this.gridFillColor,
-			defaultValue: this.gridFillColor
-		});
+		this.addWidget(
+			(new L.ALS.Widgets.Color("gridFillColor", "defaultGridFillColor")).setValue(this.gridFillColor),
+			this.gridFillColor
+		);
 
-		let meridiansColorWidget = new L.ALS.Widgets.Color("meridiansColor", "defaultMeridiansColor");
-		meridiansColorWidget.setAttributes({
-			value: this.meridiansColor,
-			defaultValue: this.meridiansColor
-		});
+		this.addWidget(
+			(new L.ALS.Widgets.Color("meridiansColor", "defaultMeridiansColor")).setValue(this.meridiansColor),
+			this.meridiansColor
+		);
 
-		let parallelsColorWidget = new L.ALS.Widgets.Color("parallelsColor", "defaultParallelsColor");
-		parallelsColorWidget.setAttributes({
-			value: this.parallelsColor,
-			defaultValue: this.parallelsColor
-		});
+		this.addWidget(
+			(new L.ALS.Widgets.Color("parallelsColor", "defaultParallelsColor")).setValue(this.parallelsColor),
+			this.parallelsColor
+		);
 
-		let lineThicknessWidget = new L.ALS.Widgets.Number("lineThickness", "defaultLineThickness");
-		lineThicknessWidget.setAttributes({
-			min: 1,
-			max: 20,
-			value: this.lineThickness,
-			defaultValue: this.lineThickness
-		});
+		this.addWidget(
+			(new L.ALS.Widgets.Number("lineThickness", "defaultLineThickness")).setMin(1).setMax(20).setValue(this.lineThickness),
+			this.lineThickness
+		);
 
-		let optimizationWidget = new L.ALS.Widgets.Number("gridHidingFactor", "gridHidingFactor");
-		optimizationWidget.setAttributes({
-			min: 1,
-			max: 10,
-			value: 5,
-			defaultValue: 5
-		});
-
-		for (let widget of [gridBorderColorWidget, gridFillColorWidget, meridiansColorWidget, parallelsColorWidget, lineThicknessWidget, optimizationWidget])
-			this.addWidget(widget);
+		this.addWidget((new L.ALS.Widgets.Number("gridHidingFactor", "gridHidingFactor")).setMin(1).setMax(10).setValue(5), 5);
 	}
 
 });

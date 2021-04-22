@@ -1,6 +1,18 @@
 /**
  * Base class for all widgets.
  *
+ * This class should be used only to create custom widgets. It shouldn't be used in application itself.
+ *
+ * Guidelines on creating custom widgets:
+ *
+ * 1. You'll probably need to have a prior knowledge of how widgets works. Please, study the widgets' markup and existing widgets' source code. Yup, that sucks but there's no good workaround.
+ * 1. As an alternative, you can build your widget from scratch, though, it's not recommended. If you choose to do so, please, use ALS classes in your elements to maintain consistency.
+ * 1. Widget's layout is being created at `toHtmlElement()` method. Compose your widget here.
+ * 1. There're couple of useful methods for composing widgets, such as `createLabel()`, `createInputElement`, etc. Use it to simplify your workflow.
+ * 1. If you want to modify those helper methods, you can either override them or change something at `toHtmlElement()`. Do whatever works better for you.
+ * 1. You can safely remove either input or label from your widget by simply not creating it.
+ * 1. Setters and other public methods should `return this`, so API users can chain it.
+ *
  * @param type {string} Type of input
  * @param id {string} ID of this input. You can select this object using this ID.
  * @param label {string} Label for this input. You can also pass locale property to localize the label.
@@ -15,6 +27,12 @@
 L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend( /** @lends L.ALS.Widgets.BaseWidget.prototype */ {
 
 	/**
+	 * Value to set when user presses revert button. Used only in settings.
+	 * @package
+	 */
+	_defaultSettingsValue: undefined,
+
+	/**
 	 * Custom classname for an input wrapper. Should NOT be modified from outside.
 	 * @readonly
 	 */
@@ -26,8 +44,14 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend( /** @lends L.ALS.Widgets.B
 	 */
 	undoable: true,
 
+	/**
+	 * Indicates whether this widget has been added to the widgetable. Needed to detect whether a callback should be called.
+	 * @package
+	 */
+	_isAdded: false,
+
 	/** @constructs */
-	initialize: function (type, id, label, callbackObject = undefined, callback = "", events = [], attributes = {}) {
+	initialize: function (type, id, label, callbackObject = undefined, callback = "", events = []) {
 		L.ALS.Serializable.prototype.initialize.call(this);
 		this.setConstructorArguments(arguments);
 		this.serializationIgnoreList.push("getContainer");
@@ -78,19 +102,13 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend( /** @lends L.ALS.Widgets.B
 		this._callback = callback;
 
 		/**
-		 * Attributes of this widget's input
-		 * @type {{}}
-		 */
-		this.attributes = attributes;
-
-		/**
 		 * Container of this widget
 		 * @type {HTMLDivElement}
 		 */
 		this.container = this.toHtmlElement();
 
 		/**
-		 * Container to place revert button to. Used by the settings
+		 * Container to place revert button to. Used by the settings.
 		 * @type Element
 		 */
 		this.containerForRevertButton = this.container;
@@ -173,33 +191,11 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend( /** @lends L.ALS.Widgets.B
 				this.callCallback();
 			});
 
-		this.setAttributes(this.attributes);
-
-		// Set value so input won't be empty
-		let value;
-		if (this.attributes.value !== undefined)
-			value = this.attributes.value;
-
-		this.setValue(value);
-
 		// Wrap input
 		let wrapper = document.createElement("div");
 		wrapper.className = "als-input " + this.customWrapperClassName;
 		wrapper.appendChild(this.input);
 		return wrapper;
-	},
-
-	/**
-	 * Sets attributes of an input, such as min, max, etc in format `{attributeName1: attributeValue1, attributeName2: attributeValue2, ...}`
-	 * @param attributes Object containing attributes
-	 */
-	setAttributes: function (attributes) {
-		for (let attr in attributes) {
-			if (this.input && attributes.hasOwnProperty(attr))
-				this.input.setAttribute(attr, attributes[attr]);
-			if (attr === "defaultValue") // Exception for default values
-				this.attributes.defaultValue = attributes[attr];
-		}
 	},
 
 	/**
@@ -216,8 +212,13 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend( /** @lends L.ALS.Widgets.B
 
 	/**
 	 * Calls callback attached to this widget
+	 *
+	 * **Warning:** Callback will be called only when widget will be added to the widgetable! Util that all calls will be paused.
+	 * @return {VoidFunction}
 	 */
-	callCallback: function () {
+	callCallback: async function () {
+		while (!this._isAdded)
+			await new Promise(resolve => setTimeout(resolve, 0)); // Infinite loop hangs the script. Timeout prevents it.
 		if (this._callbackObject !== undefined && this._callback !== "")
 			this._callbackObject[this._callback](this);
 	},
@@ -245,10 +246,12 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend( /** @lends L.ALS.Widgets.B
 	 * Before accessing container in this method, check if it's undefined: `if (this.container === undefined) return;`*
 	 *
 	 * @param value - Value to set
+	 * @return {L.ALS.Widgets.BaseWidget} This
 	 */
 	setValue: function (value) {
 		if (this.input) // See comment above
 			this.input.value = value;
+		return this;
 	},
 
 	/**
@@ -263,10 +266,12 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend( /** @lends L.ALS.Widgets.B
 	/**
 	 * Sets whether this widget should be enabled or not
 	 * @param isEnabled {boolean}
+	 * @return {L.ALS.Widgets.BaseWidget} This
 	 */
 	setEnabled: function (isEnabled) {
 		if (this.input)
 			this.input.disabled = !isEnabled;
+		return this;
 	},
 
 	/**
@@ -288,10 +293,12 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend( /** @lends L.ALS.Widgets.B
 	/**
 	 * Sets label text
 	 * @param text {string} Text to set. You can also pass locale property to localize the label.
+	 * @return {L.ALS.Widgets.BaseWidget} This
 	 */
 	setLabelText: function (text) {
 		if (this.labelWidget) // See comment above
 			L.ALS.Locales.localizeOrSetValue(this.labelWidget, text);
+		return this;
 	},
 
 });
