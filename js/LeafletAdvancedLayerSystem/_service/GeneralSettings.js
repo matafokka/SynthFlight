@@ -98,8 +98,13 @@ L.ALS._service.GeneralSettings = L.ALS.Settings.extend( /** @lends L.ALS._servic
 	 */
 	_changeThemeWorker: function (value) {
 		if (value === this._systemTheme)
-			this._changeThemeWorker(this._systemThemeMedia.matches ? this._darkTheme : this._lightTheme)
-		else
-			this._darkThemeSheet.disabled = (value !== this._darkTheme);
+			this._changeThemeWorker(this._systemThemeMedia.matches ? this._darkTheme : this._lightTheme);
+		else if (value === this._darkTheme) {
+			document.body.classList.add("als-dark");
+			this._darkThemeSheet.disabled = false;
+		} else {
+			document.body.classList.remove("als-dark");
+			this._darkThemeSheet.disabled = true;
+		}
 	},
 })

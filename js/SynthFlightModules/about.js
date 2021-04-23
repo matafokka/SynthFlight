@@ -15,6 +15,10 @@ module.exports = `
 	transition: color 0.2s, text-shadow 0.2s;
 }
 
+.als-dark .als-about-container a:hover {
+	color: pink;
+}
+
 .als-about-container ul {
 	font-family: Consolas, consolas, monospace;
 	max-height: 5rem;

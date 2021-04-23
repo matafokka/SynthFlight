@@ -244,10 +244,10 @@ L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend( /** @lends L.ALS._
 	setWindowHeight: function (height) {
 		let contentHeight = height;
 		if (typeof height === "number") {
-			let vh = window.innerHeight * 0.9; // 90vh
+			let vh = window.innerHeight * ((L.ALS.Helpers.isMobile) ?  0.99 : 0.9); // 99vh for mobile and 90vh for desktop
 			if (height > vh)
 				height = vh;
-			contentHeight = height - this._buttonsHeight - (this.isSidebarHidden ? this._selectContainer.offsetHeight : 0) + "px";
+			contentHeight = height - this._buttonsHeight + "px";
 		}
 
 		for (let prop of ["minHeight", "height"]) {

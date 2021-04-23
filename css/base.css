@@ -157,7 +157,7 @@ body {
 	font-size: 0.7rem;
 	line-height: 1rem;
 	margin-left: 0.2rem;
-	color: var(--warning-border);
+	color: var(--warning-border) !important;
 }
 
 input, select {
@@ -317,10 +317,6 @@ Note on creating multiple system instances. Add following rules to your CSS:
 .als-top-panel-wrapper > * > * {
 	background: var(--fixed-element-bg);
 }
-/* TODO: Probably, remove it
-.not-mobile .als-top-panel-wrapper *:hover {
-	background: var(--hover-bg);
-}*/
 
 .als-no-layer-switching > .ri {
 	max-width: none;
@@ -368,7 +364,7 @@ Note on creating multiple system instances. Add following rules to your CSS:
 }
 
 .als-menu-delete {
-	color: var(--delete-color);
+	color: var(--delete-color) !important;
 }
 
 /* Wizard */
@@ -442,10 +438,6 @@ Note on creating multiple system instances. Add following rules to your CSS:
 
 .als-sidebar-window *[data-hidden="1"] {
 	display: none;
-}
-
-.als-sidebar-window .als-window-content {
-	padding-bottom: 2rem;
 }
 
 .als-sidebar-window-content-wrapper {
