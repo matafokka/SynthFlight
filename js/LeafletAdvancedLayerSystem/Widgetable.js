@@ -39,7 +39,7 @@ L.ALS.Widgetable = L.ALS.Serializable.extend( /** @lends L.ALS.Widgetable.protot
 	 * @return {L.ALS.Widgetable} This
 	 */
 	addWidget: function (widget) {
-		this.container.appendChild(widget.getContainer());
+		this.container.appendChild(widget._getContainer());
 		this._widgets[widget.id] = widget;
 		widget._isAdded = true;
 		return this;
@@ -62,7 +62,7 @@ L.ALS.Widgetable = L.ALS.Serializable.extend( /** @lends L.ALS.Widgetable.protot
 	 * @return {L.ALS.Widgetable} This
 	 */
 	removeWidget: function (id) {
-		let container = this._widgets[id].getContainer();
+		let container = this._widgets[id]._getContainer();
 		container.parentNode.removeChild(container);
 		delete this._widgets[id];
 		this._widgets[id]._isAdded = false;
@@ -105,7 +105,7 @@ L.ALS.Widgetable = L.ALS.Serializable.extend( /** @lends L.ALS.Widgetable.protot
 
 	/**
 	 * Deserializes widgets and adds them to this object. Removes all previously added widgets. Use this if you want to deserialize only widgets in your own Widgetable.
-	 * @param serializedWidgets {Object} Result of `serializedWidgets()`
+	 * @param serializedWidgets {Object} Result of {@link L.ALS.Widgetable#serializeWidgets}
 	 * @param seenObjects {Object} Already seen objects' ids. Intended only for internal use.
 	 */
 	deserializeWidgets: function (serializedWidgets, seenObjects) {

@@ -72,7 +72,7 @@ L.ALS.SynthShapefileLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthShapefileL
 	},
 
 	_setColor(widget) {
-		this[widget.getId()] = widget.getValue();
+		this[widget.id] = widget.getValue();
 		this._setLayerColors();
 	},
 

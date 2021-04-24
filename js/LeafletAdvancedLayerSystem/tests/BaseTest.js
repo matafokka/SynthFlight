@@ -5,11 +5,11 @@ const chalk = require("chalk");
  *
  * Override field `name` and set it to your test's name
  *
- * Override `test()` method and implement your tests here.
+ * Override {@link BaseTest.test} method and implement your tests here.
  *
- * Use `logResult()` to log your tests' results.
+ * Use {@link BaseTest.logResult} to log your tests' results.
  *
- * Use `logSection()` to output tests sections.
+ * Use {@link BaseTest.logSection} to output tests sections.
  *
  * To mock DOM, use `jsdom-global` instead of just `jsdom`.
  */

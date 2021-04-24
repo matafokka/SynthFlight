@@ -21,12 +21,12 @@ L.ALS.Widgets.Checkbox = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widge
 
 	toHtmlElement: function () {
 		let container = this.createContainer();
-		container.appendChild(this._createInput());
+		container.appendChild(this.createInput());
 		this.input.className = "hidden";
-		this.visualElement = document.createElement("label");
-		this.visualElement.htmlFor = this.input.id;
-		this.visualElement.className = "ri ri-check-line";
-		this.input.parentElement.appendChild(this.visualElement);
+		let visualElement = document.createElement("label");
+		visualElement.htmlFor = this.input.id;
+		visualElement.className = "ri ri-check-line";
+		this.input.parentElement.appendChild(visualElement);
 		container.appendChild(this.createLabel());
 		return container;
 	},
@@ -46,7 +46,7 @@ L.ALS.Widgets.Checkbox = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widge
 	},
 
 	/**
-	 * Alias for setValue()
+	 * Alias for {@link L.ALS.Widgets.Checkbox#setValue}
 	 * @param isChecked {boolean} Check (true) or uncheck (false) this checkbox
 	 * @return {L.ALS.Widgets.Checkbox} This
 	 */
@@ -56,7 +56,7 @@ L.ALS.Widgets.Checkbox = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widge
 	},
 
 	/**
-	 * Indicates whether this checkbox is checked or not. Alias for getValue().
+	 * Alias for {@link L.ALS.Widgets.Checkbox#getValue}
 	 * @return {*}
 	 */
 	isChecked: function () {

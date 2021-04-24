@@ -14,19 +14,19 @@
  *
  * # How to implement custom mechanisms
  *
- * You'll have to override {@link L.ALS.Serializable.serialize} and {@link L.ALS.Serializable.deserialize} methods.
+ * You'll have to override {@link L.ALS.Serializable#serialize} and {@link L.ALS.Serializable.deserialize} methods.
  *
- * {@link L.ALS.Serializable.serialize} should return an object that can be serialized by `JSON.stringify()`. You may want to create plain objects containing your data or use static {@link L.ALS.Serializable.serializeAnyObject} method to serialize complex objects. Though it won't work with custom classes, it may be still useful.
+ * {@link L.ALS.Serializable#serialize} should return an object that can be serialized by `JSON.stringify()`. You may want to create plain objects containing your data or use static {@link L.ALS.Serializable.serializeAnyObject} method to serialize complex objects. Though it won't work with custom classes, it may be still useful.
  *
- * Static {@link L.ALS.Serializable.deserialize} method accepts your serialized object as an argument and must return a deserialized instance of your class. You can use static `getObjectFromSerialized()` method to do so and perform your deserialization on returned object. You may also find default deserialization mechanism useful for deserializing complex objects such as described above.
+ * Static {@link L.ALS.Serializable.deserialize} method accepts your serialized object as an argument and must return a deserialized instance of your class. You can use static {@link L.ALS.Serializable.getObjectFromSerialized} method to do so and perform your deserialization on returned object. You may also find default deserialization mechanism useful for deserializing complex objects such as described above.
  *
  * There are also plenty of helpers methods to accomplish your goal.
  *
  * # Hints
  *
- * Every {@link L.ALS.Serializable} instance has public {@link L.ALS.Serializable.serializationIgnoreList} property which contains properties' names to ignore while serializing. You may want to use it if you want to stick to default serialization mechanisms. Just append your properties' and methods' names to `serializationIgnoreList`.
+ * Every {@link L.ALS.Serializable} instance has public {@link L.ALS.Serializable#serializationIgnoreList} property which contains properties' names to ignore while serializing. You may want to use it if you want to stick to default serialization mechanisms. Just append your properties' and methods' names to `serializationIgnoreList`.
  *
- * Both {@link L.ALS.Serializable.serialize} and {@link L.ALS.Serializable.deserialize} methods accepts two additional arguments: `seenObjects` and `seenObjectsForCleanUp`. Those are used internally by serialization mechanism. If you're making layer, just don't pass anything to the default mechanism. If your class serializes some other {@link L.ALS.Serializable} that uses default mechanism, please, pass those parameters to it's `serialize()` and `deserialize()` methods.
+ * Both {@link L.ALS.Serializable#serialize} and {@link L.ALS.Serializable.deserialize} methods accepts two additional arguments: `seenObjects` and `seenObjectsForCleanUp`. Those are used internally by serialization mechanism. If you're making layer, just don't pass anything to the default mechanism. If your class serializes some other {@link L.ALS.Serializable} that uses default mechanism, please, pass those parameters to it's `serialize()` and `deserialize()` methods.
  *
  * You can prevent constructor arguments from being serialized or deserialized by creating custom `skipSerialization` and `skipDeserialization` properties respectively and setting them to `true`. If you choose to prevent serialization, you'll need to set skipped arguments at deserialization yourself. For this, see the next tip.
  *
@@ -46,6 +46,7 @@ L.ALS.Serializable = L.Class.extend( /** @lends L.ALS.Serializable.prototype */ 
 		/**
 		 * Contains properties that won't be serialized. Append your properties at constructor.
 		 * @type {string[]}
+		 * @protected
 		 */
 		this.serializationIgnoreList = ["serializationIgnoreList", "__proto__", "prototype", "_initHooks", "_initHooksCalled", "setConstructorArguments", "constructorArguments", "includes", "_leaflet_id", "_map", "_mapToAdd", "_events", "_eventParents", "getPane"];
 
@@ -53,18 +54,24 @@ L.ALS.Serializable = L.Class.extend( /** @lends L.ALS.Serializable.prototype */ 
 
 	/**
 	 * Sets constructor arguments for serialization
-	 * @param args
+	 * @param args Arguments to set
 	 */
 	setConstructorArguments: function (args) {
 		if (!args)
 			args = [];
+
+		/**
+		 * Contains arguments passed to this constructor
+		 * @type {any[]}
+		 * @protected
+		 */
 		this.constructorArguments = Array.prototype.slice.call(args);
 	},
 
 	/**
 	 * Serializes this object to JSON. If overridden, you MUST perform following operations before returning JSON:
 	 *
-	 * ```JS
+	 * ```
 	 * let json = {} // Your JSON
 	 * ... // Perform serialization
 	 * json.constructorArguments = this.serializeConstrutorArguments(); // Serialize constructor arguments
@@ -82,7 +89,7 @@ L.ALS.Serializable = L.Class.extend( /** @lends L.ALS.Serializable.prototype */ 
 	},
 
 	/**
-	 * Serializes constructor arguments. If your constructor is not empty, result of this method MUST be added to json at {@link L.ALS.Serializable.serialize} as "_construtorArgs" property.
+	 * Serializes constructor arguments. If your constructor is not empty, result of this method MUST be added to json at {@link L.ALS.Serializable#serialize} as "_construtorArgs" property.
 	 * @return {Array} Serialized constructor arguments
 	 */
 	serializeConstructorArguments: function (seenObjects) {
@@ -122,8 +129,9 @@ L.ALS.Serializable = L.Class.extend( /** @lends L.ALS.Serializable.prototype */ 
 		/**
 		 * List of custom properties to ignore when deserializing arrays
 		 * @memberOf L.ALS.Serializable
+		 * @private
 		 */
-		arrayIgnoreList: ["alsSerializableArray", "serializationID"],
+		_arrayIgnoreList: ["alsSerializableArray", "serializationID"],
 
 		/**
 		 * Checks if property should be ignored when serializing or deserializing
@@ -211,7 +219,7 @@ L.ALS.Serializable = L.Class.extend( /** @lends L.ALS.Serializable.prototype */ 
 		/**
 		 * Finds a constructor by given class name
 		 * @param className {string} Full class name. Just pass serialized.serializableClassName.
-		 * @return {ObjectConstructor|undefined} Found constructor or undefined
+		 * @return {function(new:L.ALS.Serializable)|undefined} Found constructor or undefined
 		 * @memberOf L.ALS.Serializable
 		 */
 		getSerializableConstructor: function (className) {
@@ -271,7 +279,7 @@ L.ALS.Serializable = L.Class.extend( /** @lends L.ALS.Serializable.prototype */ 
 		 * @param object {Object} Object to find getter or setter in
 		 * @return {string|undefined} Either getter or setter name or undefined if nothing has been found
 		 * @memberOf L.ALS.Serializable
-		 * @protected
+		 * @private
 		 */
 		_findGetterOrSetter: function (isGetter, property, object) {
 			let index = (property[0] === "_") ? 1 : 0;
@@ -432,7 +440,7 @@ L.ALS.Serializable = L.Class.extend( /** @lends L.ALS.Serializable.prototype */ 
 
 						if (oldProperty.alsSerializableArray) { // Arrays
 							for (let i in oldProperty) {
-								if (!L.ALS.Serializable.arrayIgnoreList.includes(i))
+								if (!L.ALS.Serializable._arrayIgnoreList.includes(i))
 									property[i] = deserialize({item: oldProperty[i]}).item; // Keeps both items and custom properties while preserving array type
 							}
 						}

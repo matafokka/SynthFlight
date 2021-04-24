@@ -2,8 +2,22 @@
   "plugins": [
 	"plugins/markdown"
   ],
+  "templates": {
+	"theme": "cerulean",
+	"linenums": true,
+	"navType": "inline",
+	"footer": "<div style='width: 100%; text-align: center;'><a href='https://github.com/matafokka'>(c) matafokka</a></div>",
+	"monospaceLinks": true,
+	"default": {
+	  "useLongnameInNav": true
+	}
+  },
+  "source": {
+	"exclude": ["./js/LeafletAdvancedLayerSystem/tests/"]
+  },
   "opts": {
 	"recurse": true,
-	"destination": "./docs/"
+	"destination": "./docs/",
+	"template": "./node_modules/ink-docstrap/template"
   }
 }

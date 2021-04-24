@@ -71,7 +71,7 @@
  * // You can pass those names to everything that can be localised.
  * this.addWidgets(
  *     new L.ALS.Widgets.Number("myNumberId", "labelForNumberWidget"),
- *     new L.ALS.Widgets.Color("myColorrId", "labelForColorWidget")
+ *     new L.ALS.Widgets.Color("myColorId", "labelForColorWidget")
  * );
  *
  * // Localize about section

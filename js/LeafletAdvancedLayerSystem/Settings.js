@@ -1,5 +1,5 @@
 /**
- * Base class for all settings. Basically, {@link L.ALS.Widgetable} without constructor arguments and with {@link L.ALS.Settings.getSettings} additional method and some overrides.
+ * Base class for all settings. Basically, {@link L.ALS.Widgetable} without constructor arguments and with {@link L.ALS.Settings#getSettings} additional method and some overrides.
  *
  * @class L.ALS.Settings
  * @extends L.ALS.Widgetable
@@ -23,7 +23,7 @@ L.ALS.Settings = L.ALS.Widgetable.extend( /** @lends L.ALS.Settings.prototype */
 	},
 
 	/**
-	 * Does nothing, just call addWidget() multiple times
+	 * Does nothing, just call {@link L.ALS.Settings#addWidget} multiple times
 	 * @return {L.ALS.Settings} This
 	 */
 	addWidgets: function() {
@@ -31,7 +31,7 @@ L.ALS.Settings = L.ALS.Widgetable.extend( /** @lends L.ALS.Settings.prototype */
 	},
 
 	/**
-	 * @return {Object} Settings as {name: value} pairs
+	 * @return {Object} Settings as {widgetID: widgetValue} pairs
 	 */
 	getSettings: function () {
 		let settings = {

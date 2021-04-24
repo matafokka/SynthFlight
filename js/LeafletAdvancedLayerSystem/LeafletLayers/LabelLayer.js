@@ -22,7 +22,7 @@
  *
  * This is preferable option for rendering labels. Use it instead of {@link L.ALS.LeafletLayers.WidgetLayer}.
  *
- * @param automaticallyRedraw {boolean} If set to true, every method will automatically redraw the canvas. If you're repeatedly changing labels, consider setting it to false and redrawing canvas manually by calling `redraw()` method. Doing so will considerably improve performance.
+ * @param automaticallyRedraw {boolean} If set to true, every method will automatically redraw the canvas. If you're repeatedly changing labels, consider setting it to false and redrawing canvas manually by calling {@link L.ALS.LeafletLayers.LabelLayer#redraw} method. Doing so will considerably improve performance.
  *
  * @class
  * @extends {L.ALS.LeafletLayers.CanvasLayer}
@@ -36,13 +36,13 @@ L.ALS.LeafletLayers.LabelLayer = L.ALS.LeafletLayers.CanvasLayer.extend( /** @le
 	 * Font size in pixels. You can extend this class and modify it, but it's not recommended because it will introduce inconsistency between everything.
 	 * @protected
 	 */
-	_fontSize: L.ALS.Helpers.isMobile ? 16 : 12,
+	fontSize: L.ALS.Helpers.isMobile ? 16 : 12,
 
 	/**
 	 * Padding around text in pixels. You can extend this class and modify it, but it's not recommended because it will introduce inconsistencies.
 	 * @protected
 	 */
-	_padding: 4,
+	padding: 4,
 
 	initialize: function (automaticallyRedraw = true) {
 		L.ALS.LeafletLayers.CanvasLayer.prototype.initialize.call(this);
@@ -171,7 +171,7 @@ L.ALS.LeafletLayers.LabelLayer = L.ALS.LeafletLayers.CanvasLayer.extend( /** @le
 		ctx.clearRect(0, 0, data.canvas.width, data.canvas.height);
 
 		// Text parameters
-		ctx.font = `${this._fontSize}px sans-serif`;
+		ctx.font = `${this.fontSize}px sans-serif`;
 		ctx.textBaseline = "top";
 
 		for (let labelId in this._labels) {
@@ -199,7 +199,7 @@ L.ALS.LeafletLayers.LabelLayer = L.ALS.LeafletLayers.CanvasLayer.extend( /** @le
 			}
 
 			let origCoords = this.latLngToCanvasCoords(label.latLng); // Coordinates of a label position on the canvas
-			let rectHeight = this._fontSize * lines.length;
+			let rectHeight = this.fontSize * lines.length;
 			let coords = {
 				x: origCoords.x,
 				y: origCoords.y
@@ -217,7 +217,7 @@ L.ALS.LeafletLayers.LabelLayer = L.ALS.LeafletLayers.CanvasLayer.extend( /** @le
 
 			// Calculated coordinates will top left corner of the label to the given position.
 			// We need to recalculate it for different origins.
-			let padding = (shouldDrawBackground) ? this._padding : 0, doublePadding = padding * 2; // This will be applied to rect. Need to adjust coordinates to it.
+			let padding = (shouldDrawBackground) ? this.padding : 0, doublePadding = padding * 2; // This will be applied to rect. Need to adjust coordinates to it.
 			let isCenter = label.origin === "center";
 
 			// X
@@ -277,7 +277,7 @@ L.ALS.LeafletLayers.LabelLayer = L.ALS.LeafletLayers.CanvasLayer.extend( /** @le
 
 			for (let line of lines) {
 				ctx.fillText(line, x, y);
-				y += this._fontSize;
+				y += this.fontSize;
 			}
 		}
 	},
@@ -296,7 +296,7 @@ L.ALS.LeafletLayers.LabelLayer = L.ALS.LeafletLayers.CanvasLayer.extend( /** @le
 
 		/**
 		 * Display options to match ALS style
-		 * @type {Object<string, DisplayOptions>}
+		 * @enum
 		 * @memberOf L.ALS.LeafletLayers.LabelLayer
 		 */
 		DefaultDisplayOptions: {

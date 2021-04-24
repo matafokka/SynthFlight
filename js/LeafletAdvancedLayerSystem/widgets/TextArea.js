@@ -25,7 +25,7 @@ L.ALS.Widgets.TextArea = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widge
 
 	toHtmlElement: function() {
 		let container = this.createContainer();
-		container.appendChild(this._createInput());
+		container.appendChild(this.createInput());
 		return container;
 	},
 
@@ -77,7 +77,7 @@ L.ALS.Widgets.TextArea = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widge
 	},
 
 	/**
-	 * Alias for setValue()
+	 * Alias for {@link L.ALS.Widgets.TextArea#setValue}
 	 * @param text {string} Text to set to this textarea
 	 * @return {L.ALS.Widgets.TextArea} This
 	 */
@@ -87,7 +87,7 @@ L.ALS.Widgets.TextArea = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widge
 	},
 
 	/**
-	 * Alias for getValue()
+	 * Alias for {@link L.ALS.Widgets.TextArea#getValue}
 	 * @return {string} Text in this textarea
 	 */
 	getText: function () {

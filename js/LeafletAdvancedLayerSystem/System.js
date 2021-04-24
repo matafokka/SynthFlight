@@ -1,6 +1,6 @@
 /**
  * Leaflet namespace
- * @external "L"
+ * @external L
  * @see https://leafletjs.com/reference-1.7.1.html
  */
 
@@ -21,8 +21,8 @@
  * 1. Useful helpers. See {@link L.ALS.Helpers}.
  * 1. Zoom control which matches ALS aesthetics. See {@link L.ALS.ControlZoom}.
  * 1. Patches:
- *      1. {@link L.Layer.setInteractive}, {@link L.Layer.getInteractive}, {@link L.Layer.isInteractive} - patch made by [Piero "Jadaw1n" Steinger](https://github.com/Jadaw1n) which adds ability to set and check interactive state of Leaflet layers.
- *      1. Serialization patches: {@link RegExp.serialize}, {@link RegExp.deserialize}, {@link L.LatLng.serialize}, {@link L.LatLng.deserialize}
+ *      1. `L.Layer#setInteractive`, `L.Layer#getInteractive`, `L.Layer#isInteractive` - patch made by [Piero "Jadaw1n" Steinger](https://github.com/Jadaw1n) which adds ability to set and check interactive state of Leaflet layers.
+ *      1. Serialization patches: `RegExp#serialize`, `RegExp.deserialize`, `L.LatLng#serialize`, `L.LatLng.deserialize`
  *
  * @namespace
  */
@@ -66,7 +66,7 @@ require("./LeafletLayers/LeafletLayers.js");
  * @property {boolean} [enableExport=true] If set to true, user will be able to export project. If you don't need it, set this property to false. Defaults to true.
  * @property {boolean} [enableBaseLayerSwitching=true] If set to true, user will be able to switch Leaflet base layers (i.e. map providers). If you don't need it, set this property to false. Defaults to true.
  * @property {"topleft"|"topright"|"bottomleft"|"bottomright"} [position="topright"] Position of the menu button. If set to topleft or bottom left, menu itself will be on the left side. Defaults to "topright".
- * @property {ObjectConstructor<L.ALS.Layer>} [useOnlyThisLayer=undefined] If you need to display only one layer and disable ability to add other layers, pass your layer's class here. At the end you'll end up with pretty much static menu. Defaults to undefined.
+ * @property {Function} [useOnlyThisLayer=undefined] If you need to display only one layer and disable ability to add other layers, pass your layer's class (class, not an instance, i.e. `L.ALS.Layer`, not `new L.ALS.Layer()`) here. At the end you'll end up with pretty much static menu. Defaults to undefined.
  */
 
 /**
@@ -609,14 +609,15 @@ L.ALS.System = L.Control.extend( /** @lends L.ALS.System.prototype */ {
 			let layer = this._layers[name];
 
 			let postfix = "";
-			if (filenames.hasOwnProperty(layer.name)) {
-				postfix = " (" + filenames[layer.name] + ")";
-				filenames[layer.name]++;
+			let layerName = layer.getName();
+			if (filenames.hasOwnProperty(layerName)) {
+				postfix = " (" + filenames[layerName] + ")";
+				filenames[layerName]++;
 			} else
-				filenames[layer.name] = 1;
+				filenames[layerName] = 1;
 
 			let json = JSON.stringify(layer.toGeoJSON());
-			let filename = layer.name + postfix + ".geojson";
+			let filename = layerName + postfix + ".geojson";
 
 			if (L.ALS.Helpers.supportsDataURL) // Any normal browser
 				zip.file(filename, json);
@@ -748,10 +749,6 @@ L.ALS.System = L.Control.extend( /** @lends L.ALS.System.prototype */ {
 		}
 	},
 
-	/**
-	 * Contains static methods
-	 * @static
-	 */
 	statics: {
 
 		/**

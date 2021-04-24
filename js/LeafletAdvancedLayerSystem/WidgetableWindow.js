@@ -3,9 +3,9 @@
  *
  * Some important properties:
  *
- * 1. `windowContainer` -- container for the window which should be added to the page
- * 1. `window` -- actual window. It contains only one child: {@link L.ALS.Widgetable}'s container ( {@link L.ALS.Widgetable.container} property). You can add custom elements to the window at {@link L.ALS.WidgetableWindow.initialize}.
- * 1. `container` -- Widgetable's container.
+ * 1. {@link L.ALS.WidgetableWindow#windowContainer} -- container for the window which should be added to the page
+ * 1. {@link L.ALS.WidgetableWindow#window} -- actual window. It contains only one child: {@link L.ALS.Widgetable}'s container ({@link L.ALS.Widgetable#container} property). You can add custom elements to the window at {@link L.ALS.WidgetableWindow#initialize}.
+ * 1. {@link L.ALS.WidgetableWindow#container} -- Widgetable's container.
  *
  * @param button {Element} Button which will activate this window
  *

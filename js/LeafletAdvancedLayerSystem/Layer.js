@@ -5,21 +5,21 @@
  *
  * Usage:
  *
- * 1. Set {@link L.ALS.Layer.defaultName} property to the default name of your layer.
+ * 1. Set {@link L.ALS.Layer#defaultName} property to the default name of your layer.
  * 1. Assign {@link L.ALS.Layer.wizard} to an instance of your wizard.
  * 1. If you need to implement settings for the layer, assign {@link L.ALS.Layer.settings} object to an instance of your settings.
- * 1. Implement {@link L.ALS.Layer.init} method. It's used as a constructor.
+ * 1. Implement {@link L.ALS.Layer#init} method. It's used as a constructor.
  * 1. Implement your own methods or extend current ones. Basically, make it work :D
  *
  * Please, read the docs for each public method, you might need to (if not should) override most of them.
  *
  * Some usage notes:
  *
- * 1. Use {@link L.ALS.Layer.addLayers} and {@link L.ALS.Layer.removeLayers} to add and remove Leaflet layers.
+ * 1. Use {@link L.ALS.Layer#addLayers} and {@link L.ALS.Layer#removeLayers} to add and remove Leaflet layers.
  * 1. To hide layer from the map, use `this.map.remove()` and `this.map.add()`.
- * 1. Use {@link L.ALS.Layer.addEventListenerTo} and {@link L.ALS.Layer.removeEventListenerFrom} to add and remove event listeners from objects and map.
+ * 1. Use {@link L.ALS.Layer#addEventListenerTo} and {@link L.ALS.Layer#removeEventListenerFrom} to add and remove event listeners from objects and map.
  * 1. NEVER use {@link L.LayerGroup} because it breaks layer system!
- * 1. Unless your layer is super simple, you'll most likely need to implement custom serialization and deserialization mechanisms. Please, refer to the @{link L.ALS.Serializable} docs and [example project](https://github.com/matafokka/SynthFlight) for this.
+ * 1. Unless your layer is super simple, you'll most likely need to implement custom serialization and deserialization mechanisms. Please, refer to the {@link L.ALS.Serializable} docs and [example project](https://github.com/matafokka/SynthFlight) for this.
  *
  * @param wizardResults {Object} Results compiled from the wizard. It is an object who's keys are IDs of your controls and values are values of your controls.
  * @param settings {Object} Current layer settings.
@@ -33,6 +33,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend( /** @lends L.ALS.Layer.prototype */ {
 	/**
 	 * Name to be assigned to this layer by default. You can use locale property to localize it.
 	 * @type {string}
+	 * @readonly
 	 */
 	defaultName: "layerDefaultName",
 
@@ -51,10 +52,10 @@ L.ALS.Layer = L.ALS.Widgetable.extend( /** @lends L.ALS.Layer.prototype */ {
 	isSelected: false,
 
 	/**
-	 * SynthLayer's constructor. Do NOT override it! Use init() method instead!
+	 * Layer's constructor. Do NOT override it! Use {@link L.ALS.Layer#init} method instead!
 	 * @param layerSystem {L.ALS.System} Layer system that creates this layer
-	 * @param args {Array} Arguments to pass to `init()`
-	 * @param settings {Object} Settings to pass to `init()`
+	 * @param args {Array} Arguments to pass to {@link L.ALS.Layer#init}
+	 * @param settings {Object} Settings to pass to {@link L.ALS.Layer#init}
 	 * @private
 	 */
 	initialize: function(layerSystem, args, settings) {
@@ -100,13 +101,14 @@ L.ALS.Layer = L.ALS.Widgetable.extend( /** @lends L.ALS.Layer.prototype */ {
 		/**
 		 * Map on which this layer is being added
 		 * @type {L.Map}
-		 * @public
+		 * @protected
 		 */
 		this.map = this._layerSystem.map;
 
 		/**
 		 * Unique ID of this layer
 		 * @type {string}
+		 * @readonly
 		 */
 		this.id = "SynthLayer" + L.ALS.Helpers.generateID();
 
@@ -121,8 +123,9 @@ L.ALS.Layer = L.ALS.Widgetable.extend( /** @lends L.ALS.Layer.prototype */ {
 		/**
 		 * Current name of this layer
 		 * @type {string}
+		 * @private
 		 */
-		this.name = this.defaultName;
+		this._name = this.defaultName;
 
 		// Build menu
 		// Handle
@@ -186,7 +189,6 @@ L.ALS.Layer = L.ALS.Widgetable.extend( /** @lends L.ALS.Layer.prototype */ {
 		}
 		L.ALS.Helpers.makeHideable(menuButton, this.container, hideFn, showFn);
 
-		// Hide/show button
 		this._hideButton = document.createElement("i");
 		this._hideButton.className = "ri ri-eye-line";
 		L.ALS.Helpers.makeHideable(this._hideButton, undefined, () => {
@@ -227,7 +229,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend( /** @lends L.ALS.Layer.prototype */ {
 	 *
 	 * Note: we use object's methods as handlers to be able to save and restore them when user saves the project.
 	 *
-	 * @param object Object to add listener to
+	 * @param object {Object} Object to add listener to
 	 * @param type {string} Event type, string in format used by Leaflet
 	 * @param handler {string} Your object's method that will handle this event
 	 */
@@ -323,7 +325,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend( /** @lends L.ALS.Layer.prototype */ {
 	/**
 	 * Being called when layer is being showed or and object is being added.
 	 *
-	 * This method is for internal use only. To add behavior upon showing, override {@link L.ALS.Layer.onShow} method.
+	 * This method is for internal use only. To add behavior upon showing, override {@link L.ALS.Layer#onShow} method.
 	 * @private
 	 */
 	_onShow: function () {
@@ -334,7 +336,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend( /** @lends L.ALS.Layer.prototype */ {
 	/**
 	 * Being called when layer is being hidden.
 	 *
-	 * This method is for internal use only. To add behavior upon hiding, override {@link L.ALS.Layer.onHide} method.
+	 * This method is for internal use only. To add behavior upon hiding, override {@link L.ALS.Layer#onHide} method.
 	 * @private
 	 */
 	_onHide: function () {
@@ -414,7 +416,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend( /** @lends L.ALS.Layer.prototype */ {
 	},
 
 	/**
-	 * Use this method instead of {@link L.ALS.Layer.initialize}
+	 * Use this method instead of {@link L.ALS.Layer#initialize}
 	 * @param wizardResults {Object} Results compiled from the wizard. It is an object who's keys are IDs of your controls and values are values of your controls.
 	 * @param settings {Object} Current layer settings.
 	 */
@@ -466,8 +468,8 @@ L.ALS.Layer = L.ALS.Widgetable.extend( /** @lends L.ALS.Layer.prototype */ {
 	 * @param name {string} Name to set
 	 */
 	setName: function (name) {
-		this.name = name;
-		this._nameLabel.innerHTML = this.name;
+		this._name = name;
+		this._nameLabel.innerHTML = this._name;
 		this.onNameChange();
 	},
 
@@ -475,7 +477,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend( /** @lends L.ALS.Layer.prototype */ {
 	 * @return {string} Name of this layer
 	 */
 	getName: function () {
-		return this.name;
+		return this._name;
 	},
 
 	/**
@@ -494,7 +496,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend( /** @lends L.ALS.Layer.prototype */ {
 
 	/**
 	 * Copies settings to this layer as properties
-	 * @param settings {Object} `settings` argument passed to `init()`
+	 * @param settings {Object} `settings` argument passed to {@link L.ALS.Layer#init}
 	 * @protected
 	 */
 	copySettingsToThis: function (settings) {
@@ -507,12 +509,12 @@ L.ALS.Layer = L.ALS.Widgetable.extend( /** @lends L.ALS.Layer.prototype */ {
 
 	/**
 	 * Being called when user updates the settings. Use it to update your layer depending on changed settings.
-	 * @param settings {Object} Same as settings passed to `init()`
+	 * @param settings {Object} Same as settings passed to {@link L.ALS.Layer#init}
 	 */
 	applyNewSettings: function (settings) {},
 
 	/**
-	 * Serializes some important properties. Must be called at `serialize()` in any layer!
+	 * Serializes some important properties. Must be called at {@link L.ALS.Layer#serialize} in any layer!
 	 * @param serialized {Object} Your serialized object
 	 */
 	serializeImportantProperties: function (serialized) {

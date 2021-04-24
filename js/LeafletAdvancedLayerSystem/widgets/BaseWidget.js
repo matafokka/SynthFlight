@@ -9,9 +9,9 @@
  *
  * 1. You'll probably need to have a prior knowledge of how widgets works. Please, study the widgets' markup and existing widgets' source code. Yup, that sucks but there's no good workaround.
  * 1. As an alternative, you can build your widget from scratch, though, it's not recommended. If you choose to do so, please, use ALS classes in your elements to maintain consistency.
- * 1. Widget's layout is being created at {@link L.ALS.Widgets.BaseWidget.toHtmlElement} method. Compose your widget here.
- * 1. There're couple of useful methods for composing widgets, such as {@link L.ALS.Widgets.BaseWidget.createLabel}, {@link L.ALS.Widgets.BaseWidget.createInputElement}, etc. Use it to simplify your workflow.
- * 1. If you want to modify those helper methods, you can either override them or change something at {@link L.ALS.Widgets.BaseWidget.toHtmlElement}. Do whatever works better for you.
+ * 1. Widget's layout is being created at {@link L.ALS.Widgets.BaseWidget#toHtmlElement} method. Compose your widget here.
+ * 1. There're couple of useful methods for composing widgets, such as {@link L.ALS.Widgets.BaseWidget#createLabel}, {@link L.ALS.Widgets.BaseWidget#createInputElement}, etc. Use it to simplify your workflow.
+ * 1. If you want to modify those helper methods, you can either override them or change something at {@link L.ALS.Widgets.BaseWidget#toHtmlElement}. Do whatever works better for you.
  * 1. You can safely remove either input or label from your widget by simply not creating it.
  * 1. Setters and other public methods should `return this`, so API users can chain it.
  *
@@ -37,6 +37,7 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend( /** @lends L.ALS.Widgets.B
 
 	/**
 	 * Custom classname for an input wrapper. Should NOT be modified from outside.
+	 * @protected
 	 * @readonly
 	 */
 	customWrapperClassName: "",
@@ -57,7 +58,7 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend( /** @lends L.ALS.Widgets.B
 	initialize: function (type, id, label, callbackObject = undefined, callback = "", events = []) {
 		L.ALS.Serializable.prototype.initialize.call(this);
 		this.setConstructorArguments(arguments);
-		this.serializationIgnoreList.push("getContainer");
+		this.serializationIgnoreList.push("_getContainer");
 
 		/**
 		 * Object which contains callback
@@ -89,11 +90,13 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend( /** @lends L.ALS.Widgets.B
 
 		/**
 		 * This widget's ID
+		 * @readonly
 		 */
 		this.id = id;
 
 		/**
 		 * This widget's initial label text
+		 * @type {string}
 		 * @private
 		 */
 		this._labelText = label;
@@ -108,12 +111,14 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend( /** @lends L.ALS.Widgets.B
 		/**
 		 * Container of this widget
 		 * @type {HTMLDivElement}
+		 * @protected
 		 */
 		this.container = this.toHtmlElement();
 
 		/**
 		 * Container to place revert button to. Used by the settings.
 		 * @type Element
+		 * @protected
 		 */
 		this.containerForRevertButton = this.container;
 	},
@@ -125,22 +130,24 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend( /** @lends L.ALS.Widgets.B
 	 * ```JavaScript
 	 * let container = this.createContainer();
 	 * container.appendChild(this.createLabel());
-	 * container.appendChild(this._createInput());
+	 * container.appendChild(this.createInput());
 	 * return container;
 	 * ```
 	 *
 	 * @return {HTMLDivElement} HTML representation of this widget
+	 * @protected
 	 */
 	toHtmlElement: function () {
 		let container = this.createContainer();
 		container.appendChild(this.createLabel());
-		container.appendChild(this._createInput());
+		container.appendChild(this.createInput());
 		return container;
 	},
 
 	/**
 	 * Creates container for this widget
 	 * @return {HTMLDivElement} Container for this widget
+	 * @protected
 	 */
 	createContainer: function () {
 		let container = document.createElement("div");
@@ -151,6 +158,7 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend( /** @lends L.ALS.Widgets.B
 	/**
 	 * Creates label for this widget
 	 * @return {HTMLLabelElement} Label
+	 * @protected
 	 */
 	createLabel: function () {
 		this.labelWidget = document.createElement("label");
@@ -162,7 +170,11 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend( /** @lends L.ALS.Widgets.B
 
 	/**
 	 * Creates input element. You can also create non-input elements here.
-	 * @return {HTMLElement}
+	 *
+	 * Use it only to create input element. To add input element at {@link L.ALS.Widgets.BaseWidget#toHtmlElement}, use {@link L.ALS.Widgets.BaseWidget#createInput}
+	 *
+	 * @return {HTMLElement} Input element
+	 * @protected
 	 */
 	createInputElement: function () {
 		let input = document.createElement("input");
@@ -175,7 +187,7 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend( /** @lends L.ALS.Widgets.B
 	 * @return {HTMLElement} Input element
 	 * @protected
 	 */
-	_createInput: function () {
+	createInput: function () {
 		/**
 		 * Input element controlled by this widget
 		 * @type {HTMLElement}
@@ -209,6 +221,7 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend( /** @lends L.ALS.Widgets.B
 	 *
 	 * @param event {Event} Event fired by input
 	 * @return {boolean} If true, the attached callback will be called. If false, attached callback won't be called.
+	 * @protected
 	 */
 	onChange: function (event) {
 		return true;
@@ -228,13 +241,6 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend( /** @lends L.ALS.Widgets.B
 	},
 
 	/**
-	 * @return {string} ID of this widget
-	 */
-	getId: function () {
-		return this.id;
-	},
-
-	/**
 	 * @return {*} Value of this widget
 	 */
 	getValue: function () {
@@ -246,10 +252,7 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend( /** @lends L.ALS.Widgets.B
 	/**
 	 * Sets value of this widget.
 	 *
-	 * *Note: This method is being called before container has been assigned to the widget.
-	 * Before accessing container in this method, check if it's undefined: `if (this.container === undefined) return;`*
-	 *
-	 * @param value - Value to set
+	 * @param value {*} Value to set
 	 * @return {L.ALS.Widgets.BaseWidget} This
 	 */
 	setValue: function (value) {
@@ -280,8 +283,9 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend( /** @lends L.ALS.Widgets.B
 
 	/**
 	 * @return {Element} Container of this widget
+	 * @package
 	 */
-	getContainer: function () {
+	_getContainer: function () {
 		return this.container;
 	},
 
@@ -304,5 +308,13 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend( /** @lends L.ALS.Widgets.B
 			L.ALS.Locales.localizeOrSetValue(this.labelWidget, text);
 		return this;
 	},
+
+	/**
+	 * @return {Element} Container for revert button
+	 * @package
+	 */
+	_getContainerForRevertButton: function () {
+		return this.containerForRevertButton;
+	}
 
 });

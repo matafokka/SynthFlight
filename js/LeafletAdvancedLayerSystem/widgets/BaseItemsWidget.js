@@ -41,7 +41,7 @@ L.ALS.Widgets.BaseItemsWidget = L.ALS.Widgets.BaseWidget.extend( /** @lends L.AL
 	selectItem: function (item) { return this; },
 
 	/**
-	 * Alias for `selectItem()`
+	 * Alias for {@link L.ALS.Widgets.BaseItemsWidget#selectItem}
 	 * @param value {string} Value to set
 	 * @return {L.ALS.Widgets.BaseItemsWidget} This
 	 */

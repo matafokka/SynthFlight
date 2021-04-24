@@ -69,7 +69,7 @@ L.ALS.Widgets.RadioButtonsGroup = L.ALS.Widgets.BaseItemsWidget.extend( /** @len
 	},
 
 	removeItem: function (item) {
-		let container = this._getContainer(item);
+		let container = this._getButtonsContainer(item);
 		if (!container)
 			return;
 		this.container.removeChild(container);
@@ -77,7 +77,7 @@ L.ALS.Widgets.RadioButtonsGroup = L.ALS.Widgets.BaseItemsWidget.extend( /** @len
 	},
 
 	selectItem: function (item) {
-		let container = this._getContainer(item);
+		let container = this._getButtonsContainer(item);
 		if (!container)
 			return;
 		container.getElementsByTagName("input")[0].checked = true;
@@ -91,7 +91,7 @@ L.ALS.Widgets.RadioButtonsGroup = L.ALS.Widgets.BaseItemsWidget.extend( /** @len
 		}
 	},
 
-	_getContainer: function (item) {
+	_getButtonsContainer: function (item) {
 		return this.container.querySelector(`div[data-radio-id="${item}"]`);
 	}
 

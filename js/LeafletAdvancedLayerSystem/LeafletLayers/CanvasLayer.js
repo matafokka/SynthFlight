@@ -27,7 +27,7 @@ L.DomUtil.setTransform = L.DomUtil.setTransform || function (el, offset, scale) 
  *
  * Canvas is always the size of the screen, it's size, position and everything is being recalculated when map is being moved or resized. When it happens, `draw()` method is being called.
  *
- * Override {@link L.ALS.LeafletLayers.CanvasLayer.draw} method and implement your stuff here.
+ * Override {@link L.ALS.LeafletLayers.CanvasLayer#draw} method and implement your stuff here.
  *
  * @example Typical usage:
  * let points = [] // Imagine that there're some points

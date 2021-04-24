@@ -25,7 +25,7 @@ L.ALS.Widgets.SimpleLabel = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Wi
 
 	toHtmlElement: function () {
 		let container = this.createContainer();
-		container.appendChild(this._createInput());
+		container.appendChild(this.createInput());
 		return container;
 	},
 

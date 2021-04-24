@@ -41,7 +41,7 @@
   },
   "scripts": {
     "start": "electron electronApp.js --debug",
-    "test": "node js/tests/runTests.js",
+    "test": "node js/LeafletAdvancedLayerSystem/tests/runTests.js",
     "buildAndRun": "node build.js -b && http-server './dist/SynthFlight-browser' -c-1",
     "generateDocs": "jsdoc js/LeafletAdvancedLayerSystem/ -c jsdoc.conf.json"
   },
@@ -88,6 +88,9 @@
     "electron": "^10.1.5",
     "electron-packager": "^15.2.0",
     "fs-extra": "^9.0.1",
+    "http-server": "^0.12.3",
+    "ink-docstrap": "^1.3.2",
+    "jsdoc": "^3.6.6",
     "jsdom": "^16.5.1",
     "jsdom-global": "^3.0.2",
     "postcss": "^8.2.4",

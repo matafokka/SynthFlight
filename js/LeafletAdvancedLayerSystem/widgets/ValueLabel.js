@@ -13,7 +13,7 @@
  * @param description {string} Value description. You can use locale property to localize it.
  * @param units {string} Units for this label. If set to empty string, unitsPosition won't take an effect.
  * @param unitsPosition {"description"|"value"} Units position. If set to "description", units will be displayed after description. Otherwise, units will be displayed after the value.
- * @param formatNumbers {boolean} If set to true, value will be formatted using L.ALS.Helpers.formatNumber()
+ * @param formatNumbers {boolean} If set to true, value will be formatted using {@link L.ALS.Helpers.formatNumber}
  * @param style {"nostyle"|"message"|"success"|"warning"|"error"} Style of this label
  * @param initialValue {string} Initial value of this label
  *
@@ -59,7 +59,7 @@ L.ALS.Widgets.ValueLabel = L.ALS.Widgets.SimpleLabel.extend( /** @lends L.ALS.Wi
 	},
 
 	/**
-	 * Sets whether this label will automatically format numbers using L.ALS.Helpers.formatNumber()
+	 * Sets whether this label will automatically format numbers using {@link L.ALS.Helpers.formatNumber}
 	 * @param formatNumbers {boolean} If true, this label will automatically format numbers.
 	 * @return {L.ALS.Widgets.ValueLabel} This
 	 */
@@ -82,7 +82,7 @@ L.ALS.Widgets.ValueLabel = L.ALS.Widgets.SimpleLabel.extend( /** @lends L.ALS.Wi
 	},
 
 	/**
-	 * Sets value of this label. It's not an alias for SimpleLabel.setValue()! There's no alias for this method.
+	 * Sets value of this label. It's not an alias for {@link L.ALS.Widgets.SimpleLabel#setValue}! There's no alias for this method.
 	 * @param value Value to set
 	 * @return {L.ALS.Widgets.ValueLabel} This
 	 */
@@ -93,7 +93,7 @@ L.ALS.Widgets.ValueLabel = L.ALS.Widgets.SimpleLabel.extend( /** @lends L.ALS.Wi
 	},
 
 	/**
-	 * @return Value of this label. It doesn't return the whole text! To get whole text, use getActualValue().
+	 * @return Value of this label. It doesn't return the whole text! To get whole text, use {@link L.ALS.Widgets.ValueLabel#getActualValue}.
 	 */
 	getValue: function () {
 		return this._labelValue;
@@ -163,7 +163,7 @@ L.ALS.Widgets.ValueLabel = L.ALS.Widgets.SimpleLabel.extend( /** @lends L.ALS.Wi
 	},
 
 	/**
-	 * @return {string} Whole text of this label, i.e. result of SimpleLabel.getValue()
+	 * @return {string} Whole text of this label, i.e. result of {@link L.ALS.Widgets.SimpleLabel#getValue}
 	 */
 	getActualValue: function () {
 		return L.ALS.Widgets.SimpleLabel.prototype.getValue.call(this);

@@ -50,7 +50,7 @@ module.exports = `
 
 </style>
 
-<h1><img src="logo.ico" alt="Logo" />SynthFlight Pre-Alpha</h1>
+<h1><img src="logo.ico" alt="Logo" />SynthFlight Alpha</h1>
 
 <p data-als-locale-property="firstParagraph"></p>
 
@@ -73,8 +73,11 @@ module.exports = `
 	<li>electron-packager</li>
 	<li>FileSaver.js</li>
 	<li>fs-extra</li>
+	<li>http-server</li>
+	<li>ink-docstrap</li>
 	<li>gLayers.Leaflet</li>
 	<li>jscolor</li>
+	<li>JSDoc</li>
 	<li>jsdom</li>
 	<li>jsdom-global</li>
 	<li>JSZip</li>

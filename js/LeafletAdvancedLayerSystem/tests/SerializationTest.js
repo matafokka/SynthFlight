@@ -3,9 +3,10 @@ require('jsdom-global')(`
 	<div id="map"></div>
 </html></body>
 `, {resources: "usable", runScripts: "outside-only"});
+delete window.localStorage; // L.ALS.Helpers access localStorage which breaks JSDOM. Removing localStorage from window works. Helpers polyfills it anyway.
 
 L = require("leaflet");
-require("./../LeafletAdvancedLayerSystem/System.js");
+require("../System.js");
 
 /**
  * Simple control object for the testing

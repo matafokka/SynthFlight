@@ -22,7 +22,7 @@ L.ALS.Widgets.Button = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widgets
 
 	toHtmlElement: function () {
 		let container = this.createContainer();
-		container.appendChild(this._createInput());
+		container.appendChild(this.createInput());
 		return container;
 	},
 
@@ -93,7 +93,7 @@ L.ALS.Widgets.Button = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widgets
 	},
 
 	/**
-	 * Alias for `getButtonText()`
+	 * Alias for {@link L.ALS.Widgets.Button#getButtonText}
 	 * @return {string} Button's text
 	 */
 	getValue: function () {
@@ -101,7 +101,7 @@ L.ALS.Widgets.Button = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widgets
 	},
 
 	/**
-	 * Alias for `setButtonText()`
+	 * Alias for {@link L.ALS.Widgets.Button#setButtonText}
 	 * @param value {string} Text to set
 	 * @return {L.ALS.Widgets.Button} This
 	 */

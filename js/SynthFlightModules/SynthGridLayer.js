@@ -178,7 +178,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGridLayer.proto
 	onNameChange: function() {
 		let popup = document.createElement("div");
 		L.ALS.Locales.localizeElement(popup, "airportForLayer", "innerText");
-		popup.innerText += " " + this.name;
+		popup.innerText += " " + this.getName();
 		this._airportMarker.bindPopup(popup);
 	},
 
@@ -446,7 +446,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGridLayer.proto
 	},
 
 	_setColor: function (widget) {
-		this[widget.getId()] = widget.getValue();
+		this[widget.id] = widget.getValue();
 		this._updateGrid();
 	},
 
@@ -936,7 +936,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGridLayer.proto
 		jsons.push(airport);
 
 		if (this["pathsByMeridians"].isEmpty() || this["pathsByParallels"].isEmpty()) {
-			window.alert(`No paths has been drawn in layer \"${this.name}\"! You'll get only selected gird cells and airport position.`);
+			window.alert(`No paths has been drawn in layer \"${this.getName()}\"! You'll get only selected gird cells and airport position.`);
 			return geojsonMerge.merge(jsons);
 		}
 

@@ -58,7 +58,7 @@ L.ALS._service.SettingsWindow = L.ALS._service.SidebarWindow.extend( /** @lends 
 			let button = document.createElement("i");
 			button.className = "ri ri-arrow-go-back-line als-revert-button";
 			L.ALS.Locales.localizeElement(button, "settingsRevertButton", "title");
-			widget.containerForRevertButton.appendChild(button);
+			widget._getContainerForRevertButton().appendChild(button);
 
 			button.addEventListener("click", () => {
 				widget.setValue(widget._defaultSettingsValue);
