@@ -13,7 +13,6 @@ L.ALS.Widgets.File = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widgets.F
 
 	undoable: false,
 
-	/** @constructs */
 	initialize: function (id, label, callbackObject= undefined, callback = "") {
 		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "file", id, label, callbackObject, callback, ["input"]);
 		this.setConstructorArguments(arguments);

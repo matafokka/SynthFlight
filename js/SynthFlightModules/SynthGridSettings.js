@@ -12,7 +12,6 @@ L.ALS.SynthGridSettings = L.ALS.Settings.extend( /** @lends L.ALS.SynthGridSetti
 	parallelsColor: "#007800",
 	lineThickness: 2,
 
-	/** @constructs */
 	initialize: function () {
 		L.ALS.Settings.prototype.initialize.call(this);
 

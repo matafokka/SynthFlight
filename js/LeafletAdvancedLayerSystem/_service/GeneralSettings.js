@@ -5,6 +5,7 @@
  *
  * @class
  * @extends L.ALS.Settings
+ * @ignore
  */
 L.ALS._service.GeneralSettings = L.ALS.Settings.extend( /** @lends L.ALS._service.GeneralSettings.prototype */ {
 
@@ -29,7 +30,6 @@ L.ALS._service.GeneralSettings = L.ALS.Settings.extend( /** @lends L.ALS._servic
 	 */
 	_systemTheme: "generalSettingsSystemTheme",
 
-	/** @constructs */
 	initialize: function (defaultLocale = "English") {
 		L.ALS.Settings.prototype.initialize.call(this);
 

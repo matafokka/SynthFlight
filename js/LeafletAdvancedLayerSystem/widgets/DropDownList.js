@@ -11,7 +11,6 @@
  */
 L.ALS.Widgets.DropDownList = L.ALS.Widgets.BaseItemsWidget.extend( /** @lends L.ALS.Widgets.DropDownList.prototype */ {
 
-	/** @constructs */
 	initialize: function (id, label, callbackObject = undefined, callback = "") {
 		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "", id, label, callbackObject, callback, ["change"]);
 		this.setConstructorArguments(arguments);

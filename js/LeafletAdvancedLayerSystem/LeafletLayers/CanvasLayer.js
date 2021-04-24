@@ -27,7 +27,7 @@ L.DomUtil.setTransform = L.DomUtil.setTransform || function (el, offset, scale) 
  *
  * Canvas is always the size of the screen, it's size, position and everything is being recalculated when map is being moved or resized. When it happens, `draw()` method is being called.
  *
- * Override `draw()` method and implement your stuff here.
+ * Override {@link L.ALS.LeafletLayers.CanvasLayer.draw} method and implement your stuff here.
  *
  * @example Typical usage:
  * let points = [] // Imagine that there're some points
@@ -55,15 +55,13 @@ L.DomUtil.setTransform = L.DomUtil.setTransform || function (el, offset, scale) 
  * });
  * let canvas = new MyCanvas().addTo(map); // Add canvas to the map
  *
+ * @param alwaysOnBottom {boolean} If browser doesn't support "pointer-events" CSS property on HTML elements, canvas will be at very bottom. Otherwise canvas will always stay at the top. To make canvas stay always on bottom and unify experience, set this property to `true`
+ *
  * @class
  * @extends L.Layer
  */
 L.ALS.LeafletLayers.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend( /** @lends L.ALS.LeafletLayers.CanvasLayer.prototype */ {
 
-	/**
-	 * Constructs CanvasLayer.
-	 * @param alwaysOnBottom {boolean} If browser doesn't support "pointer-events" CSS property on HTML elements, canvas will be at very bottom. Otherwise canvas will always stay at the top. To make canvas stay always on bottom and unify experience, set this property to `true`
-	 */
 	initialize: function (alwaysOnBottom = false) {
 		this._map = null;
 		this._canvas = null;
@@ -78,7 +76,7 @@ L.ALS.LeafletLayers.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend( /** @len
 
 	/**
 	 * Redraws content of this layer.
-	 * @return this
+	 * @return {L.ALS.LeafletLayers.CanvasLayer} this
 	 */
 	redraw: function () {
 		if (!this._frame)
@@ -139,7 +137,7 @@ L.ALS.LeafletLayers.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend( /** @len
 	/**
 	 * Adds this layer to a given map
 	 * @param map Map to add this layer to.
-	 * @return this
+	 * @return {L.ALS.LeafletLayers.CanvasLayer} this
 	 */
 	addTo: function (map) {
 		map.addLayer(this);
@@ -191,7 +189,7 @@ L.ALS.LeafletLayers.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend( /** @len
 
 	/**
 	 * Converts canvas coordinates to latLng.
-	 * @param coords {[number, number]} Coordinates to convert, array in format [x, y]
+	 * @param coords {number[]} Coordinates to convert, array in format [x, y]
 	 * @return {{lat:number, lng:number}} Converted coordinates.
 	 */
 	canvasCoordsToLatLng: function (coords) {
@@ -201,7 +199,7 @@ L.ALS.LeafletLayers.CanvasLayer = (L.Layer ? L.Layer : L.Class).extend( /** @len
 });
 
 /**
- * Alias for `L.ALS.LeafletLayers.CanvasLayer`
- * @see L.ALS.LeafletLayers.CanvasLayer
+ * Alias for {@link L.ALS.LeafletLayers.CanvasLayer}
+ * @lends L.ALS.LeafletLayers.CanvasLayer
  */
 L.CanvasLayer = L.ALS.LeafletLayers.CanvasLayer;

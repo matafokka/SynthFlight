@@ -1,3 +1,7 @@
+/**
+ * Russian locale
+ * @type {Object}
+ */
 L.ALS.Locales["Русский"] = {
 
 	// Menu buttons tooltips

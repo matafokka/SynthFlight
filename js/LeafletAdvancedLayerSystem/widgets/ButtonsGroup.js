@@ -7,7 +7,6 @@
  */
 L.ALS.Widgets.ButtonsGroup = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widgets.ButtonsGroup.prototype */ {
 
-	/** @constructs */
 	initialize: function (id) {
 		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "", id, "");
 

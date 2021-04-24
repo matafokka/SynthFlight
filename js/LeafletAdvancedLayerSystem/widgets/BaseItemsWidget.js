@@ -1,5 +1,6 @@
 /**
  * Defines methods for implementing widgets that can have multiple items, for example, drop-down lists and sets of radio buttons.
+ * @class
  * @extends L.ALS.Widgets.BaseWidget
  */
 L.ALS.Widgets.BaseItemsWidget = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widgets.BaseItemsWidget.prototype */ {

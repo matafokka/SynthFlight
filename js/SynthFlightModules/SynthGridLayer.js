@@ -32,7 +32,6 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGridLayer.proto
 	_doHidePathsByParallels: false,
 	_doHidePathsNumbers: false,
 
-	/** @constructs */
 	init: function (wizardResults, settings) {
 		this.copySettingsToThis(settings);
 

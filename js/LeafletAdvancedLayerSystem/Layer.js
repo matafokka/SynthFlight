@@ -1,25 +1,25 @@
 /**
  * Base class for all layers for the Layer System.
  *
- * Basically, it's a wrapper around FeatureGroup. It doesn't provide all of it's methods because they're used internally in the layer system, and their usage will break it. So do NOT touch the actual FeatureGroup object.
+ * Basically, it's a wrapper around {@link L.FeatureGroup}. It doesn't provide all of it's methods because they're used internally in the layer system, and their usage will break it. So do NOT touch the actual FeatureGroup object.
  *
  * Usage:
  *
- * 1. Set defaultName property to the default name of your layer.
- * 1. Assign statics.wizard object to an instance of your wizard.
- * 1. If you need to implement settings for the layer, assign statics.settings object to an instance of your settings.
- * 1. Implement init() method. It's used as a constructor.
+ * 1. Set {@link L.ALS.Layer.defaultName} property to the default name of your layer.
+ * 1. Assign {@link L.ALS.Layer.wizard} to an instance of your wizard.
+ * 1. If you need to implement settings for the layer, assign {@link L.ALS.Layer.settings} object to an instance of your settings.
+ * 1. Implement {@link L.ALS.Layer.init} method. It's used as a constructor.
  * 1. Implement your own methods or extend current ones. Basically, make it work :D
  *
  * Please, read the docs for each public method, you might need to (if not should) override most of them.
  *
  * Some usage notes:
  *
- * 1. Use addLayer() and removeLayers() to add and remove layers.
- * 1. To hide layer from the map, use this.map.remove() and this.map.add().
- * 1. Use addEventListenerTo() and removeEventListenerFrom() to add and remove event listeners from objects and map.
- * 1. NEVER use L.LayerGroup because it breaks layer system!
- * 1. Unless your layer is super simple, you'll most likely need to implement custom serialization and deserialization mechanisms. Please, refer to the `L.ALS.Serializable` docs and example project for this: https://github.com/matafokka/SynthFlight
+ * 1. Use {@link L.ALS.Layer.addLayers} and {@link L.ALS.Layer.removeLayers} to add and remove Leaflet layers.
+ * 1. To hide layer from the map, use `this.map.remove()` and `this.map.add()`.
+ * 1. Use {@link L.ALS.Layer.addEventListenerTo} and {@link L.ALS.Layer.removeEventListenerFrom} to add and remove event listeners from objects and map.
+ * 1. NEVER use {@link L.LayerGroup} because it breaks layer system!
+ * 1. Unless your layer is super simple, you'll most likely need to implement custom serialization and deserialization mechanisms. Please, refer to the @{link L.ALS.Serializable} docs and [example project](https://github.com/matafokka/SynthFlight) for this.
  *
  * @param wizardResults {Object} Results compiled from the wizard. It is an object who's keys are IDs of your controls and values are values of your controls.
  * @param settings {Object} Current layer settings.
@@ -53,7 +53,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend( /** @lends L.ALS.Layer.prototype */ {
 	/**
 	 * SynthLayer's constructor. Do NOT override it! Use init() method instead!
 	 * @param layerSystem {L.ALS.System} Layer system that creates this layer
-	 * @param args {*[]} Arguments to pass to `init()`
+	 * @param args {Array} Arguments to pass to `init()`
 	 * @param settings {Object} Settings to pass to `init()`
 	 * @private
 	 */
@@ -81,11 +81,11 @@ L.ALS.Layer = L.ALS.Widgetable.extend( /** @lends L.ALS.Layer.prototype */ {
 
 		/**
 		 * Contains map events bound to this layer
-		 * @type {[{
+		 * @type {Array<{
 		 *     type: string,
 		 *     handler: Object,
 		 *     handlerFunction: Function
-		 * }]}
+		 * }>}
 		 * @private
 		 */
 		this._mapEvents = [];
@@ -114,6 +114,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend( /** @lends L.ALS.Layer.prototype */ {
 		 * Contains added Leaflet layers
 		 * @type {L.FeatureGroup}
 		 * @package
+		 * @ignore
 		 */
 		this._leafletLayers = L.featureGroup();
 
@@ -312,6 +313,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend( /** @lends L.ALS.Layer.prototype */ {
 	/**
 	 * Removes all event listeners bounded to the map by this layer. This method is intended ONLY for internal use. Do NOT call it!
 	 * @package
+	 * @ignore
 	 */
 	_removeAllMapEventListeners: function () {
 		for (let handlerObject of this._mapEvents)
@@ -321,7 +323,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend( /** @lends L.ALS.Layer.prototype */ {
 	/**
 	 * Being called when layer is being showed or and object is being added.
 	 *
-	 * This method is for internal use only. To add behavior upon showing, override onShow() public method.
+	 * This method is for internal use only. To add behavior upon showing, override {@link L.ALS.Layer.onShow} method.
 	 * @private
 	 */
 	_onShow: function () {
@@ -332,7 +334,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend( /** @lends L.ALS.Layer.prototype */ {
 	/**
 	 * Being called when layer is being hidden.
 	 *
-	 * This method is for internal use only. To add behavior upon hiding, override onHide() public method.
+	 * This method is for internal use only. To add behavior upon hiding, override {@link L.ALS.Layer.onHide} method.
 	 * @private
 	 */
 	_onHide: function () {
@@ -374,7 +376,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend( /** @lends L.ALS.Layer.prototype */ {
 	 *
 	 * Do NOT override!
 	 *
-	 * @param layers Layers to add
+	 * @param layers {L.Layer} Layers to add
 	 */
 	addLayers: function(...layers) {
 		for (let layer of layers)
@@ -411,7 +413,11 @@ L.ALS.Layer = L.ALS.Widgetable.extend( /** @lends L.ALS.Layer.prototype */ {
 		}
 	},
 
-	/** @constructs */
+	/**
+	 * Use this method instead of {@link L.ALS.Layer.initialize}
+	 * @param wizardResults {Object} Results compiled from the wizard. It is an object who's keys are IDs of your controls and values are values of your controls.
+	 * @param settings {Object} Current layer settings.
+	 */
 	init: function(wizardResults, settings) {},
 
 	/**
@@ -539,14 +545,14 @@ L.ALS.Layer = L.ALS.Widgetable.extend( /** @lends L.ALS.Layer.prototype */ {
 		/**
 		 * Wizard instance which gives a layer it's initial properties
 		 * @type {L.ALS.Wizard}
-		 * @static
+		 * @memberOf L.ALS.Layer
 		 */
 		wizard: new L.ALS.Wizard(),
 
 		/**
 		 * Settings instance
 		 * @type {L.ALS.Settings}
-		 * @static
+		 * @memberOf L.ALS.Layer
 		 */
 		settings: new L.ALS.Settings(),
 
@@ -554,7 +560,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend( /** @lends L.ALS.Layer.prototype */ {
 		 * Deserializes some important properties. Must be called at `deserialize` in any layer!
 		 * @param serialized {Object} Serialized object
 		 * @param instance {L.ALS.Layer|Object} New instance of your layer
-		 * @static
+		 * @memberOf L.ALS.Layer
 		 */
 		deserializeImportantProperties: function (serialized, instance) {
 			instance.setName(serialized.name);
@@ -563,6 +569,12 @@ L.ALS.Layer = L.ALS.Widgetable.extend( /** @lends L.ALS.Layer.prototype */ {
 				instance[prop] = serialized[prop];
 		},
 
+		/**
+		 * @see L.ALS.Serializable.deserialize
+		 * @override
+		 * @inheritDoc
+		 * @memberOf L.ALS.Layer
+		 */
 		deserialize: function (serialized, layerSystem, settings, seenObjects) {
 			serialized.constructorArguments = [layerSystem, serialized.constructorArguments[0], settings];
 			let instance = L.ALS.Widgetable.deserialize(serialized, seenObjects);

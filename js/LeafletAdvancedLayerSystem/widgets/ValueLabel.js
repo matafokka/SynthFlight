@@ -24,7 +24,6 @@ L.ALS.Widgets.ValueLabel = L.ALS.Widgets.SimpleLabel.extend( /** @lends L.ALS.Wi
 
 	undoable: false,
 
-	/** @constructs */
 	initialize: function (id, description, units = "", unitsPosition = "description", formatNumbers = false, style="nostyle", initialValue = "") {
 		L.ALS.Widgets.SimpleLabel.prototype.initialize.call(this, id, "");
 		this.setConstructorArguments(arguments);

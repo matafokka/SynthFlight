@@ -11,6 +11,7 @@ const debounce = require("debounce");
  *
  * @class
  * @extends L.ALS.WidgetableWindow
+ * @ignore
  */
 L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend( /** @lends L.ALS._service.SidebarWindow.prototype */ {
 
@@ -18,7 +19,6 @@ L.ALS._service.SidebarWindow = L.ALS.WidgetableWindow.extend( /** @lends L.ALS._
 	sidebarWidth: 0,
 	isSidebarHidden: false,
 
-	/** @constructs */
 	initialize: function (button, sidebarTitle, contentTitle, closeButtonTitle = "sidebarWindowCancelButton", onCloseCallback = undefined) {
 		L.ALS.WidgetableWindow.prototype.initialize.call(this, button);
 		this.items = {};

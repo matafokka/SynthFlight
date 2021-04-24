@@ -3,13 +3,13 @@ const saveAs = require("file-saver");
 
 /**
  * Contains helper methods and properties
+ * @namespace
  */
 L.ALS.Helpers = {
 	/**
 	 * Dispatches event of given type to given object.
 	 * @param object {Object} Object to dispatch event to
 	 * @param type {string} Type of event
-	 * @public
 	 */
 	dispatchEvent: function (object, type) {
 		let event = document.createEvent("Event");
@@ -138,7 +138,6 @@ L.ALS.Helpers = {
 	 * Parses given HTML and appends it to given element as a child
 	 * @param html {string} HTML to parse
 	 * @param appendTo {Element} Element to append parsed HTML to
-	 * @constructor
 	 */
 	HTMLToElement: function (html, appendTo = document.body) {
 		let parsedDom = document.implementation.createHTMLDocument("title");
@@ -204,7 +203,7 @@ L.ALS.Helpers = {
 	},
 
 	/**
-	 * Downloads data by creating data URL.
+	 * Makes browser download data by creating data URL.
 	 * @param filename {string} Name of the file to save
 	 * @param mediatype {string} Data URL media type
 	 * @param encoding {string} Data or text encoding
@@ -279,8 +278,8 @@ L.ALS.Helpers = {
 	supportsBlob: !!(JSZip.support.blob && (!window.webkitURL || (window.URL && window.URL.createObjectURL))),
 
 	/**
-	 * @type {"desktop"|"phone"|"tablet"}
 	 * Contains user's device type. This detection has been performed using only user agent. If you want to implement something that relies on actual device type, consider performing feature detection by yourself. Otherwise, use this property to maintain consistent look and feel.
+	 * @type {"desktop"|"phone"|"tablet"}
 	 */
 	deviceType: "desktop",
 
@@ -292,6 +291,7 @@ L.ALS.Helpers = {
 
 	/**
 	 * If user's browser is IE (any version), will be true. Will be false otherwise.
+	 * @type {boolean}
 	 */
 	isIE: "ActiveXObject" in window,
 
@@ -359,6 +359,8 @@ document.head.appendChild(meta);
 
 /**
  * By default, points to window.localStorage. If user's browser doesn't support LocalStorage, will use temporary "polyfill" which acts like LocalStorage but doesn't actually save anything.
+ * @memberOf L.ALS.Helpers
+ * @type {WindowLocalStorage}
  */
 L.ALS.Helpers.localStorage = (!!window.localStorage) ? window.localStorage : {
 

@@ -4,7 +4,7 @@
  * Some important properties:
  *
  * 1. `windowContainer` -- container for the window which should be added to the page
- * 1. `window` -- actual window. It contains only one child: widgetable's container (`container` property). You can add custom elements to the window using it's methods.
+ * 1. `window` -- actual window. It contains only one child: {@link L.ALS.Widgetable}'s container ( {@link L.ALS.Widgetable.container} property). You can add custom elements to the window at {@link L.ALS.WidgetableWindow.initialize}.
  * 1. `container` -- Widgetable's container.
  *
  * @param button {Element} Button which will activate this window
@@ -14,7 +14,6 @@
  */
 L.ALS.WidgetableWindow = L.ALS.Widgetable.extend( /** @lends L.ALS.WidgetableWindow.prototype */ {
 
-	/** @constructs */
 	initialize: function (button) {
 		L.ALS.Widgetable.prototype.initialize.call(this, "als-window-content");
 		this.setConstructorArguments(arguments);

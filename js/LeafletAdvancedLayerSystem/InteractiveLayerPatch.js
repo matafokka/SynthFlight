@@ -2,6 +2,8 @@
  * Sets this layer to be interactive or not.
  * @param interactive {boolean} If true, this layer will be interactive. Otherwise layer will be static.
  * @author Piero "Jadaw1n" Steinger. Home page: https://github.com/Jadaw1n
+ * @instance
+ * @memberOf L.Layer
  */
 L.Layer.prototype.setInteractive = function (interactive) {
 	if (this.getLayers) {
@@ -25,14 +27,18 @@ L.Layer.prototype.setInteractive = function (interactive) {
 
 /**
  * @return {boolean} True, if this layer is interactive. False otherwise.
+ * @instance
+ * @memberOf L.Layer
  */
 L.Layer.prototype.getInteractive = function () {
 	return this.options.interactive;
 }
 
 /**
- * Alias for Layer.getInteractive()
+ * Alias for @{link L.Layer.getInteractive}
  * @return {boolean} True, if this layer is interactive. False otherwise.
+ * @instance
+ * @memberOf L.Layer
  */
 L.Layer.prototype.isInteractive = function () {
 	return this.getInteractive();

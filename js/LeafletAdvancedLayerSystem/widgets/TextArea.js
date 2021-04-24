@@ -13,7 +13,6 @@ L.ALS.Widgets.TextArea = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widge
 
 	undoable: false,
 
-	/** @constructs */
 	initialize: function (id, placeholder = "", callbackObject = undefined, callback = "") {
 		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "", id, "", callbackObject, callback, ["edit"], {
 			autocomplete: "off",
@@ -124,7 +123,7 @@ L.ALS.Widgets.TextArea = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widge
 		 * @param id {string} ID of a console
 		 * @param rowCount {int} Maximum height of the console in number of rows
 		 * @return {L.ALS.Widgets.TextArea} Textarea widget that looks like a console
-		 * @static
+		 * @memberOf L.ALS.Widgets.TextArea
 		 */
 		createConsole(id = "console", rowCount = 0) {
 			let consoleWidget = new L.ALS.Widgets.TextArea("console", "");

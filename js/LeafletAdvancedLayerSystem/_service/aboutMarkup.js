@@ -66,7 +66,7 @@ module.exports = \`
 
 <p class="extended">2. Require your file and pass it to <span class="pre">L.ALS.System</span> constructor like this:</p>
 <pre>
-let layerSystem = new L.ALS.System(map, true, require("./about.js")).addTo(map);
+let layerSystem = new L.ALS.System(map, { aboutHTML: require("./about.js") }).addTo(map);
 </pre>
 
 <footer><a href="https://github.com/matafokka">© matafokka, ${(new Date()).getFullYear()}</a></footer>

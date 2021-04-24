@@ -1,5 +1,5 @@
 /**
- * Base class for all wizards. Basically `L.ALS.Widgetable` with additional `displayName` property.
+ * Base class for all wizards. Basically {@link L.ALS.Widgetable} with additional `displayName` property.
  * @class
  * @extends L.ALS.Widgetable
  */
@@ -11,7 +11,6 @@ L.ALS.Wizard = L.ALS.Widgetable.extend( /** @lends L.ALS.Wizard.prototype */ {
 	 */
 	displayName: "layerWizardName",
 
-	/** @constructs */
 	initialize: function () {
 		L.ALS.Widgetable.prototype.initialize.call(this);
 	}

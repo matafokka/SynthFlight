@@ -13,7 +13,6 @@ L.ALS.Widgets.Checkbox = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widge
 
 	customWrapperClassName: "als-checkbox-wrapper",
 
-	/** @constructs */
 	initialize: function (id, label, callbackObject = undefined, callback = "") {
 		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "checkbox", id, label, callbackObject, callback, ["change"]);
 		this.setConstructorArguments(arguments);

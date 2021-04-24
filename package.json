@@ -1,7 +1,7 @@
 {
   "name": "synthflight",
   "productName": "SynthFlight",
-  "version": "0.0.2-pre-alpha",
+  "version": "0.0.8-alpha",
   "description": "A fully client-side software for planning aerial photography",
   "main": "electronApp.js",
   "browser": "index.html",
@@ -42,7 +42,8 @@
   "scripts": {
     "start": "electron electronApp.js --debug",
     "test": "node js/tests/runTests.js",
-    "buildAndRun": "node build.js -b && http-server './dist/SynthFlight-browser' -c-1"
+    "buildAndRun": "node build.js -b && http-server './dist/SynthFlight-browser' -c-1",
+    "generateDocs": "jsdoc js/LeafletAdvancedLayerSystem/ -c jsdoc.conf.json"
   },
   "keywords": [],
   "author": "matafokka",

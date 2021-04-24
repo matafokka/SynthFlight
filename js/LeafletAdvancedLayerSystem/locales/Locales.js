@@ -1,11 +1,11 @@
 /**
- * Contains locales. You can extend locales using addLocaleProperties() method.
+ * Contains locales. You can extend locales by using {L.ALS.Locales.addLocaleProperties} method.
  *
  * Structure is following:
- * ```JS
+ * ```
  * {
  *     "locale name that will be presented to the user, i.e. 'English'": {
- *         key1: "Value 1", // These keys will be used in app itself
+ *         key1: "Value 1", // These keys will be used in app itself. We'll call those "locale properties" for the rest of the documentation.
  *         key2: "Value 2",
  *         ...
  *     },
@@ -19,10 +19,10 @@
  * }
  * ```
  *
- * To localize elements created by strings or JSX syntax, put these attributes to localizable elements:
+ * To localize elements created by strings or JSX, put these attributes to localizable elements:
  *
  * ```
- * data-als-locale-property="property in L.ALS.locale" -- value points to property in L.ALS.Locale.
+ * data-als-locale-property="property in L.ALS.locale" -- Value points to property in L.ALS.Locale.
  *
  * data-als-locale-property-to-localize="text" -- Value says which element's property to localize. This attribute is optional.
  * ```
@@ -30,12 +30,64 @@
  * You can also use these properties to additionally alter element's value, for example, add a value to a label.
  *
  *
- * Usage note: You must put all your custom locale's properties to L.ALS.English. If you don't care about English localization, just copy all your properties to it.
+ * Usage note: You must put all your custom locale's properties to {@link L.ALS.English}. If you don't care about English localization, just copy all your properties to it.
+ *
+ * @example Create two localized labels for a couple of widgets and localized about section
+ *
+ * // Prepare locales
+ *
+ * // Require System and all additional locales except English before doing anything.
+ * require("./path/to/ALS/System.js");
+ * require("./path/to/ALS/locales/Russian.js");
+ *
+ * // Define custom locale properties for English. You can do this in external script and require it instead of doing everything at your entry point.
+ * L.ALS.Locales.addLocaleProperties("English", {
+ *     labelForNumberWidget: "Enter number", // Label for number widget
+ *     labelForColorWidget: "Choose color", // Label for color widget
+ *     aboutText: "This is my program!", // Text displayed at "About" settings section
+ * }
+ *
+ * // Define custom locale properties for Russian
+ * L.ALS.Locales.addLocaleProperties("Русский", {
+ *     labelForNumberWidget: "Введите число",
+ *     labelForColorWidget: "Выберите цвет",
+ *     aboutText: "Это моя программа!",
+ * }
+ *
+ * L.ALS.System.initializeSystem(); // Initialize system after all locales has been set up
+ *
+ * let map = ... // Create map
+ * // Create system
+ * let layerSystem = new L.ALS.System(map, {
+ *      aboutHtml: require("./about.js) // Add custom "About" section
+ * });
+ * // Do your other stuff...
+ *
+ * // Localise widgets
+ *
+ * // Imagine code below being at some custom L.ALS.Widgetable where we add our widgets
+ *
+ * // Pass our new locale properties names as labels to widgets' constructors.
+ * // You can pass those names to everything that can be localised.
+ * this.addWidgets(
+ *     new L.ALS.Widgets.Number("myNumberId", "labelForNumberWidget"),
+ *     new L.ALS.Widgets.Color("myColorrId", "labelForColorWidget")
+ * );
+ *
+ * // Localize about section
+ * // Code below is at "./about.js" script
+ *
+ * module.exports = `
+ * <h1>MyProgram</h1> <!-- Program's name -->
+ * <div data-als-locale-property="aboutText"></div> <!-- Program's description localized by "data-als-locale-property" attribute -->
+ * `;
+ *
+ * @namespace
  */
 L.ALS.Locales = {
 
 	/**
-	 * Localizes element
+	 * Localizes HTML element
 	 * @param element {Element} Element to localize
 	 * @param localeProperty {string} Property name of L.ALS.locale. For example, there's L.ALS.locale.myProperty property which contains your text. You need to pass "myProperty" string here.
 	 * @param elementPropertyToLocalize {string} Element's property to output localized text to. If not supplied, will use either textContent, innerText or innerHTML
@@ -53,7 +105,7 @@ L.ALS.Locales = {
 	},
 
 	/**
-	 * Either localizes elements by calling localizeElement() or sets localeProperty as element's value if it doesn't exist in L.ALS.locale
+	 * Either localizes element by calling localizeElement() or sets localeProperty as element's value if it doesn't exist in L.ALS.locale
 	 * @param element {Element} Element to localize
 	 * @param localeProperty {string} Property name of L.ALS.locale. For example, there's L.ALS.locale.myProperty property which contains your text. You need to pass "myProperty" string here.
 	 * @param elementPropertyToLocalize {string} Element's property to output localized text to. If not supplied, will use either textContent, innerText or innerHTML

@@ -14,7 +14,6 @@ const debounce = require("debounce");
  */
 L.ALS.Widgets.Color = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widgets.Color.prototype */ {
 
-	/** @constructs */
 	initialize: function (id, label, callbackObject = undefined, callback = "") {
 		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "color", id, label, callbackObject, callback, ["change"]);
 		this.setConstructorArguments(arguments);

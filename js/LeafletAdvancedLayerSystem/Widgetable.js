@@ -3,6 +3,8 @@
  *
  * Has property `container` which is container for the widgets. Add it to the page.
  *
+ * See {@link L.ALS.Widgets} docs for the example on working with Widgetables and Widgets.
+ *
  * @param className {string} Class name for the container
  *
  * @class
@@ -11,7 +13,6 @@
  */
 L.ALS.Widgetable = L.ALS.Serializable.extend( /** @lends L.ALS.Widgetable.prototype */ {
 
-	/** @constructs */
 	initialize: function (className = "") {
 		L.ALS.Serializable.prototype.initialize.call(this, className);
 		this.setConstructorArguments(arguments);
@@ -119,6 +120,13 @@ L.ALS.Widgetable = L.ALS.Serializable.extend( /** @lends L.ALS.Widgetable.protot
 	},
 
 	statics: {
+
+		/**
+		 * @see L.ALS.Serializable.deserialize
+		 * @override
+		 * @inheritDoc
+		 * @memberOf L.ALS.Widgetable
+		 */
 		deserialize: function (serialized, seenObjects) {
 			let obj = this.getObjectFromSerialized(serialized, seenObjects);
 			obj.deserializeWidgets(serialized._widgets, seenObjects);

@@ -1,14 +1,18 @@
 /**
- * A Widgetable that can be added to the map. Extends both Widgetable and L.Marker.
+ * A Widgetable that can be added to the map.
  *
- * Before using this class, set **map** option `keyboard` to `false`! If you don't do that, you'll encounter problems.
+ * Before using this class, set **map** option `keyboard` to `false`! If you don't do that, you'll encounter numerous problems. Do it when you create map, like this:
  *
- * ***Warning:*** *If you're targeting older browsers and adding only SimpleLabel to this widgetable, you may want to use non-breaking hyphen to prevent unnecessary word wrapping.*
+ * ```JS
+ * let map = L.map("map", { keyboard: false });
+ * ```
  *
- * ***Warning:*** *If you want to use this only for labels, consider using L.ALS.LeafletLayers.LabelLayer since it's way faster than WidgetLayer.*
+ * **Warning:** If you're targeting older browsers and adding only {@link L.ALS.Widgets.SimpleLabel} to this layer, you may want to use non-breaking hyphen (UTF-8 symbol) to prevent unnecessary word wrapping.
  *
- * @param latLng Position of this object.
- * @param origin {"topLeft"|"topCenter"|"topRight"|"bottomLeft"|"bottomCenter"|"bottomRight"|"leftCenter"|"rightCenter"|"center"} Origin of this widget, i.e. which "part" of this widget will be at given latLng
+ * **Warning:** If you want to use this only for labels, consider using {@link L.ALS.LeafletLayers.LabelLayer} since it's way faster than WidgetLayer.
+ *
+ * @param latLng {number[]|L.LatLng} Position of this object.
+ * @param origin {"topLeft"|"topCenter"|"topRight"|"bottomLeft"|"bottomCenter"|"bottomRight"|"leftCenter"|"rightCenter"|"center"} Origin of this widget, i.e. which point of this widget will be placed at given latLng
  *
  * @class
  * @extends L.ALS.Widgetable
@@ -19,7 +23,6 @@ L.ALS.LeafletLayers.WidgetLayer =  L.ALS.Widgetable.extend( /** @lends L.ALS.Lea
 
 	includes: L.Marker.prototype,
 
-	/** @constructs */
 	initialize: function (latLng = [52, 0], origin="center") {
 		L.ALS.Widgetable.prototype.initialize.call(this, "als-divicon");
 		L.Marker.prototype.initialize.call(this, latLng);
@@ -55,6 +58,10 @@ L.ALS.LeafletLayers.WidgetLayer =  L.ALS.Widgetable.extend( /** @lends L.ALS.Lea
 		return this;
 	},
 
+	/**
+	 * Checks if this layer has one or multiple widgets. If there's only one widget, padding and borders will be removed.
+	 * @private
+	 */
 	_checkWidgets: function () {
 		let hasFirst = false, hasSecond = false;
 		for (let prop in this._widgets) {
@@ -89,4 +96,8 @@ L.ALS.LeafletLayers.WidgetLayer =  L.ALS.Widgetable.extend( /** @lends L.ALS.Lea
 
 });
 
+/**
+ * Alias for {@link L.ALS.LeafletLayers.WidgetLayer}
+ * @lends L.ALS.LeafletLayers.WidgetLayer
+ */
 L.WidgetLayer = L.ALS.LeafletLayers.WidgetLayer;

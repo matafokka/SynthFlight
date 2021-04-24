@@ -14,7 +14,6 @@ L.ALS.Widgets.Button = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widgets
 	customWrapperClassName: "als-buttons-wrapper",
 	undoable: false,
 
-	/** @constructs */
 	initialize: function (id, text, callbackObject = undefined, callback = "") {
 		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "", id, "", callbackObject, callback, ["click"]);
 		this.setButtonText(text);

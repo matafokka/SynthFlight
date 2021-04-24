@@ -3,13 +3,15 @@
  *
  * This class should be used only to create custom widgets. It shouldn't be used in application itself.
  *
+ * See {@link L.ALS.Widgets} docs for the example on working with Widgetables and Widgets.
+ *
  * Guidelines on creating custom widgets:
  *
  * 1. You'll probably need to have a prior knowledge of how widgets works. Please, study the widgets' markup and existing widgets' source code. Yup, that sucks but there's no good workaround.
  * 1. As an alternative, you can build your widget from scratch, though, it's not recommended. If you choose to do so, please, use ALS classes in your elements to maintain consistency.
- * 1. Widget's layout is being created at `toHtmlElement()` method. Compose your widget here.
- * 1. There're couple of useful methods for composing widgets, such as `createLabel()`, `createInputElement`, etc. Use it to simplify your workflow.
- * 1. If you want to modify those helper methods, you can either override them or change something at `toHtmlElement()`. Do whatever works better for you.
+ * 1. Widget's layout is being created at {@link L.ALS.Widgets.BaseWidget.toHtmlElement} method. Compose your widget here.
+ * 1. There're couple of useful methods for composing widgets, such as {@link L.ALS.Widgets.BaseWidget.createLabel}, {@link L.ALS.Widgets.BaseWidget.createInputElement}, etc. Use it to simplify your workflow.
+ * 1. If you want to modify those helper methods, you can either override them or change something at {@link L.ALS.Widgets.BaseWidget.toHtmlElement}. Do whatever works better for you.
  * 1. You can safely remove either input or label from your widget by simply not creating it.
  * 1. Setters and other public methods should `return this`, so API users can chain it.
  *
@@ -29,6 +31,7 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend( /** @lends L.ALS.Widgets.B
 	/**
 	 * Value to set when user presses revert button. Used only in settings.
 	 * @package
+	 * @ignore
 	 */
 	_defaultSettingsValue: undefined,
 
@@ -47,10 +50,10 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend( /** @lends L.ALS.Widgets.B
 	/**
 	 * Indicates whether this widget has been added to the widgetable. Needed to detect whether a callback should be called.
 	 * @package
+	 * @ignore
 	 */
 	_isAdded: false,
 
-	/** @constructs */
 	initialize: function (type, id, label, callbackObject = undefined, callback = "", events = []) {
 		L.ALS.Serializable.prototype.initialize.call(this);
 		this.setConstructorArguments(arguments);
@@ -58,7 +61,8 @@ L.ALS.Widgets.BaseWidget = L.ALS.Serializable.extend( /** @lends L.ALS.Widgets.B
 
 		/**
 		 * Object which contains callback
-		 * @type {Object} @private
+		 * @type {Object}
+		 * @private
 		 */
 		this._callbackObject = callbackObject;
 

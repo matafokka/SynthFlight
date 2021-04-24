@@ -18,7 +18,6 @@ L.ALS.SynthShapefileSettings = L.ALS.Settings.extend( /** @lends L.ALS.SynthShap
 	 */
 	borderColor: "#8d4200",
 
-	/** @constructs */
 	initialize: function () {
 		L.ALS.Settings.prototype.initialize.call(this);
 

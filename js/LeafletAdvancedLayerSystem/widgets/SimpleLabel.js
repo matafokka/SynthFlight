@@ -15,7 +15,6 @@ L.ALS.Widgets.SimpleLabel = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Wi
 
 	customWrapperClassName: "als-simple-label-wrapper",
 
-	/** @constructs */
 	initialize: function (id, value ="", textAlign= "left", style="nostyle") {
 		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "", id, "");
 		this.setConstructorArguments(arguments);

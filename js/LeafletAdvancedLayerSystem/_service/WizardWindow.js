@@ -5,10 +5,10 @@
  *
  * @class
  * @extends L.ALS._service.SidebarWindow
+ * @ignore
  */
 L.ALS._service.WizardWindow = L.ALS._service.SidebarWindow.extend( /** @lends L.ALS._service.WizardWindow.prototype */ {
 
-	/** @constructs */
 	initialize: function (button) {
 		L.ALS._service.SidebarWindow.prototype.initialize.call(this, button, "wizardSelectTitle", "wizardContentTitle");
 		this.select.classList.add("als-wizard-menu");

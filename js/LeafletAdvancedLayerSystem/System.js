@@ -1,10 +1,37 @@
 /**
- * Root object containing all Layer System stuff
+ * Leaflet namespace
+ * @external "L"
+ * @see https://leafletjs.com/reference-1.7.1.html
+ */
+
+/**
+ * Root object containing all Layer System stuff.
+ *
+ * Layer System has these important subsystems:
+ * 1. System itself. See {@link L.ALS.System} docs for examples of general usage.
+ * 1. Layers. See {@link L.ALS.System} example on how to create a basic layer:
+ *      1. Layers themselves. Those are not Leaflet layers but wrappers around theme. System works with these layers, not with Leaflet layers. See {@link L.ALS.Layer} docs for examples on how to create custom layers.
+ *      1. Wizards - widgetables (see below) that provides initial layer parameters. See {@link L.ALS.Wizard} for examples of general usage.
+ *      1. Settings - widgetables that provides settings for your layers. See {@link L.ALS.Settings} for examples of general usage.
+ * 1. Widget system:
+ *      1. Widgetables - containers for widgets. See {@link L.ALS.Widgetable} docs for examples of general usage.
+ *      1. Widgets. See {@link L.ALS.Widgets} for examples of general usage. See {@Link L.ALS.Widgets.BaseWidget} for examples on how to create custom widgets.
+ * 1. Serialization and deserialization - used to save and load projects. See {@link L.ALS.Serializable} docs for examples on how to use it and create custom mechanisms.
+ * 1. Locales - allows you to localize your whole application. See {@link L.ALS.Locales} docs for examples on how to use it.
+ * 1. Useful helpers. See {@link L.ALS.Helpers}.
+ * 1. Zoom control which matches ALS aesthetics. See {@link L.ALS.ControlZoom}.
+ * 1. Patches:
+ *      1. {@link L.Layer.setInteractive}, {@link L.Layer.getInteractive}, {@link L.Layer.isInteractive} - patch made by [Piero "Jadaw1n" Steinger](https://github.com/Jadaw1n) which adds ability to set and check interactive state of Leaflet layers.
+ *      1. Serialization patches: {@link RegExp.serialize}, {@link RegExp.deserialize}, {@link L.LatLng.serialize}, {@link L.LatLng.deserialize}
+ *
+ * @namespace
  */
 L.ALS = {
 
 	/**
 	 * Contains classes only for system's internal use. Docs and architecture here sucks. I warned you.
+	 * @namespace
+	 * @ignore
 	 */
 	_service: {}
 };
@@ -45,7 +72,7 @@ require("./LeafletLayers/LeafletLayers.js");
 /**
  * Advanced extensible layer system for Leaflet. Manages things like layer creation, ordering, deletion and much more for you.
  *
- * Just add it, implement your layer types by extending `L.ALS.Layer`, register them, and you're good to go.
+ * Just add it, implement your layer types by extending {@link L.ALS.Layer}, register them, and you're good to go.
  *
  * @example Create a basic project with custom layer, wizard and settings.
  *
@@ -89,9 +116,8 @@ require("./LeafletLayers/LeafletLayers.js");
  *     initialize: function () {
  *         L.ALS.Settings.prototype.initialize.call(this); // Call parent constructor
  *
- *         // Let's add a checkbox to out settings
- *         let checkbox = new L.ALS.Checkbox("myCheckboxId", "Checkbox");
- *         checkbox._setAttributes({ defaultValue: true }); // Assign default value to the widget
+ *         // Let's add a checkbox to our settings and make it checked by default
+ *         this.addWidget(new L.ALS.Checkbox("myCheckboxId", "Checkbox"), true);
  *         this.addWidget(checkbox);
  *     }
  *
@@ -109,13 +135,23 @@ require("./LeafletLayers/LeafletLayers.js");
  *     init: function(wizardResults, settings) {
  *         // this.copySettingsToThis(settings); // If you need to copy settings to layer's properties, use copySettingsToThis()
  *
- *         // Build a menu for the layer. Let's create labels with wizard results and manage their appearance by the checkbox in the settings
+ *         // Build a menu for the layer. Let's create labels with wizard results and manage their appearance by the checkbox in the settings.
+ *         // Let's also add a color widget for demonstration purposes
+ *         // See L.ALS.Widgets.BaseWidget docs for explanation on what's going on
  *
  *         this._colorLabel = new L.ALS.SimpleLabel("colorLabel", "Color value from the wizard");
  *         this._numberLabel = new L.ALS.SimpleLabel("numberLabel", "Number value from the wizard");
- *         this.addWidget(this._colorLabel);
- *         this.addWidget(this._numberLabel);
+ *         this.addWidgets(this._colorLabel, this._numberLabel,
+ *              new L.ALS.Color("colorWidget", "Polygon color", this, "_applyPolygonColor").setValue("red")
+ *         );
  *         this.applyNewSettings(settings); // Apply the settings
+ *
+ *         // Let's also add polygon to the layer. It's fill color will be controlled by the color widget
+ *         this._polygon = L.polygon([[20, 20], [30, 30], [15, 15]]);
+ *         this._polyon.setStyle({
+ *             fillColor: "red",
+ *             fill: true
+ *         });
  *     },
  *
  *     // Override method for applying new settings
@@ -127,6 +163,12 @@ require("./LeafletLayers/LeafletLayers.js");
  *         // Set this style to the labels
  *         this._colorLabel.setStyle(style);
  *         this._numberLabel.setStyle(style);
+ *     },
+ *
+ *     // This callback accepts associated widget as an argument.
+ *     // Let's apply new polygon color here
+ *     _applyPolygonColor: function (widget) {
+ *         this._polygon.setStyle({ fillColor: widget.getValue() });
  *     },
  *
  *     statics: {
@@ -147,14 +189,14 @@ require("./LeafletLayers/LeafletLayers.js");
  * let map = L.map("map", { // Create a map
  *     preferCanvas: true, // Use it to improve performance
  *     keyboard: false // Setting this option to false is a MANDATORY! If you don't do that, you'll encounter problems when using L.ALS.LeafletLayers.WidgetLayer!
- * })
+ * });
  *
  * let layerSystem = new L.ALS.System(map); // Create an instance of this class
  * let baseLayer = ...; // Create some base layers
  * layerSystem.addBaseLayer(baseLayer, "My Base Layer"); // Add your base layers to the system
  * layerSystem.addLayerType(L.MyLayerType); // Add your layer types
  *
- * @param map {Map} Leaflet map object to manage
+ * @param map {L.Map} Leaflet map object to manage
  * @param options {SystemOptions} Options
  *
  * @class
@@ -171,10 +213,10 @@ L.ALS.System = L.Control.extend( /** @lends L.ALS.System.prototype */ {
 	/**
 	 * Indicates whether system should only one single layer or not
 	 * @package
+	 * @ignore
 	 */
 	_useOnlyOneLayer: false,
 
-	/** @constructs */
 	initialize: function (map, options) {
 		L.Control.prototype.initialize.call(this);
 
@@ -206,6 +248,7 @@ L.ALS.System = L.Control.extend( /** @lends L.ALS.System.prototype */ {
 		 *     container: Element
 		 *     settings: L.ALS.Layer.prototype.settings
 		 * }}
+		 * @private
 		 */
 		this._layerTypes = {};
 
@@ -213,19 +256,20 @@ L.ALS.System = L.Control.extend( /** @lends L.ALS.System.prototype */ {
 		 * Contains all added layers. Needed to track z-Index changes.
 		 * @type {Object<string, L.ALS.Layer>}
 		 * @package
+		 * @ignore
 		 */
 		this._layers = {};
 
 		/**
 		 * Currently selected layer
 		 * @type {L.ALS.Layer}
+		 * @private
 		 */
 		this._selectedLayer = undefined;
 
 		/**
 		 * A map passed to the constructor
 		 * @type {L.Map}
-		 * @public
 		 */
 		this.map = map;
 
@@ -243,6 +287,7 @@ L.ALS.System = L.Control.extend( /** @lends L.ALS.System.prototype */ {
 		 * Container for the layers
 		 * @type {Element}
 		 * @package
+		 * @ignore
 		 */
 		this._layerContainer = mapContainer.getElementsByClassName("als-menu-items")[0];
 
@@ -371,7 +416,6 @@ L.ALS.System = L.Control.extend( /** @lends L.ALS.System.prototype */ {
 	/**
 	 * Adds given layer type to the layer system
 	 * @param layerType - Class of the layer to add
-	 * @public
 	 */
 	addLayerType: function (layerType) {
 		let name = layerType.wizard.displayName;
@@ -407,6 +451,7 @@ L.ALS.System = L.Control.extend( /** @lends L.ALS.System.prototype */ {
 	 * Selects layer with given ID. This has been bound in SynthLayer.
 	 * @param layerId ID of a layer to select.
 	 * @package
+	 * @ignore
 	 */
 	_selectLayer: function (layerId) {
 		if (this._selectedLayer !== undefined) {
@@ -465,6 +510,7 @@ L.ALS.System = L.Control.extend( /** @lends L.ALS.System.prototype */ {
 	 * Deletes selected layer and LITERALLY everything related to it
 	 * @param shouldAskUser {boolean} If set to true, the message asking if user wants to delete selected layer will be displayed. Otherwise, layer will be silently deleted.
 	 * @package
+	 * @ignore
 	 */
 	_deleteLayer: function (shouldAskUser = true) {
 		if (this._selectedLayer === undefined || (shouldAskUser && !window.confirm(L.ALS.locale.systemConfirmDeletion)))
@@ -499,6 +545,7 @@ L.ALS.System = L.Control.extend( /** @lends L.ALS.System.prototype */ {
 	/**
 	 * Reorders layers. Will be called upon actual reordering and when it's needed to change Z-indices and bring everything back to normal;
 	 * @package
+	 * @ignore
 	 */
 	_reorderLayers: function () {
 		this._forEachLayer(function (layer) {
@@ -531,6 +578,7 @@ L.ALS.System = L.Control.extend( /** @lends L.ALS.System.prototype */ {
 	 *
 	 * @param event Event to be passed
 	 * @package
+	 * @ignore
 	 */
 	_passEvent: function (event) {
 
@@ -689,6 +737,7 @@ L.ALS.System = L.Control.extend( /** @lends L.ALS.System.prototype */ {
 
 	/**
 	 * Gathers all settings and passes it to the added layers
+	 * @private
 	 */
 	_applyNewSettings: function () {
 		for (let name in this._layers) {
@@ -699,12 +748,16 @@ L.ALS.System = L.Control.extend( /** @lends L.ALS.System.prototype */ {
 		}
 	},
 
+	/**
+	 * Contains static methods
+	 * @static
+	 */
 	statics: {
 
 		/**
 		 * Performs some important operations. Must be called after all Leaflet and ALS imports.
 		 * @param scaleUIForPhoneUsers {boolean} If set to true, UI for phone users will be scaled automatically. Otherwise UI size will stay the same. Scaling is done by increasing root font size to 36pt.
-		 * @static
+		 * @memberOf L.ALS.System
 		 */
 		initializeSystem: function (scaleUIForPhoneUsers = true) {
 

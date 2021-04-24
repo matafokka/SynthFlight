@@ -14,7 +14,6 @@ L.ALS.Widgets.Number = L.ALS.Widgets.BaseWidget.extend( /** @lends L.ALS.Widgets
 
 	customWrapperClassName: "als-number",
 
-	/** @constructs */
 	initialize: function (id, label, callbackObject = undefined, callback = "") {
 		L.ALS.Widgets.BaseWidget.prototype.initialize.call(this, "text", id, label, callbackObject, callback, ["edit", "change", "keyup"]);
 		this.setConstructorArguments(arguments);
