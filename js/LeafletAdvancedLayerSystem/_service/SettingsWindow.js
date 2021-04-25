@@ -93,7 +93,7 @@ L.ALS._service.SettingsWindow = L.ALS._service.SidebarWindow.extend( /** @lends 
 		this.forEachWidget((item, widget, key, value) => {
 			json[key] = value;
 		});
-		L.ALS.Helpers.saveAsText(JSON.stringify(json), "SynthFlightSettings.json");
+		L.ALS.Helpers.saveAsText(JSON.stringify(json), L.ALS._filePrefix + "Settings.json");
 	},
 
 	/**

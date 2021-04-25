@@ -33,7 +33,7 @@ L.ALS = {
 	 * @namespace
 	 * @ignore
 	 */
-	_service: {}
+	_service: {},
 };
 
 const Sortable = require("sortablejs");
@@ -61,10 +61,11 @@ require("./LeafletLayers/LeafletLayers.js");
  * @typedef {Object} SystemOptions
  * @property {string} [aboutHTML=undefined] HTML that will be displayed in "About" section in settings. Defaults to undefined.
  * @property {string} [defaultLocale="English"] Locale to use by default. Defaults to "English".
- * @property {boolean} [enableSettings=true] If set to true, user will be able to set up your application using built-in settings system. If you don't need it, set this property to false. However, you'll need to implement theme and locale switching yourself. System doesn't provide any API for that, so disabling this option is not recommended. Defaults to true.
- * @property {boolean} [enableProjects=true] If set to true, user will be able to save and load projects using built-in serialization system. If you don't need it, set this property to false. Defaults to true.
- * @property {boolean} [enableExport=true] If set to true, user will be able to export project. If you don't need it, set this property to false. Defaults to true.
- * @property {boolean} [enableBaseLayerSwitching=true] If set to true, user will be able to switch Leaflet base layers (i.e. map providers). If you don't need it, set this property to false. Defaults to true.
+ * @property {string} [filePrefix=""] Prefix that will be added to the saved files, i.e. if equals to "MyApp", saved project file will be called "MyAppProject.json" instead of "Project.json". Defaults to empty string.
+ * @property {boolean} [enableSettings=true] If set to true, user will be able to set up your application using built-in settings system. Otherwise, settings button will be removed. Setting this option to `false` is not recommended because you'll need to implement theme and locale switching yourself. System doesn't provide any API for that, so disabling this option is not recommended. Defaults to true.
+ * @property {boolean} [enableProjects=true] If set to true, user will be able to save and load projects using built-in serialization system. Otherwise, save and load buttons will be removed. Defaults to true.
+ * @property {boolean} [enableExport=true] If set to true, user will be able to export project to JSON. Otherwise, export button will be removed. Defaults to true.
+ * @property {boolean} [enableBaseLayerSwitching=true] If set to true, user will be able to switch Leaflet base layers (i.e. map providers). Otherwise, maps select menu will be removed. Defaults to true.
  * @property {"topleft"|"topright"|"bottomleft"|"bottomright"} [position="topright"] Position of the menu button. If set to topleft or bottom left, menu itself will be on the left side. Defaults to "topright".
  * @property {Function} [useOnlyThisLayer=undefined] If you need to display only one layer and disable ability to add other layers, pass your layer's class (class, not an instance, i.e. `L.ALS.Layer`, not `new L.ALS.Layer()`) here. At the end you'll end up with pretty much static menu. Defaults to undefined.
  */
@@ -230,10 +231,13 @@ L.ALS.System = L.Control.extend( /** @lends L.ALS.System.prototype */ {
 			enableBaseLayerSwitching: true,
 			position: "topright",
 			useOnlyThisLayer: undefined,
+			filePrefix: ""
 		}
 
 		/** @type {SystemOptions} */
 		let newOptions = L.ALS.Helpers.mergeOptions(defaultOptions, options);
+
+		L.ALS._filePrefix = newOptions.filePrefix;
 
 		/**
 		 * Contains base layers. Layers will be added in format: "Name": layer object. addBaseLayer() will update this object.
@@ -448,7 +452,7 @@ L.ALS.System = L.Control.extend( /** @lends L.ALS.System.prototype */ {
 	},
 
 	/**
-	 * Selects layer with given ID. This has been bound in SynthLayer.
+	 * Selects layer with given ID
 	 * @param layerId ID of a layer to select.
 	 * @package
 	 * @ignore
@@ -631,7 +635,7 @@ L.ALS.System = L.Control.extend( /** @lends L.ALS.System.prototype */ {
 		// FileSaver doesn't work correctly with older Chrome versions (around v14). So we have to perform following check:
 		let type = L.ALS.Helpers.supportsBlob ? "blob" : "base64";
 		zip.generateAsync({type: type}).then((data) => {
-			let filename = "SynthFlightProject.zip";
+			let filename = L.ALS._filePrefix + "Project.zip";
 			if (L.ALS.Helpers.supportsBlob)
 				saveAs(data, filename)
 			else
@@ -658,7 +662,7 @@ L.ALS.System = L.Control.extend( /** @lends L.ALS.System.prototype */ {
 			json[layer.id] = layer.serialize(seenObjects);
 		}
 		L.ALS.Serializable.cleanUp(seenObjects);
-		L.ALS.Helpers.saveAsText(JSON.stringify(json), "SynthFlightProject.json");
+		L.ALS.Helpers.saveAsText(JSON.stringify(json), L.ALS._filePrefix + "Project.json");
 	},
 
 	/**
@@ -669,7 +673,6 @@ L.ALS.System = L.Control.extend( /** @lends L.ALS.System.prototype */ {
 	_loadProject: function (json) {
 		try { this._loadProjectWorker(json); }
 		catch (e) {
-			// TODO: Add mechanism to change program name and link to the program's page
 			window.alert(L.ALS.systemNotProject);
 			console.log(e);
 		}

@@ -34,7 +34,7 @@ L.ALS.Locales["English"] = {
 	settingsImportButton: "Import Settings",
 	settingsRevertButton: "Revert back to default value",
 	settingsLoadingNotSupported: "Sorry, your browser doesn't support file loading. Please, update it.",
-	settingsImportError: "File that you try to load is not SynthFlight settings file",
+	settingsImportError: "File that you try to load is not a valid settings file",
 	settingsSavingNotSupported: "Settings can't be saved upon page refresh because your browser doesn't support it. Please, install any modern browser, so it won't happen.",
 	settingsAboutItem: "About",
 
@@ -51,7 +51,7 @@ L.ALS.Locales["English"] = {
 	systemProjectAlreadyOpen: "You already have an opened project. If you'll open another project, your changes won't be saved. Are you sure you wan't to load another one?",
 	systemProjectLoadingNotSupported: "Sorry, your browser doesn't support project loading. However, you still can create a new project, save it and open it later in a newer browser.",
 	systemConfirmDeletion: "Are you sure you want to delete this layer?",
-	systemNotProject: "File that you try to load is not SynthFlight project.",
+	systemNotProject: "File that you're trying to load is not a valid project.",
 
 	// Layer
 

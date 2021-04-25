@@ -110,7 +110,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend( /** @lends L.ALS.Layer.prototype */ {
 		 * @type {string}
 		 * @readonly
 		 */
-		this.id = "SynthLayer" + L.ALS.Helpers.generateID();
+		this.id = "ALSLayer" + L.ALS.Helpers.generateID();
 
 		/**
 		 * Contains added Leaflet layers
@@ -374,7 +374,7 @@ L.ALS.Layer = L.ALS.Widgetable.extend( /** @lends L.ALS.Layer.prototype */ {
 	onNameChange: function() {},
 
 	/**
-	 * Adds Leaflet layers to this SynthFlight layer.
+	 * Adds Leaflet layers to this layer.
 	 *
 	 * Do NOT override!
 	 *

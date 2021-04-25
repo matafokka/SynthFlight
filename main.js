@@ -47,7 +47,10 @@ if (!L.ALS.Helpers.isMobile) {
 }
 
 // Initialize layer system. Create and add base layers.
-let layerSystem = new L.ALS.System(map, { aboutHTML: require("./js/SynthFlightModules/about.js") }).addTo(map);
+let layerSystem = new L.ALS.System(map, {
+	aboutHTML: require("./js/SynthFlightModules/about.js"),
+	filePrefix: "SynthFlight"
+}).addTo(map);
 
 let osmLayer = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 	maxZoom: 19,

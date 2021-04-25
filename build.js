@@ -119,7 +119,7 @@ for (let stuff of toCopy)
 
 // Build electron app
 if (!onlyBrowser) {
-	let ignore = ["build.js", ".idea", ".cache", "dist", "ESRIGridBackup"];
+	let ignore = ["build.js", ".idea", ".cache", "dist", "docs", "ESRIGridBackup"];
 	packager({
 		all: true,
 		dir: ".",
