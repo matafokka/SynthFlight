@@ -1,8 +1,8 @@
-# SynthFlight Pre-Alpha
+# SynthFlight Alpha
 
 SynthFlight is a fully client-side software for planning aerial photography. Run it either on the desktop or in a [browser online](https://matafokka.github.io/SynthFlight/).
 
-This is a pre-alpha version, so expect bugs, crashes, errors, missing functions, API changes, etc.
+This is a alpha version, so expect bugs, crashes, errors, missing functions, API changes, etc.
 
 For now, it only can plan photography by a graticule or grid. However, planning by custom polygons or flight paths is on its way.
 

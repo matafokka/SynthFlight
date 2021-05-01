@@ -1,3 +1,3 @@
-require("core-js/stable");
+/*require("core-js/stable");
 require("regenerator-runtime/runtime");
-require("keyboardevent-key-polyfill").polyfill();
+require("keyboardevent-key-polyfill").polyfill();*/

@@ -7,13 +7,13 @@
 // So the easiest solution is to move main.js into project's root directory.
 // I've spend hours struggling with this issue, so don't try to reorganise the code, you'll fail and, as it seems, break compatibility with the older Electron versions.
 
-require("./js/LeafletAdvancedLayerSystem/System.js");
-require("./js/LeafletAdvancedLayerSystem/locales/Russian.js");
-require("./js/SynthFlightModules/locales/English.js");
-require("./js/SynthFlightModules/locales/Russian.js");
-require("./js/SynthFlightModules/SynthShapefileLayer.js");
-require("./js/SynthFlightModules/SynthGridLayer.js");
-require("./node_modules/leaflet.coordinates/dist/Leaflet.Coordinates-0.1.5.min.js")
+require("leaflet-advanced-layer-system");
+L.ALS.Locales.AdditionalLocales.Russian();
+require("./locales/English.js");
+require("./locales/Russian.js");
+require("./SynthShapefileLayer.js");
+require("./SynthGridLayer.js");
+require("./node_modules/leaflet.coordinates/dist/Leaflet.Coordinates-0.1.5.min.js");
 
 L.ALS.System.initializeSystem();
 
@@ -48,7 +48,7 @@ if (!L.ALS.Helpers.isMobile) {
 
 // Initialize layer system. Create and add base layers.
 let layerSystem = new L.ALS.System(map, {
-	aboutHTML: require("./js/SynthFlightModules/about.js"),
+	aboutHTML: require("./about.js"),
 	filePrefix: "SynthFlight"
 }).addTo(map);
 

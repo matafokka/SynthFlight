@@ -1,0 +1,27 @@
+.leaflet-control-coordinates .uiElement {
+	font-size: 0.75rem !important;
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
+.grd-lyr-airport-icon {
+	display: flex !important;
+	border: 2px solid white;
+	border-radius: 50% !important;
+	width: 2rem;
+	height: 2rem;
+	color: white;
+	background: rgba(0, 0, 100, 0.4);
+	box-shadow: 0 0 0 1px rgb(0, 0, 100);
+	transform: translate(-50%, -50%);
+}
+
+.not-mobile .grd-lyr-airport-icon:hover {
+	background: rgba(0, 0, 100, 0.7);
+	cursor: move;
+}
+
+.grd-lyr-airport-icon:active {
+	background: rgba(0, 0, 100, 1) !important;
+	cursor: move;
+}

@@ -3,13 +3,13 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 	// SynthGridWizard
 
 	gridWizardDisplayName: "Слой Сетки",
-	gridWizardNotification: `Если масштаб слишком мелкий, сетка будет скрыта. Пожалуйста, увеличьте масштаб, чтобы ее увидеть.
+	gridWizardNotification: `Если масштаб карты слишком мелкий, сетка будет скрыта. Пожалуйста, увеличьте масштаб карты, чтобы ее увидеть.
 	
 	Чтобы выделить полигон, либо нажмите на него правой кнопкой мыши (или тапните и задержите палец) или два раза кликните (тапните) на него.`,
 
-	gridStandardScales: "Масштаб сетки",
-	gridLngDistance: "Расстояние между параллелями",
-	gridLatDistance: "Расстояние между меридианами",
+	gridStandardScales: "Масштаб сетки:",
+	gridLngDistance: "Расстояние между параллелями:",
+	gridLatDistance: "Расстояние между меридианами:",
 
 	// SynthGridLayer
 
@@ -19,21 +19,21 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 	hidePathsConnections: "Скрыть соединения маршрутов",
 	hidePathsByMeridians: "Скрыть маршруты по меридианам",
 	hidePathsByParallels: "Скрыть маршруты по параллелям",
-	lineThickness: "Толщина линий",
-	gridBorderColor: "Цвет обводки сетки",
-	gridFillColor: "Цвет заливки сетки",
-	meridiansColor: "Цвет маршрутов по меридианам",
-	parallelsColor: "Цвет маршрутов по параллелям",
-	airportLat: "Широта аэропорта",
-	airportLng: "Долгота аэропорта",
-	aircraftSpeed: "Скорость самолета (km/h)",
-	imageScale: "Делитель масштаба изображения",
-	cameraWidth: "Ширина камеры (px)",
-	cameraHeight: "Высота камеры (px)",
-	pixelWidth: "Размер пикселя (μm)",
-	overlayBetweenPaths: "Перекрытие между изображениями с соседних маршрутов (%)",
-	overlayBetweenImages: "Перекрытие между изображениями с одного маршрута (%)",
-	focalLength: "Фокусное расстояние (mm)",
+	lineThickness: "Толщина линий:",
+	gridBorderColor: "Цвет обводки сетки:",
+	gridFillColor: "Цвет заливки сетки:",
+	meridiansColor: "Цвет маршрутов по меридианам:",
+	parallelsColor: "Цвет маршрутов по параллелям:",
+	airportLat: "Широта аэропорта:",
+	airportLng: "Долгота аэропорта:",
+	aircraftSpeed: "Скорость самолета (km/h):",
+	imageScale: "Делитель масштаба изображения:",
+	cameraWidth: "Ширина камеры (px):",
+	cameraHeight: "Высота камеры (px):",
+	pixelWidth: "Размер пикселя (μm):",
+	overlayBetweenPaths: "Перекрытие между изображениями с соседних маршрутов (%):",
+	overlayBetweenImages: "Перекрытие между изображениями с одного маршрута (%):",
+	focalLength: "Фокусное расстояние (mm):",
 	lngPathsCount: "Число маршрутов в одной ячейке по параллелям",
 	latPathsCount: "Число маршрутов в одной ячейке по меридианам",
 	lngPathsLength: "Длина маршрутов по параллелям",
@@ -53,8 +53,8 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 
 	airportForLayer: "Аэропорт для слоя",
 
-	minHeight: "Мин. высота (m)",
-	maxHeight: "Макс. высота (m)",
+	minHeight: "Мин. высота (m):",
+	maxHeight: "Макс. высота (m):",
 	meanHeight: "Ср. высота",
 	absoluteHeight: "Абс. высота",
 	elevationDifference: "(Макс. высота - Мин. высота) / Высота полета",
@@ -68,17 +68,17 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 
 	// SynthGridSettings
 
-	defaultGridBorderColor: "Цвет обводки сетки по умолчанию",
-	defaultGridFillColor: "Цвет заливки сетки по умолчанию",
-	defaultMeridiansColor: "Цвет маршрутов по меридианам по умолчанию",
-	defaultParallelsColor: "Цвет маршрутов по параллелям по умолчанию",
-	defaultLineThickness: "Толщина линий по умолчанию",
-	gridHidingFactor: "Увеличить отзывчивость, скрывая сетку на более высоком масштабе. Чем выше следующее значение, тем отзывчивее будет программа",
+	defaultGridBorderColor: "Цвет обводки сетки по умолчанию:",
+	defaultGridFillColor: "Цвет заливки сетки по умолчанию:",
+	defaultMeridiansColor: "Цвет маршрутов по меридианам по умолчанию:",
+	defaultParallelsColor: "Цвет маршрутов по параллелям по умолчанию:",
+	defaultLineThickness: "Толщина линий по умолчанию:",
+	gridHidingFactor: "Увеличить отзывчивость, скрывая сетку при более мелком масштабе. Чем выше это значение, тем отзывчивее будет программа:",
 
 	// SynthShapefileWizard
 
 	shapefileDisplayName: "Слой Shapefile",
-	zippedShapefile: "Сжатый shapefile (zip-архив)",
+	zippedShapefile: "Сжатый shapefile (zip-архив):",
 
 	// SynthShapefileLayer
 
@@ -86,13 +86,13 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 	shapefileNoFeatures: "Этот shapefile не содержит объектов, поэтому не будет добавлен",
 	shapefileBroken: "Экстент этого shapefile неправильный, слой не будет полностью отображен на карте. Пожалуйста, откройте его в вашей любимой ГИС и исправьте экстент",
 	shapefileNotValid: "Этот файл не является shapefile-ом",
-	shapefileBorderColor: "Цвет обводки",
-	shapefileFillColor: "Цвет заливки",
+	shapefileBorderColor: "Цвет обводки:",
+	shapefileFillColor: "Цвет заливки:",
 
 	// Shapefile settings
 
-	shapefileDefaultFillColor: "Цвет заливки по умолчанию",
-	shapefileDefaultBorderColor: "Цвет обводки по умолчанию",
+	shapefileDefaultFillColor: "Цвет заливки по умолчанию:",
+	shapefileDefaultBorderColor: "Цвет обводки по умолчанию:",
 
 	// About
 

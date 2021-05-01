@@ -1,7 +1,7 @@
 const union = require("@turf/union").default;
 const bbox = require("@turf/bbox").default;
 const turfHelpers = require("@turf/helpers");
-const MathTools = require("../MathTools.js");
+const MathTools = require("./MathTools.js");
 const RomanNumerals = require("roman-numerals");
 const geojsonMerge = require("@mapbox/geojson-merge"); // Using this since turfHelpers.featureCollection() discards previously defined properties.
 require("./SynthGridWizard.js");
