@@ -3,13 +3,13 @@ L.ALS.Locales.addLocaleProperties("English", {
 	// SynthGridWizard
 
 	gridWizardDisplayName: "Grid Layer",
-	gridWizardNotification: `If zoom is too low, generated grid will be hidden. Please, zoom in to see it.
+	gridWizardNotification: `If map scale is too low, grid will be hidden. Please, zoom in to see it.
 	
 	To select a polygon, either click right mouse button (or tap and hold) or double-click (or double-tap) on it.`,
 
-	gridStandardScales: "Grid scale",
-	gridLngDistance: "Distance between parallels",
-	gridLatDistance: "Distance between meridians",
+	gridStandardScales: "Grid scale:",
+	gridLngDistance: "Distance between parallels:",
+	gridLatDistance: "Distance between meridians:",
 
 	// SynthGridLayer
 
@@ -19,21 +19,21 @@ L.ALS.Locales.addLocaleProperties("English", {
 	hidePathsConnections: "Hide paths' connections",
 	hidePathsByMeridians: "Hide paths by meridians",
 	hidePathsByParallels: "Hide paths by parallels",
-	lineThickness: "Line thickness",
-	gridBorderColor: "Border color",
-	gridFillColor: "Fill color",
-	meridiansColor: "Paths by meridians color",
-	parallelsColor: "Paths by parallels color",
-	airportLat: "Airport latitude",
-	airportLng: "Airport longitude",
-	aircraftSpeed: "Aircraft speed (km/h)",
-	imageScale: "Image scale denominator",
-	cameraWidth: "Camera width (px)",
-	cameraHeight: "Camera height (px)",
-	pixelWidth: "Pixel size (μm)",
-	overlayBetweenPaths: "Overlay between images from adjacent paths (%)",
-	overlayBetweenImages: "Overlay between images from the same path (%)",
-	focalLength: "Focal length (mm)",
+	lineThickness: "Line thickness:",
+	gridBorderColor: "Border color:",
+	gridFillColor: "Fill color:",
+	meridiansColor: "Paths by meridians color:",
+	parallelsColor: "Paths by parallels color:",
+	airportLat: "Airport latitude:",
+	airportLng: "Airport longitude:",
+	aircraftSpeed: "Aircraft speed (km/h):",
+	imageScale: "Image scale denominator:",
+	cameraWidth: "Camera width (px):",
+	cameraHeight: "Camera height (px):",
+	pixelWidth: "Pixel size (μm):",
+	overlayBetweenPaths: "Overlay between images from adjacent paths (%):",
+	overlayBetweenImages: "Overlay between images from the same path (%):",
+	focalLength: "Focal length (mm):",
 	lngPathsCount: "Paths count in one cell by parallels",
 	latPathsCount: "Paths count in one cell by meridians",
 	lngPathsLength: "Length of paths by parallels",
@@ -58,8 +58,8 @@ L.ALS.Locales.addLocaleProperties("English", {
 
 	airportForLayer: "Airport for layer",
 
-	minHeight: "Min. height (m)",
-	maxHeight: "Max. height (m)",
+	minHeight: "Min. height (m):",
+	maxHeight: "Max. height (m):",
 	meanHeight: "Mean height",
 	absoluteHeight: "Absolute height",
 	elevationDifference: "(Max. height - Min. height) / Flight height",
@@ -73,17 +73,17 @@ L.ALS.Locales.addLocaleProperties("English", {
 
 	// SynthGridSettings
 
-	defaultGridBorderColor: "Default grid border color",
-	defaultGridFillColor: "Default grid fill color",
-	defaultMeridiansColor: "Paths by meridians default color",
-	defaultParallelsColor: "Paths by parallels default color",
-	defaultLineThickness: "Default line thickness",
-	gridHidingFactor: "Increase responsiveness by hiding grid at higher zoom levels. The higher the following value, the more responsive program will be",
+	defaultGridBorderColor: "Default grid border color:",
+	defaultGridFillColor: "Default grid fill color:",
+	defaultMeridiansColor: "Paths by meridians default color:",
+	defaultParallelsColor: "Paths by parallels default color:",
+	defaultLineThickness: "Default line thickness:",
+	gridHidingFactor: "Increase responsiveness by hiding grid at smaller map scales. The higher this value, the more responsive program will be:",
 
 	// SynthShapefileWizard
 
 	shapefileDisplayName: "Zipped Shapefile Layer",
-	zippedShapefile: "Zipped shapefile",
+	zippedShapefile: "Zipped shapefile:",
 
 	// SynthShapefileLayer
 
@@ -91,17 +91,17 @@ L.ALS.Locales.addLocaleProperties("English", {
 	shapefileNoFeatures: "This shapefile doesn't contain any features so it won't be added",
 	shapefileBroken: "Extent of this shapefile is broken, layer won't be fully displayed on the map. Please, open it in your favourite GIS and fix the extent.",
 	shapefileNotValid: "This file is not valid zipped shapefile",
-	shapefileBorderColor: "Border color",
-	shapefileFillColor: "Fill color",
+	shapefileBorderColor: "Border color:",
+	shapefileFillColor: "Fill color:",
 
 	// Shapefile settings
 
-	shapefileDefaultFillColor: "Default fill color",
-	shapefileDefaultBorderColor: "Default border color",
+	shapefileDefaultFillColor: "Default fill color:",
+	shapefileDefaultBorderColor: "Default border color:",
 
 	// About
 
-	firstParagraph: "SynthFlight is a fully client-side software for planning aerial photography. This is a pre-alpha version, so expect bugs, crashes, errors, missing functions, API changes, etc.",
+	firstParagraph: "SynthFlight is a fully client-side software for planning aerial photography. This is an alpha version, so expect bugs, crashes, errors, missing functions, API changes, etc.",
 
 	secondParagraphPart1: "Visit project's",
 	secondParagraphPart2: "GitHub page",

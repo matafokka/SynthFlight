@@ -2,7 +2,12 @@ require("./SynthShapefileWizard.js");
 require("./SynthShapefileSettings.js");
 const shp = require("shpjs");
 
-L.ALS.SynthShapefileLayer = L.ALS.Layer.extend({
+/**
+ * Shapefile layer
+ * @class
+ * @extends L.ALS.Layer
+ */
+L.ALS.SynthShapefileLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthShapefileLayer.prototype */ {
 
 	defaultName: "shapefileDefaultName",
 
@@ -44,8 +49,8 @@ L.ALS.SynthShapefileLayer = L.ALS.Layer.extend({
 	},
 
 	_displayShapefile: function (geoJson) {
-		let borderColor = new L.ALS.Widgets.Color("borderColor", "shapefileBorderColor", this, "_setColor", { "value": this.borderColor });
-		let fillColor = new L.ALS.Widgets.Color("fillColor", "shapefileFillColor", this, "_setColor", { "value": this.fillColor });
+		let borderColor = (new L.ALS.Widgets.Color("borderColor", "shapefileBorderColor", this, "_setColor")).setValue(this.borderColor);
+		let fillColor = (new L.ALS.Widgets.Color("fillColor", "shapefileFillColor", this, "_setColor")).setValue(this.fillColor);
 
 		this.type = geoJson.features[0].geometry.type;
 		let menu = [];
@@ -67,7 +72,7 @@ L.ALS.SynthShapefileLayer = L.ALS.Layer.extend({
 	},
 
 	_setColor(widget) {
-		this[widget.getId()] = widget.getValue();
+		this[widget.id] = widget.getValue();
 		this._setLayerColors();
 	},
 

@@ -1,13 +1,18 @@
 const union = require("@turf/union").default;
 const bbox = require("@turf/bbox").default;
 const turfHelpers = require("@turf/helpers");
-const MathTools = require("../MathTools.js");
+const MathTools = require("./MathTools.js");
 const RomanNumerals = require("roman-numerals");
 const geojsonMerge = require("@mapbox/geojson-merge"); // Using this since turfHelpers.featureCollection() discards previously defined properties.
 require("./SynthGridWizard.js");
 require("./SynthGridSettings.js");
 
-L.ALS.SynthGridLayer = L.ALS.Layer.extend({
+/**
+ * Layer that allows users to plan aerial photography using grid
+ * @class
+ * @extends L.ALS.Layer
+ */
+L.ALS.SynthGridLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGridLayer.prototype */ {
 
 	defaultName: "Grid Layer",
 
@@ -35,84 +40,36 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 		this.serializationIgnoreList.push("selectedPolygons", "_airportMarker", "lngDistance", "latDistance", "_currentStandardScale");
 
 		// Create menu
-
-		let camOpts = {
-			"min": 1,
-			"step": 1,
-			"value": 17000
-		};
-
-		let calculateParametersError = new L.ALS.Widgets.SimpleLabel("calculateParametersError");
-		calculateParametersError.setStyle("error");
-		let cameraParametersWarning = new L.ALS.Widgets.SimpleLabel("cameraParametersWarning");
-		cameraParametersWarning.setStyle("warning");
-
-		let menu = [
+		this.addWidgets(
 			new L.ALS.Widgets.Checkbox("hidePolygonWidgets", "hidePolygonWidgets", this, "_hidePolygonWidgets"),
 			new L.ALS.Widgets.Checkbox("hideNumbers", "hideNumbers", this, "_hidePointsNumbers"),
 			new L.ALS.Widgets.Checkbox("hidePathsConnections", "hidePathsConnections", this, "_hidePathsConnections"),
 			new L.ALS.Widgets.Checkbox("hidePathsByMeridians", "hidePathsByMeridians", this, "_hidePathsByMeridians"),
 			new L.ALS.Widgets.Checkbox("hidePathsByParallels", "hidePathsByParallels", this, "_hidePathsByParallels"),
-			new L.ALS.Widgets.Number("lineThickness", "lineThickness", this, "_setLineThickness", {
-				"min": 1,
-				"max": 20,
-				"value": this.lineThickness
-			}),
-			new L.ALS.Widgets.Color("gridBorderColor", "gridBorderColor", this, "_setColor", { "value": this.gridBorderColor }),
-			new L.ALS.Widgets.Color("gridFillColor", "gridFillColor", this, "_setColor", { "value": this.gridFillColor }),
-			new L.ALS.Widgets.Color("meridiansColor", "meridiansColor", this, "_setColor", { "value": this.meridiansColor }),
-			new L.ALS.Widgets.Color("parallelsColor", "parallelsColor", this, "_setColor", { "value": this.parallelsColor }),
+			(new L.ALS.Widgets.Number("lineThickness", "lineThickness", this, "_setLineThickness")).setMin(1).setMax(20).setValue(this.lineThickness),
+			(new L.ALS.Widgets.Color("gridBorderColor", "gridBorderColor", this, "_setColor")).setValue(this.gridBorderColor),
+			(new L.ALS.Widgets.Color("gridFillColor", "gridFillColor", this, "_setColor")).setValue(this.gridFillColor),
+			(new L.ALS.Widgets.Color("meridiansColor", "meridiansColor", this, "_setColor")).setValue(this.meridiansColor),
+			(new L.ALS.Widgets.Color("parallelsColor", "parallelsColor", this, "_setColor")).setValue(this.parallelsColor),
 
 			new L.ALS.Widgets.Divider("div1"),
 
-			new L.ALS.Widgets.Number("airportLat", "airportLat", this, "_setAirportLatLng", {
-				"min": -90,
-				"max": 90,
-				"step": 0.01
-			}),
-			new L.ALS.Widgets.Number("airportLng", "airportLng", this, "_setAirportLatLng", {
-				"min": -180,
-				"max": 180,
-				"step": 0.01
-			}),
-			new L.ALS.Widgets.Number("aircraftSpeed", "aircraftSpeed", this, "calculateParameters", {
-				"min": 0,
-				"step": 1,
-				"value": 350
-			}),
-			new L.ALS.Widgets.Number("imageScale", "imageScale", this, "calculateParameters", {
-				"min": 1,
-				"step": 1,
-				"value": 25000
-			}),
-			new L.ALS.Widgets.Number("cameraWidth", "cameraWidth", this, "calculateParameters", camOpts),
-			new L.ALS.Widgets.Number("cameraHeight", "cameraHeight", this, "calculateParameters", camOpts),
-			new L.ALS.Widgets.Number("pixelWidth", "pixelWidth", this, "calculateParameters", {
-				"min": 0.1,
-				"step": 0.1,
-				"value": 5
-			}),
-			new L.ALS.Widgets.Number("overlayBetweenPaths", "overlayBetweenPaths", this, "calculateParameters", {
-				"min": 60,
-				"max": 100,
-				"step": 0.1,
-				"value": 60
-			}),
-			new L.ALS.Widgets.Number("overlayBetweenImages", "overlayBetweenImages", this, "calculateParameters", {
-				"min": 30,
-				"max": 100,
-				"step": 0.1,
-				"value": 30
-			}),
-			new L.ALS.Widgets.Number("focalLength", "focalLength", this, "calculateParameters", {
-				"min": 0.001,
-				"step": 1,
-				"value": 112
-			}),
-			calculateParametersError,
-			cameraParametersWarning,
-			new L.ALS.Widgets.Divider("div2"),
-		];
+			(new L.ALS.Widgets.Number("airportLat", "airportLat", this, "_setAirportLatLng")).setMin(-90).setMax(90).setStep(0.01),
+			(new L.ALS.Widgets.Number("airportLng", "airportLng", this, "_setAirportLatLng")).setMin(-180).setMax(180).setStep(0.01),
+			(new L.ALS.Widgets.Number("aircraftSpeed", "aircraftSpeed", this, "calculateParameters")).setMin(1).setStep(1).setValue(350),
+			(new L.ALS.Widgets.Number("imageScale", "imageScale", this, "calculateParameters")).setMin(1).setStep(1).setValue(25000),
+
+			(new L.ALS.Widgets.Number("cameraWidth", "cameraWidth", this, "calculateParameters")).setMin(1).setStep(1).setValue(17000),
+			(new L.ALS.Widgets.Number("cameraHeight", "cameraHeight", this, "calculateParameters")).setMin(1).setStep(1).setValue(17000),
+			(new L.ALS.Widgets.Number("pixelWidth", "pixelWidth", this, "calculateParameters")).setMin(0.1).setStep(0.1).setValue(5),
+			(new L.ALS.Widgets.Number("overlayBetweenPaths", "overlayBetweenPaths", this, "calculateParameters")).setMin(60).setMax(100).setStep(0.1).setValue(60),
+			(new L.ALS.Widgets.Number("overlayBetweenImages", "overlayBetweenImages", this, "calculateParameters")).setMin(30).setMax(100).setStep(0.1).setValue(30),
+			(new L.ALS.Widgets.Number("focalLength", "focalLength", this, "calculateParameters")).setMin(0.001).setStep(1).setValue(112),
+
+			(new L.ALS.Widgets.SimpleLabel("calculateParametersError")).setStyle("error"),
+			(new L.ALS.Widgets.SimpleLabel("cameraParametersWarning")).setStyle("warning"),
+			new L.ALS.Widgets.Divider("div2")
+		);
 
 		let valueLabels = [
 			new L.ALS.Widgets.ValueLabel("lngPathsCount", "lngPathsCount"),
@@ -137,9 +94,6 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 			new L.ALS.Widgets.ValueLabel("FOV", "FOV", "deg"),
 			new L.ALS.Widgets.ValueLabel("GFOV", "GFOV", "m"),
 		];
-
-		for (let widget of menu)
-			this.addWidget(widget);
 
 		for (let widget of valueLabels) {
 			widget.setFormatNumbers(true);
@@ -224,7 +178,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 	onNameChange: function() {
 		let popup = document.createElement("div");
 		L.ALS.Locales.localizeElement(popup, "airportForLayer", "innerText");
-		popup.innerText += " " + this.name;
+		popup.innerText += " " + this.getName();
 		this._airportMarker.bindPopup(popup);
 	},
 
@@ -465,25 +419,15 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 			polygon.setStyle({fill: true});
 			this.selectedPolygons[name] = polygon;
 
-			let controlsContainer = new L.WidgetLayer(polygon.getLatLngs()[0][1], "topLeft");
-			let numberAttrs = {
-				min: 1,
-				value: 1
-			};
-
-			let errorLabel = new L.ALS.Widgets.SimpleLabel("error");
-			errorLabel.setStyle("error");
-			let widgets = [
-				new L.ALS.Widgets.Number("minHeight", "minHeight", this, "_calculatePolygonParameters", numberAttrs),
-				new L.ALS.Widgets.Number("maxHeight", "maxHeight", this, "_calculatePolygonParameters", numberAttrs),
+			let controlsContainer = (new L.WidgetLayer(polygon.getLatLngs()[0][1], "topLeft")).addWidgets(
+				(new L.ALS.Widgets.Number("minHeight", "minHeight", this, "_calculatePolygonParameters")).setMin(1).setValue(1),
+				(new L.ALS.Widgets.Number("maxHeight", "maxHeight", this, "_calculatePolygonParameters")).setMin(1).setValue(1),
 				new L.ALS.Widgets.ValueLabel("meanHeight", "meanHeight", "m"),
 				new L.ALS.Widgets.ValueLabel("absoluteHeight", "absoluteHeight", "m"),
 				new L.ALS.Widgets.ValueLabel("elevationDifference", "elevationDifference"),
 				new L.ALS.Widgets.ValueLabel("reliefType", "reliefType"),
-				errorLabel
-			];
-			for (let widget of widgets)
-				controlsContainer.addWidget(widget);
+				(new L.ALS.Widgets.SimpleLabel("error")).setStyle("error")
+			);
 
 			let toFormatNumbers = ["meanHeight", "absoluteHeight", "elevationDifference"];
 			for (let id of toFormatNumbers)
@@ -502,7 +446,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 	},
 
 	_setColor: function (widget) {
-		this[widget.getId()] = widget.getValue();
+		this[widget.id] = widget.getValue();
 		this._updateGrid();
 	},
 
@@ -992,7 +936,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend({
 		jsons.push(airport);
 
 		if (this["pathsByMeridians"].isEmpty() || this["pathsByParallels"].isEmpty()) {
-			window.alert(`No paths has been drawn in layer \"${this.name}\"! You'll get only selected gird cells and airport position.`);
+			window.alert(`No paths has been drawn in layer \"${this.getName()}\"! You'll get only selected gird cells and airport position.`);
 			return geojsonMerge.merge(jsons);
 		}
 

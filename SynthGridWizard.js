@@ -1,4 +1,9 @@
-L.ALS.SynthGridWizard = L.ALS.Wizard.extend({
+/**
+ * Wizard for SynthGridLayer
+ * @class
+ * @extends L.ALS.Wizard
+ */
+L.ALS.SynthGridWizard = L.ALS.Wizard.extend( /** @lends L.ALS.SynthGridWizard.prototype */ {
 
 	displayName: "gridLayerDefaultName",
 
@@ -18,33 +23,18 @@ L.ALS.SynthGridWizard = L.ALS.Wizard.extend({
 			"1:2 000": [25 / 3600, 37.5 / 3600],
 		}
 
-		let notificationLabel = new L.ALS.Widgets.SimpleLabel("notificationLabel", "gridWizardNotification");
-		notificationLabel.setStyle("message");
-
 		let dropDownList = new L.ALS.Widgets.DropDownList("gridStandardScales", "gridStandardScales", this, "onGridStandardScalesChange");
-		let widgets = [
-			dropDownList,
-			new L.ALS.Widgets.Number("gridLngDistance", "gridLngDistance", undefined, "", {
-				"min": 0.0001,
-				"max": 180,
-				"step": 0.001
-			}),
-			new L.ALS.Widgets.Number("gridLatDistance", "gridLatDistance", undefined, "", {
-				"min": 0.0001,
-				"max": 90,
-				"step": 0.001
-			}),
-			notificationLabel
-		];
-		for (let widget of widgets)
-			this.addWidget(widget);
-
 		for (let param in this.standardScales) {
 			if (this.standardScales.hasOwnProperty(param))
 				dropDownList.addItem(param);
 		}
-		dropDownList.addItem("Custom");
-		dropDownList.selectItem("1:25 000");
+		dropDownList.addItem("Custom").selectItem("1:25 000");
+
+		this.addWidgets(dropDownList,
+			(new L.ALS.Widgets.Number("gridLngDistance", "gridLngDistance")).setMin(0.0001).setMax(180).setStep(0.001),
+			(new L.ALS.Widgets.Number("gridLatDistance", "gridLatDistance")).setMin(0.0001).setMax(90).setStep(0.001),
+			(new L.ALS.Widgets.SimpleLabel("notificationLabel", "gridWizardNotification")).setStyle("message")
+		);
 	},
 
 	onGridStandardScalesChange: function (widget) {

@@ -1,7 +1,7 @@
 {
   "name": "synthflight",
   "productName": "SynthFlight",
-  "version": "0.0.2-pre-alpha",
+  "version": "0.0.8-alpha",
   "description": "A fully client-side software for planning aerial photography",
   "main": "electronApp.js",
   "browser": "index.html",
@@ -41,8 +41,9 @@
   },
   "scripts": {
     "start": "electron electronApp.js --debug",
-    "test": "node js/tests/runTests.js",
-    "buildAndRun": "node build.js -b && http-server './dist/SynthFlight-browser' -c-1"
+    "postinstall": "npm link leaflet-advanced-layer-system",
+    "buildAndRun": "node build.js -b && http-server './dist/SynthFlight-browser' -c-1",
+    "buildAndRunDebug": "node build.js -b -d && http-server './dist/SynthFlight-browser' -c-1"
   },
   "keywords": [],
   "author": "matafokka",
@@ -55,23 +56,14 @@
     "@turf/bbox": "^6.0.1",
     "@turf/helpers": "^6.1.4",
     "@turf/union": "^6.0.3",
-    "classlist": "github:eligrey/classList.js",
     "core-js": "^3.7.0",
     "debounce": "^1.2.1",
-    "feather-icons": "^4.28.0",
-    "file-saver": "^2.0.5",
-    "jscolor": "github:EastDesire/jscolor#2.1.1",
-    "jszip": "^3.5.0",
-    "keyboardevent-key-polyfill": "^1.1.0",
     "leaflet": "^1.7.1",
+    "leaflet-advanced-layer-system": "^1.0.0",
     "leaflet.coordinates": "~0.1.5",
-    "object-defineproperty-ie": "^3.1.0",
     "regenerator-runtime": "^0.13.7",
-    "remixicon": "^2.5.0",
     "roman-numerals": "^0.3.2",
-    "shpjs": "^3.6.2",
-    "sortablejs": "~1.10.2",
-    "time-input-polyfill": "^1.0.9"
+    "shpjs": "^3.6.3"
   },
   "devDependencies": {
     "@babel/core": "^7.12.3",
@@ -80,17 +72,13 @@
     "@babel/preset-env": "^7.12.1",
     "babelify": "^10.0.0",
     "browserify": "~13.3.0",
-    "chalk": "^2.4.2",
     "common-shakeify": "^0.6.2",
-    "css-patch": "^1.1.2",
     "cssnano": "^4.1.10",
     "electron": "^10.1.5",
     "electron-packager": "^15.2.0",
     "fs-extra": "^9.0.1",
-    "jsdom": "^16.5.1",
-    "jsdom-global": "^3.0.2",
+    "http-server": "^0.12.3",
     "postcss": "^8.2.4",
-    "postcss-css-variables": "^0.17.0",
     "postcss-preset-env": "^6.7.0",
     "uglifyify": "^5.0.2"
   }
