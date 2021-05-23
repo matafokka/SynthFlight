@@ -73,7 +73,7 @@
     "fs-extra": "^9.0.1",
     "http-server": "^0.12.3",
     "leaflet": "^1.7.1",
-    "leaflet-advanced-layer-system": "file:..\\leaflet-advanced-layer-system",
+    "leaflet-advanced-layer-system": "^1.0.2",
     "leaflet.coordinates": "~0.1.5",
     "persistify": "^2.0.1",
     "postcss": "^8.2.4",
