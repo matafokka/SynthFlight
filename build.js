@@ -1,13 +1,36 @@
-const browserify = require("browserify");
+const persistify = require("persistify");
 const babelify = require("babelify");
 const packager = require("electron-packager");
 const fs = require("fs");
 const fse = require("fs-extra");
-const postcss = require("postcss");
-const postcssPresetEnv = require("postcss-preset-env");
-const cssnano = require("cssnano");
+const {Worker} = require('worker_threads');
 
-let onlyBrowser = false, debug = false;
+let onlyBrowser = false, debug = false, cssThreadFinished = false, copyPromiseFinished = false;
+let dir = "dist/SynthFlight-browser/";
+
+let buildElectron = () => {
+	if (onlyBrowser || !(cssThreadFinished && copyPromiseFinished))
+		return;
+
+	let ignore = ["build.js", ".idea", ".cache", "dist", "docs", "ESRIGridBackup"];
+
+	packager({
+		all: true,
+		dir: dir,
+		out: "dist",
+		ignore: (path) => {
+			for (let p of ignore)
+				if (path === "/" + p)
+					return true;
+			return false;
+		},
+		icon: "logo.ico",
+	}).then(() => {
+		for (let file of ["package.json", "electronApp.js"])
+			fs.unlink(dir + file, () => {});
+	});
+
+}
 
 for (let arg of process.argv) {
 	if (arg === "-h" || arg === "--help") {
@@ -23,38 +46,32 @@ for (let arg of process.argv) {
 		debug = true;
 }
 
-console.log("\nStarting SynthFlight build process...\n" +
+console.log(`\n${new Date().toTimeString()} - Starting SynthFlight build process...\n` +
 	"Type -h or --help to view help on build arguments.\n");
 
 fse.emptyDirSync("dist");
 
 // Create build directory
-let dir = "dist/SynthFlight-browser/";
 fs.mkdirSync(dir + "css", {recursive: true});
 
-// Build CSS
-let plugins = [
-	postcssPresetEnv({
-		autoprefixer: {flexbox: "no-2009"}
-	}),
-];
-if (!debug)
-	plugins.push(cssnano());
+// Create worker
+let worker = new Worker("./buildCSSWorker.js", {
+	workerData: {
+		debug: debug, dir: dir,
+	}
+});
 
-let cssFilename = "css/styles.css";
-let css = fs.readFileSync(cssFilename).toString();
-
-postcss(plugins).process(css, {from: undefined}).then(async (result) => {
-	fs.writeFile(dir + cssFilename, result.css, {}, (err) => {
-		if (err)
-			console.log(err);
-	});
+worker.on("exit", () => {
+	cssThreadFinished = true;
+	buildElectron();
 });
 
 // Build project
 let mainFile = "main.js";
-browserify([mainFile], { debug: debug })
-	.transform("babelify", {
+persistify({
+	entries: [mainFile],
+	debug: debug
+}).transform("babelify", {
 		presets: ["@babel/preset-env"],
 		global: true, // ShpJS is built without polyfills and uses async functions. So we have to build node_modules too. Maybe other modules are built that way too.
 		minified: !debug,
@@ -78,22 +95,18 @@ let toCopy = ["index.html", "logo.ico",
 	"node_modules/leaflet.coordinates/dist/Leaflet.Coordinates-0.1.5.min.js",
 ];
 
-for (let stuff of toCopy)
-	fse.copy(stuff, dir + stuff);
+if (!onlyBrowser)
+	toCopy.push("package.json", "electronApp.js") // Needed for Electron, will be removed after packaging
 
-// Build electron app
-if (!onlyBrowser) {
-	let ignore = ["build.js", ".idea", ".cache", "dist", "docs", "ESRIGridBackup"];
-	packager({
-		all: true,
-		dir: ".",
-		out: "dist",
-		ignore: (path) => {
-			for (let p of ignore)
-				if (path === "/" + p)
-					return true;
-			return false;
-		},
-		icon: "logo.ico",
-	});
-}
+let promises = [];
+for (let target of toCopy)
+	promises.push(new Promise((resolve) => {
+		fse.copy(target, dir + target).then(resolve());
+	}));
+
+Promise.all(promises).then(() => {
+	copyPromiseFinished = true;
+	buildElectron();
+}).catch(error => {
+	console.error(error.message)
+});
