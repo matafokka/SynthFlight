@@ -40,7 +40,7 @@
     ]
   },
   "scripts": {
-    "start": "electron electronApp.js --debug",
+    "start": "electron electronApp.js -d",
     "postinstall": "npm link leaflet-advanced-layer-system",
     "runOnServer": "http-server \"./dist/SynthFlight-browser\" -c-1",
     "buildAndRun": "node build.js -b && npm run-script runOnServer",
