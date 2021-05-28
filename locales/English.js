@@ -16,6 +16,7 @@ L.ALS.Locales.addLocaleProperties("English", {
 	gridLayerDefaultName: "Grid Layer",
 	hidePolygonWidgets: "Hide widgets on the map",
 	hideNumbers: "Hide points' numbers on the map",
+	hideCapturePoints: "Hide capture points",
 	hidePathsConnections: "Hide paths' connections",
 	hidePathsByMeridians: "Hide paths by meridians",
 	hidePathsByParallels: "Hide paths by parallels",

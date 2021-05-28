@@ -16,6 +16,7 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 	gridLayerDefaultName: "Слой Сетки",
 	hidePolygonWidgets: "Скрыть виджеты на карте",
 	hideNumbers: "Скрыть номера точек на карте",
+	hideCapturePoints: "Скрыть точки съемки",
 	hidePathsConnections: "Скрыть соединения маршрутов",
 	hidePathsByMeridians: "Скрыть маршруты по меридианам",
 	hidePathsByParallels: "Скрыть маршруты по параллелям",

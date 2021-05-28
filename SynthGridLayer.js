@@ -31,6 +31,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGridLayer.proto
 	_doHidePathsByMeridians: false,
 	_doHidePathsByParallels: false,
 	_doHidePathsNumbers: false,
+	_areCapturePointsHidden: true,
 
 	init: function (wizardResults, settings) {
 		this.copySettingsToThis(settings);
@@ -43,6 +44,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGridLayer.proto
 		this.addWidgets(
 			new L.ALS.Widgets.Checkbox("hidePolygonWidgets", "hidePolygonWidgets", this, "_hidePolygonWidgets"),
 			new L.ALS.Widgets.Checkbox("hideNumbers", "hideNumbers", this, "_hidePointsNumbers"),
+			new L.ALS.Widgets.Checkbox("hideCapturePoints", "hideCapturePoints", this, "_hideCapturePoints").setValue(true),
 			new L.ALS.Widgets.Checkbox("hidePathsConnections", "hidePathsConnections", this, "_hidePathsConnections"),
 			new L.ALS.Widgets.Checkbox("hidePathsByMeridians", "hidePathsByMeridians", this, "_hidePathsByMeridians"),
 			new L.ALS.Widgets.Checkbox("hidePathsByParallels", "hidePathsByParallels", this, "_hidePathsByParallels"),
@@ -123,18 +125,17 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGridLayer.proto
 		// 2. Hide grid when it'll contain a lot of polygons and becomes messy
 		// Additional redrawing actually won't introduce any noticeable delay.
 
-		// Create empty groups containing our stuff
+		// Create empty groups containing our stuff. Yeah, I hate copying too, but I want code completion :D
 
 		this.polygonGroup = L.featureGroup();
 		this.widgetsGroup = L.featureGroup();
 		this.bordersGroup = L.featureGroup();
+		this.latPointsGroup = L.featureGroup();
+		this.lngPointsGroup = L.featureGroup();
 		this.pathsWithoutConnectionsGroup = L.featureGroup();
-
-		let props = ["polygonGroup", "widgetsGroup", "bordersGroup", "pathsWithoutConnectionsGroup"];
-		for (let prop of props)
-			this.addLayers(this[prop]);
 		this.labelsGroup = new L.LabelLayer(false);
-		this.addLayers(this.labelsGroup);
+
+		this.addLayers(this.polygonGroup, this.widgetsGroup, this.bordersGroup, this.pathsWithoutConnectionsGroup, this.latPointsGroup, this.lngPointsGroup, this.labelsGroup);
 
 		/**
 		 * Contains polygons' names IDs
@@ -166,6 +167,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGridLayer.proto
 
 		this.onNameChange();
 		this._updateGrid();
+		this.getWidgetById("hideCapturePoints").callCallback();
 	},
 
 	onMarkerDrag: function() {
@@ -481,13 +483,24 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGridLayer.proto
 		this._updateGrid();
 	},
 
+	_hideCapturePoints: function (widget) {
+		this._areCapturePointsHidden = this._hideOrShowLayer(widget, this.latPointsGroup);
+		this._hideOrShowLayer(widget, this.lngPointsGroup);
+		this._hidePathsByMeridians(this.getWidgetById("hidePathsByMeridians"));
+		this._hidePathsByParallels(this.getWidgetById("hidePathsByParallels"));
+	},
+
 	_hidePathsByMeridians: function (widget) {
 		this._doHidePathsByMeridians = this._hideOrShowLayer(widget, this["pathsByMeridians"]);
+		if (!this._areCapturePointsHidden)
+			this._hideOrShowLayer(widget, this.latPointsGroup);
 		this._updateGrid();
 	},
 
 	_hidePathsByParallels: function (widget) {
 		this._doHidePathsByParallels = this._hideOrShowLayer(widget, this["pathsByParallels"]);
+		if (!this._areCapturePointsHidden)
+			this._hideOrShowLayer(widget, this.lngPointsGroup);
 		this._updateGrid();
 	},
 
@@ -619,7 +632,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGridLayer.proto
 		this.lx = this["cameraHeight"] * pixelWidth; // Image height
 		this.Lx = this.lx * this["imageScale"]; // Image height on the ground
 		this.Bx = this.Lx * (100 - this["overlayBetweenImages"]) / 100; // Capture basis, distance between images' centers
-		this.doubleBasis = turfHelpers.lengthToDegrees(this.Bx, "meters") * 2;
+		this.basis = turfHelpers.lengthToDegrees(this.Bx, "meters");
 
 		this.GSI = pixelWidth * this["imageScale"];
 		this.IFOV = pixelWidth / focalLength * 1e6;
@@ -658,7 +671,9 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGridLayer.proto
 			});
 		}
 
-		this.pathsWithoutConnectionsGroup.clearLayers();
+		let groupsToClear = ["pathsWithoutConnectionsGroup", "latPointsGroup", "lngPointsGroup"];
+		for (let group of groupsToClear)
+			this[group].clearLayers();
 
 		// Validate parameters
 
@@ -703,6 +718,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGridLayer.proto
 			color = "meridiansColor";
 			hideEverything = this._doHidePathsByMeridians;
 		}
+		let pointsName = nameForOutput + "PointsGroup";
 
 		let parallelsPathsCount = this["lngPathsCount"];
 		let meridiansPathsCount = this["latPathsCount"];
@@ -744,6 +760,13 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGridLayer.proto
 			let parallelsDistance = lengthByLat / newParallelsPathsCount;
 			let meridiansDistance = lengthByLng / newMeridiansPathsCount;
 
+			// Calculate correct capture basis in degrees.
+			let latDistance = Math.abs(endLat - startLat), lngDistance = Math.abs(endLng - startLng);
+			let latPointsCount = Math.round(latDistance / this.basis);
+			let lngPointsCount = Math.round(lngDistance / this.basis);
+
+			let latBasis = latDistance / latPointsCount, lngBasis = lngDistance / lngPointsCount;
+
 			let lat = startLat, lng = startLng;
 			let turfPolygonCoordinates = turfPolygon.geometry.coordinates[0] // MathTools.isLineOnEdgeOfPolygon accepts coordinates of the polygon, not polygon itself
 			let number = 1;
@@ -776,10 +799,10 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGridLayer.proto
 				let index, captureBasis;
 				if (isParallels) {
 					index = 0;
-					captureBasis = this.doubleBasis;
+					captureBasis = lngBasis * 2;
 				} else {
 					index = 1;
-					captureBasis = -this.doubleBasis;
+					captureBasis = -latBasis * 2;
 				}
 
 				// WARNING: It somehow modifies polygons when generating paths by parallels! Imagine following selected polygons:
@@ -799,13 +822,14 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGridLayer.proto
 				newClippedLine[0][index] -= captureBasis;
 				newClippedLine[1][index] += captureBasis;
 
-				let firstPoint, secondPoint;
+				let startPoint = newClippedLine[0], endPoint = newClippedLine[1]; // Points for generating capturing points
+				let firstPoint, secondPoint; // Points for generating lines
 				if (swapPoints) {
-					firstPoint = newClippedLine[1];
-					secondPoint = newClippedLine[0];
+					firstPoint = endPoint;
+					secondPoint = startPoint;
 				} else {
-					firstPoint = newClippedLine[0];
-					secondPoint = newClippedLine[1];
+					firstPoint = startPoint;
+					secondPoint = endPoint;
 				}
 
 				// This line will be added to pathsWithoutConnectionsGroup
@@ -832,6 +856,25 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGridLayer.proto
 					number++;
 				}
 				this.pathsWithoutConnectionsGroup.addLayer(line);
+
+				// Add capture points
+				let ptLat = startPoint[1], ptLng = startPoint[0], ptEndLat = endPoint[1], ptEndLng = endPoint[0];
+
+				let ptColor = isParallels ? this.parallelsColor : this.meridiansColor;
+				while (MathTools.isGreaterThanOrEqualTo(ptLat, ptEndLat) && MathTools.isLessThanOrEqualTo(ptLng, ptEndLng)) {
+					let circle = L.circleMarker([ptLat, ptLng], {
+						radius: this.lineThickness * 2,
+						stroke: false,
+						fillOpacity: 1,
+						fill: true,
+						fillColor: ptColor,
+					});
+					this[pointsName].addLayer(circle);
+					if (isParallels)
+						ptLng += lngBasis;
+					else
+						ptLat -= latBasis;
+				}
 
 				swapPoints = !swapPoints;
 				if (isParallels)
@@ -961,6 +1004,15 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGridLayer.proto
 		for (let line of lines) {
 			for (let param of lineParams)
 				line[1].properties[param] = this[line[0]][param];
+		}
+
+		let pointsParams = [["capturePointByMeridians", this.latPointsGroup.getLayers()], ["capturePointByParallels", this.lngPointsGroup.getLayers()]];
+		for (let param of pointsParams) {
+			for (let layer of param[1]) {
+				let pointsJson = layer.toGeoJSON();
+				pointsJson.name = param[0];
+				jsons.push(pointsJson);
+			}
 		}
 
 		return geojsonMerge.merge(jsons);
