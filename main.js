@@ -29,7 +29,7 @@ let map = L.map("map", {
 	maxBoundsViscosity: 1,
 	preferCanvas: true, // Canvas is faster than SVG renderer
 	keyboard: false,
-}).setView([51.505, -0.09], 13);
+}).setView([55.75, 37.6], 13); //.setView([51.505, -0.09], 13);
 map.doubleClickZoom.disable();
 
 map.addControl(new L.ALS.ControlZoom({ position: "topleft" }));

@@ -72,6 +72,10 @@ L.ALS.Locales.addLocaleProperties("English", {
 	errorPathsCountTooSmall: "Calculated paths count is too small, it should be greater than 2. Please, check your values.",
 	errorMinHeightBiggerThanMaxHeight: "Min. height should be less than or equal to max. height!",
 
+	DEMFiles: "Load DEM files to calculate statistics:",
+	confirmDEMLoading: "Are you sure you want to load DEMs? It will override current statistics and take some time.",
+	DEMError: "Sorry, an error occurred while loading one of your files", //TODO: Add file name
+
 	// SynthGridSettings
 
 	defaultGridBorderColor: "Default grid border color:",

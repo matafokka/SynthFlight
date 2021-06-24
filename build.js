@@ -27,7 +27,8 @@ let buildElectron = () => {
 		icon: "logo.ico",
 	}).then(() => {
 		for (let file of ["package.json", "electronApp.js"])
-			fs.unlink(dir + file, () => {});
+			fs.unlink(dir + file, () => {
+			});
 	});
 
 }
@@ -72,11 +73,11 @@ persistify({
 	entries: [mainFile],
 	debug: debug
 }).transform("babelify", {
-		presets: ["@babel/preset-env"],
-		global: true, // ShpJS is built without polyfills and uses async functions. So we have to build node_modules too. Maybe other modules are built that way too.
-		minified: !debug,
-	})
-	.plugin("common-shakeify")
+	presets: ["@babel/preset-env"],
+	global: true, // ShpJS is built without polyfills and uses async functions. So we have to build node_modules too. Maybe other modules are built that way too.
+	minified: !debug,
+	//ignore: [/node_modules\/geotiff/],
+}).plugin("common-shakeify")
 	.transform("uglifyify", {
 		global: true,
 		ie8: true,

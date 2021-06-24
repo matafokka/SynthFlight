@@ -60,6 +60,7 @@
     "@mapbox/geojson-merge": "^1.1.1",
     "@turf/bbox": "^6.0.1",
     "@turf/helpers": "^6.1.4",
+    "@turf/intersect": "^6.4.0",
     "@turf/union": "^6.0.3",
     "babelify": "^10.0.0",
     "browserify": "^16.1.1",
@@ -71,6 +72,7 @@
     "electron": "^10.1.5",
     "electron-packager": "^15.2.0",
     "fs-extra": "^9.0.1",
+    "geotiff": "^1.0.4",
     "http-server": "^0.12.3",
     "leaflet": "^1.7.1",
     "leaflet-advanced-layer-system": "^1.0.2",
@@ -78,10 +80,12 @@
     "persistify": "^2.0.1",
     "postcss": "^8.2.4",
     "postcss-preset-env": "^6.7.0",
+    "proj4": "^2.7.4",
     "regenerator-runtime": "^0.13.7",
     "roman-numerals": "^0.3.2",
     "shpjs": "^3.6.3",
     "uglifyify": "^5.0.2",
-    "watchify": "^3.11.0"
+    "watchify": "^3.11.0",
+    "webworkify": "^1.5.0"
   }
 }
