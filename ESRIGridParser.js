@@ -10,7 +10,7 @@ class ESRIGridParser {
 	 * Constructs a ESRI Grid parser.
 	 *
 	 * @param layer {L.ALS.SynthGridLayer} A layer to apply parsed values to.
-	 * @param projectionString {string} Proj4 projection string. If not given, Web Mercator assumed.
+	 * @param projectionString {string} Proj4 projection string. If not given, WGS84 assumed.
 	 */
 	constructor(layer = undefined, projectionString = "") {
 
@@ -27,7 +27,11 @@ class ESRIGridParser {
 		this.hasProj = (projectionString !== "");
 
 		if (this.hasProj)
-			proj4.defs("gridproj", projectionString);
+			/**
+			 * Proj4 projection object. Projects coordinates from WGS84 to grids projection.
+			 * @type {Object|undefined}
+			 */
+			this.projectionFromWGS = proj4("WGS84", projectionString);
 
 		this.clearState();
 	}
@@ -216,7 +220,7 @@ class ESRIGridParser {
 				}
 
 				let oldPoint = [this.x, this.y];
-				let point = (this.hasProj) ? proj4("gridproj", "EPSG:3857").forward(oldPoint) : oldPoint;
+				let point = (this.hasProj) ? this.projectionFromWGS.inverse(oldPoint) : oldPoint;
 				for (let name in this.polygonsCoordinates) {
 					if (!MathTools.isPointInRectangle(point, this.polygonsCoordinates[name]))
 						continue;
@@ -293,6 +297,7 @@ class ESRIGridParser {
 	 * @param size {number} Chunk size
 	 * @param offset {number} Current chunk offset
 	 * @param parser {ESRIGridParser} A parser instance
+	 * @param callback {function(Object)} Callback that accepts statistics as an argument.
 	 * @private
 	 */
 	static _nextChunk(file, fileReader, size, offset, parser, callback) {

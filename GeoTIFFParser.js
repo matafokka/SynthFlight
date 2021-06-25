@@ -3,6 +3,8 @@
 //const geotiff = require("./node_modules/geotiff/src/geotiff.js"); // For browser
 const geotiff = require("geotiff"); // For testing in electron
 const turfHelpers = require("@turf/helpers");
+const bbox = require("@turf/bbox").default;
+const bboxPolygon = require('@turf/bbox-polygon').default;
 const intersect = require("@turf/intersect").default;
 const proj4 = require("proj4");
 const MathTools = require("./MathTools.js");
@@ -10,7 +12,7 @@ const MathTools = require("./MathTools.js");
 /**
  * Parses GeoTIFF files
  * @param file {File} File to parse
- * @param projectionString {string} Projection string in WKT or proj4 format. Pass empty string if there's no projection information. In this case, Web Mercator assumed.
+ * @param projectionString {string} Projection string in WKT or proj4 format. Pass empty string if there's no projection information. In this case, WGS84 assumed.
  * @param initialData {Object} Result of {@link ESRIGridParser.getInitialData}
  * @return {Promise<Object>} Calculated stats
  */
@@ -25,33 +27,40 @@ module.exports = async function (file, projectionString, initialData) {
 		let origin = image.getOrigin(), leftX = origin[0], topY = origin[1];
 		let nodata = image.getGDALNoData();
 		let resolution = image.getResolution(), xSize = resolution[0], ySize = resolution[1], zScale = resolution[2];
+		if (zScale === 0)
+			zScale = 1;
 		let rightX = leftX + image.getWidth() * xSize, bottomY = topY + image.getHeight() * ySize;
 		let imagePolygon = turfHelpers.polygon([[
 			[leftX, topY], [rightX, topY], [rightX, bottomY], [leftX, bottomY], [leftX, topY]
 		]]);
 
-		let hasProj = projectionString !== "";
+		let hasProj = projectionString !== "", projectionFromWGS;
 		if (hasProj)
-			proj4.defs("tiffproj", projectionString);
+			projectionFromWGS = proj4("WGS84", projectionString);
 
 		for (let name in initialData) {
 			// Let's project each polygon to the image, get their intersection part and calculate statistics for it
 			let polygon = initialData[name];
 			let oldBbox = [
-				polygon[0], [polygon[1][0], polygon[0][1]], polygon[1], [polygon[0][0], polygon[1][1]]
+				polygon[0], [polygon[1][0], polygon[0][1]], polygon[1], [polygon[0][0], polygon[1][1]], polygon[0]
 			];
 
 			let newBbox;
 			if (!hasProj)
-				newBbox = oldBbox;
+				newBbox = turfHelpers.polygon([oldBbox]);
 			else {
 				newBbox = [];
 				for (let point of oldBbox)
-					newBbox.push(proj4("EPSG:3857", "tiffproj").forward(point));
-			}
-			oldBbox.push(oldBbox[0]);
+					newBbox.push(projectionFromWGS.forward(point));
 
-			let intersection = intersect(imagePolygon, turfHelpers.polygon([newBbox]));
+				newBbox = bboxPolygon(
+					bbox(
+						turfHelpers.polygon([newBbox])
+					)
+				);
+			}
+
+			let intersection = intersect(imagePolygon, newBbox);
 			if (!intersection)
 				continue;
 
@@ -92,7 +101,7 @@ module.exports = async function (file, projectionString, initialData) {
 					currentX++; // So we can continue without incrementing
 					index++;
 					if (hasProj)
-						point = proj4("tiffproj", "EPSG:3857").forward(point);
+						point = projectionFromWGS.inverse(point);
 					if (!MathTools.isPointInRectangle(point, polygon))
 						continue;
 
@@ -100,11 +109,14 @@ module.exports = async function (file, projectionString, initialData) {
 					for (let color of raster)
 						value += color[index];
 					value = value / raster.length;
+					let multipliedValue = value * zScale;
+					if (value === nodata || multipliedValue === nodata)
+						continue;
 
-					if (value < stats.min)
-						stats.min = value;
-					if (value > stats.max)
-						stats.max = value;
+					if (multipliedValue < stats.min)
+						stats.min = multipliedValue;
+					if (multipliedValue > stats.max)
+						stats.max = multipliedValue;
 				}
 			}
 			polygonStats[name] = stats;
