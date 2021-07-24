@@ -1,18 +1,16 @@
-// TODO: Fix this nonsense
-// Thanks to parcel (which is used by geotiff) for this nightmare
-//const geotiff = require("./node_modules/geotiff/src/geotiff.js"); // For browser
-const geotiff = require("geotiff"); // For testing in electron
+const geotiff = require("geotiff");
 const turfHelpers = require("@turf/helpers");
 const bbox = require("@turf/bbox").default;
 const bboxPolygon = require('@turf/bbox-polygon').default;
 const intersect = require("@turf/intersect").default;
+const toProj4 = require("geotiff-geokeys-to-proj4");
 const proj4 = require("proj4");
 const MathTools = require("./MathTools.js");
 
 /**
  * Parses GeoTIFF files
  * @param file {File} File to parse
- * @param projectionString {string} Projection string in WKT or proj4 format. Pass empty string if there's no projection information. In this case, WGS84 assumed.
+ * @param projectionString {string} Projection string in WKT or proj4 format. Pass empty string if there's no projection information. In this case, geokeys will be used.
  * @param initialData {Object} Result of {@link ESRIGridParser.getInitialData}
  * @return {Promise<Object>} Calculated stats
  */
@@ -34,9 +32,13 @@ module.exports = async function (file, projectionString, initialData) {
 			[leftX, topY], [rightX, topY], [rightX, bottomY], [leftX, bottomY], [leftX, topY]
 		]]);
 
-		let hasProj = projectionString !== "", projectionFromWGS;
-		if (hasProj)
-			projectionFromWGS = proj4("WGS84", projectionString);
+		let projInformation;
+		if (projectionString === "") {
+			projInformation = toProj4.toProj4(image.getGeoKeys());
+			projectionString = projInformation.proj4;
+		}
+
+		let projectionFromWGS = proj4("WGS84", projectionString);
 
 		for (let name in initialData) {
 			// Let's project each polygon to the image, get their intersection part and calculate statistics for it
@@ -45,20 +47,15 @@ module.exports = async function (file, projectionString, initialData) {
 				polygon[0], [polygon[1][0], polygon[0][1]], polygon[1], [polygon[0][0], polygon[1][1]], polygon[0]
 			];
 
-			let newBbox;
-			if (!hasProj)
-				newBbox = turfHelpers.polygon([oldBbox]);
-			else {
-				newBbox = [];
-				for (let point of oldBbox)
-					newBbox.push(projectionFromWGS.forward(point));
+			let newBbox = [];
+			for (let point of oldBbox)
+				newBbox.push(projectionFromWGS.forward(point));
 
-				newBbox = bboxPolygon(
-					bbox(
-						turfHelpers.polygon([newBbox])
-					)
-				);
-			}
+			newBbox = bboxPolygon(
+				bbox(
+					turfHelpers.polygon([newBbox])
+				)
+			);
 
 			let intersection = intersect(imagePolygon, newBbox);
 			if (!intersection)
@@ -97,11 +94,16 @@ module.exports = async function (file, projectionString, initialData) {
 				let color0 = raster[0]; // Raster is a TypedArray where elements are colors and their elements are pixel values of that color.
 				let index = -1;
 				for (let pixel of color0) {
-					let point = [origin[0] + currentX * xSize, origin[1] + currentY * ySize];
+					let crsX = origin[0] + currentX * xSize, crsY = origin[1] + currentY * ySize;
+					if (projInformation) {
+						crsX *= projInformation.coordinatesConversionParameters.x;
+						crsY *= projInformation.coordinatesConversionParameters.y;
+					}
+
+					let point = projectionFromWGS.inverse([crsX, crsY]);
 					currentX++; // So we can continue without incrementing
 					index++;
-					if (hasProj)
-						point = projectionFromWGS.inverse(point);
+
 					if (!MathTools.isPointInRectangle(point, polygon))
 						continue;
 

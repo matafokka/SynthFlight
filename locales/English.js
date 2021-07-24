@@ -72,8 +72,10 @@ L.ALS.Locales.addLocaleProperties("English", {
 	errorPathsCountTooSmall: "Calculated paths count is too small, it should be greater than 2. Please, check your values.",
 	errorMinHeightBiggerThanMaxHeight: "Min. height should be less than or equal to max. height!",
 
-	DEMFiles: "Load DEM files to calculate statistics:",
+	DEMFiles: "Load DEM files to calculate statistics. Select GeoTIFF or ASCII Grid files. Select .prj or .aux.xml files with the same name to override CRS. For ASCII Grid, if no of these file selected, WGS84 is assumed.",
 	confirmDEMLoading: "Are you sure you want to load DEMs? It will override current statistics and take some time.",
+	loadingDEM: "Loading selected DEM files, it might take a while...",
+	notGridNotSupported: "Sorry, your browser doesn't support anything other than ASCII Grid. Please, select a valid ASCII Grid file.",
 	DEMError: "Sorry, an error occurred while loading one of your files", //TODO: Add file name
 
 	// SynthGridSettings

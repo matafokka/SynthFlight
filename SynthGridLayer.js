@@ -1,3 +1,6 @@
+// noinspection JSReferencingArgumentsOutsideOfFunction,JSUnresolvedVariable
+L.ALS.Helpers.isBrowserify = (typeof arguments[4] !== "string");
+
 const union = require("@turf/union").default;
 const bbox = require("@turf/bbox").default;
 const turfHelpers = require("@turf/helpers");
@@ -10,9 +13,6 @@ const GeoTIFFParser = require("./GeoTIFFParser.js");
 const work = require("webworkify");
 require("./SynthGridWizard.js");
 require("./SynthGridSettings.js");
-
-// noinspection JSReferencingArgumentsOutsideOfFunction,JSUnresolvedVariable
-const isBrowserify = (typeof arguments[4] !== "string");
 
 /**
  * Layer that allows users to plan aerial photography using grid
@@ -1101,8 +1101,18 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGridLayer.proto
 	},
 
 	onDEMLoad: async function (widget) {
-		if (!window.confirm(L.ALS.locale.confirmDEMLoading))
+		let clear = () => {
+			L.ALS.operationsWindow.removeOperation("dem");
+			widget.clearFileArea();
+		}
+
+		if (!window.confirm(L.ALS.locale.confirmDEMLoading)) {
+			clear();
 			return;
+		}
+
+		L.ALS.operationsWindow.addOperation("dem", "loadingDEM");
+		await new Promise(resolve => setTimeout(resolve, 0));
 
 		// For old browser that doesn't support FileReader
 		if (!window.FileReader) {
@@ -1110,16 +1120,19 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGridLayer.proto
 				let parser = new ESRIGridParser(this);
 				parser.readChunk(grid);
 				parser.copyStats();
+				clear();
 			});
+			return;
 		}
 
 		// For normal browsers
 		try {
 			await this.onDEMLoadWorker(widget);
 		} catch (e) {
-			console.log(e);
+			console.error(e);
 			window.alert(L.ALS.locale.DEMError);
 		}
+		clear();
 
 	},
 
@@ -1131,7 +1144,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGridLayer.proto
 		let files = widget.getValue();
 		let parser = new ESRIGridParser(this);
 		let fileReader = new FileReader();
-		let supportsWorker = (window.Worker && isBrowserify); // We're using webworkify which relies on browserify-specific stuff which isn't available in dev environment
+		let supportsWorker = (window.Worker && L.ALS.Helpers.isBrowserify); // We're using webworkify which relies on browserify-specific stuff which isn't available in dev environment
 
 		for (let file of files) {
 			let ext = L.ALS.Helpers.getFileExtension(file.name).toLowerCase();
@@ -1182,23 +1195,26 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGridLayer.proto
 			}
 
 			if (!supportsWorker) {
-				ESRIGridParser.parseFile(file, parser, fileReader);
+				await new Promise ((resolve) => {
+					ESRIGridParser.parseFile(file, parser, fileReader, () => { resolve(); })
+				});
 				continue;
 			}
 
 			//let workerFn = isTiff ? GeoTIFFParserWorker : ESRIGridParserWorker; // In case we'll define another parser
 			let worker = work(ESRIGridParserWorker);
-			await new Promise((resolve => {
+			await new Promise(resolve => {
 				worker.addEventListener("message", (e) => {
 					ESRIGridParser.copyStats(this, e.data);
 					resolve();
+					worker.terminate();
 				});
 				worker.postMessage({
 					parserData: ESRIGridParser.getInitialData(this),
 					projectionString: projectionString,
 					file: file,
 				});
-			}));
+			});
 		}
 
 	},
