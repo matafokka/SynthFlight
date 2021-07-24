@@ -73,6 +73,8 @@ L.ALS.Locales.addLocaleProperties("English", {
 	errorMinHeightBiggerThanMaxHeight: "Min. height should be less than or equal to max. height!",
 
 	DEMFiles: "Load DEM files to calculate statistics. Select GeoTIFF or ASCII Grid files. Select .prj or .aux.xml files with the same name to override CRS. For ASCII Grid, if no of these file selected, WGS84 is assumed.",
+	DEMFilesWhenGeoTIFFNotSupported: "Load ASCII Grid DEM files to calculate statistics. By default, WGS84 assumed. To override it, select .prj or .aux.xml files with the same name.",
+	DEMFilesIE9: "Load ASCII Grid DEM file to calculate statistics. This file should use WGS84.",
 	confirmDEMLoading: "Are you sure you want to load DEMs? It will override current statistics and take some time.",
 	loadingDEM: "Loading selected DEM files, it might take a while...",
 	notGridNotSupported: "Sorry, your browser doesn't support anything other than ASCII Grid. Please, select a valid ASCII Grid file.",

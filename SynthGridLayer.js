@@ -9,7 +9,10 @@ const RomanNumerals = require("roman-numerals");
 const geojsonMerge = require("@mapbox/geojson-merge"); // Using this since turfHelpers.featureCollection() discards previously defined properties.
 const ESRIGridParser = require("./ESRIGridParser.js");
 const ESRIGridParserWorker = require("./ESRIGridParserWorker.js");
-const GeoTIFFParser = require("./GeoTIFFParser.js");
+let GeoTIFFParser;
+try {
+	GeoTIFFParser = require("./GeoTIFFParser.js");
+} catch (e) {}
 const work = require("webworkify");
 require("./SynthGridWizard.js");
 require("./SynthGridSettings.js");
@@ -47,6 +50,12 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGridLayer.proto
 		this.selectedPolygonsWidgets = {};
 		this.serializationIgnoreList.push("selectedPolygons", "_airportMarker", "lngDistance", "latDistance", "_currentStandardScale");
 
+		let DEMFilesLabel = "DEMFiles";
+		if (!GeoTIFFParser)
+			DEMFilesLabel = "DEMFilesWhenGeoTIFFNotSupported";
+		if (L.ALS.Helpers.isIElte9)
+			DEMFilesLabel = "DEMFilesIE9";
+
 		// Create menu
 		this.addWidgets(
 			new L.ALS.Widgets.Checkbox("hidePolygonWidgets", "hidePolygonWidgets", this, "_hidePolygonWidgets"),
@@ -79,7 +88,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGridLayer.proto
 			new L.ALS.Widgets.SimpleLabel("cameraParametersWarning").setStyle("warning"),
 			new L.ALS.Widgets.Divider("div2"),
 
-			new L.ALS.Widgets.File("DEMFiles", "DEMFiles", this, "onDEMLoad").setMultiple(true),
+			new L.ALS.Widgets.File("DEMFiles", DEMFilesLabel, this, "onDEMLoad").setMultiple(true),
 			new L.ALS.Widgets.Divider("div3"),
 		);
 
@@ -1114,7 +1123,7 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGridLayer.proto
 		L.ALS.operationsWindow.addOperation("dem", "loadingDEM");
 		await new Promise(resolve => setTimeout(resolve, 0));
 
-		// For old browser that doesn't support FileReader
+		// For old browsers that doesn't support FileReader
 		if (!window.FileReader) {
 			L.ALS.Helpers.readTextFile(widget.input, L.ALS.locale.notGridNotSupported, (grid) => {
 				let parser = new ESRIGridParser(this);
@@ -1189,6 +1198,8 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGridLayer.proto
 			}
 
 			if (isTiff) {
+				if (!GeoTIFFParser)
+					continue;
 				let stats = await GeoTIFFParser(file, projectionString, ESRIGridParser.getInitialData(this));
 				ESRIGridParser.copyStats(this, stats);
 				continue;
