@@ -92,6 +92,57 @@ class MathTools {
 	}
 
 	/**
+	 * Determines whether given point lies in polygon including its edges.
+	 * @param point {number[]} Point in format [lng, lat]
+	 * @param polygon {number[][]} Polygon in format [[lng, lat], [lng, lat], ...]
+	 * @return {boolean} True, if point lies in polygon or on one of its edges. Returns false otherwise.
+	 */
+	static isPointInPolygon(point, polygon) {
+		let intersections = 0;
+		for (let edge of polygon) {
+			let ray = [point, [point[0], 1]];
+			if (MathTools.linesIntersection(edge, ray))
+				intersections++;
+		}
+		return (intersections % 2 !== 0);
+	}
+
+	/**
+	 * Determines whether given point lies in rectangle. This method is faster than {@link MathTools.isPointInPolygon}
+	 * @param point {number[]} Point in format [lng, lat]
+	 * @param rect {number[][]} Rectangle in format [[topLeftLng, topLeftLat], [bottomRightLng, bottomRightLat]]
+	 * @return {boolean} True, if point lies in rectangle.
+	 */
+	static isPointInRectangle(point, rect) {
+		let topLeft = rect[0], bottomRight = rect[1], pLng = point[0], pLat = point[1];
+		return (
+			this.isGreaterThanOrEqualTo(pLng, topLeft[0]) &&
+			this.isLessThanOrEqualTo(pLat, topLeft[1]) &&
+			this.isLessThanOrEqualTo(pLng, bottomRight[0]) &&
+			this.isGreaterThanOrEqualTo(pLat, bottomRight[1])
+		);
+	}
+
+	/**
+	 * Determines whether given rectangles intersects.
+	 * @param rect1 {number[][]} Rectangle in format [[topLeftLng, topLeftLat], [bottomRightLng, bottomRightLat]]
+	 * @param rect2{number[][]} Rectangle in format [[topLeftLng, topLeftLat], [bottomRightLng, bottomRightLat]]
+	 * @return {boolean} True, if rectangles intersects, one rectangle fully contains another or edges or vertices touches.
+	 */
+	static doRectanglesIntersect(rect1, rect2) {
+		for (let point of rect2) {
+			if (this.isPointInRectangle(point, rect1))
+				return true;
+		}
+		// When rect2 fully contains rect1
+		for (let point of rect1) {
+			if (this.isPointInRectangle(point, rect2))
+				return true;
+		}
+		return false;
+	}
+
+	/**
 	 * Clips line using polygon.
 	 * @param line {number[][]} - line in format [[lng, lat], [lng, lat]]
 	 * @param polygon {number[][]} - polygon in format [[lng, lat], [lng, lat], ...]

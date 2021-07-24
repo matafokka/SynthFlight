@@ -7,6 +7,8 @@
 // So the easiest solution is to move main.js into project's root directory.
 // I've spend hours struggling with this issue, so don't try to reorganise the code, you'll fail and, as it seems, break compatibility with the older Electron versions.
 
+//require("fastestsmallesttextencoderdecoder");
+//require("../leaflet-advanced-layer-system/System.js");
 require("leaflet-advanced-layer-system");
 L.ALS.Locales.AdditionalLocales.Russian();
 require("./locales/English.js");

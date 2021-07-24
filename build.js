@@ -27,7 +27,8 @@ let buildElectron = () => {
 		icon: "logo.ico",
 	}).then(() => {
 		for (let file of ["package.json", "electronApp.js"])
-			fs.unlink(dir + file, () => {});
+			fs.unlink(dir + file, () => {
+			});
 	});
 
 }
@@ -71,18 +72,46 @@ let mainFile = "main.js";
 persistify({
 	entries: [mainFile],
 	debug: debug
-}).transform("babelify", {
+}).require("./node_modules/geotiff/src/geotiff.js", {expose: "geotiff"}) // Thanks to parcel for this nightmare
+	.transform("babelify", {
 		presets: ["@babel/preset-env"],
 		global: true, // ShpJS is built without polyfills and uses async functions. So we have to build node_modules too. Maybe other modules are built that way too.
 		minified: !debug,
-	})
-	.plugin("common-shakeify")
+	}).plugin("common-shakeify")
 	.transform("uglifyify", {
 		global: true,
 		ie8: true,
 		sourceMap: debug
 	})
 	.bundle().pipe(fs.createWriteStream(dir + mainFile));
+
+/*let files = ["polyfills", "main"]; // Files to build
+for (let file of files) {
+	let build = persistify({
+		entries: [file + ".js"],
+		debug: debug
+	});
+	if (file !== "polyfills") { // Transform everything except polyfills from CoreJS
+		build = build.require("./node_modules/geotiff/src/geotiff.js", {expose: "geotiff"}) // Thanks to parcel for this nightmare
+			.transform("babelify", {
+				presets: ["@babel/preset-env"],
+				global: true, // ShpJS is built without polyfills and uses async functions. So we have to build node_modules too. Maybe other modules are built that way too.
+				minified: !debug,
+			});
+	}
+
+	if (!debug) {
+		build = build
+			.plugin("common-shakeify")
+			.transform("uglifyify", {
+				global: true,
+				ie8: true,
+				sourceMap: debug,
+			});
+	}
+	build.bundle().pipe(fs.createWriteStream(dir + file + ".js"));
+}*/
+
 
 // Copy styles and scripts referenced in index.html
 

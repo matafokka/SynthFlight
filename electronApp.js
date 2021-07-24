@@ -14,7 +14,7 @@ function createWindow () {
 
 	mainWindow.loadFile("index.html");
 	process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = true; // Security warnings creates annoying warning about HTTP. We're using HTTP to support older browsers. So we better off with just suppressing those warnings.
-	if (process.argv.indexOf("--debug") !== -1)
+	if (process.argv.indexOf("-d") !== -1)
 		mainWindow.webContents.openDevTools();
 	mainWindow.removeMenu();
 	mainWindow.maximize();
