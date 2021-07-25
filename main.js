@@ -57,7 +57,6 @@ let layerSystem = new L.ALS.System(map, {
 let osmLayer = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 	maxZoom: 19,
 	noWrap: true,
-	attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
 });
 layerSystem.addBaseLayer(osmLayer, "Open Street Maps");
 
@@ -75,9 +74,8 @@ for (let letter of letters) {
 // Yandex maps
 let countries = ["ru_RU", "en_US", "uk_UA", "tr_TR"];
 for (let country of countries) {
-	let layer = L.tileLayer("http://vec{s}.maps.yandex.net/tiles?l=map&v=4.55.2&z={z}&x={x}&y={y}&scale=2&lang=" + country, {
+	let layer = L.tileLayer(`https://core-renderer-tiles.maps.yandex.net/tiles?l=map&v=21.07.25-1-b210701140430&x={x}&y={y}&z={z}&scale=1&lang=${country}&experimental_data_poi=no_extra_orgs`, {
 		subdomains: ['01', '02', '03', '04'],
-		attribution: '<a href="yandex.ru" target="_blank">Yandex</a>',
 		reuseTiles: true,
 		updateWhenIdle: false,
 		noWrap: true,
