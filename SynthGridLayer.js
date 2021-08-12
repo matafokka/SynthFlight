@@ -1,6 +1,3 @@
-// noinspection JSReferencingArgumentsOutsideOfFunction,JSUnresolvedVariable
-L.ALS.Helpers.isBrowserify = (typeof arguments[4] !== "string");
-
 const union = require("@turf/union").default;
 const bbox = require("@turf/bbox").default;
 const turfHelpers = require("@turf/helpers");
@@ -1153,7 +1150,8 @@ L.ALS.SynthGridLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGridLayer.proto
 		let files = widget.getValue();
 		let parser = new ESRIGridParser(this);
 		let fileReader = new FileReader();
-		let supportsWorker = (window.Worker && L.ALS.Helpers.isBrowserify); // We're using webworkify which relies on browserify-specific stuff which isn't available in dev environment
+		// noinspection JSUnresolvedVariable
+		let supportsWorker = (window.Worker && process.browser); // We're using webworkify which relies on browserify-specific stuff which isn't available in dev environment
 
 		for (let file of files) {
 			let ext = L.ALS.Helpers.getFileExtension(file.name).toLowerCase();

@@ -20,9 +20,9 @@ You don't need to install it, just [use it online](https://matafokka.github.io/S
     1. If you've downloaded the browser build, open `index.html` file.
     1. Otherwise, navigate to the extracted folder, open it and run `SynthFlight` executable file.
 
-***Warning:** only browser and Windows x64 builds has been tested so far.*
+***Warning 1:** only browser and Windows x64 builds has been tested so far.*
 
-***Warning:** macOS builds are not signed.*
+***Warning 2:** macOS builds are not signed.*
 
 # Usage
 
@@ -50,16 +50,16 @@ In the menu, you can:
 
 # System requirements
 
-If you want to run the **client**:
+For **standalone application**:
 
-* **Operating system**: one of:
+* **Operating system** - one of:
     * **Windows 7** or later. ARM64, x86 and x64 platforms are supported.
-    * **Linux** with X-Server installed (basically all of the modern distros). ARM32, ARM64, x86 and x64 platforms are supported.
+    * **Linux** with X11 installed (basically all modern distros). ARM32, ARM64, x86 and x64 platforms are supported.
     * **macOS**. I have no idea which versions are supported. Try and see if it works.
 * **CPU**: One that can handle web surfing. If you can browse the internet, SynthFlight will work fine.
 * **RAM**: 1 GB or more.
 
-If you want to run from **browser**: one of:
+For **browser version** - one of:
 
 * Chrome 7 or later.
 * Firefox 22 or later.
@@ -68,7 +68,7 @@ If you want to run from **browser**: one of:
 
 ***Note 1.*** *Outdated Chromium-based browsers have a "feature" that prevents FileReader from reading local files. If you're using such browser, please, either host SynthFlight on a web server or add ` --allow-file-access-from-files` flag when running browser.*
 
-***Note 2:*** *Some of the outdated browsers can't download files normally. Please, update your browser for better user experience.*
+***Note 2:*** *Some outdated browsers can't download files normally. Please, update your browser for better user experience.*
 
 # Building
 
@@ -77,7 +77,7 @@ If you want to build SynthFlight yourself, do the following:
 1. Install [NodeJS](https://www.nodejs.org).
 1. Download the source code and `cd` to the project's root.
 1. Download dependencies by running `npm install`.
-1. Build by running `node build.js`. There are additional options, to see them, run `nodejs build.js -h`.
+1. Build by running `node build.js`. There are additional options, to see them, run `node build.js -h`.
 1. When build will be finished, in project root will be `dist` directory containing builds for different OSs and platforms.
 
 ***Warning:** To build for macOS, you may need to build on an actual macOS.*

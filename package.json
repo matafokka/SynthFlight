@@ -1,7 +1,7 @@
 {
   "name": "synthflight",
   "productName": "SynthFlight",
-  "version": "0.0.11-alpha",
+  "version": "0.0.12-alpha",
   "description": "A fully client-side software for planning aerial photography",
   "main": "electronApp.js",
   "browser": "index.html",
@@ -42,9 +42,10 @@
   "scripts": {
     "start": "electron electronApp.js -d",
     "postinstall": "npm link leaflet-advanced-layer-system",
-    "runOnServer": "http-server \"./dist/SynthFlight-browser\" -c-1",
-    "buildAndRun": "node build.js -b && npm run-script runOnServer",
-    "buildAndRunDebug": "node build.js -b -d && npm run-script runOnServer"
+    "serve": "http-server \"./dist/SynthFlight-browser\" -c-1",
+    "build": "node build.js",
+    "build-and-serve": "node build.js -b && npm run serve",
+    "build-and-serve-debug": "node build.js -b -d && npm run build-and-serve"
   },
   "keywords": [],
   "author": "matafokka",
@@ -79,7 +80,7 @@
     "http-server": "^0.12.3",
     "keyboardevent-key-polyfill": "^1.1.0",
     "leaflet": "^1.7.1",
-    "leaflet-advanced-layer-system": "^1.1.0",
+    "leaflet-advanced-layer-system": "^1.2.0",
     "leaflet.coordinates": "~0.1.5",
     "persistify": "^2.0.1",
     "postcss": "^8.2.4",
