@@ -1,5 +1,5 @@
 const { app, BrowserWindow } = require("electron");
-const fs = require("fs");
+const integrate = require("leaflet-advanced-layer-system/ElectronIntegration");
 
 function createWindow () {
 	// Create the browser window.
@@ -18,7 +18,10 @@ function createWindow () {
 		mainWindow.webContents.openDevTools();
 	mainWindow.removeMenu();
 	mainWindow.maximize();
+	integrate(mainWindow);
 }
+
+app.commandLine.appendSwitch("enable-experimental-web-platform-features");
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
