@@ -59,6 +59,7 @@ L.ALS.Locales.addLocaleProperties("English", {
 
 	airportForLayer: "Airport for layer",
 
+	zoneNumber: "Zone number",
 	minHeight: "Min. height (m):",
 	maxHeight: "Max. height (m):",
 	meanHeight: "Mean height",
@@ -116,7 +117,7 @@ L.ALS.Locales.addLocaleProperties("English", {
 	secondParagraphPart2: "GitHub page",
 	secondParagraphPart3: "for more information.",
 
-	thirdParagraph: "Developing SynthFlight is possible thanks to following open-source software:",
+	thirdParagraph: "Developing SynthFlight is possible thanks to various open-source software.",
 
 	fourthParagraph: "Using maps is possible thanks to following geoservices:",
 

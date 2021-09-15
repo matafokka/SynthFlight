@@ -4,7 +4,7 @@
 	margin-bottom: 0;
 }
 
-.grd-lyr-airport-icon {
+.ri.grd-lyr-airport-icon {
 	display: flex !important;
 	border: 2px solid white;
 	border-radius: 50% !important;
@@ -16,12 +16,12 @@
 	transform: translate(-50%, -50%);
 }
 
-.not-mobile .grd-lyr-airport-icon:hover {
+.not-mobile .ri.grd-lyr-airport-icon:hover {
 	background: rgba(0, 0, 100, 0.7);
 	cursor: move;
 }
 
-.grd-lyr-airport-icon:active {
+.ri.grd-lyr-airport-icon:active {
 	background: rgba(0, 0, 100, 1) !important;
 	cursor: move;
 }

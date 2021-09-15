@@ -104,7 +104,7 @@ L.ALS.SynthShapefileLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthShapefileL
 	},
 
 	statics: {
-		wizard: new L.ALS.SynthShapefileWizard(),
+		wizard: L.ALS.SynthShapefileWizard,
 		settings: new L.ALS.SynthShapefileSettings(),
 
 		serializationProperties: ["serializableClassName", "type", "fillColor", "borderColor", "geometryType"],

@@ -36,7 +36,7 @@ L.ALS.SynthGridSettings = L.ALS.Settings.extend( /** @lends L.ALS.SynthGridSetti
 		);
 
 		this.addWidget(
-			(new L.ALS.Widgets.Number("lineThickness", "defaultLineThickness")).setMin(1).setMax(20).setValue(this.lineThickness),
+			(new L.ALS.Widgets.Number("lineThicknessValue", "defaultLineThickness")).setMin(1).setMax(20).setValue(this.lineThickness),
 			this.lineThickness
 		);
 
