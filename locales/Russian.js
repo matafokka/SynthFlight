@@ -54,6 +54,7 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 
 	airportForLayer: "Аэропорт для слоя",
 
+	zoneNumber: "Номер участка",
 	minHeight: "Мин. высота (m):",
 	maxHeight: "Макс. высота (m):",
 	meanHeight: "Ср. высота",
@@ -111,7 +112,7 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 	secondParagraphPart2: "страницу проекта на GitHub",
 	secondParagraphPart3: "для дополнительной информации (на английском языке).",
 
-	thirdParagraph: "Разработка SynthFlight возможна, благодаря следующему свободному ПО:",
+	thirdParagraph: "Разработка SynthFlight возможна, благодаря различному свободному ПО.",
 
 	fourthParagraph: "Использование карт возможно, благодаря следующим геосервисам:",
 

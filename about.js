@@ -58,44 +58,6 @@ module.exports = `
 
 <p data-als-locale-property="thirdParagraph"></p>
 
-<ul>
-	<li>Babel</li>
-	<li>Babelify</li>
-	<li>Browserify</li>
-	<li>chalk</li>
-	<li>classlist</li>
-	<li>common-shakeify</li>
-	<li>core-js</li>
-	<li>css-patch</li>
-	<li>cssnano</li>
-	<li>debounce</li>
-	<li>Electron</li>
-	<li>electron-packager</li>
-	<li>FileSaver.js</li>
-	<li>fs-extra</li>
-	<li>http-server</li>
-	<li>ink-docstrap</li>
-	<li>gLayers.Leaflet</li>
-	<li>jscolor</li>
-	<li>JSDoc</li>
-	<li>jsdom</li>
-	<li>jsdom-global</li>
-	<li>JSZip</li>
-	<li>keyboardevent-key-polyfill</li>
-	<li>Leaflet</li>
-	<li>Leaflet.Coordinates</li>
-	<li>object-defineproperty-ie</li>
-	<li>PostCSS</li>
-	<li>postcss-css-variables</li>
-	<li>postcss-preset-env</li>
-	<li>Remix Icon</li>
-	<li>roman-numerals</li>
-	<li>shpjs</li>
-	<li>SortableJS</li>
-	<li>time-input-polyfill</li>
-	<li>uglifyify</li>
-</ul>
-
 <p data-als-locale-property="fourthParagraph"></p>
 <ul>
 	<li>OpenStreetMaps</li>

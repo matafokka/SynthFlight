@@ -8,14 +8,18 @@
 // I've spend hours struggling with this issue, so don't try to reorganise the code, you'll fail and, as it seems, break compatibility with the older Electron versions.
 
 //require("fastestsmallesttextencoderdecoder");
-//require("../leaflet-advanced-layer-system/System.js");
 require("leaflet-advanced-layer-system");
 L.ALS.Locales.AdditionalLocales.Russian();
 require("./locales/English.js");
 require("./locales/Russian.js");
 require("./SynthShapefileLayer.js");
-require("./SynthGridLayer.js");
+require("./SynthBaseLayer.js");
+require("./SynthGridLayer/SynthGridLayer.js");
 require("./node_modules/leaflet.coordinates/dist/Leaflet.Coordinates-0.1.5.min.js");
+require("leaflet-draw");
+require("./SynthBaseDrawLayer.js");
+require("./SynthPolygonLayer.js");
+require("./SynthLineLayer.js");
 
 L.ALS.System.initializeSystem();
 
@@ -23,8 +27,8 @@ L.ALS.System.initializeSystem();
 let map = L.map("map", {
 	attributionControl: false, // Attribution will be present in About window
 	zoomControl: false,
-	minZoom: 2, // Leaflet will hide everything below this zoom
-	maxBounds: L.latLngBounds( // This will disable infinite panning
+	minZoom: 1,
+	maxBounds: L.latLngBounds(
 		L.latLng(90, -180),
 		L.latLng(-90, 180)
 	),
@@ -33,8 +37,6 @@ let map = L.map("map", {
 	keyboard: false,
 }).setView([51.505, -0.09], 13);
 map.doubleClickZoom.disable();
-
-map.addControl(new L.ALS.ControlZoom({ position: "topleft" }));
 
 // Show coordinates via Leaflet.Control plugin. It doesn't look good on phones, so we won't add it in this case.
 if (!L.ALS.Helpers.isMobile) {
@@ -51,8 +53,12 @@ if (!L.ALS.Helpers.isMobile) {
 // Initialize layer system. Create and add base layers.
 let layerSystem = new L.ALS.System(map, {
 	aboutHTML: require("./about.js"),
-	filePrefix: "SynthFlight"
-}).addTo(map);
+	filePrefix: "SynthFlight",
+	enableHistory: true,
+	enableToolbar: true,
+	makeMapFullscreen: true,
+});
+
 
 let osmLayer = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 	maxZoom: 19,

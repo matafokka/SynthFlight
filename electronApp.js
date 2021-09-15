@@ -7,7 +7,10 @@ function createWindow () {
 		width: 1280,
 		height: 720,
 		icon: "logo.ico",
+		frame: false,
+		titleBarStyle: 'customButtonsOnHover',
 		webPreferences: {
+			enableRemoteModule: true,
 			nodeIntegration: true
 		}
 	});
@@ -18,7 +21,9 @@ function createWindow () {
 		mainWindow.webContents.openDevTools();
 	mainWindow.removeMenu();
 	mainWindow.maximize();
-	integrate(mainWindow);
+	integrate(mainWindow, {
+		useToolbarAsFrame: true,
+	});
 }
 
 app.commandLine.appendSwitch("enable-experimental-web-platform-features");
