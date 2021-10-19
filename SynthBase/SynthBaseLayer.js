@@ -10,6 +10,8 @@ const turfHelpers = require("@turf/helpers");
  */
 L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.prototype */{
 
+	hasYOverlay: true,
+
 	init: function () {
 		this.serializationIgnoreList.push("_airportMarker");
 
@@ -43,7 +45,12 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 			new L.ALS.Widgets.Number("cameraWidth", "cameraWidth", this, "calculateParameters").setMin(1).setStep(1).setValue(17000),
 			new L.ALS.Widgets.Number("cameraHeight", "cameraHeight", this, "calculateParameters").setMin(1).setStep(1).setValue(17000),
 			new L.ALS.Widgets.Number("pixelWidth", "pixelWidth", this, "calculateParameters").setMin(0.1).setStep(0.1).setValue(5),
-			new L.ALS.Widgets.Number("overlayBetweenPaths", "overlayBetweenPaths", this, "calculateParameters").setMin(60).setMax(100).setStep(0.1).setValue(60),
+		);
+
+		if (this.hasYOverlay)
+			this.addWidget(new L.ALS.Widgets.Number("overlayBetweenPaths", "overlayBetweenPaths", this, "calculateParameters").setMin(60).setMax(100).setStep(0.1).setValue(60));
+
+		this.addWidgets(
 			new L.ALS.Widgets.Number("overlayBetweenImages", "overlayBetweenImages", this, "calculateParameters").setMin(30).setMax(100).setStep(0.1).setValue(30),
 			new L.ALS.Widgets.Number("focalLength", "focalLength", this, "calculateParameters").setMin(0.001).setStep(1).setValue(112),
 
@@ -55,14 +62,21 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 	},
 
 	addBaseParametersOutputSection: function () {
+		let yWidgets = [];
+		if (this.hasYOverlay) {
+			yWidgets = [
+				new L.ALS.Widgets.ValueLabel("ly", "ly", "m"),
+				new L.ALS.Widgets.ValueLabel("Ly", "Ly", "m"),
+				new L.ALS.Widgets.ValueLabel("By", "By", "m"),
+			];
+		}
+
 		let valueLabels = [
 			new L.ALS.Widgets.ValueLabel("flightHeight", "flightHeight"),
 			new L.ALS.Widgets.ValueLabel("lx", "lx", "m"),
 			new L.ALS.Widgets.ValueLabel("Lx", "Lx", "m"),
 			new L.ALS.Widgets.ValueLabel("Bx", "Bx", "m"),
-			new L.ALS.Widgets.ValueLabel("ly", "ly", "m"),
-			new L.ALS.Widgets.ValueLabel("Ly", "Ly", "m"),
-			new L.ALS.Widgets.ValueLabel("By", "By", "m"),
+			...yWidgets,
 			new L.ALS.Widgets.ValueLabel("GSI", "GSI", "m"),
 			new L.ALS.Widgets.ValueLabel("IFOV", "IFOV", "μrad"),
 			new L.ALS.Widgets.ValueLabel("GIFOV", "GIFOV", "m"),
@@ -79,7 +93,7 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 	calculateParameters: function () {
 		let parameters = ["cameraWidth", "cameraHeight", "pixelWidth", "focalLength", "imageScale", "overlayBetweenPaths", "overlayBetweenImages", "aircraftSpeed"];
 		for (let param of parameters)
-			this[param] = this.getWidgetById(param).getValue();
+			this[param] = this.getWidgetById(param)?.getValue();
 		this.flightHeight = this["imageScale"] * this["focalLength"];
 
 		let cameraParametersWarning = this.getWidgetById("cameraParametersWarning");
@@ -91,9 +105,11 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 		let pixelWidth = this["pixelWidth"] * 1e-6;
 		let focalLength = this["focalLength"] * 0.001;
 
-		this.ly = this["cameraWidth"] * pixelWidth; // Image size in meters
-		this.Ly = this.ly * this["imageScale"] // Image width on the ground
-		this.By = this.Ly * (100 - this["overlayBetweenPaths"]) / 100; // Distance between paths
+		if (this.hasYOverlay) {
+			this.ly = this["cameraWidth"] * pixelWidth; // Image size in meters
+			this.Ly = this.ly * this["imageScale"] // Image width on the ground
+			this.By = this.Ly * (100 - this["overlayBetweenPaths"]) / 100; // Distance between paths
+		}
 
 		this.lx = this["cameraHeight"] * pixelWidth; // Image height
 		this.Lx = this.lx * this["imageScale"]; // Image height on the ground
@@ -110,11 +126,15 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 
 		let names = ["flightHeight", "lx", "Lx", "Bx", "ly", "Ly", "By", "GSI", "IFOV", "GIFOV", "FOV", "GFOV",];
 		for (let name of names) {
+			const field = this[name];
+			if (field === undefined)
+				continue;
+
 			let value;
 			try {
-				value = this.toFixed(this[name]);
+				value = this.toFixed(field);
 			} catch (e) {
-				value = this[name];
+				value = field;
 			}
 			this.getWidgetById(name).setValue(value);
 		}

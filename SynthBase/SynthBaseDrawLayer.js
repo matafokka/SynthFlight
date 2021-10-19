@@ -2,17 +2,15 @@ L.ALS.SynthBaseDrawLayer = L.ALS.SynthBaseLayer.extend({
 
 	defaultName: "Draw Layer",
 
-	/**
-	 * Leaflet.Draw controls to use
-	 */
-	drawControls: {},
-
 	init: function (wizardResults, settings) {
+
+		/**
+		 * Leaflet.Draw controls to use
+		 */
+		this.drawControls = this.drawControls || {}
 
 		this.addBaseParametersInputSection();
 		this.addBaseParametersOutputSection();
-
-		L.ALS.SynthBaseLayer.prototype.init.call(this);
 
 		/**
 		 * Leaflet.Draw group
@@ -39,6 +37,7 @@ L.ALS.SynthBaseDrawLayer = L.ALS.SynthBaseLayer.extend({
 
 		this.control = new L.Control.Draw(options);
 
+		L.ALS.SynthBaseLayer.prototype.init.call(this, wizardResults, settings);
 		this.addEventListenerTo(this.map, "draw:created", "onDraw");
 		this.onNameChange();
 	},
