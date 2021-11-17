@@ -1,9 +1,9 @@
-L.ALS.SynthLineSettings = L.ALS.Settings.extend({
+L.ALS.SynthLineSettings = L.ALS.SynthBaseSettings.extend({
 
 	initialize: function () {
-		L.ALS.Settings.prototype.initialize.call(this);
+		L.ALS.SynthBaseSettings.prototype.initialize.call(this);
 		const color = "#ff0000";
-		this.addWidget(new L.ALS.Widgets.Color("color", "settingsLineLayerColor").setValue(color), color);
+		this.addWidget(new L.ALS.Widgets.Color("color0", "settingsLineLayerColor").setValue(color), color);
 	}
 
-})
+});

@@ -13,7 +13,7 @@ L.ALS.SynthGridLayer.prototype.serialize = function (seenObjects) {
 	return serialized;
 }
 
-L.ALS.SynthGridLayer._toUpdateColors = ["gridBorderColor", "gridFillColor", "meridiansColor", "parallelsColor"];
+L.ALS.SynthGridLayer._toUpdateColors = ["gridBorderColor", "gridFillColor", "color0", "color1"];
 
 L.ALS.SynthGridLayer.deserialize = function (serialized, layerSystem, settings, seenObjects) {
 	let object = L.ALS.Layer.deserialize(serialized, layerSystem, settings, seenObjects);

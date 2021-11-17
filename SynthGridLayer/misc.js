@@ -1,83 +1,67 @@
 // Misc methods, event handlers, etc which most likely won't change in future
 
 const turfHelpers = require("@turf/helpers");
-const union = require("@turf/union").default;
-
-L.ALS.SynthGridLayer.prototype.onMarkerDrag = function () {
-	L.ALS.SynthBaseLayer.prototype.onMarkerDrag.call(this);
-	this._drawPaths();
-}
+const polybool = require("polybooljs");
+const MathTools = require("../MathTools.js");
 
 L.ALS.SynthGridLayer.prototype._setColor = function (widget) {
 	this[widget.id] = widget.getValue();
 	this.updateGrid();
 }
 
-L.ALS.SynthGridLayer.prototype._setLineThickness = function (widget) {
-	this.lineThicknessValue = widget.getValue();
-	this.updateGrid();
+L.ALS.SynthGridLayer.prototype._updateLayersVisibility = function () {
+	let hidePathsByMeridians = this.getWidgetById("hidePathsByMeridians").getValue(),
+		hidePathsByParallels = this.getWidgetById("hidePathsByParallels").getValue();
+
+	if (this.getWidgetById("hidePathsConnections").getValue()) {
+		this.parallelsInternalConnections.remove();
+		this.parallelsExternalConnections.remove();
+		this.meridiansInternalConnections.remove();
+		this.meridiansExternalConnections.remove();
+	} else {
+		this._hideOrShowLayer(hidePathsByParallels, this.parallelsInternalConnections);
+		this._hideOrShowLayer(hidePathsByParallels, this.parallelsExternalConnections);
+		this._hideOrShowLayer(hidePathsByMeridians, this.meridiansInternalConnections);
+		this._hideOrShowLayer(hidePathsByMeridians, this.meridiansExternalConnections);
+	}
+
+	if (this.getWidgetById("hideCapturePoints").getValue()) {
+		this.latPointsGroup.remove();
+		this.lngPointsGroup.remove();
+	} else {
+		this._hideOrShowLayer(hidePathsByParallels, this.lngPointsGroup);
+		this._hideOrShowLayer(hidePathsByMeridians, this.latPointsGroup);
+	}
+
+	this._hideOrShowLayer(hidePathsByParallels, this.pathsByParallels);
+	this._hideOrShowLayer(hidePathsByMeridians, this.pathsByMeridians);
+
+	this._doHidePolygonWidgets = this._hideOrShowLayer(this.getWidgetById("hidePolygonWidgets").getValue(), this.widgetsGroup);
+	this._doHidePathsNumbers = this.getWidgetById("hideNumbers").getValue();
+	this._drawPaths(); // We have to redraw paths both for hiding one of the paths and hiding numbers
 }
 
-L.ALS.SynthGridLayer.prototype._hidePathsConnections = function (widget) {
-	this._doHidePathsConnections = widget.getValue();
-	this._drawPaths();
+/**
+ * Hides or shows layer.
+ * @param hide {boolean} If true, hide layer
+ * @param layer {Layer} Layer to show or hide
+ * @return {boolean} If true, layer has been hidden. False otherwise.
+ * @private
+ */
+L.ALS.SynthGridLayer.prototype._hideOrShowLayer = function (hide, layer) {
+	if (hide)
+		layer.remove();
+	else
+		this.map.addLayer(layer);
+	return hide;
 }
 
 /**
  * Updates grid by redrawing all polygons, recalculating stuff, etc
  */
 L.ALS.SynthGridLayer.prototype.updateGrid = function () {
-	this.labelsGroup.deleteAllLabels();
 	this._onMapZoom();
 	this.calculateParameters();
-	this._calculatePolygonParameters();
-	this._drawPaths();
-}
-
-L.ALS.SynthGridLayer.prototype._hidePolygonWidgets = function (widget) {
-	this._doHidePolygonWidgets = this._hideOrShowLayer(widget, this.widgetsGroup);
-}
-
-L.ALS.SynthGridLayer.prototype._hidePointsNumbers = function (widget) {
-	this._doHidePathsNumbers = widget.getValue();
-	this.updateGrid();
-}
-
-L.ALS.SynthGridLayer.prototype._hideCapturePoints = function (widget) {
-	this._areCapturePointsHidden = this._hideOrShowLayer(widget, this.latPointsGroup);
-	this._hideOrShowLayer(widget, this.lngPointsGroup);
-	this._hidePathsByMeridians(this.getWidgetById("hidePathsByMeridians"));
-	this._hidePathsByParallels(this.getWidgetById("hidePathsByParallels"));
-}
-
-L.ALS.SynthGridLayer.prototype._hidePathsByMeridians = function (widget) {
-	this._doHidePathsByMeridians = this._hideOrShowLayer(widget, this["pathsByMeridians"]);
-	if (!this._areCapturePointsHidden)
-		this._hideOrShowLayer(widget, this.latPointsGroup);
-	this.updateGrid();
-}
-
-L.ALS.SynthGridLayer.prototype._hidePathsByParallels = function (widget) {
-	this._doHidePathsByParallels = this._hideOrShowLayer(widget, this["pathsByParallels"]);
-	if (!this._areCapturePointsHidden)
-		this._hideOrShowLayer(widget, this.lngPointsGroup);
-	this.updateGrid();
-}
-
-/**
- * Hides or shows layer.
- * @param checkbox {L.ALS.Widgets.Checkbox} Checkbox that indicates whether layer should be hidden or not
- * @param layer {Layer} Layer to show or hide
- * @return {boolean} If true, layer has been hidden. False otherwise.
- * @private
- */
-L.ALS.SynthGridLayer.prototype._hideOrShowLayer = function (checkbox, layer) {
-	let isChecked = checkbox.getValue();
-	if (isChecked)
-		layer.remove();
-	else
-		this.map.addLayer(layer);
-	return isChecked;
 }
 
 /**
@@ -89,11 +73,6 @@ L.ALS.SynthGridLayer.prototype._hideOrShowLayer = function (checkbox, layer) {
 L.ALS.SynthGridLayer.prototype._generatePolygonName = function (polygon) {
 	let firstPoint = polygon.getLatLngs()[0][0];
 	return "p_" + this.toFixed(firstPoint.lat) + "_" + this.toFixed(firstPoint.lng);
-}
-
-L.ALS.SynthGridLayer.prototype.setAirportLatLng = function () {
-	L.ALS.SynthBaseLayer.prototype.setAirportLatLng.call(this);
-	this._drawPaths();
 }
 
 /**
@@ -147,7 +126,7 @@ L.ALS.SynthGridLayer.prototype.applyNewSettings = function (settings) {
 
 /**
  * Calculates grid hiding threshold
- * @param settings {L.ALS.Settings} Settings to calculate threshold from
+ * @param settings {SettingsObject} Settings to calculate threshold from
  */
 L.ALS.SynthGridLayer.prototype.calculateThreshold = function (settings) {
 	let multiplier = (settings.gridHidingFactor - 5) / 5; // Factor is in range [1..10]. Let's make it [-1...1]
@@ -159,38 +138,127 @@ L.ALS.SynthGridLayer.prototype.calculateThreshold = function (settings) {
 }
 
 /**
- * Calculates line length using haversine formula with account of flight height
- * @param line
- * @return {number}
- */
-L.ALS.SynthGridLayer.prototype.lineLengthUsingFlightHeight = function (line) {
-	let r = 6371000 + this["flightHeight"];
-	let points = line.getLatLngs();
-	let distance = 0;
-	for (let i = 0; i < points.length - 1; i++) {
-		let p1 = points[i], p2 = points[i + 1];
-		let f1 = turfHelpers.degreesToRadians(p1.lat), f2 = turfHelpers.degreesToRadians(p2.lat);
-		let df = f2 - f1;
-		let dl = turfHelpers.degreesToRadians(p2.lng - p1.lng);
-		let a = Math.sin(df / 2) ** 2 + Math.cos(f1) * Math.cos(f2) * Math.sin(dl / 2) ** 2;
-		distance += r * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-	}
-	return distance;
-}
-
-/**
  * Merges selected polygon into one GeoJSON feature.
- * @param currentGeoJSON Current GeoJSON object
- * @param name {string} Name of current polygon
- * @return Merged feature
+ * @return number[][][] Merged feature
  * @private
  */
-L.ALS.SynthGridLayer.prototype._addSelectedPolygonToGeoJSON = function (currentGeoJSON, name) {
-	let polygonGeoJSON = this.selectedPolygons[name].toGeoJSON();
-	if (currentGeoJSON === undefined) {
-		currentGeoJSON = polygonGeoJSON;
-		return currentGeoJSON;
+L.ALS.SynthGridLayer.prototype._mergeSelectedPolygons = function () {
+	// Convert object with polygons to an array and push edges instead of points here
+	this.mergedPolygons = [];
+	for (let id in this.selectedPolygons) {
+		let latLngs = this.selectedPolygons[id].getLatLngs()[0], poly = [];
+		for (let p of latLngs)
+			poly.push([p.lng, p.lat]);
+		poly.push(poly[0]); // We need to close the polygons to use MathTools stuff
+		poly.zoneNumber = this.selectedPolygonsWidgets[id].getWidgetById("zoneNumber").getValue();
+		poly.name = this.selectedPolygons[id].polygonName; // TODO: Remove after testing
+		this.mergedPolygons.push(poly);
 	}
-	currentGeoJSON = union(currentGeoJSON, polygonGeoJSON);
-	return currentGeoJSON;
+
+	// Until there's no adjacent polygons, compare each polygon to each and try to find adjacent one. Then merge it.
+	while (true) {
+		let toMerge;
+		for (let poly1 of this.mergedPolygons) {
+			for (let poly2 of this.mergedPolygons) {
+				if (poly1 === poly2 || poly1.zoneNumber !== poly2.zoneNumber)
+					continue;
+
+				// Check if we have a small polygon completely inside of a big one, i.e., if it could form a hole.
+				// We need a special algorithm because a small polygon might have all common points, but not any common
+				// edges. In such case, polygons shouldn't be merged.
+				// If all points touch edges, but not all edges do the same, we're completely fine with it.
+
+				// So we're gonna check if all points of a small polygon are inside a big one, but none of the points
+				// touches a point of a big polygon.
+
+				let shouldMerge = true;
+				for (let p1 of poly1) {
+					shouldMerge = shouldMerge && MathTools.isPointInPolygon(p1, poly2);
+
+					if (poly1.name === "M-30-24-D-b")
+						console.log(p1, MathTools.isPointInPolygon(p1, poly2));
+
+					if (!shouldMerge)
+						break;
+
+					for (let p2 of poly2) {
+						shouldMerge = shouldMerge && !MathTools.arePointsEqual(p1, p2);
+
+						if (!shouldMerge)
+							break;
+					}
+
+					if (!shouldMerge)
+						break;
+				}
+
+				if (shouldMerge) {
+					toMerge = {poly1, poly2};
+					break;
+				}
+
+				// Check if any two edges of the polygons overlap, in which case we should merge polygons
+
+				for (let ii = 0; ii < poly1.length - 1; ii++) {
+					let edge1 = [poly1[ii], poly1[ii + 1]];
+
+					for (let jj = 0; jj < poly2.length - 1; jj++) {
+						let edge2 = [poly2[jj], poly2[jj + 1]],
+							intersection = MathTools.linesIntersection(edge1, edge2);
+
+						if (!intersection || intersection.length === 1)
+							continue;
+
+						let [p1, p2] = intersection, pairs = [[p1, p2], [p2, p1]];
+
+						// When edges are adjacent, i.e. when only one point of the first edge touches a point
+						// of the second edge
+						if (MathTools.arePointsEqual(p1, p2))
+							continue;
+
+						for (let pair of pairs) {
+							let [p1, p2] = pair;
+							if (MathTools.isPointOnLine(p1, edge1) && MathTools.isPointOnLine(p2, edge2)) {
+								toMerge = {poly1, poly2};
+								break;
+							}
+						}
+
+						if (toMerge)
+							break;
+					}
+					if (toMerge)
+						break;
+				}
+				if (toMerge)
+					break;
+			}
+			if (toMerge)
+				break;
+		}
+		if (!toMerge)
+			break;
+
+		let merged = polybool.union(
+			{regions: [toMerge.poly1]},
+			{regions: [toMerge.poly2]}
+		).regions,
+			newPolygon = merged.length === 1 ? merged[0] : merged[1];
+		newPolygon.zoneNumber = toMerge.poly1.zoneNumber;
+
+		// Union returns polygon with four points, we need to close it
+		if (!MathTools.arePointsEqual(newPolygon[0], newPolygon[newPolygon.length - 1]))
+			newPolygon.push(newPolygon[0]);
+
+		let newPolygons = [newPolygon]; // Array with merged polygons
+
+		for (let poly of this.mergedPolygons) {
+			if (poly !== toMerge.poly1 && poly !== toMerge.poly2)
+				newPolygons.push(poly);
+		}
+		this.mergedPolygons = newPolygons;
+	}
+
+	console.log(this.mergedPolygons)
+	return this.mergedPolygons;
 }

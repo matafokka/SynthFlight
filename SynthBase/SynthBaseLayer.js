@@ -5,15 +5,87 @@ const turfHelpers = require("@turf/helpers");
  *
  * Call {@link L.ALS.SynthBaseLayer#init} after you've created a menu!
  *
+ * @param settings {SettingsObject} Settings object
+ * @param pathGroup1 {L.FeatureGroup} First paths group (a group of polylines)
+ * @param connectionsGroup1 {L.FeatureGroup} First connections group
+ * @param colorLabel1 {string} Color widget label for paths group 1
+ * @param path1AdditionalLayers {L.Layer[]} Additional layers related to path 1 that should have same color and thickness
+ * @param pathGroup2 {L.FeatureGroup} Second paths group (a group of polylines). If you have only one path, leave this one as undefined.
+ * @param connectionsGroup2 {L.FeatureGroup} Second connections group. If you have only one path, leave this one as undefined.
+ * @param colorLabel2 {string} Color widget label for paths group 2. If you have only one path, leave this one as undefined.
+ * @param path2AdditionalLayers {L.Layer[]} Additional layers related to path 2 that should have same color and thickness
+ *
  * @class
  * @extends L.ALS.Layer
  */
-L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.prototype */{
+L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.prototype */ {
 
-	hasYOverlay: true,
+	/**
+	 * Parameter to pass to dashArray option
+	 * @type {string}
+	 */
+	dashedLine: "4 4",
 
-	init: function () {
-		this.serializationIgnoreList.push("_airportMarker");
+	init: function (settings, pathGroup1, connectionsGroup1, colorLabel1, path1AdditionalLayers = [], pathGroup2 = undefined, connectionsGroup2 = undefined, colorLabel2 = undefined, path2AdditionalLayers = []) {
+
+		this._settings = settings;
+
+		/**
+		 * Array of paths widgets to remove whenever paths are updated
+		 * @type {L.ALS.Widgets.Spoiler[]}
+		 */
+		this._pathsWidgets = [];
+
+		/**
+		 * For numbering paths widgets
+		 * @type {number}
+		 * @private
+		 */
+		this._pathsWidgetsNumber = 1;
+
+		this.path1 = {
+			pathGroup: pathGroup1,
+			connectionsGroup: connectionsGroup1,
+			colorLabel: colorLabel1,
+			toUpdateColors: [pathGroup1, connectionsGroup1, ...path1AdditionalLayers]
+		}
+
+		this.path2 = pathGroup2 ? {
+			pathGroup: pathGroup2,
+			connectionsGroup: connectionsGroup2,
+			colorLabel: colorLabel2,
+			toUpdateColors: [pathGroup2, connectionsGroup2, ...path2AdditionalLayers]
+		} : undefined;
+
+		this.hasYOverlay = !!this.path2;
+
+		this.paths = [this.path1];
+		if (this.hasYOverlay)
+			this.paths.push(this.path2);
+
+		/**
+		 * Current line thickness value
+		 * @type {number}
+		 */
+		this.lineThicknessValue = settings.lineThicknessValue;
+
+		/**
+		 * Groups to update line thickness of. To set double thickness, create thicknessMultiplier property in layer to control how thick should be line relative to thickness set by user.
+		 *
+		 * Already contains paths and connections groups
+		 *
+		 * @type {L.FeatureGroup[]}
+		 */
+		this.toUpdateThickness = [...path1AdditionalLayers, ...path2AdditionalLayers];
+
+		for (let i = 0; i < this.paths.length; i++) {
+			let path = this.paths[i];
+			path.hullConnection = L.polyline([[0, 0], [0, 0]], this.getConnectionLineOptions(settings[`color${i}`]));
+			this.addLayers(path.pathGroup, path.connectionsGroup);
+			this.toUpdateThickness.push(path.pathGroup, path.connectionsGroup);
+		}
+
+		this.serializationIgnoreList.push("_airportMarker", "toUpdateThickness");
 
 		// Add airport
 		let icon = L.divIcon({
@@ -30,12 +102,23 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 		// Set inputs' values to new ones on drag
 		this.addEventListenerTo(this._airportMarker, "drag", "onMarkerDrag");
 		this.addLayers(this._airportMarker);
-		this._airportMarker.fire("drag"); // Just to set values
 	},
 
 	addBaseParametersInputSection: function () {
+		this.addWidget(
+			new L.ALS.Widgets.Number("lineThickness", "lineThickness", this, "setLineThickness").setMin(1).setMax(20).setValue(this._settings.lineThicknessValue),
+		);
+
+		for (let i = 0; i < this.paths.length; i++) {
+			this.addWidget(
+				new L.ALS.Widgets.Color(`color${i}`, this.paths[i].colorLabel, this, "_setPathsColor").setValue(this._settings[`color${i}`]),
+			);
+		}
+
 		this.addWidgets(
 			new L.ALS.Widgets.Divider("div1"),
+
+			new L.ALS.Widgets.DropDownList("connectionMethod", "connectionMethod", this, "updatePathsMeta").addItems("allIntoOne", "oneFlightPerPath"),
 
 			new L.ALS.Widgets.Number("airportLat", "airportLat", this, "setAirportLatLng").setMin(-90).setMax(90).setStep(0.01),
 			new L.ALS.Widgets.Number("airportLng", "airportLng", this, "setAirportLatLng").setMin(-180).setMax(180).setStep(0.01),
@@ -59,6 +142,7 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 
 			new L.ALS.Widgets.Divider("div2"),
 		);
+		this._airportMarker.fire("drag"); // Just to set values
 	},
 
 	addBaseParametersOutputSection: function () {
@@ -90,53 +174,30 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 		}
 	},
 
-	calculateParameters: function () {
-		let parameters = ["cameraWidth", "cameraHeight", "pixelWidth", "focalLength", "imageScale", "overlayBetweenPaths", "overlayBetweenImages", "aircraftSpeed"];
-		for (let param of parameters)
-			this[param] = this.getWidgetById(param)?.getValue();
-		this.flightHeight = this["imageScale"] * this["focalLength"];
+	/**
+	 * Sets line thickness of whatever's in {@link L.ALS.SynthBaseLayer#toUpdateThickness}
+	 * @param widget {L.ALS.Widgets.Number} Widget that controls line thickness
+	 */
+	setLineThickness: function (widget) {
+		this.lineThicknessValue = widget.getValue();
+		let doubleThickness = this.lineThicknessValue * 2;
 
-		let cameraParametersWarning = this.getWidgetById("cameraParametersWarning");
-		if (this["cameraHeight"] > this["cameraWidth"])
-			cameraParametersWarning.setValue("errorCamHeight");
-		else
-			cameraParametersWarning.setValue("");
-
-		let pixelWidth = this["pixelWidth"] * 1e-6;
-		let focalLength = this["focalLength"] * 0.001;
-
-		if (this.hasYOverlay) {
-			this.ly = this["cameraWidth"] * pixelWidth; // Image size in meters
-			this.Ly = this.ly * this["imageScale"] // Image width on the ground
-			this.By = this.Ly * (100 - this["overlayBetweenPaths"]) / 100; // Distance between paths
+		for (let group of this.toUpdateThickness) {
+			group.eachLayer((layer) => {
+				if (layer instanceof L.Polyline || layer instanceof L.Polygon)
+					layer.setStyle({weight: (layer.thicknessMultiplier || group.thicknessMultiplier || 1) * this.lineThicknessValue});
+				else if (layer instanceof L.CircleMarker)
+					layer.setRadius(doubleThickness);
+			})
 		}
+	},
 
-		this.lx = this["cameraHeight"] * pixelWidth; // Image height
-		this.Lx = this.lx * this["imageScale"]; // Image height on the ground
-		this.Bx = this.Lx * (100 - this["overlayBetweenImages"]) / 100; // Capture basis, distance between images' centers
-		this.basis = turfHelpers.lengthToDegrees(this.Bx, "meters");
-
-		this.GSI = pixelWidth * this["imageScale"];
-		this.IFOV = pixelWidth / focalLength * 1e6;
-		this.GIFOV = this.GSI;
-		this.FOV = this["cameraWidth"] * this.IFOV;
-		this.GFOV = this["cameraWidth"] * this.GSI;
-
-		this.aircraftSpeedInMetersPerSecond = this["aircraftSpeed"] * 1 / 36;
-
-		let names = ["flightHeight", "lx", "Lx", "Bx", "ly", "Ly", "By", "GSI", "IFOV", "GIFOV", "FOV", "GFOV",];
-		for (let name of names) {
-			const field = this[name];
-			if (field === undefined)
-				continue;
-
-			let value;
-			try {
-				value = this.toFixed(field);
-			} catch (e) {
-				value = field;
-			}
-			this.getWidgetById(name).setValue(value);
+	_setPathsColor: function () {
+		for (let i = 0; i < this.paths.length; i++) {
+			let style = {color: this.getWidgetById(`color${i}`).getValue()},
+				path = this.paths[i];
+			for (let group of path.toUpdateColors)
+				group.setStyle(style);
 		}
 	},
 
@@ -145,12 +206,14 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 			this.getWidgetById("airportLat").getValue(),
 			this.getWidgetById("airportLng").getValue()
 		]);
+		this.connectToAirport();
 	},
 
 	onMarkerDrag: function () {
 		let latLng = this._airportMarker.getLatLng();
 		this.getWidgetById("airportLat").setValue(latLng.lat.toFixed(5));
 		this.getWidgetById("airportLng").setValue(latLng.lng.toFixed(5));
+		this.connectToAirport();
 	},
 
 	onNameChange: function () {
@@ -158,6 +221,181 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 		L.ALS.Locales.localizeElement(popup, "airportForLayer", "innerText");
 		popup.innerText += " " + this.getName();
 		this._airportMarker.bindPopup(popup);
-	}
+	},
 
-})
+	connectToAirport: function () {
+		const value = this.getWidgetById("connectionMethod").getValue();
+		if (value === "oneFlightPerPath")
+			this.connectOnePerFlightToAirport();
+		else // allIntoOne
+			this.connectHullToAirport();
+	},
+
+	updatePathsMeta: function () {
+		// Clear widgets
+		for (let widget of this._pathsWidgets)
+			this.removeWidget(widget.id);
+
+		this._pathsWidgets = [];
+		this._pathsWidgetsNumber = 1;
+
+		// Connect paths. Paths will be connected to the airport, their widgets will be added, and their parameters will be calculated at each of methods below.
+		const value = this.getWidgetById("connectionMethod").getValue();
+		if (value === "oneFlightPerPath")
+			this.connectOnePerFlight();
+		else// allIntoOne
+			this.connectHull();
+	},
+
+	_createPathWidget: function (length, toFlash) {
+		let button = new L.ALS.Widgets.Button("flashPath", "flashPath", this, "flashPath");
+		button.toFlash = toFlash;
+
+		let widget = new L.ALS.Widgets.Spoiler(`pathWidget${this._pathsWidgetsNumber}`, `${L.ALS.locale.pathSpoiler} ${this._pathsWidgetsNumber}`)
+			.addWidgets(
+				button,
+				new L.ALS.Widgets.ValueLabel("pathLength", "pathLength", "m").setFormatNumbers(true).setNumberOfDigitsAfterPoint(0).setValue(length),
+				new L.ALS.Widgets.ValueLabel("flightTime", "flightTime", "h").setFormatNumbers(true).setValue(this.getFlightTime(length)),
+			);
+
+		this.addWidgets(widget);
+		this._pathsWidgetsNumber++;
+		this._pathsWidgets.push(widget);
+		return widget;
+	},
+
+	getFlightTime: function (length) {
+		return parseFloat((length / this.aircraftSpeedInMetersPerSecond / 3600).toFixed(2));
+	},
+
+	/**
+	 * Calculates line length using haversine formula with account of flight height
+	 * @param line {L.Polyline|number[][]|LatLng[]} Line
+	 * @return {number} Line length
+	 */
+	lineLengthUsingFlightHeight: function (line) {
+		let r = 6371000 + this.flightHeight, points = line instanceof Array ? line : line.getLatLngs(), distance = 0, x, y;
+		if (points.length === 0)
+			return 0;
+
+		if (points[0].lat === undefined) {
+			x = "0";
+			y = "1";
+		} else {
+			x = "lng";
+			y = "lat";
+		}
+
+		for (let i = 0; i < points.length - 1; i++) {
+			let p1 = points[i], p2 = points[i + 1],
+				f1 = turfHelpers.degreesToRadians(p1[y]), f2 = turfHelpers.degreesToRadians(p2[y]),
+				df = f2 - f1,
+				dl = turfHelpers.degreesToRadians(p2[x] - p1[x]),
+				a = Math.sin(df / 2) ** 2 + Math.cos(f1) * Math.cos(f2) * Math.sin(dl / 2) ** 2;
+			distance += r * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+		}
+		return distance;
+	},
+
+	/**
+	 * Called when there's one flight per each path. You should call {@link L.ALS.SynthBaseLayer#connectOnePerFlight} here.
+	 */
+	connectOnePerFlightToAirport: function () {
+		let airportPos = this._airportMarker.getLatLng();
+
+		for (let path of this.paths) {
+			let layers = path.connectionsGroup.getLayers();
+			for (let layer of layers) {
+				layer.getLatLngs()[1] = airportPos;
+				layer.redraw();
+
+				let length = layer.pathLength + this.lineLengthUsingFlightHeight(layer);
+				layer.pathWidget.getWidgetById("pathLength").setValue(length);
+				layer.pathWidget.getWidgetById("flightTime").setValue(this.getFlightTime(length));
+			}
+		}
+
+	},
+
+	// This may be reused to connect VRP (if we'll add it), but we should replace paths with connections endpoints
+
+	/**
+	 * Builds connections per flight
+	 */
+	connectOnePerFlight: function () {
+		for (let i = 0; i < this.paths.length; i++) {
+
+			let path = this.paths[i], {connectionsGroup, pathGroup} = path, layers = pathGroup.getLayers(),
+				lineOptions = this.getConnectionLineOptions(this.getWidgetById(`color${i}`).getValue());
+
+			connectionsGroup.clearLayers();
+
+			for (let layer of layers) {
+				layer.pathLength = this.lineLengthUsingFlightHeight(layer);
+
+				let latLngs = layer.getLatLngs(),
+					connectionLine = L.polyline([latLngs[0], [0, 0], latLngs[latLngs.length - 1]], lineOptions);
+				connectionLine.pathLength = layer.pathLength;
+				let toFlash = [layer, connectionLine];
+				if (layer.actualPaths)
+					toFlash.push(...layer.actualPaths)
+
+				connectionLine.pathWidget = this._createPathWidget(1, toFlash);
+				connectionsGroup.addLayer(connectionLine);
+			}
+		}
+		this.connectOnePerFlightToAirport(); // So we'll end up with only one place that updates widgets
+	},
+
+	/**
+	 * Creates an array of cycles of paths connected to the airport
+	 * @param path {Object} Path to get cycles of
+	 * @return {LatLng[][]} Cycles
+	 */
+	onePerFlightToCycles: function (path) {
+		let layers = path.pathGroup.getLayers(), cycles = [], airportPos = this._airportMarker.getLatLng();
+		for (let layer of layers)
+			cycles.push([airportPos, ...layer.getLatLngs()], airportPos);
+		return cycles;
+	},
+
+	/**
+	 * Returns connection line options
+	 * @param color {string} Line color
+	 * @return {Object} Line options
+	 */
+	getConnectionLineOptions: function (color) {
+		return {
+			color,
+			dashArray: this.dashedLine,
+			weight: this.lineThicknessValue
+		}
+	},
+
+	flashPath: function (widget) {
+		for (let group of widget.toFlash) {
+			let layers = group instanceof L.FeatureGroup ? group.getLayers() : [group];
+			for (let layer of layers)
+				this.flashLine(layer);
+		}
+	},
+
+	flashLine: async function (line) {
+		if (line.isFlashing)
+			return;
+
+		let color = line.options.color;
+		line.isFlashing = true;
+		for (let i = 0; i < 5; i++) {
+			line.setStyle({color: line.options.color === "white" ? "black" : "white"});
+			await new Promise(resolve => setTimeout(resolve, 250));
+		}
+		line.setStyle({color});
+		line.isFlashing = false;
+	},
+
+});
+
+require("./Hull.js");
+require("./calculateParameters.js");
+require("./toGeoJSON.js");

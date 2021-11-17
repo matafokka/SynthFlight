@@ -40,11 +40,10 @@ L.ALS.SynthGridLayer.prototype._selectOrDeselectPolygon = function (event) {
 L.ALS.SynthGridLayer.prototype._calculatePolygonParameters = function () {
 	let areaIncrement = Math.round(this["latCellSizeInMeters"] * this["lngCellSizeInMeters"]);
 	this.selectedArea = 0;
-	let unitedPolygons = undefined;
 	for (let name in this.selectedPolygons) {
 		if (!this.selectedPolygons.hasOwnProperty(name))
 			continue;
-		unitedPolygons = this._addSelectedPolygonToGeoJSON(unitedPolygons, name);
+
 		this.selectedArea += areaIncrement;
 
 		let layer = this.selectedPolygons[name];
@@ -80,19 +79,21 @@ L.ALS.SynthGridLayer.prototype._calculatePolygonParameters = function () {
 	this.getWidgetById("selectedArea").setValue(this.selectedArea);
 
 	// Draw thick borders around selected polygons
+	this._mergeSelectedPolygons();
 	this.bordersGroup.clearLayers();
-	if (unitedPolygons === undefined)
+	if (this.mergedPolygons.length === 0)
 		return;
-	let geometry = unitedPolygons.geometry;
-	let isMultiPolygon = (geometry.type === "MultiPolygon");
-	for (let polygon of geometry.coordinates) {
-		let line = L.polyline([], {
-			color: this.gridBorderColor,
-			weight: this.lineThicknessValue * 2
-		});
-		let coordinates = isMultiPolygon ? polygon[0] : polygon;
-		for (let coordinate of coordinates)
-			line.addLatLng([coordinate[1], coordinate[0]]);
-		this.bordersGroup.addLayer(line);
+
+	for (let polygon of this.mergedPolygons) {
+		let latLngs = [];
+		for (let p of polygon)
+			latLngs.push([p[1], p[0]]);
+
+		this.bordersGroup.addLayer(L.polyline(latLngs, {
+				weight: this.lineThicknessValue * this.bordersGroup.thicknessMultiplier,
+				color: this.getWidgetById("gridBorderColor").getValue()
+			}
+		));
 	}
+	this._drawPaths();
 }

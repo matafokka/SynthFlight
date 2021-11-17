@@ -1,5 +1,21 @@
 L.ALS.Locales.addLocaleProperties("Русский", {
 
+	// SynthBaseLayer
+	connectionMethod: "Метод соединения маршрутов",
+	allIntoOne: "Все в один",
+	oneFlightPerPath: "Один полет на маршрут",
+	pathSpoiler: "Маршрут",
+	flashPath: "Помигать маршрутом",
+	pathLength: "Длина маршрута",
+	flightTime: "Время полета",
+
+	// SynthLineWizard
+	lineLayerName: "Слой Линий",
+	lineLayerWizardLabel: "Этот слой находится в разработке, пока ничего не делает и может сломать приложение, если его добавить",
+
+	// SynthLineLayer
+	lineLayerColor: "Цвет линий:",
+
 	// SynthGridWizard
 
 	gridWizardDisplayName: "Слой Сетки",
@@ -37,10 +53,6 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 	focalLength: "Фокусное расстояние (mm):",
 	lngPathsCount: "Число маршрутов в одной ячейке по параллелям",
 	latPathsCount: "Число маршрутов в одной ячейке по меридианам",
-	lngPathsLength: "Длина маршрутов по параллелям",
-	latPathsLength: "Длина маршрутов по меридианам",
-	lngFlightTime: "Время полета по параллеям",
-	latFlightTime: "Время полета по меридианам",
 	lngCellSizeInMeters: "Средняя ширина ячейки",
 	latCellSizeInMeters: "Средняя высота сетки",
 	selectedArea: "Площадь выделенных полигонов",

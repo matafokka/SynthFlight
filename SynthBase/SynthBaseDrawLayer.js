@@ -1,16 +1,18 @@
+/**
+ * Base class for L.Draw layers
+ * @param settings {SettingsObject} Settings object
+ * @param colorLabel {string} Color widget label for paths group
+ */
 L.ALS.SynthBaseDrawLayer = L.ALS.SynthBaseLayer.extend({
 
 	defaultName: "Draw Layer",
 
-	init: function (wizardResults, settings) {
+	init: function (settings, colorLabel) {
 
 		/**
 		 * Leaflet.Draw controls to use
 		 */
 		this.drawControls = this.drawControls || {}
-
-		this.addBaseParametersInputSection();
-		this.addBaseParametersOutputSection();
 
 		/**
 		 * Leaflet.Draw group
@@ -18,9 +20,9 @@ L.ALS.SynthBaseDrawLayer = L.ALS.SynthBaseLayer.extend({
 		 */
 		this.drawingGroup = L.featureGroup();
 
-		this.addLayers(this.drawingGroup);
+		this.connectionsGroup = L.featureGroup();
 
-		let options = {
+		this._drawOptions = {
 			draw: {},
 			edit: {
 				featureGroup: this.drawingGroup,
@@ -31,27 +33,33 @@ L.ALS.SynthBaseDrawLayer = L.ALS.SynthBaseLayer.extend({
 		let toDisable = ["circle", "circlemarker", "marker", "polygon", "polyline", "rectangle", "simpleshape"];
 
 		for (let control of toDisable)
-			options.draw[control] = false;
+			this._drawOptions.draw[control] = false;
+
 		for (let control in this.drawControls)
-			options.draw[control] = this.drawControls[control];
+			this._drawOptions.draw[control] = this.drawControls[control];
 
-		this.control = new L.Control.Draw(options);
+		this.control = new L.Control.Draw(this._drawOptions);
 
-		L.ALS.SynthBaseLayer.prototype.init.call(this, wizardResults, settings);
+		L.ALS.SynthBaseLayer.prototype.init.call(this, settings, this.drawingGroup, this.connectionsGroup, colorLabel);
+		this.updateDrawThickness();
 		this.addEventListenerTo(this.map, "draw:created", "onDraw");
 		this.onNameChange();
-	},
-
-	onSelect: function () {
-		this.map.addControl(this.control);
-	},
-
-	onDeselect: function () {
-		this.map.removeControl(this.control);
+		this.addControl(this.control, "top", "topleft");
 	},
 
 	onDraw: function (e) {
 		this.drawingGroup.addLayer(e.layer);
+	},
+
+	setLineThickness: function (widget) {
+		L.ALS.SynthBaseLayer.prototype.setLineThickness.call(this, widget);
+		this.updateDrawThickness();
+	},
+
+	updateDrawThickness: function () {
+		try {
+			this._drawOptions.draw.polyline.shapeOptions.weight = this.lineThicknessValue;
+		} catch (e) {}
 	}
 
 })

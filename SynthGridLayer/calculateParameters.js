@@ -16,7 +16,5 @@ L.ALS.SynthGridLayer.prototype.calculateParameters = function () {
 		this.getWidgetById(sizeName).setValue(this.toFixed(cellSize));
 		this.getWidgetById(countName).setValue(pathsCount);
 	}
-
-	this._drawPaths();
 	this._calculatePolygonParameters();
 }

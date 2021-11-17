@@ -96,6 +96,7 @@ let toCopy = ["index.html", "logo.ico",
 	"node_modules/leaflet.coordinates/dist/Leaflet.Coordinates-0.1.5.css",
 	"node_modules/leaflet.coordinates/dist/Leaflet.Coordinates-0.1.5.min.js",
 	"node_modules/leaflet-draw/dist/leaflet.draw.css",
+	"node_modules/leaflet-draw/dist/images",
 ];
 
 if (!onlyBrowser)

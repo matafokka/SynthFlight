@@ -1,5 +1,21 @@
 L.ALS.Locales.addLocaleProperties("English", {
 
+	// SynthBaseLayer
+	connectionMethod: "Path connection method",
+	allIntoOne: "All into one",
+	oneFlightPerPath: "One flight per path",
+	pathSpoiler: "Path",
+	flashPath: "Flash path",
+	pathLength: "Path length",
+	flightTime: "Flight time",
+
+	// SynthLineWizard
+	lineLayerName: "Line Layer",
+	lineLayerWizardLabel: "This layer is in development, doesn't do anything at the moment, might break the app when added", // TODO: Change to "This layer has no options" when it'll be finished
+
+	// SynthLineLayer
+	lineLayerColor: "Line color:",
+
 	// SynthGridWizard
 
 	gridWizardDisplayName: "Grid Layer",
@@ -37,10 +53,6 @@ L.ALS.Locales.addLocaleProperties("English", {
 	focalLength: "Focal length (mm):",
 	lngPathsCount: "Paths count in one cell by parallels",
 	latPathsCount: "Paths count in one cell by meridians",
-	lngPathsLength: "Length of paths by parallels",
-	latPathsLength: "Length of paths by meridians",
-	lngFlightTime: "Flight time by parallels",
-	latFlightTime: "Flight time by meridians",
 	lngCellSizeInMeters: "Mean cell width",
 	latCellSizeInMeters: "Mean cell height",
 	selectedArea: "Selected area",

@@ -13,6 +13,7 @@ L.ALS.Locales.AdditionalLocales.Russian();
 require("./locales/English.js");
 require("./locales/Russian.js");
 require("./SynthShapefileLayer/SynthShapefileLayer.js");
+require("./SynthBase/SynthBaseSettings.js");
 require("./SynthBase/SynthBaseLayer.js");
 require("./SynthGridLayer/SynthGridLayer.js");
 require("./node_modules/leaflet.coordinates/dist/Leaflet.Coordinates-0.1.5.min.js");
@@ -98,3 +99,16 @@ layerSystem.addBaseLayer(L.tileLayer(""), "Empty");
 layerSystem.addLayerType(L.ALS.SynthLineLayer);
 layerSystem.addLayerType(L.ALS.SynthGridLayer);
 layerSystem.addLayerType(L.ALS.SynthShapefileLayer);
+
+const MathTools = require("./MathTools.js");
+
+let poly = [
+	[0.25, 51.583333333333336], [0.25, 51.33333333333333],
+	[-0.125, 51.33333333333333], [-0.125, 51.583333333333336],
+	[0.25, 51.583333333333336]
+], point = [0, 51.416666666666664];
+
+map.addLayer(L.marker(point));
+map.addLayer(L.polygon(poly));
+
+console.log(MathTools.isPointInPolygon(point, poly))
