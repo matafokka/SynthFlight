@@ -255,7 +255,7 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 			.addWidgets(
 				button,
 				new L.ALS.Widgets.ValueLabel("pathLength", "pathLength", "m").setFormatNumbers(true).setNumberOfDigitsAfterPoint(0).setValue(length),
-				new L.ALS.Widgets.ValueLabel("flightTime", "flightTime", "h").setFormatNumbers(true).setValue(this.getFlightTime(length)),
+				new L.ALS.Widgets.ValueLabel("flightTime", "flightTime", "h:mm").setValue(this.getFlightTime(length)),
 			);
 
 		this.addWidgets(widget);
@@ -264,8 +264,29 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 		return widget;
 	},
 
-	getFlightTime: function (length) {
-		return parseFloat((length / this.aircraftSpeedInMetersPerSecond / 3600).toFixed(2));
+	/**
+	 * Calculates flight time for given path length
+	 * @param length {number} Path length
+	 * @param formatAsTimeSpan {boolean} If true, will format time as time span
+	 * @return {string|number} Flight time in hours
+	 */
+	getFlightTime: function (length, formatAsTimeSpan = true) {
+		let time = length / this.aircraftSpeedInMetersPerSecond / 3600;
+
+		if (!formatAsTimeSpan)
+			return time;
+
+		let hours = Math.floor(time), minutes = Math.round((time % 1) * 60).toString();
+
+		if (minutes === "60") {
+			hours++;
+			minutes = "00";
+		}
+
+		if (minutes.length === 1)
+			minutes = "0" + minutes;
+
+		return hours + ":" + minutes;
 	},
 
 	/**

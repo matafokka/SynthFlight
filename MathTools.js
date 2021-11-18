@@ -133,11 +133,6 @@ class MathTools {
 
 			if (notOnVertex)
 				intersections++;
-
-			if (MathTools.arePointsEqual(point, [-0.25, 51.5])) {
-				console.log(intersection)
-				map.addLayer(L.marker([intersection[0][1], intersection[0][0]]))
-			}
 		}
 		//console.log(point, intersections);
 		return (intersections % 2 !== 0);

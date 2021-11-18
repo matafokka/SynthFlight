@@ -290,7 +290,7 @@ L.ALS.SynthBaseLayer.prototype.connectHull = function () {
 /**
  * Creates a cycle out of hull connection of given path
  * @param path {Object} Path to create cycle of
- * @return {LatLng[]} Cycle
+ * @return {LatLng[][]} Cycle
  */
 L.ALS.SynthBaseLayer.prototype.hullToCycles = function (path) {
 	// The idea is to start with the first connection, find the starting point in it and for each connection
@@ -358,7 +358,7 @@ L.ALS.SynthBaseLayer.prototype.hullToCycles = function (path) {
 	cycle = [hullP2, ...afterAirport, ...beforeAirport, hullP2];
 
 	this.map.addLayer(L.polyline(cycle, {weight: 10, opacity: 0.5}));
-	return cycle;
+	return [cycle];
 }
 
 L.ALS.SynthBaseLayer.prototype.getOrderedPathFromHull = function (prevPoint, connection, copyTo, i = 0) {

@@ -175,9 +175,6 @@ L.ALS.SynthGridLayer.prototype._mergeSelectedPolygons = function () {
 				for (let p1 of poly1) {
 					shouldMerge = shouldMerge && MathTools.isPointInPolygon(p1, poly2);
 
-					if (poly1.name === "M-30-24-D-b")
-						console.log(p1, MathTools.isPointInPolygon(p1, poly2));
-
 					if (!shouldMerge)
 						break;
 
@@ -259,6 +256,5 @@ L.ALS.SynthGridLayer.prototype._mergeSelectedPolygons = function () {
 		this.mergedPolygons = newPolygons;
 	}
 
-	console.log(this.mergedPolygons)
 	return this.mergedPolygons;
 }
