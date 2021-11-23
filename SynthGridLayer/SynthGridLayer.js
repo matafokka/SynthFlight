@@ -108,20 +108,8 @@ L.ALS.SynthGridLayer = L.ALS.SynthBaseLayer.extend( /** @lends L.ALS.SynthGridLa
 		this.addWidgets(
 			new L.ALS.Widgets.File("DEMFiles", DEMFilesLabel, this, "onDEMLoad").setMultiple(true),
 			new L.ALS.Widgets.Divider("div3"),
+			new L.ALS.Widgets.ValueLabel("selectedArea", "selectedArea", "sq.m.").setNumberOfDigitsAfterPoint(0).setFormatNumbers(true),
 		);
-
-		let valueLabels = [
-			new L.ALS.Widgets.ValueLabel("lngPathsCount", "lngPathsCount"),
-			new L.ALS.Widgets.ValueLabel("latPathsCount", "latPathsCount"),
-			new L.ALS.Widgets.ValueLabel("lngCellSizeInMeters", "lngCellSizeInMeters", "m"),
-			new L.ALS.Widgets.ValueLabel("latCellSizeInMeters", "latCellSizeInMeters", "m"),
-			new L.ALS.Widgets.ValueLabel("selectedArea", "selectedArea", "sq.m."),
-		];
-
-		for (let widget of valueLabels) {
-			widget.setFormatNumbers(true);
-			this.addWidget(widget);
-		}
 
 		this.addBaseParametersOutputSection();
 
@@ -158,7 +146,6 @@ L.ALS.SynthGridLayer = L.ALS.SynthBaseLayer.extend( /** @lends L.ALS.SynthGridLa
 
 });
 
-require("./calculateParameters.js");
 require("./DEM.js");
 require("./drawPaths.js");
 require("./misc.js");

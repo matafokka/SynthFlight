@@ -15,8 +15,8 @@ L.ALS.SynthGridLayer.prototype._drawPaths = function () {
 	// Validate parameters
 
 	let errorLabel = this.getWidgetById("calculateParametersError");
-	let parallelsPathsCount = this["lngPathsCount"];
-	let meridiansPathsCount = this["latPathsCount"];
+	let parallelsPathsCount = this["lngFakePathsCount"];
+	let meridiansPathsCount = this["latFakePathsCount"];
 
 	if (parallelsPathsCount === undefined) {
 		errorLabel.setValue("errorDistanceHasNotBeenCalculated");
@@ -49,24 +49,24 @@ L.ALS.SynthGridLayer.prototype._drawPaths = function () {
  */
 L.ALS.SynthGridLayer.prototype._drawPathsWorker = function (isParallels) {
 
-	let pathName, nameForOutput, color, connectionsGroup, widgetId;
+	let pathName, nameForOutput, color, connectionsGroup, widgetId, extensionIndex;
 	if (isParallels) {
 		pathName = "pathsByParallels";
 		connectionsGroup = this.parallelsInternalConnections;
 		nameForOutput = "lng";
 		color = this["color0"];
 		widgetId = "hidePathsByParallels";
+		extensionIndex = 0;
 	} else {
 		pathName = "pathsByMeridians";
 		connectionsGroup = this.meridiansInternalConnections;
 		nameForOutput = "lat";
 		color = this["color1"];
 		widgetId = "hidePathsByMeridians";
+		extensionIndex = 1;
 	}
 	let pathGroup = this[pathName],
 		pointsName = nameForOutput + "PointsGroup",
-		parallelsPathsCount = this["lngPathsCount"],
-		meridiansPathsCount = this["latPathsCount"],
 		lineOptions = {
 			color,
 			weight: this.lineThicknessValue
@@ -80,28 +80,30 @@ L.ALS.SynthGridLayer.prototype._drawPathsWorker = function (isParallels) {
 	let shouldHideNumbers = this.getWidgetById(widgetId).getValue() || this._doHidePathsNumbers;
 
 	for (let polygon of this.mergedPolygons) {
-		let turfPolygon = turfHelpers.polygon([polygon]), // This function accepts array of arrays of coordinates. Simple polygons are just arrays of coordinates, so we gotta wrap it.
+		let turfPolygon = turfHelpers.polygon([polygon]), // This function accepts array of arrays of coordinates. Our polygons are just arrays of coordinates, so we gotta wrap it.
 			[startLng, endLat, endLng, startLat] = bbox(turfPolygon), // Create bounding box around current polygon. We'll draw paths using bounding box and then clip it by current polygon
 			swapPoints = false, // Should swap points on each new line
 
 			// Calculate new distances between paths for current polygon
 			lengthByLat = Math.abs(startLat - endLat),
 			lengthByLng = Math.abs(endLng - startLng),
-			newParallelsPathsCount = parallelsPathsCount * Math.round(lengthByLat / this.latDistance),
-			newMeridiansPathsCount = meridiansPathsCount * Math.round(lengthByLng / this.lngDistance),
-			parallelsDistance = lengthByLat / newParallelsPathsCount,
-			meridiansDistance = lengthByLng / newMeridiansPathsCount,
+			parallelsDistance = lengthByLat * this.By / this.getLineLengthMeters([[startLng, startLat], [startLng, endLat]], false),
+			meridiansDistance = lengthByLng * this.By / this.getLineLengthMeters([[startLng, startLat], [endLng, startLat]], false),
 
 			// Calculate correct capture basis in degrees.
-			latDistance = Math.abs(endLat - startLat), lngDistance = Math.abs(endLng - startLng),
-			latPointsCount = Math.round(latDistance / this.basis),
-			lngPointsCount = Math.round(lngDistance / this.basis),
+			bottomSide = [[startLng, endLat], [startLng + this.lngDistance, endLat]],
+			rightSide = [[endLng, startLat], [endLng, startLat - this.latDistance]],
+			parallelsPointsCount = Math.ceil(this.getLineLengthMeters(bottomSide, false) / this.Bx),
+			meridiansPointsCount = Math.ceil(this.getLineLengthMeters(rightSide, false) / this.Bx),
 
-			latBasis = latDistance / latPointsCount, lngBasis = lngDistance / lngPointsCount,
+			parallelsBasis = this.getLineLength(bottomSide) / parallelsPointsCount, meridiansBasis = this.getLineLength(rightSide) / meridiansPointsCount,
+			extendBy = isParallels ? parallelsBasis * 2 : -meridiansBasis * 2,
 
 			lat = startLat, lng = startLng,
 			turfPolygonCoordinates = turfPolygon.geometry.coordinates[0], // MathTools accepts coordinates of the polygon, not polygon itself
-			number = 1, connectionLine = L.polyline([], connLineOptions);
+			number = 1, connectionLine = L.polyline([], connLineOptions),
+			prevLine;
+
 		connectionLine.actualPaths = [];
 
 		while (MathTools.isGreaterThanOrEqualTo(lat, endLat) && MathTools.isLessThanOrEqualTo(lng, endLng)) {
@@ -119,15 +121,18 @@ L.ALS.SynthGridLayer.prototype._drawPathsWorker = function (isParallels) {
 
 			let clippedLine = MathTools.clipLineByPolygon(lineCoordinates, turfPolygonCoordinates);
 
-			// Extend line by double capture basis to each side
-			let index, captureBasis;
-			if (isParallels) {
-				index = 0;
-				captureBasis = lngBasis * 2;
-			} else {
-				index = 1;
-				captureBasis = -latBasis * 2;
+			// Line can be outside of polygon, so we have to get use previous line as clipped line
+			// TODO: Remove?
+			if (!clippedLine) {
+				clippedLine = [];
+				for (let lngLat of prevLine) {
+					if (isParallels)
+						clippedLine.push([lngLat[0], lat]);
+					else
+						clippedLine.push([lng, lngLat[1]]);
+				}
 			}
+			prevLine = clippedLine;
 
 			// WARNING: It somehow modifies polygons when generating paths by parallels! Imagine following selected polygons:
 			//   []
@@ -136,15 +141,17 @@ L.ALS.SynthGridLayer.prototype._drawPathsWorker = function (isParallels) {
 			//   \]
 			// [][]
 			// I don't know why it happens, I traced everything. I'll just leave this comment as an explanation and a warning.
-			/*clippedLine[0][index] -= captureBasis;
-			clippedLine[1][index] += captureBasis;*/
+			/*clippedLine[0][extensionIndex] -= extendBy;
+			clippedLine[1][extensionIndex] += extendBy;*/
 
 			// Instead, let's just copy our points to the new array. Array.slice() and newClippedLine.push(point) doesn't work either.
 			let newClippedLine = [];
 			for (let point of clippedLine)
 				newClippedLine.push([point[0], point[1]]);
-			newClippedLine[0][index] -= captureBasis;
-			newClippedLine[1][index] += captureBasis;
+
+			// Extend line by double capture basis to each side
+			newClippedLine[0][extensionIndex] -= extendBy;
+			newClippedLine[1][extensionIndex] += extendBy;
 
 			let startPoint = newClippedLine[0], endPoint = newClippedLine[1]; // Points for generating capturing points
 			let firstPoint, secondPoint; // Points for generating lines
@@ -189,9 +196,9 @@ L.ALS.SynthGridLayer.prototype._drawPathsWorker = function (isParallels) {
 				});
 				this[pointsName].addLayer(circle);
 				if (isParallels)
-					ptLng += lngBasis;
+					ptLng += parallelsBasis;
 				else
-					ptLat -= latBasis;
+					ptLat -= meridiansBasis;
 			}
 
 			swapPoints = !swapPoints;

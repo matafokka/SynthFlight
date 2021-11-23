@@ -17,10 +17,14 @@ L.ALS.SynthGridLayer.prototype._selectOrDeselectPolygon = function (event) {
 			new L.ALS.Widgets.ValueLabel("absoluteHeight", "absoluteHeight", "m"),
 			new L.ALS.Widgets.ValueLabel("elevationDifference", "elevationDifference"),
 			new L.ALS.Widgets.ValueLabel("reliefType", "reliefType"),
-			new L.ALS.Widgets.SimpleLabel("error").setStyle("error")
+			new L.ALS.Widgets.SimpleLabel("error").setStyle("error"),
+			new L.ALS.Widgets.ValueLabel("lngPathsCount", "lngPathsCount", "", "value"),
+			new L.ALS.Widgets.ValueLabel("latPathsCount", "latPathsCount", "", "value"),
+			new L.ALS.Widgets.ValueLabel("lngCellSizeInMeters", "lngCellSizeInMeters", "m").setNumberOfDigitsAfterPoint(0),
+			new L.ALS.Widgets.ValueLabel("latCellSizeInMeters", "latCellSizeInMeters", "m").setNumberOfDigitsAfterPoint(0),
 		);
 
-		let toFormatNumbers = ["meanHeight", "absoluteHeight", "elevationDifference"];
+		let toFormatNumbers = ["meanHeight", "absoluteHeight", "elevationDifference", "lngPathsCount", "latPathsCount", "lngCellSizeInMeters", "latCellSizeInMeters"];
 		for (let id of toFormatNumbers)
 			controlsContainer.getWidgetById(id).setFormatNumbers(true);
 
@@ -38,16 +42,26 @@ L.ALS.SynthGridLayer.prototype._selectOrDeselectPolygon = function (event) {
 }
 
 L.ALS.SynthGridLayer.prototype._calculatePolygonParameters = function () {
-	let areaIncrement = Math.round(this["latCellSizeInMeters"] * this["lngCellSizeInMeters"]);
 	this.selectedArea = 0;
 	for (let name in this.selectedPolygons) {
 		if (!this.selectedPolygons.hasOwnProperty(name))
 			continue;
 
-		this.selectedArea += areaIncrement;
-
-		let layer = this.selectedPolygons[name];
+		let layer = this.selectedPolygons[name], latLngs = layer.getLatLngs()[0];
 		let widgetContainer = this.selectedPolygonsWidgets[name];
+
+		layer.lngCellSizeInMeters = this.getLineLengthMeters([latLngs[0], latLngs[1]], false);
+		layer.latCellSizeInMeters = this.getLineLengthMeters([latLngs[1], latLngs[2]], false);
+
+		layer.lngPathsCount = Math.ceil(layer.lngCellSizeInMeters / this.By);
+		layer.latPathsCount = Math.ceil(layer.latCellSizeInMeters / this.By);
+
+		this.selectedArea += layer.lngCellSizeInMeters * layer.latCellSizeInMeters;
+
+		widgetContainer.getWidgetById("lngCellSizeInMeters").setValue(layer.lngCellSizeInMeters);
+		widgetContainer.getWidgetById("latCellSizeInMeters").setValue(layer.latCellSizeInMeters);
+		widgetContainer.getWidgetById("lngPathsCount").setValue(layer.lngPathsCount);
+		widgetContainer.getWidgetById("latPathsCount").setValue(layer.latPathsCount);
 
 		layer.minHeight = widgetContainer.getWidgetById("minHeight").getValue();
 		layer.maxHeight = widgetContainer.getWidgetById("maxHeight").getValue();

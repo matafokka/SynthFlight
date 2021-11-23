@@ -237,7 +237,7 @@ L.ALS.SynthBaseLayer.prototype.connectHullToAirport = function () {
 			if (layer === hullConnection)
 				continue;
 			if (layer.pathLength === undefined)
-				layer.pathLength = this.lineLengthUsingFlightHeight(layer);
+				layer.pathLength = this.getLineLengthMeters(layer);
 			totalLength += layer.pathLength;
 		}
 
@@ -246,7 +246,7 @@ L.ALS.SynthBaseLayer.prototype.connectHullToAirport = function () {
 				continue;
 
 			let [p1, p2] = layer.getLatLngs(),
-				len = totalLength - layer.pathLength + this.lineLengthUsingFlightHeight([p1, airportPos]) + this.lineLengthUsingFlightHeight([p2, airportPos]);
+				len = totalLength - layer.pathLength + this.getLineLengthMeters([p1, airportPos]) + this.getLineLengthMeters([p2, airportPos]);
 
 			if (len < minLen) {
 				minLen = len;
@@ -383,15 +383,20 @@ L.ALS.SynthBaseLayer.prototype.getOrderedPathFromHull = function (prevPoint, con
 
 /**
  * Calculates length of a polyline
- * @param line {L.Polyline || L.LatLng[]} Line to calculate length of
+ * @param line {L.Polyline | L.LatLng[] | number[][]} Line to calculate length of
  * @return {number} Line length
  */
 L.ALS.SynthBaseLayer.prototype.getLineLength = function (line) {
-	const latLngs = line instanceof Array ? line : line.getLatLngs();
-	let length = 0;
+	let latLngs = line instanceof Array ? line : line.getLatLngs(), length = 0, x = 0, y = 1;
+
+	if (latLngs[0].lat !== undefined) {
+		x = "lng";
+		y = "lat";
+	}
+
 	for (let i = 0; i < latLngs.length - 1; i++) {
 		const p1 = latLngs[i], p2 = latLngs[i + 1];
-		length += Math.sqrt((p1.lng - p2.lng) ** 2 + (p1.lat - p2.lat) ** 2);
+		length += Math.sqrt((p1[x] - p2[x]) ** 2 + (p1[y] - p2[y]) ** 2);
 	}
 	return length;
 }

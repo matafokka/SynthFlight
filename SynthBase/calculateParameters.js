@@ -16,16 +16,15 @@ L.ALS.SynthBaseLayer.prototype.calculateParameters = function () {
 	let pixelWidth = this["pixelWidth"] * 1e-6;
 	let focalLength = this["focalLength"] * 0.001;
 
-	if (this.hasYOverlay) {
-		this.ly = this["cameraWidth"] * pixelWidth; // Image size in meters
-		this.Ly = this.ly * this["imageScale"] // Image width on the ground
+	this.ly = this["cameraWidth"] * pixelWidth; // Image size in meters
+	this.Ly = this.ly * this["imageScale"] // Image width on the ground
+
+	if (this.hasYOverlay)
 		this.By = this.Ly * (100 - this["overlayBetweenPaths"]) / 100; // Distance between paths
-	}
 
 	this.lx = this["cameraHeight"] * pixelWidth; // Image height
 	this.Lx = this.lx * this["imageScale"]; // Image height on the ground
 	this.Bx = this.Lx * (100 - this["overlayBetweenImages"]) / 100; // Capture basis, distance between images' centers
-	this.basis = turfHelpers.lengthToDegrees(this.Bx, "meters");
 
 	this.GSI = pixelWidth * this["imageScale"];
 	this.IFOV = pixelWidth / focalLength * 1e6;

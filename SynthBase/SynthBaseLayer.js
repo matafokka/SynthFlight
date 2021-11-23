@@ -292,10 +292,11 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 	/**
 	 * Calculates line length using haversine formula with account of flight height
 	 * @param line {L.Polyline|number[][]|LatLng[]} Line
+	 * @param useFlightHeight {boolean} If true, will account flight height, i.e. line will float above the Earth
 	 * @return {number} Line length
 	 */
-	lineLengthUsingFlightHeight: function (line) {
-		let r = 6371000 + this.flightHeight, points = line instanceof Array ? line : line.getLatLngs(), distance = 0, x, y;
+	getLineLengthMeters: function (line, useFlightHeight = true) {
+		let r = 6371000 + (useFlightHeight ? this.flightHeight : 0), points = line instanceof Array ? line : line.getLatLngs(), distance = 0, x, y;
 		if (points.length === 0)
 			return 0;
 
@@ -330,7 +331,7 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 				layer.getLatLngs()[1] = airportPos;
 				layer.redraw();
 
-				let length = layer.pathLength + this.lineLengthUsingFlightHeight(layer);
+				let length = layer.pathLength + this.getLineLengthMeters(layer);
 				layer.pathWidget.getWidgetById("pathLength").setValue(length);
 				layer.pathWidget.getWidgetById("flightTime").setValue(this.getFlightTime(length));
 			}
@@ -352,7 +353,7 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 			connectionsGroup.clearLayers();
 
 			for (let layer of layers) {
-				layer.pathLength = this.lineLengthUsingFlightHeight(layer);
+				layer.pathLength = this.getLineLengthMeters(layer);
 
 				let latLngs = layer.getLatLngs(),
 					connectionLine = L.polyline([latLngs[0], [0, 0], latLngs[latLngs.length - 1]], lineOptions);

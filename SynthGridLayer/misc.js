@@ -9,6 +9,20 @@ L.ALS.SynthGridLayer.prototype._setColor = function (widget) {
 	this.updateGrid();
 }
 
+L.ALS.SynthGridLayer.prototype.calculateParameters = function () {
+	L.ALS.SynthBaseLayer.prototype.calculateParameters.call(this);
+
+	// Calculate estimated paths count for a polygon. Values are somewhat true for equatorial regions.
+	// We'll check if it's too small (in near-polar regions, there'll be only one path when value is 2) or too big.
+	let latLngs = ["lat", "lng"];
+	for (let name of latLngs) {
+		let cellSize = Math.round(turfHelpers.radiansToLength(turfHelpers.degreesToRadians(this[name + "Distance"]), "meters"));
+		this[name + "FakePathsCount"] = Math.ceil(cellSize / this.By);
+	}
+
+	this._calculatePolygonParameters();
+}
+
 L.ALS.SynthGridLayer.prototype._updateLayersVisibility = function () {
 	let hidePathsByMeridians = this.getWidgetById("hidePathsByMeridians").getValue(),
 		hidePathsByParallels = this.getWidgetById("hidePathsByParallels").getValue();

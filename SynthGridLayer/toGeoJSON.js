@@ -8,7 +8,7 @@ L.ALS.SynthGridLayer.prototype.toGeoJSON = function () {
 			continue;
 		let polygon = this.selectedPolygons[name],
 			polygonJson = polygon.toGeoJSON(),
-			props = ["polygonName", "minHeight", "maxHeight", "meanHeight", "absoluteHeight", "reliefType", "elevationDifference"];
+			props = ["polygonName", "minHeight", "maxHeight", "meanHeight", "absoluteHeight", "reliefType", "elevationDifference", "latCellSizeInMeters", "lngCellSizeInMeters", "lngPathsCount", "latPathsCount"];
 		for (let prop of props)
 			polygonJson.properties[prop] = polygon[prop];
 		polygonJson.properties.name = "Selected cell";
@@ -25,15 +25,9 @@ L.ALS.SynthGridLayer.prototype.toGeoJSON = function () {
 	}
 
 	// See _calculateParameters
-	let parallelsProps = {
-			pathsCount: this.latPathsCount,
-			name: "Flight paths by parallels"
-		},
-		meridiansProps = {
-			pathsCount: this.lngPathsCount,
-			name: "Flight paths by meridians"
-		},
-		params = ["cameraWidth", "cameraHeight", "pixelWidth", "focalLength", "flightHeight", "overlayBetweenPaths", "overlayBetweenImages", "imageScale", "ly", "Ly", "By", "lx", "Lx", "Bx", "GSI", "IFOV", "GIFOV", "FOV", "GFOV", "latCellSizeInMeters", "lngCellSizeInMeters", "selectedArea"];
+	let parallelsProps = {name: "Flight paths by parallels"},
+		meridiansProps = {name: "Flight paths by meridians"},
+		params = ["cameraWidth", "cameraHeight", "pixelWidth", "focalLength", "flightHeight", "overlayBetweenPaths", "overlayBetweenImages", "imageScale", "ly", "Ly", "By", "lx", "Lx", "Bx", "GSI", "IFOV", "GIFOV", "FOV", "GFOV", "selectedArea"];
 
 	for (let prop of [parallelsProps, meridiansProps]) {
 		for (let param of params)
