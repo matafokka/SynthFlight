@@ -296,7 +296,7 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 	 * @return {number} Line length
 	 */
 	getLineLengthMeters: function (line, useFlightHeight = true) {
-		let r = 6371000 + (useFlightHeight ? this.flightHeight : 0), points = line instanceof Array ? line : line.getLatLngs(), distance = 0, x, y;
+		let r = this._getEarthRadius(useFlightHeight), points = line instanceof Array ? line : line.getLatLngs(), distance = 0, x, y;
 		if (points.length === 0)
 			return 0;
 
@@ -317,6 +317,38 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 			distance += r * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 		}
 		return distance;
+	},
+
+	/**
+	 * Using given point and length calculates by how much you should modify (add or remove to) lng or lat to get a line of given length.
+	 *
+	 * In other words, can be used to draw straight vertical or straight horizontal lines
+	 *
+	 * @param startingPoint {number[]} Point in format [lng, lat]
+	 * @param length {number} Line length
+	 * @param isVertical {boolean} Whether line should vertical or horizontal
+	 * @param useFlightHeight {boolean} If true, will account flight height
+	 * @return {number} By how much you should modify (add or remove to) lng or lat to get a line of given length
+	 */
+	getArcAngleByLength: function (startingPoint, length, isVertical, useFlightHeight = false) {
+		let r = this._getEarthRadius(useFlightHeight);
+
+		// For vertical lines, we can simply use arc length since any two equal angles will form two equal arcs along any meridian.
+		if (isVertical)
+			return turfHelpers.radiansToDegrees(length / r);
+
+		// For horizontal lines, first, we need to find a circle formed by cutting sphere by a horizontal plane
+		// containing given point. To do so, we'll find a distance from a point to the line from center to
+		// the North pole. This will be a radius of the said circle. Then we'll use formula above on a formed circle.
+
+		// Angle between line from point to center and line from center to the North pole.
+		let angle = turfHelpers.degreesToRadians(90 - Math.abs(startingPoint[1])),
+			newR = Math.sin(angle) * r;
+		return turfHelpers.radiansToDegrees(length / newR);
+	},
+
+	_getEarthRadius: function (useFlightHeight = false) {
+		return 6378137 + (useFlightHeight ? this.flightHeight : 0);
 	},
 
 	/**

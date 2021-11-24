@@ -84,21 +84,6 @@ L.ALS.SynthGridLayer.prototype._drawPathsWorker = function (isParallels) {
 			[startLng, endLat, endLng, startLat] = bbox(turfPolygon), // Create bounding box around current polygon. We'll draw paths using bounding box and then clip it by current polygon
 			swapPoints = false, // Should swap points on each new line
 
-			// Calculate new distances between paths for current polygon
-			lengthByLat = Math.abs(startLat - endLat),
-			lengthByLng = Math.abs(endLng - startLng),
-			parallelsDistance = lengthByLat * this.By / this.getLineLengthMeters([[startLng, startLat], [startLng, endLat]], false),
-			meridiansDistance = lengthByLng * this.By / this.getLineLengthMeters([[startLng, startLat], [endLng, startLat]], false),
-
-			// Calculate correct capture basis in degrees.
-			bottomSide = [[startLng, endLat], [startLng + this.lngDistance, endLat]],
-			rightSide = [[endLng, startLat], [endLng, startLat - this.latDistance]],
-			parallelsPointsCount = Math.ceil(this.getLineLengthMeters(bottomSide, false) / this.Bx),
-			meridiansPointsCount = Math.ceil(this.getLineLengthMeters(rightSide, false) / this.Bx),
-
-			parallelsBasis = this.getLineLength(bottomSide) / parallelsPointsCount, meridiansBasis = this.getLineLength(rightSide) / meridiansPointsCount,
-			extendBy = isParallels ? parallelsBasis * 2 : -meridiansBasis * 2,
-
 			lat = startLat, lng = startLng,
 			turfPolygonCoordinates = turfPolygon.geometry.coordinates[0], // MathTools accepts coordinates of the polygon, not polygon itself
 			number = 1, connectionLine = L.polyline([], connLineOptions),
@@ -149,9 +134,16 @@ L.ALS.SynthGridLayer.prototype._drawPathsWorker = function (isParallels) {
 			for (let point of clippedLine)
 				newClippedLine.push([point[0], point[1]]);
 
-			// Extend line by double capture basis to each side
-			newClippedLine[0][extensionIndex] -= extendBy;
-			newClippedLine[1][extensionIndex] += extendBy;
+			// Extend the line, so it'll hold whole number of images + double basis, i.e. two images from each side
+			let length = this.getLineLengthMeters(newClippedLine, false),
+				numberOfImages = Math.ceil(length / this.Bx) + 4,
+				extendBy = (this.Bx * numberOfImages - length) / 2,
+				multiplier = isParallels ? -1 : 1; // We'll start from the leftmost or topmost point
+
+			for (let point of newClippedLine) {
+				point[extensionIndex] += multiplier * this.getArcAngleByLength(newClippedLine[1], extendBy, !isParallels);
+				multiplier *= -1;
+			}
 
 			let startPoint = newClippedLine[0], endPoint = newClippedLine[1]; // Points for generating capturing points
 			let firstPoint, secondPoint; // Points for generating lines
@@ -195,17 +187,21 @@ L.ALS.SynthGridLayer.prototype._drawPathsWorker = function (isParallels) {
 					fillColor: color,
 				});
 				this[pointsName].addLayer(circle);
+
+				let moveBy = this.getArcAngleByLength([ptLng, ptLat], this.Bx, !isParallels);
 				if (isParallels)
-					ptLng += parallelsBasis;
+					ptLng += moveBy;
 				else
-					ptLat -= meridiansBasis;
+					ptLat -= moveBy;
 			}
 
 			swapPoints = !swapPoints;
+
+			let moveBy = this.getArcAngleByLength([ptLng, ptLat], this.By, isParallels);
 			if (isParallels)
-				lat -= parallelsDistance;
+				lat -= moveBy;
 			else
-				lng += meridiansDistance;
+				lng += moveBy;
 
 		}
 		connectionsGroup.addLayer(connectionLine);
