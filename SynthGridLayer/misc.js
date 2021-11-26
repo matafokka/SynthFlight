@@ -50,7 +50,8 @@ L.ALS.SynthGridLayer.prototype._updateLayersVisibility = function () {
 	this._hideOrShowLayer(hidePathsByParallels, this.pathsByParallels);
 	this._hideOrShowLayer(hidePathsByMeridians, this.pathsByMeridians);
 
-	this._doHidePolygonWidgets = this._hideOrShowLayer(this.getWidgetById("hidePolygonWidgets").getValue(), this.widgetsGroup);
+	this._doHidePolygonWidgets = this.getWidgetById("hidePolygonWidgets").getValue();
+	this._hideOrShowLayer(this._doHidePolygonWidgets || this._shouldHideEverything, this.widgetsGroup);
 	this._doHidePathsNumbers = this.getWidgetById("hideNumbers").getValue();
 	this._drawPaths(); // We have to redraw paths both for hiding one of the paths and hiding numbers
 }

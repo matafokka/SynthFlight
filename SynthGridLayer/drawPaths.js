@@ -2,8 +2,7 @@ const bbox = require("@turf/bbox").default;
 const MathTools = require("../MathTools.js");
 const turfHelpers = require("@turf/helpers");
 
-L.ALS.SynthGridLayer.prototype._drawPaths = function () {
-	// Remove previously added paths
+L.ALS.SynthGridLayer.prototype._clearPaths = function () {
 	let groupsToClear = [this.pathsByParallels, this.pathsByMeridians, this.meridiansExternalConnections, this.meridiansInternalConnections, this.parallelsExternalConnections, this.parallelsInternalConnections, this.latPointsGroup, this.lngPointsGroup];
 	for (let group of groupsToClear)
 		group.clearLayers();
@@ -11,12 +10,16 @@ L.ALS.SynthGridLayer.prototype._drawPaths = function () {
 	for (let id of this._pathsLabelsIDs)
 		this.labelsGroup.deleteLabel(id);
 	this._pathsLabelsIDs = [];
+}
 
-	// Validate parameters
+L.ALS.SynthGridLayer.prototype._drawPaths = function () {
+	this._clearPaths();
 
-	let errorLabel = this.getWidgetById("calculateParametersError");
-	let parallelsPathsCount = this["lngFakePathsCount"];
-	let meridiansPathsCount = this["latFakePathsCount"];
+	// Validate estimated paths count
+
+	let errorLabel = this.getWidgetById("calculateParametersError"),
+		parallelsPathsCount = this["lngFakePathsCount"],
+		meridiansPathsCount = this["latFakePathsCount"];
 
 	if (parallelsPathsCount === undefined) {
 		errorLabel.setValue("errorDistanceHasNotBeenCalculated");

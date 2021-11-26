@@ -18,13 +18,11 @@ L.ALS.SynthGridLayer.prototype._selectOrDeselectPolygon = function (event) {
 			new L.ALS.Widgets.ValueLabel("elevationDifference", "elevationDifference"),
 			new L.ALS.Widgets.ValueLabel("reliefType", "reliefType"),
 			new L.ALS.Widgets.SimpleLabel("error").setStyle("error"),
-			new L.ALS.Widgets.ValueLabel("lngPathsCount", "lngPathsCount", "", "value"),
-			new L.ALS.Widgets.ValueLabel("latPathsCount", "latPathsCount", "", "value"),
 			new L.ALS.Widgets.ValueLabel("lngCellSizeInMeters", "lngCellSizeInMeters", "m").setNumberOfDigitsAfterPoint(0),
 			new L.ALS.Widgets.ValueLabel("latCellSizeInMeters", "latCellSizeInMeters", "m").setNumberOfDigitsAfterPoint(0),
 		);
 
-		let toFormatNumbers = ["meanHeight", "absoluteHeight", "elevationDifference", "lngPathsCount", "latPathsCount", "lngCellSizeInMeters", "latCellSizeInMeters"];
+		let toFormatNumbers = ["meanHeight", "absoluteHeight", "elevationDifference", "lngCellSizeInMeters", "latCellSizeInMeters"];
 		for (let id of toFormatNumbers)
 			controlsContainer.getWidgetById(id).setFormatNumbers(true);
 
@@ -53,15 +51,10 @@ L.ALS.SynthGridLayer.prototype._calculatePolygonParameters = function () {
 		layer.lngCellSizeInMeters = this.getLineLengthMeters([latLngs[0], latLngs[1]], false);
 		layer.latCellSizeInMeters = this.getLineLengthMeters([latLngs[1], latLngs[2]], false);
 
-		layer.lngPathsCount = Math.ceil(layer.lngCellSizeInMeters / this.By);
-		layer.latPathsCount = Math.ceil(layer.latCellSizeInMeters / this.By);
-
 		this.selectedArea += layer.lngCellSizeInMeters * layer.latCellSizeInMeters;
 
 		widgetContainer.getWidgetById("lngCellSizeInMeters").setValue(layer.lngCellSizeInMeters);
 		widgetContainer.getWidgetById("latCellSizeInMeters").setValue(layer.latCellSizeInMeters);
-		widgetContainer.getWidgetById("lngPathsCount").setValue(layer.lngPathsCount);
-		widgetContainer.getWidgetById("latPathsCount").setValue(layer.latPathsCount);
 
 		layer.minHeight = widgetContainer.getWidgetById("minHeight").getValue();
 		layer.maxHeight = widgetContainer.getWidgetById("maxHeight").getValue();
@@ -95,8 +88,10 @@ L.ALS.SynthGridLayer.prototype._calculatePolygonParameters = function () {
 	// Draw thick borders around selected polygons
 	this._mergeSelectedPolygons();
 	this.bordersGroup.clearLayers();
-	if (this.mergedPolygons.length === 0)
+	if (this.mergedPolygons.length === 0) {
+		this._clearPaths();
 		return;
+	}
 
 	for (let polygon of this.mergedPolygons) {
 		let latLngs = [];

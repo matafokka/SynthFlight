@@ -143,7 +143,7 @@ L.ALS.SynthBaseLayer.prototype.buildHull = function (path, color) {
 
 				for (let pair of pairs) {
 					let [p1, p2] = pair, line1 = [p1, conP1], line2 = [p2, conP2],
-						len = this.getLineLength(line1) + this.getLineLength(line2);
+						len = this.getLineLengthMeters(line1) + this.getLineLengthMeters(line2);
 
 					if (len < minLen) {
 						minLen = len;
@@ -213,7 +213,7 @@ L.ALS.SynthBaseLayer.prototype.getHullOptimalConnection = function (pathP1, path
 
 	for (let pair of pairs) {
 		let [p1, p2] = pair,
-			len = this.getLineLength([prevPoint, p1]) + this.getLineLength([nextPoint, p2]);
+			len = this.getLineLengthMeters([prevPoint, p1]) + this.getLineLengthMeters([nextPoint, p2]);
 
 		if (len < minLen) {
 			minLen = len;
@@ -268,10 +268,7 @@ L.ALS.SynthBaseLayer.prototype.connectHullToAirport = function () {
 
 		let [p1, p2] = toRemove.getLatLngs();
 		hullConnection.setLatLngs([p1, airportPos, p2]);
-
-		// Update widgets
-		path.pathWidget.getWidgetById("pathLength").setValue(minLen);
-		path.pathWidget.getWidgetById("flightTime").setValue(this.getFlightTime(minLen));
+		path.updateWidgets(minLen);
 	}
 }
 
@@ -281,7 +278,7 @@ L.ALS.SynthBaseLayer.prototype.connectHullToAirport = function () {
 L.ALS.SynthBaseLayer.prototype.connectHull = function () {
 	for (let i = 0; i < this.paths.length; i++) {
 		let path = this.paths[i];
-		path.pathWidget = this._createPathWidget(1, path.toUpdateColors);
+		this._createPathWidget(path, 1, path.toUpdateColors);
 		this.buildHull(path, this.getWidgetById(`color${i}`).getValue());
 	}
 	this.connectHullToAirport();
@@ -387,12 +384,8 @@ L.ALS.SynthBaseLayer.prototype.getOrderedPathFromHull = function (prevPoint, con
  * @return {number} Line length
  */
 L.ALS.SynthBaseLayer.prototype.getLineLength = function (line) {
-	let latLngs = line instanceof Array ? line : line.getLatLngs(), length = 0, x = 0, y = 1;
-
-	if (latLngs[0].lat !== undefined) {
-		x = "lng";
-		y = "lat";
-	}
+	let latLngs = line instanceof Array ? line : line.getLatLngs(), length = 0,
+		{x, y} = MathTools.getXYPropertiesForPoint(latLngs[0]);
 
 	for (let i = 0; i < latLngs.length - 1; i++) {
 		const p1 = latLngs[i], p2 = latLngs[i + 1];

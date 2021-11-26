@@ -29,12 +29,14 @@ L.ALS.SynthBaseLayer.prototype.calculateParameters = function () {
 	this.GSI = pixelWidth * this["imageScale"];
 	this.IFOV = pixelWidth / focalLength * 1e6;
 	this.GIFOV = this.GSI;
-	this.FOV = this["cameraWidth"] * this.IFOV;
+	this.FOV = turfHelpers.radiansToDegrees(this["cameraWidth"] * this.IFOV / 1e6);
 	this.GFOV = this["cameraWidth"] * this.GSI;
 
 	this.aircraftSpeedInMetersPerSecond = this["aircraftSpeed"] * 1 / 36;
 
-	let names = ["flightHeight", "lx", "Lx", "Bx", "ly", "Ly", "By", "GSI", "IFOV", "GIFOV", "FOV", "GFOV",];
+	this.timeBetweenCaptures = this.Bx / this.aircraftSpeedInMetersPerSecond;
+
+	let names = ["flightHeight", "lx", "Lx", "Bx", "ly", "Ly", "By", "GSI", "IFOV", "GIFOV", "FOV", "GFOV", "timeBetweenCaptures"];
 	for (let name of names) {
 		const field = this[name];
 		if (field === undefined)

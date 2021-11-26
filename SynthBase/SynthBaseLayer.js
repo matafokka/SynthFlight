@@ -1,4 +1,5 @@
 const turfHelpers = require("@turf/helpers");
+const MathTools = require("../MathTools.js");
 
 /**
  * Base layer. Provides airport markers, basic calculations and menu entries for them.
@@ -156,11 +157,12 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 		}
 
 		let valueLabels = [
-			new L.ALS.Widgets.ValueLabel("flightHeight", "flightHeight"),
+			new L.ALS.Widgets.ValueLabel("flightHeight", "flightHeight", "m"),
 			new L.ALS.Widgets.ValueLabel("lx", "lx", "m"),
 			new L.ALS.Widgets.ValueLabel("Lx", "Lx", "m"),
 			new L.ALS.Widgets.ValueLabel("Bx", "Bx", "m"),
 			...yWidgets,
+			new L.ALS.Widgets.ValueLabel("timeBetweenCaptures", "timeBetweenCaptures", "s"),
 			new L.ALS.Widgets.ValueLabel("GSI", "GSI", "m"),
 			new L.ALS.Widgets.ValueLabel("IFOV", "IFOV", "μrad"),
 			new L.ALS.Widgets.ValueLabel("GIFOV", "GIFOV", "m"),
@@ -247,36 +249,36 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 			this.connectHull();
 	},
 
-	_createPathWidget: function (length, toFlash) {
-		let button = new L.ALS.Widgets.Button("flashPath", "flashPath", this, "flashPath");
+	_createPathWidget: function (layer, length, toFlash) {
+		let button = new L.ALS.Widgets.Button("flashPath", "flashPath", this, "flashPath"),
+			lengthWidget = new L.ALS.Widgets.ValueLabel("pathLength", "pathLength", "m").setFormatNumbers(true).setNumberOfDigitsAfterPoint(0),
+			timeWidget = new L.ALS.Widgets.ValueLabel("flightTime", "flightTime", "h:mm").setValue(),
+			warning = new L.ALS.Widgets.SimpleLabel("warning", "", "center", "warning"),
+			widget = new L.ALS.Widgets.Spoiler(`pathWidget${this._pathsWidgetsNumber}`, `${L.ALS.locale.pathSpoiler} ${this._pathsWidgetsNumber}`)
+			.addWidgets(button, lengthWidget, timeWidget, warning);
+
+		layer.updateWidgets = (length) => {
+			lengthWidget.setValue(length);
+			let time = this.getFlightTime(length);
+			timeWidget.setValue(time.formatted);
+			warning.setValue(time.number > 4 ? "flightTimeWarning" : "");
+		}
+
 		button.toFlash = toFlash;
-
-		let widget = new L.ALS.Widgets.Spoiler(`pathWidget${this._pathsWidgetsNumber}`, `${L.ALS.locale.pathSpoiler} ${this._pathsWidgetsNumber}`)
-			.addWidgets(
-				button,
-				new L.ALS.Widgets.ValueLabel("pathLength", "pathLength", "m").setFormatNumbers(true).setNumberOfDigitsAfterPoint(0).setValue(length),
-				new L.ALS.Widgets.ValueLabel("flightTime", "flightTime", "h:mm").setValue(this.getFlightTime(length)),
-			);
-
 		this.addWidgets(widget);
 		this._pathsWidgetsNumber++;
 		this._pathsWidgets.push(widget);
-		return widget;
+		layer.updateWidgets(length);
 	},
 
 	/**
 	 * Calculates flight time for given path length
 	 * @param length {number} Path length
-	 * @param formatAsTimeSpan {boolean} If true, will format time as time span
-	 * @return {string|number} Flight time in hours
+	 * @return {{number: number, formatted: string}} Flight time in hours, both as number and formatted string
 	 */
-	getFlightTime: function (length, formatAsTimeSpan = true) {
-		let time = length / this.aircraftSpeedInMetersPerSecond / 3600;
-
-		if (!formatAsTimeSpan)
-			return time;
-
-		let hours = Math.floor(time), minutes = Math.round((time % 1) * 60).toString();
+	getFlightTime: function (length) {
+		let time = length / this.aircraftSpeedInMetersPerSecond / 3600,
+			hours = Math.floor(time), minutes = Math.round((time % 1) * 60).toString();
 
 		if (minutes === "60") {
 			hours++;
@@ -286,7 +288,7 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 		if (minutes.length === 1)
 			minutes = "0" + minutes;
 
-		return hours + ":" + minutes;
+		return {number: time, formatted: hours +":" + minutes};
 	},
 
 	/**
@@ -296,17 +298,11 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 	 * @return {number} Line length
 	 */
 	getLineLengthMeters: function (line, useFlightHeight = true) {
-		let r = this._getEarthRadius(useFlightHeight), points = line instanceof Array ? line : line.getLatLngs(), distance = 0, x, y;
+		let r = this._getEarthRadius(useFlightHeight), points = line instanceof Array ? line : line.getLatLngs(), distance = 0;
 		if (points.length === 0)
 			return 0;
 
-		if (points[0].lat === undefined) {
-			x = "0";
-			y = "1";
-		} else {
-			x = "lng";
-			y = "lat";
-		}
+		let {x, y} = MathTools.getXYPropertiesForPoint(points[0]);
 
 		for (let i = 0; i < points.length - 1; i++) {
 			let p1 = points[i], p2 = points[i + 1],
@@ -362,10 +358,7 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 			for (let layer of layers) {
 				layer.getLatLngs()[1] = airportPos;
 				layer.redraw();
-
-				let length = layer.pathLength + this.getLineLengthMeters(layer);
-				layer.pathWidget.getWidgetById("pathLength").setValue(length);
-				layer.pathWidget.getWidgetById("flightTime").setValue(this.getFlightTime(length));
+				layer.updateWidgets(layer.pathLength + this.getLineLengthMeters(layer));
 			}
 		}
 
@@ -394,7 +387,7 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 				if (layer.actualPaths)
 					toFlash.push(...layer.actualPaths)
 
-				connectionLine.pathWidget = this._createPathWidget(1, toFlash);
+				this._createPathWidget(connectionLine, 1, toFlash);
 				connectionsGroup.addLayer(connectionLine);
 			}
 		}

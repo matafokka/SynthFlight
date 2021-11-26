@@ -1,4 +1,3 @@
-const MathTools = require("../MathTools.js");
 const turfHelpers = require("@turf/helpers");
 const geojsonMerge = require("@mapbox/geojson-merge"); // Using this since turfHelpers.featureCollection() discards previously defined properties.
 
@@ -26,7 +25,7 @@ L.ALS.SynthBaseLayer.prototype.toGeoJSON = function (path1Metadata, path2Metadat
 				cycleJson.properties[name] = metadata[name];
 
 			cycleJson.properties.length = this.getLineLengthMeters(cycle);
-			cycleJson.properties.flightTime = this.getFlightTime(cycleJson.properties.length, false);
+			cycleJson.properties.flightTime = this.getFlightTime(cycleJson.properties.length).number;
 
 			toMerge.push(cycleJson);
 		}

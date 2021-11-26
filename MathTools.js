@@ -313,12 +313,14 @@ class MathTools {
 	}
 
 	static arePointsEqual(p1, p2) {
-		let x = 0, y = 1;
-		if (p1.lat !== undefined) {
-			x = "lng";
-			y = "lat";
-		}
+		let {x, y} = this.getXYPropertiesForPoint(p1);
 		return this.isEqual(p1[x], p2[x]) && this.isEqual(p1[y], p2[y]);
+	}
+
+	static getXYPropertiesForPoint(p) {
+		if (p.lat === undefined)
+			return {x: 0, y: 1}
+		return {x: "lng", y: "lat"}
 	}
 
 }

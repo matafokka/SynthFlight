@@ -8,6 +8,7 @@ L.ALS.Locales.addLocaleProperties("English", {
 	flashPath: "Flash path",
 	pathLength: "Path length",
 	flightTime: "Flight time",
+	flightTimeWarning: "Flight time exceeds 4 hours. Consider splitting capture area that contains this path into chunks.",
 
 	// SynthLineWizard
 	lineLayerName: "Line Layer",
@@ -52,13 +53,14 @@ L.ALS.Locales.addLocaleProperties("English", {
 	overlayBetweenImages: "Overlay between images from the same path (%):",
 	focalLength: "Focal length (mm):",
 	selectedArea: "Selected area",
-	flightHeight: "Flight height (m)",
+	flightHeight: "Flight height",
 	lx: "Image height, lx",
 	Lx: "Image height on the ground, Lx",
 	Bx: "Distance between photographing positions, Bx",
 	ly: "Image width, ly",
 	Ly: "Image width on the ground, Ly",
 	By: "Distance between adjacent paths, By",
+	timeBetweenCaptures: "Time between captures",
 	GSI: "GSI",
 	IFOV: "IFOV",
 	GIFOV: "GIFOV",
