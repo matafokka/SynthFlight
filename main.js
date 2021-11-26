@@ -12,14 +12,17 @@ require("leaflet-advanced-layer-system");
 L.ALS.Locales.AdditionalLocales.Russian();
 require("./locales/English.js");
 require("./locales/Russian.js");
-require("./SynthShapefileLayer.js");
-require("./SynthBaseLayer.js");
+require("./SynthShapefileLayer/SynthShapefileLayer.js");
+require("./SynthBase/SynthBaseSettings.js");
+require("./SynthBase/SynthBaseLayer.js");
 require("./SynthGridLayer/SynthGridLayer.js");
 require("./node_modules/leaflet.coordinates/dist/Leaflet.Coordinates-0.1.5.min.js");
 require("leaflet-draw");
-require("./SynthBaseDrawLayer.js");
+require("./SynthBase/SynthBaseDrawLayer.js");
 require("./SynthPolygonLayer.js");
-require("./SynthLineLayer.js");
+require("./SynthLineLayer/SynthLineWizard.js");
+require("./SynthLineLayer/SynthLineSettings.js");
+require("./SynthLineLayer/SynthLineLayer.js");
 
 L.ALS.System.initializeSystem();
 
@@ -94,4 +97,5 @@ layerSystem.addBaseLayer(L.tileLayer(""), "Empty");
 
 // Add layer types
 layerSystem.addLayerType(L.ALS.SynthGridLayer);
+layerSystem.addLayerType(L.ALS.SynthLineLayer);
 layerSystem.addLayerType(L.ALS.SynthShapefileLayer);

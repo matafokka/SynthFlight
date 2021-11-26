@@ -13,22 +13,29 @@ L.ALS.SynthGridLayer.prototype._onMapZoom = function () {
 	let distancePx = this.map.latLngToContainerPoint(distanceLatLng).x;
 
 	// Grid becomes messy when distance is around 15 pixels
-	let shouldHide = distancePx < this.hidingThreshold;
-	if (shouldHide) {
+
+	/**
+	 * Whether should hide stuff, if map is zoomed out
+	 * @type {boolean}
+	 * @private
+	 */
+	this._shouldHideEverything = distancePx < this.hidingThreshold;
+
+	if (this._shouldHideEverything) {
 		let groups = ["polygonGroup", "bordersGroup", "labelsGroup", "widgetsGroup"];
 		for (let group of groups)
 			this[group].remove();
 		this.isDisplayed = false;
-	} else if (!shouldHide && !this.isDisplayed) {
+	} else if (!this._shouldHideEverything && !this.isDisplayed) {
 		this.isDisplayed = true;
 		this.polygonGroup.addTo(this.map); // Add removed stuff
 		this.bordersGroup.addTo(this.map);
 		this.labelsGroup.addTo(this.map);
 	}
 
-	shouldHide = distancePx < 200;
+	this._shouldHideEverything = distancePx < 200;
 	if (this.isDisplayed && !this._doHidePolygonWidgets) {
-		if (shouldHide)
+		if (this._shouldHideEverything)
 			this.widgetsGroup.remove();
 		else {
 			this.widgetsGroup.addTo(this.map);

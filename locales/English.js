@@ -1,5 +1,22 @@
 L.ALS.Locales.addLocaleProperties("English", {
 
+	// SynthBaseLayer
+	connectionMethod: "Path connection method",
+	allIntoOne: "All into one",
+	oneFlightPerPath: "One flight per path",
+	pathSpoiler: "Path",
+	flashPath: "Flash path",
+	pathLength: "Path length",
+	flightTime: "Flight time",
+	flightTimeWarning: "Flight time exceeds 4 hours. Consider splitting capture area that contains this path into chunks.",
+
+	// SynthLineWizard
+	lineLayerName: "Line Layer",
+	lineLayerWizardLabel: "This layer is in development, doesn't do anything at the moment, might break the app when added", // TODO: Change to "This layer has no options" when it'll be finished
+
+	// SynthLineLayer
+	lineLayerColor: "Line color:",
+
 	// SynthGridWizard
 
 	gridWizardDisplayName: "Grid Layer",
@@ -35,22 +52,15 @@ L.ALS.Locales.addLocaleProperties("English", {
 	overlayBetweenPaths: "Overlay between images from adjacent paths (%):",
 	overlayBetweenImages: "Overlay between images from the same path (%):",
 	focalLength: "Focal length (mm):",
-	lngPathsCount: "Paths count in one cell by parallels",
-	latPathsCount: "Paths count in one cell by meridians",
-	lngPathsLength: "Length of paths by parallels",
-	latPathsLength: "Length of paths by meridians",
-	lngFlightTime: "Flight time by parallels",
-	latFlightTime: "Flight time by meridians",
-	lngCellSizeInMeters: "Mean cell width",
-	latCellSizeInMeters: "Mean cell height",
 	selectedArea: "Selected area",
-	flightHeight: "Flight height (m)",
+	flightHeight: "Flight height",
 	lx: "Image height, lx",
 	Lx: "Image height on the ground, Lx",
 	Bx: "Distance between photographing positions, Bx",
 	ly: "Image width, ly",
 	Ly: "Image width on the ground, Ly",
 	By: "Distance between adjacent paths, By",
+	timeBetweenCaptures: "Time between captures",
 	GSI: "GSI",
 	IFOV: "IFOV",
 	GIFOV: "GIFOV",
@@ -66,11 +76,15 @@ L.ALS.Locales.addLocaleProperties("English", {
 	absoluteHeight: "Absolute height",
 	elevationDifference: "(Max. height - Min. height) / Flight height",
 	reliefType: "Relief type",
+	lngPathsCount: "Paths count by parallels",
+	latPathsCount: "Paths count by meridians",
+	lngCellSizeInMeters: "Cell width",
+	latCellSizeInMeters: "Cell height",
 
 	errorDistanceHasNotBeenCalculated: "Distance between paths hasn't been calculated!",
-	errorPathsCountTooBig: "Calculated paths count is too big, it should be less than 20. Please, check your values.",
+	errorPathsCountTooBig: "Calculated paths count is too big. Please, check your values.",
 	errorCamHeight: "Camera height is greater than camera width!",
-	errorPathsCountTooSmall: "Calculated paths count is too small, it should be greater than 2. Please, check your values.",
+	errorPathsCountTooSmall: "Calculated paths count is too small. Please, check your values.",
 	errorMinHeightBiggerThanMaxHeight: "Min. height should be less than or equal to max. height!",
 
 	DEMFiles: "Load DEM files to calculate statistics. Select GeoTIFF or ASCII Grid files. Select .prj or .aux.xml files with the same name to override CRS. For ASCII Grid, if no of these file selected, WGS84 is assumed.",

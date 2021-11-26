@@ -53,14 +53,15 @@ class MathTools {
 	 * @return {{intercept: number, slope: number}|undefined} Object containing slope and intercept or undefined, if it can't be found (when dx = 0);
 	 */
 	static getSlopeAndIntercept(line) {
-		let p1 = line[0], p2 = line[1];
-		let p1x = p1[0], p1y = p1[1], p2x = p2[0], p2y = p2[1];
-		let deltaX = p2x - p1x;
+		let [p1, p2] = line, [p1x, p1y] = p1, [p2x, p2y] = p2,
+			deltaX = p2x - p1x;
+
 		if (this.isEqual(deltaX, 0))
 			return undefined;
 
-		let m = (p2y - p1y) / deltaX; // Slope
-		let b = p1y - m * p1x; // Intercept
+		let m = (p2y - p1y) / deltaX, // Slope
+			b = p1y - m * p1x; // Intercept
+
 		return {
 			slope: m,
 			intercept: b
@@ -95,15 +96,45 @@ class MathTools {
 	 * Determines whether given point lies in polygon including its edges.
 	 * @param point {number[]} Point in format [lng, lat]
 	 * @param polygon {number[][]} Polygon in format [[lng, lat], [lng, lat], ...]
-	 * @return {boolean} True, if point lies in polygon or on one of its edges. Returns false otherwise.
+	 * @return {boolean} True, if point lies in polygon or on one of its edges.
 	 */
 	static isPointInPolygon(point, polygon) {
-		let intersections = 0;
-		for (let edge of polygon) {
-			let ray = [point, [point[0], 1]];
-			if (MathTools.linesIntersection(edge, ray))
+		let intersections = 0, ray = [point, [Infinity, point[1]]];
+		for (let i = 0; i < polygon.length - 1; i++) {
+			let edge = [polygon[i], polygon[i + 1]], isPointOnEdge = MathTools.isPointOnLine(point, edge);
+
+			if (isPointOnEdge)
+				return true;
+
+			let intersection = MathTools.linesIntersection(edge, ray);
+			if (!intersection)
+				continue;
+
+			// There're two special cases: when ray lies on the edge and when intersection is at the point of the edge.
+			// In second case, we check if other point of the edge lies above (then we skip it)
+			// or below (then we count it) the ray. If point lies on the ray, we come to the first case that is solved
+			// by skipping the edge.
+
+			// Source: http://alienryderflex.com/polygon/
+
+			if (intersection.length === 2)
+				continue;
+
+			let intersectionPoint = intersection[0], notOnVertex = true;
+			for (let p of edge) {
+				if (!MathTools.arePointsEqual(p, intersectionPoint))
+					continue;
+
+				notOnVertex = false;
+				let otherP = p === edge[0] ? edge[1] : edge[0];
+				if (otherP[1] < intersectionPoint[1])
+					intersections++;
+			}
+
+			if (notOnVertex)
 				intersections++;
 		}
+		//console.log(point, intersections);
 		return (intersections % 2 !== 0);
 	}
 
@@ -282,7 +313,14 @@ class MathTools {
 	}
 
 	static arePointsEqual(p1, p2) {
-		return this.isEqual(p1[0], p2[0]) && this.isEqual(p1[1], p2[1]);
+		let {x, y} = this.getXYPropertiesForPoint(p1);
+		return this.isEqual(p1[x], p2[x]) && this.isEqual(p1[y], p2[y]);
+	}
+
+	static getXYPropertiesForPoint(p) {
+		if (p.lat === undefined)
+			return {x: 0, y: 1}
+		return {x: "lng", y: "lat"}
 	}
 
 }

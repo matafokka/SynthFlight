@@ -2,12 +2,13 @@ const geojsonMerge = require("@mapbox/geojson-merge"); // Using this since turfH
 
 L.ALS.SynthGridLayer.prototype.toGeoJSON = function () {
 	let jsons = [];
+
 	for (let name in this.selectedPolygons) {
 		if (!this.selectedPolygons.hasOwnProperty(name))
 			continue;
-		let polygon = this.selectedPolygons[name];
-		let polygonJson = polygon.toGeoJSON();
-		let props = ["polygonName", "minHeight", "maxHeight", "meanHeight", "absoluteHeight", "reliefType", "elevationDifference"];
+		let polygon = this.selectedPolygons[name],
+			polygonJson = polygon.toGeoJSON(),
+			props = ["polygonName", "minHeight", "maxHeight", "meanHeight", "absoluteHeight", "reliefType", "elevationDifference", "latCellSizeInMeters", "lngCellSizeInMeters"];
 		for (let prop of props)
 			polygonJson.properties[prop] = polygon[prop];
 		polygonJson.properties.name = "Selected cell";
@@ -18,33 +19,22 @@ L.ALS.SynthGridLayer.prototype.toGeoJSON = function () {
 	airport.name = "Airport";
 	jsons.push(airport);
 
-	if (this["pathsByMeridians"].isEmpty() || this["pathsByParallels"].isEmpty()) {
-		window.alert(`No paths has been drawn in layer \"${this.getName()}\"! You'll get only selected gird cells and airport position.`);
+	if (this.pathsByMeridians.getLayers().length === 0 || this.pathsByParallels.getLayers().length === 0) {
+		window.alert(`No paths has been drawn in layer "${this.getName()}"! You'll get only selected gird cells and airport position.`);
 		return geojsonMerge.merge(jsons);
 	}
 
-	let meridianJson = this["pathsByMeridians"].toGeoJSON();
-	meridianJson.properties.name = "Flight paths by meridians";
-	let parallelsJson = this["pathsByParallels"].toGeoJSON();
-	parallelsJson.properties.name = "Flight paths by parallels";
-
 	// See _calculateParameters
-	let params = ["cameraWidth", "cameraHeight", "pixelWidth", "focalLength", "flightHeight", "overlayBetweenPaths", "overlayBetweenImages", "imageScale", "ly", "Ly", "By", "lx", "Lx", "Bx", "GSI", "IFOV", "GIFOV", "FOV", "GFOV", "latCellSizeInMeters", "lngCellSizeInMeters", "selectedArea"];
-	for (let line of [meridianJson, parallelsJson]) {
+	let parallelsProps = {name: "Flight paths by parallels"},
+		meridiansProps = {name: "Flight paths by meridians"},
+		params = ["cameraWidth", "cameraHeight", "pixelWidth", "focalLength", "flightHeight", "overlayBetweenPaths", "overlayBetweenImages", "imageScale", "ly", "Ly", "By", "lx", "Lx", "Bx", "GSI", "IFOV", "GIFOV", "FOV", "GFOV", "selectedArea", "timeBetweenCaptures"];
+
+	for (let prop of [parallelsProps, meridiansProps]) {
 		for (let param of params)
-			line.properties[param] = this[param];
-		jsons.push(line)
+			prop[param] = this[param];
 	}
 
-	let lines = [
-		["pathsByParallels", parallelsJson],
-		["pathsByMeridians", meridianJson]
-	];
-	let lineParams = ["pathLength", "flightTime", "pathsCount"];
-	for (let line of lines) {
-		for (let param of lineParams)
-			line[1].properties[param] = this[line[0]][param];
-	}
+	jsons.push(L.ALS.SynthBaseLayer.prototype.toGeoJSON.call(this, parallelsProps, meridiansProps));
 
 	let pointsParams = [["capturePointByMeridians", this.latPointsGroup.getLayers()], ["capturePointByParallels", this.lngPointsGroup.getLayers()]];
 	for (let param of pointsParams) {

@@ -17,10 +17,12 @@ L.ALS.SynthGridLayer.prototype._selectOrDeselectPolygon = function (event) {
 			new L.ALS.Widgets.ValueLabel("absoluteHeight", "absoluteHeight", "m"),
 			new L.ALS.Widgets.ValueLabel("elevationDifference", "elevationDifference"),
 			new L.ALS.Widgets.ValueLabel("reliefType", "reliefType"),
-			new L.ALS.Widgets.SimpleLabel("error").setStyle("error")
+			new L.ALS.Widgets.SimpleLabel("error").setStyle("error"),
+			new L.ALS.Widgets.ValueLabel("lngCellSizeInMeters", "lngCellSizeInMeters", "m").setNumberOfDigitsAfterPoint(0),
+			new L.ALS.Widgets.ValueLabel("latCellSizeInMeters", "latCellSizeInMeters", "m").setNumberOfDigitsAfterPoint(0),
 		);
 
-		let toFormatNumbers = ["meanHeight", "absoluteHeight", "elevationDifference"];
+		let toFormatNumbers = ["meanHeight", "absoluteHeight", "elevationDifference", "lngCellSizeInMeters", "latCellSizeInMeters"];
 		for (let id of toFormatNumbers)
 			controlsContainer.getWidgetById(id).setFormatNumbers(true);
 
@@ -38,17 +40,21 @@ L.ALS.SynthGridLayer.prototype._selectOrDeselectPolygon = function (event) {
 }
 
 L.ALS.SynthGridLayer.prototype._calculatePolygonParameters = function () {
-	let areaIncrement = Math.round(this["latCellSizeInMeters"] * this["lngCellSizeInMeters"]);
 	this.selectedArea = 0;
-	let unitedPolygons = undefined;
 	for (let name in this.selectedPolygons) {
 		if (!this.selectedPolygons.hasOwnProperty(name))
 			continue;
-		unitedPolygons = this._addSelectedPolygonToGeoJSON(unitedPolygons, name);
-		this.selectedArea += areaIncrement;
 
-		let layer = this.selectedPolygons[name];
+		let layer = this.selectedPolygons[name], latLngs = layer.getLatLngs()[0];
 		let widgetContainer = this.selectedPolygonsWidgets[name];
+
+		layer.lngCellSizeInMeters = this.getLineLengthMeters([latLngs[0], latLngs[1]], false);
+		layer.latCellSizeInMeters = this.getLineLengthMeters([latLngs[1], latLngs[2]], false);
+
+		this.selectedArea += layer.lngCellSizeInMeters * layer.latCellSizeInMeters;
+
+		widgetContainer.getWidgetById("lngCellSizeInMeters").setValue(layer.lngCellSizeInMeters);
+		widgetContainer.getWidgetById("latCellSizeInMeters").setValue(layer.latCellSizeInMeters);
 
 		layer.minHeight = widgetContainer.getWidgetById("minHeight").getValue();
 		layer.maxHeight = widgetContainer.getWidgetById("maxHeight").getValue();
@@ -80,19 +86,23 @@ L.ALS.SynthGridLayer.prototype._calculatePolygonParameters = function () {
 	this.getWidgetById("selectedArea").setValue(this.selectedArea);
 
 	// Draw thick borders around selected polygons
+	this._mergeSelectedPolygons();
 	this.bordersGroup.clearLayers();
-	if (unitedPolygons === undefined)
+	if (this.mergedPolygons.length === 0) {
+		this._clearPaths();
 		return;
-	let geometry = unitedPolygons.geometry;
-	let isMultiPolygon = (geometry.type === "MultiPolygon");
-	for (let polygon of geometry.coordinates) {
-		let line = L.polyline([], {
-			color: this.gridBorderColor,
-			weight: this.lineThicknessValue * 2
-		});
-		let coordinates = isMultiPolygon ? polygon[0] : polygon;
-		for (let coordinate of coordinates)
-			line.addLatLng([coordinate[1], coordinate[0]]);
-		this.bordersGroup.addLayer(line);
 	}
+
+	for (let polygon of this.mergedPolygons) {
+		let latLngs = [];
+		for (let p of polygon)
+			latLngs.push([p[1], p[0]]);
+
+		this.bordersGroup.addLayer(L.polyline(latLngs, {
+				weight: this.lineThicknessValue * this.bordersGroup.thicknessMultiplier,
+				color: this.getWidgetById("gridBorderColor").getValue()
+			}
+		));
+	}
+	this._drawPaths();
 }
