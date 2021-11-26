@@ -166,7 +166,6 @@ L.ALS.SynthGridLayer.prototype._mergeSelectedPolygons = function () {
 			poly.push([p.lng, p.lat]);
 		poly.push(poly[0]); // We need to close the polygons to use MathTools stuff
 		poly.zoneNumber = this.selectedPolygonsWidgets[id].getWidgetById("zoneNumber").getValue();
-		poly.name = this.selectedPolygons[id].polygonName; // TODO: Remove after testing
 		this.mergedPolygons.push(poly);
 	}
 

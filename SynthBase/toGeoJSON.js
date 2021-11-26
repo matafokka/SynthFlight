@@ -12,7 +12,12 @@ L.ALS.SynthBaseLayer.prototype.toGeoJSON = function (path1Metadata, path2Metadat
 		pathNumber = 1, toMerge = [];
 
 	for (let path of this.paths) {
-		let cycles = this[fn](path), metadata = pathNumber === 1 ? path1Metadata : path2Metadata;
+		let cycles = this[fn](path);
+
+		if (!cycles)
+			return {};
+
+		let metadata = pathNumber === 1 ? path1Metadata : path2Metadata;
 
 		for (let cycle of cycles) {
 

@@ -30,12 +30,10 @@ L.ALS.SynthBaseLayer.prototype.buildHull = function (path, color) {
 		return;
 
 	if (layers.length === 1) {
-		const path = layers[0].getLatLngs();
-		connectionsGroup.addLayer(L.polyline(
-			[path[0], path[path.length - 1]],
-			lineOptions
-		));
+		const latLngs = layers[0].getLatLngs();
+		connectionsGroup.addLayer(L.polyline([latLngs[0], latLngs[latLngs.length - 1]], lineOptions));
 		connectionsGroup.addLayer(hullConnection);
+		path.hullConnections = [];
 		return;
 	}
 
@@ -290,6 +288,19 @@ L.ALS.SynthBaseLayer.prototype.connectHull = function () {
  * @return {LatLng[][]} Cycle
  */
 L.ALS.SynthBaseLayer.prototype.hullToCycles = function (path) {
+
+	if (!path.hullConnections)
+		return undefined;
+
+	if (path.hullConnections.length === 0) {
+		let airportPos = this._airportMarker.getLatLng();
+		return [[
+			airportPos,
+			...path.pathGroup.getLayers()[0].getLatLngs(),
+			airportPos
+		]];
+	}
+
 	// The idea is to start with the first connection, find the starting point in it and for each connection
 	// find the next point of a current connection and add points of its paths. We can do this because connections
 	// are ordered. We'll also compare instances of the points because they're copied from the path, and it'll
@@ -352,10 +363,7 @@ L.ALS.SynthBaseLayer.prototype.hullToCycles = function (path) {
 		}
 	}
 
-	cycle = [hullP2, ...afterAirport, ...beforeAirport, hullP2];
-
-	this.map.addLayer(L.polyline(cycle, {weight: 10, opacity: 0.5}));
-	return [cycle];
+	return [[hullP2, ...afterAirport, ...beforeAirport, hullP2]];
 }
 
 L.ALS.SynthBaseLayer.prototype.getOrderedPathFromHull = function (prevPoint, connection, copyTo, i = 0) {

@@ -110,11 +110,8 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 			new L.ALS.Widgets.Number("lineThickness", "lineThickness", this, "setLineThickness").setMin(1).setMax(20).setValue(this._settings.lineThicknessValue),
 		);
 
-		for (let i = 0; i < this.paths.length; i++) {
-			this.addWidget(
-				new L.ALS.Widgets.Color(`color${i}`, this.paths[i].colorLabel, this, "_setPathsColor").setValue(this._settings[`color${i}`]),
-			);
-		}
+		for (let i = 0; i < this.paths.length; i++)
+			this.addWidget(new L.ALS.Widgets.Color(`color${i}`, this.paths[i].colorLabel, this, "_setPathsColor").setValue(this._settings[`color${i}`]));
 
 		this.addWidgets(
 			new L.ALS.Widgets.Divider("div1"),
@@ -400,9 +397,15 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 	 * @return {LatLng[][]} Cycles
 	 */
 	onePerFlightToCycles: function (path) {
-		let layers = path.pathGroup.getLayers(), cycles = [], airportPos = this._airportMarker.getLatLng();
+		let layers = path.pathGroup.getLayers();
+
+		if (layers.length === 0)
+			return undefined;
+
+		let cycles = [], airportPos = this._airportMarker.getLatLng();
 		for (let layer of layers)
-			cycles.push([airportPos, ...layer.getLatLngs()], airportPos);
+			cycles.push([airportPos, ...layer.getLatLngs(), airportPos]);
+
 		return cycles;
 	},
 
