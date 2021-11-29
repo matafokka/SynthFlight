@@ -2,7 +2,7 @@ const bbox = require("@turf/bbox").default;
 const MathTools = require("../MathTools.js");
 const turfHelpers = require("@turf/helpers");
 
-L.ALS.SynthGridLayer.prototype._clearPaths = function () {
+L.ALS.SynthPolygonLayer.prototype._clearPaths = function () {
 	let groupsToClear = [this.pathsByParallels, this.pathsByMeridians, this.meridiansExternalConnections, this.meridiansInternalConnections, this.parallelsExternalConnections, this.parallelsInternalConnections, this.latPointsGroup, this.lngPointsGroup];
 	for (let group of groupsToClear)
 		group.clearLayers();
@@ -12,7 +12,7 @@ L.ALS.SynthGridLayer.prototype._clearPaths = function () {
 	this._pathsLabelsIDs = [];
 }
 
-L.ALS.SynthGridLayer.prototype._drawPaths = function () {
+L.ALS.SynthPolygonLayer.prototype._drawPaths = function () {
 	this._clearPaths();
 
 	// Validate estimated paths count
@@ -50,7 +50,7 @@ L.ALS.SynthGridLayer.prototype._drawPaths = function () {
  * Draws flight paths. Use _drawPaths wrapper to draw paths instead of this.
  * @private
  */
-L.ALS.SynthGridLayer.prototype._drawPathsWorker = function (isParallels) {
+L.ALS.SynthPolygonLayer.prototype._drawPathsWorker = function (isParallels) {
 
 	let pathName, nameForOutput, color, connectionsGroup, widgetId, extensionIndex;
 	if (isParallels) {
@@ -205,7 +205,6 @@ L.ALS.SynthGridLayer.prototype._drawPathsWorker = function (isParallels) {
 				lat -= moveBy;
 			else
 				lng += moveBy;
-
 		}
 		connectionsGroup.addLayer(connectionLine);
 	}

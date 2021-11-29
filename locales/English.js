@@ -12,7 +12,6 @@ L.ALS.Locales.addLocaleProperties("English", {
 
 	// SynthLineWizard
 	lineLayerName: "Line Layer",
-	lineLayerWizardLabel: "This layer is in development, doesn't do anything at the moment, might break the app when added", // TODO: Change to "This layer has no options" when it'll be finished
 
 	// SynthLineLayer
 	lineLayerColor: "Line color:",
@@ -103,6 +102,13 @@ L.ALS.Locales.addLocaleProperties("English", {
 	defaultParallelsColor: "Paths by parallels default color:",
 	defaultLineThickness: "Default line thickness:",
 	gridHidingFactor: "Increase responsiveness by hiding grid at smaller map scales. The higher this value, the more responsive program will be:",
+
+	// SynthRectangleLayer
+	rectangleLayerName: "Rectangle Layer",
+	defaultRectangleBorderColor: "Default border color:",
+	defaultRectangleFillColor: "Default fill color:",
+	rectangleBorderColor: "Rectangle border color:",
+	rectangleFillColor: "Rectangle fill color:",
 
 	// SynthShapefileWizard
 

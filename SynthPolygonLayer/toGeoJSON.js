@@ -1,12 +1,12 @@
 const geojsonMerge = require("@mapbox/geojson-merge"); // Using this since turfHelpers.featureCollection() discards previously defined properties.
 
-L.ALS.SynthGridLayer.prototype.toGeoJSON = function () {
+L.ALS.SynthPolygonLayer.prototype.toGeoJSON = function () {
 	let jsons = [];
 
-	for (let name in this.selectedPolygons) {
-		if (!this.selectedPolygons.hasOwnProperty(name))
+	for (let name in this.polygons) {
+		if (!this.polygons.hasOwnProperty(name))
 			continue;
-		let polygon = this.selectedPolygons[name],
+		let polygon = this.polygons[name],
 			polygonJson = polygon.toGeoJSON(),
 			props = ["polygonName", "minHeight", "maxHeight", "meanHeight", "absoluteHeight", "reliefType", "elevationDifference", "latCellSizeInMeters", "lngCellSizeInMeters"];
 		for (let prop of props)

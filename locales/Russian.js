@@ -12,7 +12,6 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 
 	// SynthLineWizard
 	lineLayerName: "Слой Линий",
-	lineLayerWizardLabel: "Этот слой находится в разработке, пока ничего не делает и может сломать приложение, если его добавить",
 
 	// SynthLineLayer
 	lineLayerColor: "Цвет линий:",
@@ -98,6 +97,13 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 	defaultParallelsColor: "Цвет маршрутов по параллелям по умолчанию:",
 	defaultLineThickness: "Толщина линий по умолчанию:",
 	gridHidingFactor: "Увеличить отзывчивость, скрывая сетку при более мелком масштабе. Чем выше это значение, тем отзывчивее будет программа:",
+
+	// SynthRectangleLayer
+	rectangleLayerName: "Слой Прямоугольников",
+	defaultRectangleBorderColor: "Цвет обводки по умолчанию:",
+	defaultRectangleFillColor: "Цвет заливки по умолчанию:",
+	rectangleBorderColor: "Цвет обводки прямоугольников:",
+	rectangleFillColor: "Цвет заливки прямоугольников:",
 
 	// SynthShapefileWizard
 

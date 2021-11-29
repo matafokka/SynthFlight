@@ -10,18 +10,15 @@
 //require("fastestsmallesttextencoderdecoder");
 require("leaflet-advanced-layer-system");
 L.ALS.Locales.AdditionalLocales.Russian();
+require("./node_modules/leaflet.coordinates/dist/Leaflet.Coordinates-0.1.5.min.js");
+require("leaflet-draw");
 require("./locales/English.js");
 require("./locales/Russian.js");
 require("./SynthShapefileLayer/SynthShapefileLayer.js");
-require("./SynthBase/SynthBaseSettings.js");
 require("./SynthBase/SynthBaseLayer.js");
+require("./SynthPolygonLayer/SynthPolygonLayer.js");
 require("./SynthGridLayer/SynthGridLayer.js");
-require("./node_modules/leaflet.coordinates/dist/Leaflet.Coordinates-0.1.5.min.js");
-require("leaflet-draw");
-require("./SynthBase/SynthBaseDrawLayer.js");
-require("./SynthPolygonLayer.js");
-require("./SynthLineLayer/SynthLineWizard.js");
-require("./SynthLineLayer/SynthLineSettings.js");
+require("./SynthRectangleLayer/SynthRectangleLayer.js");
 require("./SynthLineLayer/SynthLineLayer.js");
 
 L.ALS.System.initializeSystem();
@@ -96,6 +93,7 @@ for (let country of countries) {
 layerSystem.addBaseLayer(L.tileLayer(""), "Empty");
 
 // Add layer types
+layerSystem.addLayerType(L.ALS.SynthRectangleLayer);
 layerSystem.addLayerType(L.ALS.SynthGridLayer);
 layerSystem.addLayerType(L.ALS.SynthLineLayer);
 layerSystem.addLayerType(L.ALS.SynthShapefileLayer);

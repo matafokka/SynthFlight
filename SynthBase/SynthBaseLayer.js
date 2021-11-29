@@ -1,3 +1,4 @@
+require("./SynthBaseSettings.js");
 const turfHelpers = require("@turf/helpers");
 const MathTools = require("../MathTools.js");
 
@@ -145,19 +146,16 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 
 	addBaseParametersOutputSection: function () {
 		let yWidgets = [];
-		if (this.hasYOverlay) {
-			yWidgets = [
-				new L.ALS.Widgets.ValueLabel("ly", "ly", "m"),
-				new L.ALS.Widgets.ValueLabel("Ly", "Ly", "m"),
-				new L.ALS.Widgets.ValueLabel("By", "By", "m"),
-			];
-		}
+		if (this.hasYOverlay)
+			yWidgets = [new L.ALS.Widgets.ValueLabel("By", "By", "m")];
 
 		let valueLabels = [
 			new L.ALS.Widgets.ValueLabel("flightHeight", "flightHeight", "m"),
 			new L.ALS.Widgets.ValueLabel("lx", "lx", "m"),
 			new L.ALS.Widgets.ValueLabel("Lx", "Lx", "m"),
 			new L.ALS.Widgets.ValueLabel("Bx", "Bx", "m"),
+			new L.ALS.Widgets.ValueLabel("ly", "ly", "m"),
+			new L.ALS.Widgets.ValueLabel("Ly", "Ly", "m"),
 			...yWidgets,
 			new L.ALS.Widgets.ValueLabel("timeBetweenCaptures", "timeBetweenCaptures", "s"),
 			new L.ALS.Widgets.ValueLabel("GSI", "GSI", "m"),
@@ -189,6 +187,7 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 					layer.setRadius(doubleThickness);
 			})
 		}
+		this.updateDrawThickness();
 	},
 
 	_setPathsColor: function () {
@@ -448,4 +447,5 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 
 require("./Hull.js");
 require("./calculateParameters.js");
+require("./draw.js");
 require("./toGeoJSON.js");
