@@ -8,8 +8,11 @@ L.ALS.SynthPolygonLayer.prototype.serialize = function (seenObjects) {
 	for (let name in this.polygons) {
 		if (!this.polygons.hasOwnProperty(name))
 			continue;
-		serialized.polygons[name] = this.polygons[name].getLatLngs();
+		let poly = this.polygons[name];
+		serialized.polygons[name] = poly[poly instanceof L.Rectangle ? "getBounds" : "getLatLngs"]();
 	}
+
+	this.clearSerializedPathsWidgets(serialized);
 	return serialized;
 }
 
@@ -18,8 +21,10 @@ L.ALS.SynthPolygonLayer._toUpdateColors = ["borderColor", "fillColor", "color0",
 L.ALS.SynthPolygonLayer.deserialize = function (serialized, layerSystem, settings, seenObjects) {
 	let object = L.ALS.Layer.deserialize(serialized, layerSystem, settings, seenObjects);
 
-	for (let prop in serialized.polygons)
-		object.polygons[prop] = L.polygon(serialized.polygons[prop]);
+	for (let prop in serialized.polygons) {
+		let value = serialized.polygons[prop];
+		object.polygons[prop] = L[value.serializableClassName === "L.LatLngBounds" ? "rectangle" : "polygon"](value);
+	}
 
 	for (let prop in object.polygonsWidgets) {
 		let widget = object.polygonsWidgets[prop];

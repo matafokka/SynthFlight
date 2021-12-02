@@ -79,7 +79,7 @@
     "http-server": "^0.12.3",
     "keyboardevent-key-polyfill": "^1.1.0",
     "leaflet": "^1.7.1",
-    "leaflet-advanced-layer-system": "^2.1.1",
+    "leaflet-advanced-layer-system": "^2.1.2",
     "leaflet-draw": "^1.0.4",
     "leaflet.coordinates": "~0.1.5",
     "persistify": "^2.0.1",

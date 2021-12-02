@@ -47,6 +47,8 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend({
 
 		if (!this.getWidgetById("hideCapturePoints").getValue())
 			this.map.addLayer(this.pointsGroup);
+
+		this.writeToHistory();
 	},
 
 	statics: {

@@ -104,10 +104,7 @@ L.ALS.SynthPolygonLayer.prototype.onHide = function () {
 }
 
 L.ALS.SynthPolygonLayer.prototype.onShow = function () {
-	this.forEachPath((path) => {
-		this.map.addLayer(path);
-	});
-	this.updateAll(); // Update grid upon showing
+	this._updateLayersVisibility();
 }
 
 L.ALS.SynthPolygonLayer.prototype.onDelete = function () {

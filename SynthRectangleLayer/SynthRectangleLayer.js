@@ -38,10 +38,30 @@ L.ALS.SynthRectangleLayer = L.ALS.SynthPolygonLayer.extend({
 		this.map.addLayer(this.labelsGroup); // Nothing in the base layer hides or shows it, so it's only hidden in code above
 		this._updateLayersVisibility();
 		this.updateAll();
+		this.writeToHistory();
+	},
+
+	_setColor: function (widget) {
+		L.ALS.SynthPolygonLayer.prototype._setColor.call(this, widget);
+		this.updateRectanglesColors();
+	},
+
+	updateRectanglesColors: function () {
+		let color = this.getWidgetById("borderColor").getValue(),
+			fillColor = this.getWidgetById("fillColor").getValue();
+		for (let id in this.polygons)
+			this.polygons[id].setStyle({color, fillColor});
 	},
 
 	statics: {
 		wizard: L.ALS.SynthRectangleWizard,
 		settings: new L.ALS.SynthRectangleSettings(),
+		deserialize: function (serialized, layerSystem, settings, seenObjects) {
+			let deserialized = L.ALS.SynthPolygonLayer.deserialize(serialized, layerSystem, settings, seenObjects);
+			for (let id in deserialized.polygons)
+				deserialized.polygonGroup.addLayer(deserialized.polygons[id]);
+			deserialized.updateRectanglesColors();
+			return deserialized;
+		}
 	}
 });

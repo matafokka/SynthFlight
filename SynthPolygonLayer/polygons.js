@@ -1,8 +1,8 @@
 L.ALS.SynthPolygonLayer.prototype.addPolygon = function (polygon) {
-	let name = this._generatePolygonName(polygon);
+	polygon._intName = this._generatePolygonName(polygon);
 
 	polygon.setStyle({fill: true});
-	this.polygons[name] = polygon;
+	this.polygons[polygon._intName] = polygon;
 
 	let controlsContainer = new L.WidgetLayer(polygon.getLatLngs()[0][1], "topLeft");
 
@@ -25,12 +25,12 @@ L.ALS.SynthPolygonLayer.prototype.addPolygon = function (polygon) {
 	for (let id of toFormatNumbers)
 		controlsContainer.getWidgetById(id).setFormatNumbers(true);
 
-	this.polygonsWidgets[name] = controlsContainer;
+	this.polygonsWidgets[polygon._intName] = controlsContainer;
 	this.widgetsGroup.addLayer(controlsContainer);
 }
 
 L.ALS.SynthPolygonLayer.prototype.removePolygon = function (polygon, removeFromObject = true) {
-	let name = this._generatePolygonName(polygon);
+	let name = polygon._intName || this._generatePolygonName(polygon);
 	if (removeFromObject)
 		delete this.polygons[name];
 	this.widgetsGroup.removeLayer(this.polygonsWidgets[name]);

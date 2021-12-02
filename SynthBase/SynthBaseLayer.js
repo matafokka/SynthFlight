@@ -248,7 +248,7 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 	_createPathWidget: function (layer, length, toFlash) {
 		let button = new L.ALS.Widgets.Button("flashPath", "flashPath", this, "flashPath"),
 			lengthWidget = new L.ALS.Widgets.ValueLabel("pathLength", "pathLength", "m").setFormatNumbers(true).setNumberOfDigitsAfterPoint(0),
-			timeWidget = new L.ALS.Widgets.ValueLabel("flightTime", "flightTime", "h:mm").setValue(),
+			timeWidget = new L.ALS.Widgets.ValueLabel("flightTime", "flightTime", "h:mm"),
 			warning = new L.ALS.Widgets.SimpleLabel("warning", "", "center", "warning"),
 			widget = new L.ALS.Widgets.Spoiler(`pathWidget${this._pathsWidgetsNumber}`, `${L.ALS.locale.pathSpoiler} ${this._pathsWidgetsNumber}`)
 			.addWidgets(button, lengthWidget, timeWidget, warning);
@@ -442,6 +442,11 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 		line.setStyle({color});
 		line.isFlashing = false;
 	},
+
+	clearSerializedPathsWidgets: function (serialized) {
+		for (let i = 1; i <= this._pathsWidgetsNumber; i++)
+			delete serialized._widgets["pathWidget" + i];
+	}
 
 });
 
