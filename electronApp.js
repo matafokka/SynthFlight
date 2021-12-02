@@ -1,4 +1,6 @@
 const { app, BrowserWindow } = require("electron");
+const remote = require("@electron/remote/main");
+remote.initialize();
 const integrate = require("leaflet-advanced-layer-system/ElectronIntegration");
 
 function createWindow () {
@@ -11,7 +13,8 @@ function createWindow () {
 		titleBarStyle: 'customButtonsOnHover',
 		webPreferences: {
 			enableRemoteModule: true,
-			nodeIntegration: true
+			nodeIntegration: true,
+			contextIsolation: false,
 		}
 	});
 
@@ -21,6 +24,7 @@ function createWindow () {
 		mainWindow.webContents.openDevTools();
 	mainWindow.removeMenu();
 	mainWindow.maximize();
+	remote.enable(mainWindow.webContents);
 	integrate(mainWindow, {
 		useToolbarAsFrame: true,
 	});

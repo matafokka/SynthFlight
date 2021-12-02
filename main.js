@@ -93,7 +93,7 @@ for (let country of countries) {
 layerSystem.addBaseLayer(L.tileLayer(""), "Empty");
 
 // Add layer types
-layerSystem.addLayerType(L.ALS.SynthRectangleLayer);
 layerSystem.addLayerType(L.ALS.SynthGridLayer);
+layerSystem.addLayerType(L.ALS.SynthRectangleLayer);
 layerSystem.addLayerType(L.ALS.SynthLineLayer);
 layerSystem.addLayerType(L.ALS.SynthShapefileLayer);

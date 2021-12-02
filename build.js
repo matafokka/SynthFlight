@@ -5,30 +5,38 @@ const fs = require("fs");
 const fse = require("fs-extra");
 const {Worker} = require('worker_threads');
 
-let onlyBrowser = false, debug = false, cssThreadFinished = false, copyPromiseFinished = false;
-let dir = "dist/SynthFlight-browser/";
+let onlyBrowser = false, debug = false, cssThreadFinished = false, copyPromiseFinished = false,
+	dir = "dist/SynthFlight-browser/",
+	electronDeps = ["package.json", "electronApp.js"], // Packager can't work without these in dist
+	electronMissingDeps = ["node_modules/@electron", "node_modules/leaflet-advanced-layer-system/ElectronIntegration.js", "node_modules/leaflet-advanced-layer-system/_service/mergeOptions.js"]; // Packager also won't copy these for some unknown reason
 
 let buildElectron = () => {
 	if (onlyBrowser || !(cssThreadFinished && copyPromiseFinished))
 		return;
 
-	let ignore = ["build.js", ".idea", ".cache", "dist", "docs", "ESRIGridBackup"];
-
+	let ignore = ["build.js", ".idea", ".cache", "dist"];
 	packager({
 		all: true,
+		asar: true,
 		dir: dir,
 		out: "dist",
+		prune: false,
+		afterCopy: [(buildPath, electronVersion, platform, arch, callback) => {
+			for (let source of electronMissingDeps)
+				fse.copySync(source, buildPath + "/" + source);
+			callback();
+		}],
 		ignore: (path) => {
-			for (let p of ignore)
+			for (let p of ignore) {
 				if (path === "/" + p)
 					return true;
+			}
 			return false;
 		},
 		icon: "logo.ico",
 	}).then(() => {
-		for (let file of ["package.json", "electronApp.js"])
-			fs.unlink(dir + file, () => {
-			});
+		for (let file of electronDeps)
+			fs.unlink(dir + file, () => {});
 	});
 
 }
@@ -100,7 +108,7 @@ let toCopy = ["index.html", "logo.ico",
 ];
 
 if (!onlyBrowser)
-	toCopy.push("package.json", "electronApp.js") // Needed for Electron, will be removed after packaging
+	toCopy.push(...electronDeps) // Needed for Electron, will be removed after packaging
 
 let promises = [];
 for (let target of toCopy)
