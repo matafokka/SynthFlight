@@ -19,9 +19,6 @@ L.ALS.SynthBaseLayer.prototype.calculateParameters = function () {
 	this.ly = this["cameraWidth"] * pixelWidth; // Image size in meters
 	this.Ly = this.ly * this["imageScale"] // Image width on the ground
 
-	if (this.hasYOverlay)
-		this.By = this.Ly * (100 - this["overlayBetweenPaths"]) / 100; // Distance between paths
-
 	this.lx = this["cameraHeight"] * pixelWidth; // Image height
 	this.Lx = this.lx * this["imageScale"]; // Image height on the ground
 	this.Bx = this.Lx * (100 - this["overlayBetweenImages"]) / 100; // Capture basis, distance between images' centers
@@ -36,7 +33,14 @@ L.ALS.SynthBaseLayer.prototype.calculateParameters = function () {
 
 	this.timeBetweenCaptures = this.Bx / this.aircraftSpeedInMetersPerSecond;
 
-	let names = ["flightHeight", "lx", "Lx", "Bx", "ly", "Ly", "By", "GSI", "IFOV", "GIFOV", "FOV", "GFOV", "timeBetweenCaptures"];
+	let names = ["flightHeight", "lx", "Lx", "Bx", "ly", "Ly", "GSI", "IFOV", "GIFOV", "FOV", "GFOV", "timeBetweenCaptures"];
+
+
+	if (this.hasYOverlay) {
+		this.By = this.Ly * (100 - this["overlayBetweenPaths"]) / 100; // Distance between paths
+		names.push("By");
+	}
+
 	for (let name of names) {
 		const field = this[name];
 		if (field === undefined)

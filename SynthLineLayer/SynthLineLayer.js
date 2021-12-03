@@ -1,19 +1,26 @@
-L.ALS.SynthLineLayer = L.ALS.SynthBaseDrawLayer.extend({
+require("./SynthLineWizard.js");
+require("./SynthLineSettings.js");
+
+L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend({
 	defaultName: "Line Layer",
 	hideCapturePoints: true,
 	hidePathsConnections: false,
+	hasYOverlay: false,
 
 	init: function (wizardResults, settings) {
+		this.drawingGroup = L.featureGroup();
+		this.connectionsGroup = L.featureGroup();
 
-		this.drawControls = {
+		L.ALS.SynthBaseLayer.prototype.init.call(this, settings, this.drawingGroup, this.connectionsGroup, "lineLayerColor");
+
+		this.enableDraw({
 			polyline: {
 				shapeOptions: {
 					color: "#ff0000",
 					weight: this.lineThicknessValue
 				}
 			}
-		}
-		L.ALS.SynthBaseDrawLayer.prototype.init.call(this, settings, "lineLayerColor");
+		}, this.drawingGroup);
 
 		this.addWidgets(
 			new L.ALS.Widgets.Checkbox("hideCapturePoints", "hideCapturePoints", this, "_hideCapturePoints").setValue(true),
@@ -24,9 +31,6 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseDrawLayer.extend({
 		this.addBaseParametersOutputSection();
 
 		this.pointsGroup = L.featureGroup();
-
-		this.addEventListenerTo(this.map, "draw:drawstart draw:editstart draw:deletestart", "onEditStart");
-		this.addEventListenerTo(this.map, "draw:drawstop draw:editstop draw:deletestop", "onEditEnd");
 		this.calculateParameters();
 	},
 
@@ -43,14 +47,8 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseDrawLayer.extend({
 
 		if (!this.getWidgetById("hideCapturePoints").getValue())
 			this.map.addLayer(this.pointsGroup);
-	},
 
-	onDraw: function (e) {
-		L.ALS.SynthBaseDrawLayer.prototype.onDraw.call(this, e);
-		e.layer.setStyle({
-			color: this.getWidgetById("color0").getValue(),
-			opacity: 1
-		});
+		this.writeToHistory();
 	},
 
 	statics: {

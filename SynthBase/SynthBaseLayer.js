@@ -1,3 +1,4 @@
+require("./SynthBaseSettings.js");
 const turfHelpers = require("@turf/helpers");
 const MathTools = require("../MathTools.js");
 
@@ -145,19 +146,16 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 
 	addBaseParametersOutputSection: function () {
 		let yWidgets = [];
-		if (this.hasYOverlay) {
-			yWidgets = [
-				new L.ALS.Widgets.ValueLabel("ly", "ly", "m"),
-				new L.ALS.Widgets.ValueLabel("Ly", "Ly", "m"),
-				new L.ALS.Widgets.ValueLabel("By", "By", "m"),
-			];
-		}
+		if (this.hasYOverlay)
+			yWidgets = [new L.ALS.Widgets.ValueLabel("By", "By", "m")];
 
 		let valueLabels = [
 			new L.ALS.Widgets.ValueLabel("flightHeight", "flightHeight", "m"),
 			new L.ALS.Widgets.ValueLabel("lx", "lx", "m"),
 			new L.ALS.Widgets.ValueLabel("Lx", "Lx", "m"),
 			new L.ALS.Widgets.ValueLabel("Bx", "Bx", "m"),
+			new L.ALS.Widgets.ValueLabel("ly", "ly", "m"),
+			new L.ALS.Widgets.ValueLabel("Ly", "Ly", "m"),
 			...yWidgets,
 			new L.ALS.Widgets.ValueLabel("timeBetweenCaptures", "timeBetweenCaptures", "s"),
 			new L.ALS.Widgets.ValueLabel("GSI", "GSI", "m"),
@@ -189,6 +187,7 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 					layer.setRadius(doubleThickness);
 			})
 		}
+		this.updateDrawThickness();
 	},
 
 	_setPathsColor: function () {
@@ -249,7 +248,7 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 	_createPathWidget: function (layer, length, toFlash) {
 		let button = new L.ALS.Widgets.Button("flashPath", "flashPath", this, "flashPath"),
 			lengthWidget = new L.ALS.Widgets.ValueLabel("pathLength", "pathLength", "m").setFormatNumbers(true).setNumberOfDigitsAfterPoint(0),
-			timeWidget = new L.ALS.Widgets.ValueLabel("flightTime", "flightTime", "h:mm").setValue(),
+			timeWidget = new L.ALS.Widgets.ValueLabel("flightTime", "flightTime", "h:mm"),
 			warning = new L.ALS.Widgets.SimpleLabel("warning", "", "center", "warning"),
 			widget = new L.ALS.Widgets.Spoiler(`pathWidget${this._pathsWidgetsNumber}`, `${L.ALS.locale.pathSpoiler} ${this._pathsWidgetsNumber}`)
 			.addWidgets(button, lengthWidget, timeWidget, warning);
@@ -444,8 +443,14 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 		line.isFlashing = false;
 	},
 
+	clearSerializedPathsWidgets: function (serialized) {
+		for (let i = 1; i <= this._pathsWidgetsNumber; i++)
+			delete serialized._widgets["pathWidget" + i];
+	}
+
 });
 
 require("./Hull.js");
 require("./calculateParameters.js");
+require("./draw.js");
 require("./toGeoJSON.js");

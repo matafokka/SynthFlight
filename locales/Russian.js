@@ -12,7 +12,6 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 
 	// SynthLineWizard
 	lineLayerName: "Слой Линий",
-	lineLayerWizardLabel: "Этот слой находится в разработке, пока ничего не делает и может сломать приложение, если его добавить",
 
 	// SynthLineLayer
 	lineLayerColor: "Цвет линий:",
@@ -99,24 +98,30 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 	defaultLineThickness: "Толщина линий по умолчанию:",
 	gridHidingFactor: "Увеличить отзывчивость, скрывая сетку при более мелком масштабе. Чем выше это значение, тем отзывчивее будет программа:",
 
+	// SynthRectangleLayer
+	rectangleLayerName: "Слой Прямоугольников",
+	defaultRectangleBorderColor: "Цвет обводки прямоугольников по умолчанию:",
+	defaultRectangleFillColor: "Цвет заливки прямоугольников по умолчанию:",
+	rectangleBorderColor: "Цвет обводки прямоугольников:",
+	rectangleFillColor: "Цвет заливки прямоугольников:",
+
 	// SynthShapefileWizard
 
-	shapefileDisplayName: "Слой Shapefile",
-	zippedShapefile: "Сжатый shapefile (zip-архив):",
+	geometryDisplayName: "Слой Геометрии",
+	geometryFileLabel: "Сжатый shapefile (zip-архив) или GeoJSON:",
 
 	// SynthShapefileLayer
 
-	shapefileDefaultName: "Сжатый Shapefile",
-	shapefileNoFeatures: "Этот shapefile не содержит объектов, поэтому не будет добавлен",
-	shapefileBroken: "Экстент этого shapefile неправильный, слой не будет полностью отображен на карте. Пожалуйста, откройте его в вашей любимой ГИС и исправьте экстент",
-	shapefileNotValid: "Этот файл не является shapefile-ом",
-	shapefileBorderColor: "Цвет обводки:",
-	shapefileFillColor: "Цвет заливки:",
+	geometryOutOfBounds: "Объекты в выбранном файле выходят за границы видимой области. Пожалуйста, проверьте проекцию и/или добавьте в архив файл .prj",
+	geometryInvalidFile: "Этот файл не является shapefile-ом или файлом GeoJSON",
+	geometryNoFeatures: "Этот файл не содержит объектов, поэтому не будет добавлен",
+	geometryBorderColor: "Цвет обводки:",
+	geometryFillColor: "Цвет заливки:",
 
 	// Shapefile settings
 
-	shapefileDefaultFillColor: "Цвет заливки по умолчанию:",
-	shapefileDefaultBorderColor: "Цвет обводки по умолчанию:",
+	geometryDefaultFillColor: "Цвет заливки по умолчанию:",
+	geometryDefaultBorderColor: "Цвет обводки по умолчанию:",
 
 	// About
 

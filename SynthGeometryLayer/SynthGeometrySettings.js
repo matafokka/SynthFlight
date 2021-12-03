@@ -4,7 +4,7 @@
  * @class
  * @extends L.ALS.Settings
  */
-L.ALS.SynthShapefileSettings = L.ALS.Settings.extend( /** @lends L.ALS.SynthShapefileSettings.prototype */ {
+L.ALS.SynthGeometrySettings = L.ALS.Settings.extend( /** @lends L.ALS.SynthGeometrySettings.prototype */ {
 
 	/**
 	 * Polygons' fill color
@@ -22,12 +22,12 @@ L.ALS.SynthShapefileSettings = L.ALS.Settings.extend( /** @lends L.ALS.SynthShap
 		L.ALS.Settings.prototype.initialize.call(this);
 
 		this.addWidget(
-			(new L.ALS.Widgets.Color("fillColor", "shapefileDefaultFillColor")).setValue(this.fillColor),
+			(new L.ALS.Widgets.Color("fillColor", "geometryDefaultFillColor")).setValue(this.fillColor),
 			this.fillColor
 		);
 
 		this.addWidget(
-			(new L.ALS.Widgets.Color("borderColor", "shapefileDefaultBorderColor")).setValue(this.borderColor),
+			(new L.ALS.Widgets.Color("borderColor", "geometryDefaultBorderColor")).setValue(this.borderColor),
 			this.borderColor
 		);
 	}

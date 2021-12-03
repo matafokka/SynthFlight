@@ -2,21 +2,21 @@ const MathTools = require("./MathTools.js");
 const proj4 = require("proj4");
 
 /**
- * A stateful ESRI Grid parser. Calculates min and max values for selected polygons in {@link L.ALS.SynthGridLayer}. Can parse huge files by chunks.
+ * A stateful ESRI Grid parser. Calculates min and max values for selected polygons in {@link L.ALS.SynthPolygonLayer}. Can parse huge files by chunks.
  */
 class ESRIGridParser {
 
 	/**
 	 * Constructs a ESRI Grid parser.
 	 *
-	 * @param layer {L.ALS.SynthGridLayer} A layer to apply parsed values to.
+	 * @param layer {L.ALS.SynthPolygonLayer} A layer to apply parsed values to.
 	 * @param projectionString {string} Proj4 projection string. If not given, WGS84 assumed.
 	 */
 	constructor(layer = undefined, projectionString = "") {
 
 		/**
 		 * Layer to apply parsed values to
-		 * @type {L.ALS.SynthGridLayer}
+		 * @type {L.ALS.SynthPolygonLayer}
 		 */
 		this.layer = layer
 
@@ -263,7 +263,7 @@ class ESRIGridParser {
 	 *
 	 * This method is NOT thread-safe! Call it outside of your WebWorker and pass your layer as an argument.
 	 *
-	 * @param layer {L.ALS.SynthGridLayer} If you're not using it in a WebWorker, don't pass anything. Otherwise, pass your layer.
+	 * @param layer {L.ALS.SynthPolygonLayer} If you're not using it in a WebWorker, don't pass anything. Otherwise, pass your layer.
 	 */
 	copyStats(layer = undefined) {
 		let l = this.layer || layer;
@@ -314,15 +314,15 @@ class ESRIGridParser {
 
 	/**
 	 * Generates initial parameters for the layer.
-	 * @param layer {L.ALS.SynthGridLayer} Layer to copy data from
+	 * @param layer {L.ALS.SynthPolygonLayer} Layer to copy data from
 	 */
 	static getInitialData(layer) {
 		let polygonsCoordinates = {};
-		for (let name in layer.selectedPolygons) {
-			if (!layer.selectedPolygons.hasOwnProperty(name))
+		for (let name in layer.polygons) {
+			if (!layer.polygons.hasOwnProperty(name))
 				continue;
 
-			let rect = layer.selectedPolygons[name].getBounds();
+			let rect = layer.polygons[name].getBounds();
 			polygonsCoordinates[name] = [
 				[rect.getWest(), rect.getNorth()],
 				[rect.getEast(), rect.getSouth()]
@@ -333,17 +333,17 @@ class ESRIGridParser {
 
 	/**
 	 * Copies stats from any ESRIGridParser to a given layer
-	 * @param layer {L.ALS.SynthGridLayer} Layer to copy stats to
+	 * @param layer {L.ALS.SynthPolygonLayer} Layer to copy stats to
 	 * @param stats {Object} Stats from any ESRIGridParser
 	 */
 	static copyStats(layer, stats) {
 		for (let name in stats) {
-			let widgetable = layer.selectedPolygonsWidgets[name];
+			let widgetable = layer.polygonsWidgets[name];
 			let s = stats[name];
 			widgetable.getWidgetById("minHeight").setValue(s.min);
 			widgetable.getWidgetById("maxHeight").setValue(s.max);
 		}
-		layer.updateGrid();
+		layer.updateAll();
 	}
 
 }

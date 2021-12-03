@@ -8,7 +8,7 @@ try {
 } catch (e) {}
 const work = require("webworkify");
 
-L.ALS.SynthGridLayer.prototype.onDEMLoad = async function (widget) {
+L.ALS.SynthPolygonLayer.prototype.onDEMLoad = async function (widget) {
 	let clear = () => {
 		L.ALS.operationsWindow.removeOperation("dem");
 		widget.clearFileArea();
@@ -48,7 +48,7 @@ L.ALS.SynthGridLayer.prototype.onDEMLoad = async function (widget) {
  * Being called upon DEM load
  * @param widget {L.ALS.Widgets.File}
  */
-L.ALS.SynthGridLayer.prototype.onDEMLoadWorker = async function (widget) {
+L.ALS.SynthPolygonLayer.prototype.onDEMLoadWorker = async function (widget) {
 	let files = widget.getValue();
 	let parser = new ESRIGridParser(this);
 	let fileReader = new FileReader();
@@ -132,7 +132,7 @@ L.ALS.SynthGridLayer.prototype.onDEMLoadWorker = async function (widget) {
 
 };
 
-L.ALS.SynthGridLayer.prototype.getFileBaseName = function (filename) {
+L.ALS.SynthPolygonLayer.prototype.getFileBaseName = function (filename) {
 	let baseName = "";
 	for (let symbol of filename) {
 		if (symbol === ".")

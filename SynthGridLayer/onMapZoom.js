@@ -22,24 +22,22 @@ L.ALS.SynthGridLayer.prototype._onMapZoom = function () {
 	this._shouldHideEverything = distancePx < this.hidingThreshold;
 
 	if (this._shouldHideEverything) {
-		let groups = ["polygonGroup", "bordersGroup", "labelsGroup", "widgetsGroup"];
-		for (let group of groups)
-			this[group].remove();
+		this.hideOrShowGroups(true);
 		this.isDisplayed = false;
 	} else if (!this._shouldHideEverything && !this.isDisplayed) {
 		this.isDisplayed = true;
-		this.polygonGroup.addTo(this.map); // Add removed stuff
-		this.bordersGroup.addTo(this.map);
-		this.labelsGroup.addTo(this.map);
+		this.hideOrShowGroups(false);
 	}
 
 	this._shouldHideEverything = distancePx < 200;
-	if (this.isDisplayed && !this._doHidePolygonWidgets) {
-		if (this._shouldHideEverything)
-			this.widgetsGroup.remove();
-		else {
-			this.widgetsGroup.addTo(this.map);
-		}
-	}
+	if (this.isDisplayed && !this._doHidePolygonWidgets)
+		this.hideOrShowLayer(this._shouldHideEverything, this.widgetsGroup);
+
 	this._onMapPan(); // Redraw polygons
+}
+
+L.ALS.SynthGridLayer.prototype.hideOrShowGroups = function (hide) {
+	let groups = [this.polygonGroup, this.bordersGroup, this.labelsGroup, this.widgetsGroup];
+	for (let group of groups)
+		this.hideOrShowLayer(hide, group);
 }

@@ -12,7 +12,6 @@ L.ALS.Locales.addLocaleProperties("English", {
 
 	// SynthLineWizard
 	lineLayerName: "Line Layer",
-	lineLayerWizardLabel: "This layer is in development, doesn't do anything at the moment, might break the app when added", // TODO: Change to "This layer has no options" when it'll be finished
 
 	// SynthLineLayer
 	lineLayerColor: "Line color:",
@@ -104,24 +103,30 @@ L.ALS.Locales.addLocaleProperties("English", {
 	defaultLineThickness: "Default line thickness:",
 	gridHidingFactor: "Increase responsiveness by hiding grid at smaller map scales. The higher this value, the more responsive program will be:",
 
+	// SynthRectangleLayer
+	rectangleLayerName: "Rectangle Layer",
+	defaultRectangleBorderColor: "Default rectangle border color:",
+	defaultRectangleFillColor: "Default rectangle fill color:",
+	rectangleBorderColor: "Rectangle border color:",
+	rectangleFillColor: "Rectangle fill color:",
+
 	// SynthShapefileWizard
 
-	shapefileDisplayName: "Zipped Shapefile Layer",
-	zippedShapefile: "Zipped shapefile:",
+	geometryDisplayName: "Geometry Layer",
+	geometryFileLabel: "Zipped shapefile or GeoJSON:",
 
 	// SynthShapefileLayer
 
-	shapefileDefaultName: "Zipped Shapefile",
-	shapefileNoFeatures: "This shapefile doesn't contain any features so it won't be added",
-	shapefileBroken: "Extent of this shapefile is broken, layer won't be fully displayed on the map. Please, open it in your favourite GIS and fix the extent.",
-	shapefileNotValid: "This file is not valid zipped shapefile",
-	shapefileBorderColor: "Border color:",
-	shapefileFillColor: "Fill color:",
+	geometryOutOfBounds: "Features in selected file are out of visible area. Please, check projection and/or add .prj file to the archive.",
+	geometryInvalidFile: "This file is not valid zipped shapefile or GeoJSON file",
+	geometryNoFeatures: "This file doesn't contain any features, so it won't be added",
+	geometryBorderColor: "Border color:",
+	geometryFillColor: "Fill color:",
 
 	// Shapefile settings
 
-	shapefileDefaultFillColor: "Default fill color:",
-	shapefileDefaultBorderColor: "Default border color:",
+	geometryDefaultFillColor: "Default fill color:",
+	geometryDefaultBorderColor: "Default border color:",
 
 	// About
 

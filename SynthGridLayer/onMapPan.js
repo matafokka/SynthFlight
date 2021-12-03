@@ -77,10 +77,10 @@ L.ALS.SynthGridLayer.prototype._onMapPan = function () {
 			// If this polygon has been selected, we should fill it and replace it in the array.
 			// Because fill will be changed, we can't keep old polygon, it's easier to just replace it
 			let name = this._generatePolygonName(polygon);
-			let isSelected = this.selectedPolygons[name] !== undefined;
+			let isSelected = this.polygons[name] !== undefined;
 			polygon.setStyle({
-				color: this.gridBorderColor,
-				fillColor: this.gridFillColor,
+				color: this.borderColor,
+				fillColor: this.fillColor,
 				fill: isSelected,
 				weight: this.lineThicknessValue
 			});
@@ -90,7 +90,7 @@ L.ALS.SynthGridLayer.prototype._onMapPan = function () {
 			this.polygonGroup.addLayer(polygon);
 
 			if (isSelected)
-				this.selectedPolygons[name] = polygon;
+				this.polygons[name] = polygon;
 
 			// Generate current polygon's name if grid uses one of standard scales
 			if (this._currentStandardScale === Infinity) {

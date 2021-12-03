@@ -2,7 +2,7 @@ const bbox = require("@turf/bbox").default;
 const MathTools = require("../MathTools.js");
 const turfHelpers = require("@turf/helpers");
 
-L.ALS.SynthGridLayer.prototype._clearPaths = function () {
+L.ALS.SynthPolygonLayer.prototype._clearPaths = function () {
 	let groupsToClear = [this.pathsByParallels, this.pathsByMeridians, this.meridiansExternalConnections, this.meridiansInternalConnections, this.parallelsExternalConnections, this.parallelsInternalConnections, this.latPointsGroup, this.lngPointsGroup];
 	for (let group of groupsToClear)
 		group.clearLayers();
@@ -12,7 +12,7 @@ L.ALS.SynthGridLayer.prototype._clearPaths = function () {
 	this._pathsLabelsIDs = [];
 }
 
-L.ALS.SynthGridLayer.prototype._drawPaths = function () {
+L.ALS.SynthPolygonLayer.prototype._drawPaths = function () {
 	this._clearPaths();
 
 	// Validate estimated paths count
@@ -50,7 +50,7 @@ L.ALS.SynthGridLayer.prototype._drawPaths = function () {
  * Draws flight paths. Use _drawPaths wrapper to draw paths instead of this.
  * @private
  */
-L.ALS.SynthGridLayer.prototype._drawPathsWorker = function (isParallels) {
+L.ALS.SynthPolygonLayer.prototype._drawPathsWorker = function (isParallels) {
 
 	let pathName, nameForOutput, color, connectionsGroup, widgetId, extensionIndex;
 	if (isParallels) {
@@ -90,11 +90,11 @@ L.ALS.SynthGridLayer.prototype._drawPathsWorker = function (isParallels) {
 			lat = startLat, lng = startLng,
 			turfPolygonCoordinates = turfPolygon.geometry.coordinates[0], // MathTools accepts coordinates of the polygon, not polygon itself
 			number = 1, connectionLine = L.polyline([], connLineOptions),
-			prevLine;
+			prevLine, shouldDraw = true;
 
 		connectionLine.actualPaths = [];
 
-		while (MathTools.isGreaterThanOrEqualTo(lat, endLat) && MathTools.isLessThanOrEqualTo(lng, endLng)) {
+		while (shouldDraw) {
 			let lineCoordinates;
 			if (isParallels)
 				lineCoordinates = [
@@ -109,10 +109,12 @@ L.ALS.SynthGridLayer.prototype._drawPathsWorker = function (isParallels) {
 
 			let clippedLine = MathTools.clipLineByPolygon(lineCoordinates, turfPolygonCoordinates);
 
-			// Line can be outside of polygon, so we have to get use previous line as clipped line
-			// TODO: Remove?
+			// When we reach end of the polygon, we should add one more path in any case.
+			// It'll be outside of polygon, so we have to get use previous line as clipped line.
+			// It should also mark end of the loop.
 			if (!clippedLine) {
 				clippedLine = [];
+				shouldDraw = false;
 				for (let lngLat of prevLine) {
 					if (isParallels)
 						clippedLine.push([lngLat[0], lat]);
@@ -122,15 +124,14 @@ L.ALS.SynthGridLayer.prototype._drawPathsWorker = function (isParallels) {
 			}
 			prevLine = clippedLine;
 
-			// WARNING: It somehow modifies polygons when generating paths by parallels! Imagine following selected polygons:
+			// WARNING: Clipping somehow modifies polygons when generating paths by parallels!
+			// Imagine following selected polygons:
 			//   []
 			// [][]
 			// Then if these lines are present, turf produces following shape:
 			//   \]
 			// [][]
 			// I don't know why it happens, I traced everything. I'll just leave this comment as an explanation and a warning.
-			/*clippedLine[0][extensionIndex] -= extendBy;
-			clippedLine[1][extensionIndex] += extendBy;*/
 
 			// Instead, let's just copy our points to the new array. Array.slice() and newClippedLine.push(point) doesn't work either.
 			let newClippedLine = [];
@@ -205,7 +206,6 @@ L.ALS.SynthGridLayer.prototype._drawPathsWorker = function (isParallels) {
 				lat -= moveBy;
 			else
 				lng += moveBy;
-
 		}
 		connectionsGroup.addLayer(connectionLine);
 	}
