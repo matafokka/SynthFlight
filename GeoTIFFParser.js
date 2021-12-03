@@ -22,17 +22,17 @@ module.exports = async function (file, projectionString, initialData) {
 		let image = await tiff.getImage(i);
 
 		// Get info about image
-		let origin = image.getOrigin(), leftX = origin[0], topY = origin[1];
-		let nodata = image.getGDALNoData();
-		let resolution = image.getResolution(), xSize = resolution[0], ySize = resolution[1], zScale = resolution[2];
+		let [leftX, topY] = image.getOrigin(),
+			nodata = image.getGDALNoData(),
+			resolution = image.getResolution(), xSize = resolution[0], ySize = resolution[1], zScale = resolution[2];
 		if (zScale === 0)
 			zScale = 1;
-		let rightX = leftX + image.getWidth() * xSize, bottomY = topY + image.getHeight() * ySize;
-		let imagePolygon = turfHelpers.polygon([[
-			[leftX, topY], [rightX, topY], [rightX, bottomY], [leftX, bottomY], [leftX, topY]
-		]]);
+		let rightX = leftX + image.getWidth() * xSize, bottomY = topY + image.getHeight() * ySize,
+			imagePolygon = turfHelpers.polygon([[
+				[leftX, topY], [rightX, topY], [rightX, bottomY], [leftX, bottomY], [leftX, topY]
+			]]),
+			projInformation;
 
-		let projInformation;
 		if (projectionString === "") {
 			projInformation = toProj4.toProj4(image.getGeoKeys());
 			projectionString = projInformation.proj4;
@@ -42,12 +42,12 @@ module.exports = async function (file, projectionString, initialData) {
 
 		for (let name in initialData) {
 			// Let's project each polygon to the image, get their intersection part and calculate statistics for it
-			let polygon = initialData[name];
-			let oldBbox = [
+			let polygon = initialData[name],
+				oldBbox = [
 				polygon[0], [polygon[1][0], polygon[0][1]], polygon[1], [polygon[0][0], polygon[1][1]], polygon[0]
-			];
+			],
+				newBbox = [];
 
-			let newBbox = [];
 			for (let point of oldBbox)
 				newBbox.push(projectionFromWGS.forward(point));
 
@@ -62,8 +62,7 @@ module.exports = async function (file, projectionString, initialData) {
 				continue;
 
 			intersection = intersection.geometry.coordinates[0];
-			let points = [intersection[0], intersection[2]];
-			let imageWindow = [];
+			let points = [intersection[0], intersection[2]], imageWindow = [];
 			for (let point of points) {
 				imageWindow.push(
 					Math.floor((point[0] - leftX) / xSize),
@@ -79,22 +78,16 @@ module.exports = async function (file, projectionString, initialData) {
 
 			// geotiff.js will mash all pixels into one array.
 			// To easily keep track of coordinates and reduce memory consumption, we need to read image row by row.
-			let minX = imageWindow[0], maxX = imageWindow[2];
-			let currentY = imageWindow[1], maxY = imageWindow [3];
-
-			// Stats for current polygon
-			let stats = {
-				min: Infinity,
-				max: -Infinity,
-			}
+			let [minX, currentY, maxX, maxY] = imageWindow,
+				stats = {min: Infinity, max: -Infinity} // Stats for current polygon
 
 			for (currentY; currentY <= maxY; currentY++) {
 				let currentX = minX;
-				let raster = await image.readRasters({ window: [minX, currentY, maxX, currentY + 1] });
-				let color0 = raster[0]; // Raster is a TypedArray where elements are colors and their elements are pixel values of that color.
-				let index = -1;
+				let raster = await image.readRasters({window: [minX, currentY, maxX, currentY + 1]});
+				let color0 = raster[0], // Raster is a TypedArray where elements are colors and their elements are pixel values of that color.
+					index = -1;
 				for (let pixel of color0) {
-					let crsX = origin[0] + currentX * xSize, crsY = origin[1] + currentY * ySize;
+					let crsX = leftX + currentX * xSize, crsY = topY + currentY * ySize;
 					if (projInformation) {
 						crsX *= projInformation.coordinatesConversionParameters.x;
 						crsY *= projInformation.coordinatesConversionParameters.y;
