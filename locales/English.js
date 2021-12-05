@@ -110,20 +110,22 @@ L.ALS.Locales.addLocaleProperties("English", {
 	rectangleBorderColor: "Rectangle border color:",
 	rectangleFillColor: "Rectangle fill color:",
 
-	// SynthShapefileWizard
+	// SynthGeometryWizard
 
 	geometryDisplayName: "Geometry Layer",
 	geometryFileLabel: "Zipped shapefile or GeoJSON:",
 
-	// SynthShapefileLayer
+	// SynthGeometryLayer
 
 	geometryOutOfBounds: "Features in selected file are out of visible area. Please, check projection and/or add .prj file to the archive.",
 	geometryInvalidFile: "This file is not valid zipped shapefile or GeoJSON file",
 	geometryNoFeatures: "This file doesn't contain any features, so it won't be added",
 	geometryBorderColor: "Border color:",
 	geometryFillColor: "Fill color:",
+	geometryBrowserNotSupported: "Your browser doesn't support adding this layer. You still can open projects with this layer though.",
+	geometryNoFileSelected: "No file has been selected. Please, select a file that you want to add and try again.",
 
-	// Shapefile settings
+	// SynthGeometrySettings
 
 	geometryDefaultFillColor: "Default fill color:",
 	geometryDefaultBorderColor: "Default border color:",

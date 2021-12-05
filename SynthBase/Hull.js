@@ -244,7 +244,7 @@ L.ALS.SynthBaseLayer.prototype.connectHullToAirport = function () {
 				continue;
 
 			let [p1, p2] = layer.getLatLngs(),
-				len = totalLength - layer.pathLength + this.getLineLengthMeters([p1, airportPos]) + this.getLineLengthMeters([p2, airportPos]);
+				len = totalLength - layer.pathLength + this.getLineLengthMeters([p1, airportPos, p2]);
 
 			if (len < minLen) {
 				minLen = len;
@@ -266,7 +266,7 @@ L.ALS.SynthBaseLayer.prototype.connectHullToAirport = function () {
 
 		let [p1, p2] = toRemove.getLatLngs();
 		hullConnection.setLatLngs([p1, airportPos, p2]);
-		path.updateWidgets(minLen);
+		path.updateWidgets(minLen + path.hullLength);
 	}
 }
 
@@ -276,6 +276,10 @@ L.ALS.SynthBaseLayer.prototype.connectHullToAirport = function () {
 L.ALS.SynthBaseLayer.prototype.connectHull = function () {
 	for (let i = 0; i < this.paths.length; i++) {
 		let path = this.paths[i];
+		path.hullLength = 0;
+		let layers = path.pathGroup.getLayers();
+		for (let layer of layers)
+			path.hullLength += this.getLineLengthMeters(layer);
 		this._createPathWidget(path, 1, path.toUpdateColors);
 		this.buildHull(path, this.getWidgetById(`color${i}`).getValue());
 	}

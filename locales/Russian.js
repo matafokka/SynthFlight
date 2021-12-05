@@ -117,6 +117,8 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 	geometryNoFeatures: "Этот файл не содержит объектов, поэтому не будет добавлен",
 	geometryBorderColor: "Цвет обводки:",
 	geometryFillColor: "Цвет заливки:",
+	geometryBrowserNotSupported: "Ваш браузер не поддерживает добавление данного слоя, но вы можете открывать проекты, использующие этот слой.",
+	geometryNoFileSelected: "Файл не был выбран. Пожалуйста, выберете файл, который хотите добавить, и попробуйте снова.",
 
 	// Shapefile settings
 
