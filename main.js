@@ -12,6 +12,7 @@ require("leaflet-advanced-layer-system");
 L.ALS.Locales.AdditionalLocales.Russian();
 require("./node_modules/leaflet.coordinates/dist/Leaflet.Coordinates-0.1.5.min.js");
 require("leaflet-draw");
+window.type = true; // Fixes L.Draw error. Devs forgot to initialize this variable in their code, and project looks dead, so there will be no fixes from devs.
 require("./locales/English.js");
 require("./locales/Russian.js");
 require("./SynthGeometryLayer/SynthGeometryLayer.js");
