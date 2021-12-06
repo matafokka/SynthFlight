@@ -19,7 +19,18 @@ L.ALS.SynthGeometryLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGeometryLay
 		if (wizardResults === "deserialized")
 			return;
 
+		if (!window.FileReader) {
+			this._deleteInvalidLayer(L.ALS.locale.geometryBrowserNotSupported);
+			return;
+		}
+
 		let file = wizardResults["geometryFileLabel"][0], fileReader = new FileReader();
+
+		if (!file) {
+			this._deleteInvalidLayer(L.ALS.locale.geometryNoFileSelected);
+			return;
+		}
+
 		this.setName(file.name);
 
 		// Try to read as shapefile

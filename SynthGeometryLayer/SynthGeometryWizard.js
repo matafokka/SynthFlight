@@ -9,6 +9,10 @@ L.ALS.SynthGeometryWizard = L.ALS.Wizard.extend( /** @lends L.ALS.SynthGeometryW
 
 	initialize: function () {
 		L.ALS.Wizard.prototype.initialize.call(this);
+		if (!window.FileReader) {
+			this.addWidget(new L.ALS.Widgets.SimpleLabel("lbl", "geometryBrowserNotSupported", "center", "error"));
+			return;
+		}
 		this.addWidget(new L.ALS.Widgets.File("geometryFileLabel", "geometryFileLabel"));
 	}
 

@@ -8,10 +8,10 @@
 // I've spend hours struggling with this issue, so don't try to reorganise the code, you'll fail and, as it seems, break compatibility with the older Electron versions.
 
 //require("fastestsmallesttextencoderdecoder");
+require("leaflet-draw");
 require("leaflet-advanced-layer-system");
 L.ALS.Locales.AdditionalLocales.Russian();
 require("./node_modules/leaflet.coordinates/dist/Leaflet.Coordinates-0.1.5.min.js");
-require("leaflet-draw");
 require("./locales/English.js");
 require("./locales/Russian.js");
 require("./SynthGeometryLayer/SynthGeometryLayer.js");

@@ -36,7 +36,7 @@ L.ALS.SynthPolygonLayer.prototype.toGeoJSON = function () {
 
 	jsons.push(L.ALS.SynthBaseLayer.prototype.toGeoJSON.call(this, parallelsProps, meridiansProps));
 
-	let pointsParams = [["capturePointByMeridians", this.latPointsGroup.getLayers()], ["capturePointByParallels", this.lngPointsGroup.getLayers()]];
+	let pointsParams = [["capturePointsByMeridians", this.latPointsGroup.getLayers()], ["capturePointsByParallels", this.lngPointsGroup.getLayers()]];
 	for (let param of pointsParams) {
 		for (let layer of param[1]) {
 			let pointsJson = layer.toGeoJSON();

@@ -5,7 +5,6 @@ L.ALS.SynthBaseLayer.prototype.calculateParameters = function () {
 	let parameters = ["cameraWidth", "cameraHeight", "pixelWidth", "focalLength", "imageScale", "overlayBetweenPaths", "overlayBetweenImages", "aircraftSpeed"];
 	for (let param of parameters)
 		this[param] = this.getWidgetById(param)?.getValue();
-	this.flightHeight = this["imageScale"] * this["focalLength"];
 
 	let cameraParametersWarning = this.getWidgetById("cameraParametersWarning");
 	if (this["cameraHeight"] > this["cameraWidth"])
@@ -14,7 +13,8 @@ L.ALS.SynthBaseLayer.prototype.calculateParameters = function () {
 		cameraParametersWarning.setValue("");
 
 	let pixelWidth = this["pixelWidth"] * 1e-6;
-	let focalLength = this["focalLength"] * 0.001;
+	let focalLength = this["focalLength"] / 1000;
+	this.flightHeight = this["imageScale"] * focalLength;
 
 	this.ly = this["cameraWidth"] * pixelWidth; // Image size in meters
 	this.Ly = this.ly * this["imageScale"] // Image width on the ground
@@ -29,7 +29,7 @@ L.ALS.SynthBaseLayer.prototype.calculateParameters = function () {
 	this.FOV = turfHelpers.radiansToDegrees(this["cameraWidth"] * this.IFOV / 1e6);
 	this.GFOV = this["cameraWidth"] * this.GSI;
 
-	this.aircraftSpeedInMetersPerSecond = this["aircraftSpeed"] * 1 / 36;
+	this.aircraftSpeedInMetersPerSecond = this["aircraftSpeed"] / 3.6;
 
 	this.timeBetweenCaptures = this.Bx / this.aircraftSpeedInMetersPerSecond;
 
