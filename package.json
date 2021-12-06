@@ -1,7 +1,7 @@
 {
   "name": "synthflight",
   "productName": "SynthFlight",
-  "version": "0.0.15-alpha",
+  "version": "0.0.16-alpha",
   "description": "A fully client-side software for planning aerial photography",
   "main": "electronApp.js",
   "browser": "index.html",
@@ -95,6 +95,6 @@
   },
   "dependencies": {
     "@electron/remote": "^2.0.1",
-    "leaflet-advanced-layer-system": "^2.1.3"
+    "leaflet-advanced-layer-system": "^2.1.4"
   }
 }
