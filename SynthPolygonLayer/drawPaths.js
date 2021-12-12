@@ -183,14 +183,7 @@ L.ALS.SynthPolygonLayer.prototype._drawPathsWorker = function (isParallels) {
 			// Add capture points
 			let [ptLng, ptLat] = startPoint, [ptEndLng, ptEndLat] = endPoint;
 			while (MathTools.isGreaterThanOrEqualTo(ptLat, ptEndLat) && MathTools.isLessThanOrEqualTo(ptLng, ptEndLng)) {
-				let circle = L.circleMarker([ptLat, ptLng], {
-					radius: this.lineThicknessValue * 2,
-					stroke: false,
-					fillOpacity: 1,
-					fill: true,
-					fillColor: color,
-				});
-				this[pointsName].addLayer(circle);
+				this[pointsName].addLayer(this.createCapturePoint([ptLat, ptLng], color));
 
 				let moveBy = this.getArcAngleByLength([ptLng, ptLat], this.Bx, !isParallels);
 				if (isParallels)

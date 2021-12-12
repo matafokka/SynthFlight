@@ -55,20 +55,6 @@ L.ALS.SynthPolygonLayer.prototype._updateLayersVisibility = function () {
 }
 
 /**
- * Hides or shows layer.
- * @param hide {boolean} If true, hide layer
- * @param layer {Layer} Layer to show or hide
- * @return {boolean} If true, layer has been hidden. False otherwise.
- */
-L.ALS.SynthPolygonLayer.prototype.hideOrShowLayer = function (hide, layer) {
-	if (hide)
-		layer.remove();
-	else
-		this.map.addLayer(layer);
-	return hide;
-}
-
-/**
  * Updates grid by redrawing all polygons, recalculating stuff, etc
  */
 L.ALS.SynthPolygonLayer.prototype.updateAll = function () {

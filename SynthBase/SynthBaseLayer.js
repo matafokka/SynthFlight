@@ -443,6 +443,30 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 		line.isFlashing = false;
 	},
 
+	createCapturePoint: function (coord, color) {
+		return L.circleMarker(coord, {
+			radius: this.lineThicknessValue * 2,
+			stroke: false,
+			fillOpacity: 1,
+			fill: true,
+			fillColor: color,
+		});
+	},
+
+	/**
+	 * Hides or shows layer.
+	 * @param hide {boolean} If true, hide layer
+	 * @param layer {Layer} Layer to show or hide
+	 * @return {boolean} If true, layer has been hidden. False otherwise.
+	 */
+	hideOrShowLayer: function (hide, layer) {
+		if (hide)
+			layer.remove();
+		else
+			this.map.addLayer(layer);
+		return hide;
+	},
+
 	clearSerializedPathsWidgets: function (serialized) {
 		for (let i = 1; i <= this._pathsWidgetsNumber; i++)
 			delete serialized._widgets["pathWidget" + i];

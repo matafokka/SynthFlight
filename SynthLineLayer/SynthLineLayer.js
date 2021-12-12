@@ -1,5 +1,7 @@
 require("./SynthLineWizard.js");
 require("./SynthLineSettings.js");
+const turfHelpers = require("@turf/helpers");
+const MathTools = require("../MathTools.js");
 
 L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend({
 	defaultName: "Line Layer",
@@ -33,6 +35,14 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend({
 
 		this.pointsGroup = L.featureGroup();
 		this.calculateParameters();
+	},
+
+	_hideCapturePoints: function (widget) {
+		this.hideOrShowLayer(widget.getValue(), this.pointsGroup);
+	},
+
+	_hidePathsConnections: function (widget) {
+		this.hideOrShowLayer(widget.getValue(), this.connectionsGroup);
 	},
 
 	onEditStart: function () {
@@ -76,13 +86,14 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend({
 			requiredLength = refLength / 2,
 			refC = turfHelpers.degreesToRadians(this.getArcAngleByLength([0, 0], refLength, true)),
 			c = turfHelpers.degreesToRadians(this.getArcAngleByLength([0, 0], requiredLength, true)),
+			// When it'll be equal to pi (180 deg), the world will collapse, and no one will need this program.
+			// Thus, we won't cover this case.
 			refSinC = Math.sin(refC),
 			sinC = Math.sin(c),
 			sinA = Math.sin(turfHelpers.degreesToRadians(Math.abs(y2 - y1))) / refSinC,
 			sinB = Math.sin(turfHelpers.degreesToRadians(Math.abs(x2 - x1))) / refSinC,
-			a = turfHelpers.radiansToDegrees(Math.asin(sinA * sinC)), // We always add to lng
-			// We have to subtract from lat, if lat1 < lat2.
-			b = turfHelpers.radiansToDegrees(Math.asin(sinB * sinC)) * (y1 < y2 ? 1 : -1);
+			a = turfHelpers.radiansToDegrees(Math.asin(sinA * sinC)) * (y1 < y2 ? 1 : -1),
+			b = turfHelpers.radiansToDegrees(Math.asin(sinB * sinC));
 
 		map.addLayer(L.polyline([[y1, x1], [y2, x2]]));
 		map.addLayer(L.polyline([[y1, x1], [y1 + a, x1 + b]], {color: "#6c00ff"}));
@@ -91,10 +102,10 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend({
 		// Sorry for the quality of the rest of the code, it's done for optimization
 
 		this.pathsGroup.clearLayers();
+		this.pointsGroup.clearLayers();
 
-		let layers = this.drawingGroup.getLayers(), lineOptions = {
-			color: this.getWidgetById("color0").getValue(),
-			thickness: this.lineThicknessValue,
+		let layers = this.drawingGroup.getLayers(), color = this.getWidgetById("color0").getValue(), lineOptions = {
+			color, thickness: this.lineThicknessValue,
 		};
 
 		for (let layer of layers) {
@@ -122,12 +133,23 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend({
 					sinA = Math.sin(turfHelpers.degreesToRadians(Math.abs(p2.lat - p1.lat))) / refSinC,
 					sinB = Math.sin(turfHelpers.degreesToRadians(Math.abs(p2.lng - p1.lng))) / refSinC,
 					moveByLat = this.sideLength(sinA, sinC) * latSign,
-					moveByLng = this.sideLength(sinB, sinC) ;
+					moveByLng = this.sideLength(sinB, sinC);
 				p1.lng -= moveByLng;
 				p1.lat -= moveByLat;
 				p2.lng += moveByLng;
 				p2.lat += moveByLat;
 				this.pathsGroup.addLayer(L.polyline([p1, p2], lineOptions));
+
+				// Add capture points
+				sinC = this.sineOfSideC(this.Bx);
+				moveByLat = this.sideLength(sinA, sinC) * latSign;
+				moveByLng = this.sideLength(sinB, sinC);
+				let {lat, lng} = p1, toCompare = [p2.lat, p2.lng];
+				while (!MathTools.arePointsEqual([lat - moveByLat, lng - moveByLng], toCompare)) {
+					this.pointsGroup.addLayer(this.createCapturePoint([lat, lng], color));
+					lat += moveByLat;
+					lng += moveByLng;
+				}
 			}
 		}
 
