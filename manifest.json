@@ -7,19 +7,19 @@
 	"theme_color": "#191919",
 	"icons": [
 		{
-			"src": "/img/logo.ico",
+			"src": "img/logo.ico",
 			"sizes": "128x128",
 			"type": "image/x-icon",
 			"purpose": "any maskable"
 		},
 		{
-			"src": "/img/logo.png",
+			"src": "img/logo.png",
 			"type": "image/png",
 			"sizes": "512x512",
 			"purpose": "any maskable"
 		},
 		{
-			"src": "/img/logo.svg",
+			"src": "img/logo.svg",
 			"type": "image/svg",
 			"sizes": "144x144, 512x512, any",
 			"purpose": "any maskable"
