@@ -139,7 +139,7 @@ L.ALS.SynthPolygonLayer.prototype._drawPathsWorker = function (isParallels) {
 				newClippedLine.push([point[0], point[1]]);
 
 			// Extend the line, so it'll hold whole number of images + double basis, i.e. two images from each side
-			let length = this.getLineLengthMeters(newClippedLine, false),
+			let length = this.getParallelOrMeridianLineLength(newClippedLine[0], newClippedLine[1], false),
 				numberOfImages = Math.ceil(length / this.Bx) + 4,
 				extendBy = (this.Bx * numberOfImages - length) / 2,
 				multiplier = isParallels ? -1 : 1; // We'll start from the leftmost or topmost point
@@ -183,14 +183,7 @@ L.ALS.SynthPolygonLayer.prototype._drawPathsWorker = function (isParallels) {
 			// Add capture points
 			let [ptLng, ptLat] = startPoint, [ptEndLng, ptEndLat] = endPoint;
 			while (MathTools.isGreaterThanOrEqualTo(ptLat, ptEndLat) && MathTools.isLessThanOrEqualTo(ptLng, ptEndLng)) {
-				let circle = L.circleMarker([ptLat, ptLng], {
-					radius: this.lineThicknessValue * 2,
-					stroke: false,
-					fillOpacity: 1,
-					fill: true,
-					fillColor: color,
-				});
-				this[pointsName].addLayer(circle);
+				this[pointsName].addLayer(this.createCapturePoint([ptLat, ptLng], color));
 
 				let moveBy = this.getArcAngleByLength([ptLng, ptLat], this.Bx, !isParallels);
 				if (isParallels)

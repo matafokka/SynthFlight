@@ -1,5 +1,7 @@
 // This file contains class definitions and menu. For other stuff, see other files in this directory.
 
+const MathTools = require("../MathTools.js");
+const turfHelpers = require("@turf/helpers");
 require("./SynthPolygonSettings.js");
 let GeoTIFFParser;
 try {
@@ -125,6 +127,36 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthBaseLayer.extend( /** @lends L.ALS.SynthPol
 		this.updateAll();
 		this.getWidgetById("hideCapturePoints").callCallback();
 	},
+
+	// TODO: I don't remember what this is for, use it or remove it
+	getPathLength: function (layer) {
+		// Basically, inverse of L.ALS.SynthBaseLayer#getArcAngleByLength
+		let latLngs = layer instanceof Array ? layer : layer.getLatLngs(), length = 0;
+
+		for (let i = 0; i < latLngs.length - 1; i += 2) {
+			// Path length
+			let p1 = latLngs[i], p2 = latLngs[i + 1], connP = latLngs[i + 2];
+			length += this.getParallelOrMeridianLineLength(p1, p2);
+
+			// Connection length
+			if (connP)
+				length += this.getParallelOrMeridianLineLength(p2, connP);
+		}
+		return length;
+	},
+
+	getParallelOrMeridianLineLength: function (p1, p2, useFlightHeight = true) {
+		let r = this._getEarthRadius(useFlightHeight), {x, y} = MathTools.getXYPropertiesForPoint(p1),
+			p1Y = p1[y], lngDiff = Math.abs(p1[x] - p2[x]);
+
+		// By meridians
+		if (lngDiff <= MathTools.precision)
+			return r * turfHelpers.degreesToRadians(Math.abs(p1Y - p2[y]));
+
+		// By parallels
+		let angle = turfHelpers.degreesToRadians(90 - Math.abs(p1Y));
+		return turfHelpers.degreesToRadians(lngDiff) * Math.sin(angle) * r;
+	}
 
 });
 

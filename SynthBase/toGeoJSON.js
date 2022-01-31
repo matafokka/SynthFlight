@@ -29,8 +29,8 @@ L.ALS.SynthBaseLayer.prototype.toGeoJSON = function (path1Metadata, path2Metadat
 			for (let name in metadata)
 				cycleJson.properties[name] = metadata[name];
 
-			cycleJson.properties.length = this.getLineLengthMeters(cycle);
-			cycleJson.properties.flightTime = this.getFlightTime(cycleJson.properties.length).number;
+			cycleJson.properties.length = cycle.pathLength;
+			cycleJson.properties.flightTime = this.getFlightTime(cycle.pathLength).number;
 
 			toMerge.push(cycleJson);
 		}

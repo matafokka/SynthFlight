@@ -4,7 +4,8 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 	connectionMethod: "Метод соединения маршрутов",
 	allIntoOne: "Все в один",
 	oneFlightPerPath: "Один полет на маршрут",
-	pathSpoiler: "Маршрут",
+	pathsSpoilerTitle: "Информация о маршрутах",
+	pathTitle: "Маршрут",
 	flashPath: "Помигать маршрутом",
 	pathLength: "Длина маршрута",
 	flightTime: "Время полета",
@@ -15,6 +16,7 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 
 	// SynthLineLayer
 	lineLayerColor: "Цвет линий:",
+	settingsLineLayerColor: "Цвет линий по умолчанию:",
 
 	// SynthGridWizard
 
@@ -29,6 +31,7 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 
 	// SynthGridLayer
 
+	alphabet: "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ", // Don't add it, if you don't need different symbols in cells' names
 	gridLayerDefaultName: "Слой Сетки",
 	hidePolygonWidgets: "Скрыть виджеты на карте",
 	hideNumbers: "Скрыть номера точек на карте",
@@ -104,6 +107,7 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 	defaultRectangleFillColor: "Цвет заливки прямоугольников по умолчанию:",
 	rectangleBorderColor: "Цвет обводки прямоугольников:",
 	rectangleFillColor: "Цвет заливки прямоугольников:",
+	rectangleLayersRemoved: "Один или несколько прямоугольников были удалены, так как они слишком большие",
 
 	// SynthShapefileWizard
 

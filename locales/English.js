@@ -4,7 +4,8 @@ L.ALS.Locales.addLocaleProperties("English", {
 	connectionMethod: "Path connection method",
 	allIntoOne: "All into one",
 	oneFlightPerPath: "One flight per path",
-	pathSpoiler: "Path",
+	pathsSpoilerTitle: "Paths details",
+	pathTitle: "Path",
 	flashPath: "Flash path",
 	pathLength: "Path length",
 	flightTime: "Flight time",
@@ -15,6 +16,7 @@ L.ALS.Locales.addLocaleProperties("English", {
 
 	// SynthLineLayer
 	lineLayerColor: "Line color:",
+	settingsLineLayerColor: "Default line color:",
 
 	// SynthGridWizard
 
@@ -29,6 +31,7 @@ L.ALS.Locales.addLocaleProperties("English", {
 
 	// SynthGridLayer
 
+	alphabet: "ABCDEFGHIJKLMNOPQRSTUVWXYZ", // Don't add it, if you don't need different symbols in cells' names
 	gridLayerDefaultName: "Grid Layer",
 	hidePolygonWidgets: "Hide widgets on the map",
 	hideNumbers: "Hide points' numbers on the map",
@@ -109,6 +112,7 @@ L.ALS.Locales.addLocaleProperties("English", {
 	defaultRectangleFillColor: "Default rectangle fill color:",
 	rectangleBorderColor: "Rectangle border color:",
 	rectangleFillColor: "Rectangle fill color:",
+	rectangleLayersRemoved: "One or more rectangles has been removed because they're too big",
 
 	// SynthGeometryWizard
 

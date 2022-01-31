@@ -31,7 +31,7 @@ L.ALS.SynthBaseLayer.prototype.buildHull = function (path, color) {
 
 	if (layers.length === 1) {
 		const latLngs = layers[0].getLatLngs();
-		connectionsGroup.addLayer(L.polyline([latLngs[0], latLngs[latLngs.length - 1]], lineOptions));
+		connectionsGroup.addLayer(L.geodesic([latLngs[0], latLngs[latLngs.length - 1]], lineOptions));
 		connectionsGroup.addLayer(hullConnection);
 		path.hullConnections = [];
 		return;
@@ -158,7 +158,7 @@ L.ALS.SynthBaseLayer.prototype.buildHull = function (path, color) {
 	}
 
 	for (let pair of optConnections)
-		connectionsGroup.addLayer(L.polyline(pair, lineOptions));
+		connectionsGroup.addLayer(L.geodesic(pair, lineOptions));
 	connectionsGroup.addLayer(hullConnection);
 	path.hullConnections = optConnections;
 }
@@ -279,7 +279,7 @@ L.ALS.SynthBaseLayer.prototype.connectHull = function () {
 		path.hullLength = 0;
 		let layers = path.pathGroup.getLayers();
 		for (let layer of layers)
-			path.hullLength += this.getLineLengthMeters(layer);
+			path.hullLength += this.getPathLength(layer);
 		this._createPathWidget(path, 1, path.toUpdateColors);
 		this.buildHull(path, this.getWidgetById(`color${i}`).getValue());
 	}
@@ -367,7 +367,9 @@ L.ALS.SynthBaseLayer.prototype.hullToCycles = function (path) {
 		}
 	}
 
-	return [[hullP2, ...afterAirport, ...beforeAirport, hullP2]];
+	let toReturn = [hullP2, ...afterAirport, ...beforeAirport, hullP2];
+	toReturn.pathLength = path.hullLength;
+	return [toReturn];
 }
 
 L.ALS.SynthBaseLayer.prototype.getOrderedPathFromHull = function (prevPoint, connection, copyTo, i = 0) {

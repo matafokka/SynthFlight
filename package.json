@@ -1,7 +1,7 @@
 {
   "name": "synthflight",
   "productName": "SynthFlight",
-  "version": "0.0.16-alpha",
+  "version": "0.0.17-alpha",
   "description": "A fully client-side software for planning aerial photography",
   "main": "electronApp.js",
   "browser": "index.html",
@@ -9,6 +9,8 @@
     "chrome >= 7",
     "firefox >= 4",
     "ie >= 8",
+    "safari >= 5",
+    "ios_saf >= 5",
     "last 2 versions"
   ],
   "babel": {
@@ -21,7 +23,7 @@
             "version": 3,
             "proposals": true
           },
-          "targets": "chrome >= 7, firefox >= 4, ie >= 8, last 2 versions",
+          "targets": "chrome >= 7, firefox >= 4, ie >= 8, safari >= 5, ios_saf >= 5, last 2 versions",
           "forceAllTransforms": true,
           "spec": true
         }
@@ -81,6 +83,7 @@
     "leaflet": "^1.7.1",
     "leaflet-draw": "^1.0.4",
     "leaflet.coordinates": "~0.1.5",
+    "leaflet.geodesic": "^2.5.5-0",
     "persistify": "^2.0.1",
     "polybooljs": "^1.2.0",
     "postcss": "^8.2.4",
@@ -95,6 +98,6 @@
   },
   "dependencies": {
     "@electron/remote": "^2.0.1",
-    "leaflet-advanced-layer-system": "^2.1.4"
+    "leaflet-advanced-layer-system": "^2.1.6"
   }
 }
