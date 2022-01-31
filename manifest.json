@@ -1,0 +1,28 @@
+{
+	"name": "SynthFlight",
+	"short_name": "SynthFlight",
+	"display": "standalone",
+	"start_url": "/index.html",
+	"background_color": "#191919",
+	"theme_color": "#191919",
+	"icons": [
+		{
+			"src": "/img/logo.ico",
+			"sizes": "128x128",
+			"type": "image/x-icon",
+			"purpose": "any maskable"
+		},
+		{
+			"src": "/img/logo.png",
+			"type": "image/png",
+			"sizes": "512x512",
+			"purpose": "any maskable"
+		},
+		{
+			"src": "/img/logo.svg",
+			"type": "image/svg",
+			"sizes": "144x144, 512x512, any",
+			"purpose": "any maskable"
+		}
+	]
+}
