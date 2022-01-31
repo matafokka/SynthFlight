@@ -2,7 +2,7 @@
 	"name": "SynthFlight",
 	"short_name": "SynthFlight",
 	"display": "standalone",
-	"start_url": "/index.html",
+	"start_url": "./",
 	"background_color": "#191919",
 	"theme_color": "#191919",
 	"icons": [
