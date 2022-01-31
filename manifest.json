@@ -21,7 +21,7 @@
 		{
 			"src": "img/logo.svg",
 			"type": "image/svg",
-			"sizes": "144x144 512x512 1024x1024 any",
+			"sizes": "48x48 96x96 128x128 144x144 192x192 240x240 256x256 288x288 336x336 384x384 512x512 1024x1024 2048x2048 any",
 			"purpose": "any maskable"
 		}
 	]
