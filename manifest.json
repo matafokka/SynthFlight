@@ -2,26 +2,26 @@
 	"name": "SynthFlight",
 	"short_name": "SynthFlight",
 	"display": "standalone",
-	"start_url": "/index.html",
+	"start_url": "./",
 	"background_color": "#191919",
 	"theme_color": "#191919",
 	"icons": [
 		{
-			"src": "/img/logo.ico",
+			"src": "img/logo.ico",
 			"sizes": "128x128",
 			"type": "image/x-icon",
 			"purpose": "any maskable"
 		},
 		{
-			"src": "/img/logo.png",
+			"src": "img/logo.png",
 			"type": "image/png",
 			"sizes": "512x512",
 			"purpose": "any maskable"
 		},
 		{
-			"src": "/img/logo.svg",
+			"src": "img/logo.svg",
 			"type": "image/svg",
-			"sizes": "144x144, 512x512, any",
+			"sizes": "48x48 96x96 128x128 144x144 192x192 240x240 256x256 288x288 336x336 384x384 512x512 1024x1024 2048x2048 any",
 			"purpose": "any maskable"
 		}
 	]
