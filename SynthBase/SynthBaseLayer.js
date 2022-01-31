@@ -33,12 +33,6 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 		this._settings = settings;
 
 		/**
-		 * Array of paths widgets to remove whenever paths are updated
-		 * @type {L.ALS.Widgets.Spoiler[]}
-		 */
-		this._pathsWidgets = [];
-
-		/**
 		 * For numbering paths widgets
 		 * @type {number}
 		 * @private
@@ -82,7 +76,7 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 
 		for (let i = 0; i < this.paths.length; i++) {
 			let path = this.paths[i];
-			path.hullConnection = L.polyline([[0, 0], [0, 0]], this.getConnectionLineOptions(settings[`color${i}`]));
+			path.hullConnection = L.geodesic([[0, 0], [0, 0]], this.getConnectionLineOptions(settings[`color${i}`]));
 			this.addLayers(path.pathGroup, path.connectionsGroup);
 			this.toUpdateThickness.push(path.pathGroup, path.connectionsGroup);
 		}
@@ -169,6 +163,8 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 			widget.setFormatNumbers(true);
 			this.addWidget(widget);
 		}
+		this.pathsDetailsSpoiler = new L.ALS.Widgets.Spoiler("pathsDetails", "pathsSpoilerTitle");
+		this.addWidget(this.pathsDetailsSpoiler);
 	},
 
 	/**
@@ -230,28 +226,23 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 	},
 
 	updatePathsMeta: function () {
-		// Clear widgets
-		for (let widget of this._pathsWidgets)
-			this.removeWidget(widget.id);
-
-		this._pathsWidgets = [];
+		this.pathsDetailsSpoiler.removeAllWidgets();
 		this._pathsWidgetsNumber = 1;
 
 		// Connect paths. Paths will be connected to the airport, their widgets will be added, and their parameters will be calculated at each of methods below.
 		const value = this.getWidgetById("connectionMethod").getValue();
 		if (value === "oneFlightPerPath")
 			this.connectOnePerFlight();
-		else// allIntoOne
+		else // allIntoOne
 			this.connectHull();
 	},
 
 	_createPathWidget: function (layer, length, toFlash) {
-		let button = new L.ALS.Widgets.Button("flashPath", "flashPath", this, "flashPath"),
-			lengthWidget = new L.ALS.Widgets.ValueLabel("pathLength", "pathLength", "m").setFormatNumbers(true).setNumberOfDigitsAfterPoint(0),
-			timeWidget = new L.ALS.Widgets.ValueLabel("flightTime", "flightTime", "h:mm"),
-			warning = new L.ALS.Widgets.SimpleLabel("warning", "", "center", "warning"),
-			widget = new L.ALS.Widgets.Spoiler(`pathWidget${this._pathsWidgetsNumber}`, `${L.ALS.locale.pathSpoiler} ${this._pathsWidgetsNumber}`)
-			.addWidgets(button, lengthWidget, timeWidget, warning);
+		let id = L.ALS.Helpers.generateID(),
+			button = new L.ALS.Widgets.Button("flashPath" + id, "flashPath", this, "flashPath"),
+			lengthWidget = new L.ALS.Widgets.ValueLabel("pathLength" + id, "pathLength", "m").setFormatNumbers(true).setNumberOfDigitsAfterPoint(0),
+			timeWidget = new L.ALS.Widgets.ValueLabel("flightTime" + id, "flightTime", "h:mm"),
+			warning = new L.ALS.Widgets.SimpleLabel("warning" + id, "", "center", "warning");
 
 		layer.updateWidgets = (length) => {
 			lengthWidget.setValue(length);
@@ -259,11 +250,13 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 			timeWidget.setValue(time.formatted);
 			warning.setValue(time.number > 4 ? "flightTimeWarning" : "");
 		}
+		this.pathsDetailsSpoiler.addWidgets(
+			new L.ALS.Widgets.SimpleLabel("pathLabel" + id, `${L.ALS.locale.pathTitle} ${this._pathsWidgetsNumber}`, "center", "message"),
+			button, lengthWidget, timeWidget, warning,
+		);
 
 		button.toFlash = toFlash;
-		this.addWidgets(widget);
 		this._pathsWidgetsNumber++;
-		this._pathsWidgets.push(widget);
 		layer.updateWidgets(length);
 	},
 
@@ -344,6 +337,15 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 	},
 
 	/**
+	 * Calculates path length. By default, uses {@link L.ALS.SynthBaseLayer#getLineLengthMeters}.
+	 * @param layer {L.Polyline | number[][] | LatLng[]} Path to calculate length of.
+	 * @return {number} Path length
+	 */
+	getPathLength: function (layer) {
+		return this.getLineLengthMeters(layer, true);
+	},
+
+	/**
 	 * Called when there's one flight per each path. You should call {@link L.ALS.SynthBaseLayer#connectOnePerFlight} here.
 	 */
 	connectOnePerFlightToAirport: function () {
@@ -374,14 +376,14 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 			connectionsGroup.clearLayers();
 
 			for (let layer of layers) {
-				layer.pathLength = this.getLineLengthMeters(layer);
+				layer.pathLength = this.getPathLength(layer);
 
 				let latLngs = layer.getLatLngs(),
-					connectionLine = L.polyline([latLngs[0], [0, 0], latLngs[latLngs.length - 1]], lineOptions);
+					connectionLine = L.geodesic([latLngs[0], [0, 0], latLngs[latLngs.length - 1]], lineOptions);
 				connectionLine.pathLength = layer.pathLength;
 				let toFlash = [layer, connectionLine];
 				if (layer.actualPaths)
-					toFlash.push(...layer.actualPaths)
+					toFlash.push(...layer.actualPaths);
 
 				this._createPathWidget(connectionLine, 1, toFlash);
 				connectionsGroup.addLayer(connectionLine);
@@ -402,8 +404,12 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 			return undefined;
 
 		let cycles = [], airportPos = this._airportMarker.getLatLng();
-		for (let layer of layers)
-			cycles.push([airportPos, ...layer.getLatLngs(), airportPos]);
+		for (let layer of layers) {
+			let latLngs = layer.getLatLngs(), toPush = [airportPos, ...latLngs, airportPos];
+			toPush.pathLength = layer.pathLength + this.getLineLengthMeters([latLngs[0], airportPos]) +
+				this.getLineLengthMeters([latLngs[latLngs.length - 1], airportPos]);
+			cycles.push(toPush);
+		}
 
 		return cycles;
 	},
@@ -417,11 +423,16 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 		return {
 			color,
 			dashArray: this.dashedLine,
-			weight: this.lineThicknessValue
+			weight: this.lineThicknessValue,
+			segmentsNumber: 500,
 		}
 	},
 
 	flashPath: function (widget) {
+		// Close menu on mobile
+		if (L.ALS.Helpers.isMobile)
+			L.ALS.Helpers.dispatchEvent(this._layerSystem._menuCloseButton, "click");
+
 		for (let group of widget.toFlash) {
 			let layers = group instanceof L.FeatureGroup ? group.getLayers() : [group];
 			for (let layer of layers)

@@ -8,7 +8,9 @@
 // I've spend hours struggling with this issue, so don't try to reorganise the code, you'll fail and, as it seems, break compatibility with the older Electron versions.
 
 //require("fastestsmallesttextencoderdecoder");
+L.Geodesic = require("leaflet.geodesic");
 require("leaflet-draw");
+require("./DrawGeodesic.js");
 require("leaflet-advanced-layer-system");
 L.ALS.Locales.AdditionalLocales.Russian();
 require("./node_modules/leaflet.coordinates/dist/Leaflet.Coordinates-0.1.5.min.js");
@@ -37,6 +39,33 @@ let map = L.map("map", {
 	keyboard: false,
 }).setView([51.505, -0.09], 13);
 map.doubleClickZoom.disable();
+
+// TODO: Remove when Leaflet.Geodesic will be fully integrated with Leaflet.Draw
+/*let group = L.featureGroup();
+group.addTo(map);
+
+let control = new L.Control.Draw({
+	draw: {
+		polyline: {
+			shapeOptions: {
+				color: "#ff0000",
+				weight: 4,
+				wrap: false,
+			}
+		}
+	},
+	edit: {
+		featureGroup: group,
+		remove: true,
+	}
+})
+control.addTo(map);
+
+map.on("draw:created", (e) => {
+	group.addLayer(e.layer);
+	console.log(e.layer)
+});
+*/
 
 // Show coordinates via Leaflet.Control plugin. It doesn't look good on phones, so we won't add it in this case.
 if (!L.ALS.Helpers.isMobile) {

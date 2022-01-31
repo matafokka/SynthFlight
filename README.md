@@ -2,7 +2,7 @@
 
 SynthFlight is a fully client-side software for planning aerial photography. Run it either on the desktop or in a [browser online](https://matafokka.github.io/SynthFlight/).
 
-This is a alpha version, so expect bugs, crashes, errors, missing functions, API changes, etc.
+This is an alpha version, so expect bugs, crashes, errors, missing functions, API changes, etc.
 
 For now, it only can plan photography by a graticule or grid. However, planning by custom polygons or flight paths is on its way.
 
@@ -10,65 +10,59 @@ SynthFlight also features an advanced extendable layer system for Leaflet that w
 
 You can use layers to try and compare different parameters to choose which ones suites you best.
 
-# Installation
+# Setup
 
-You don't need to install it, just [use it online](https://matafokka.github.io/SynthFlight/). However, if you want to have a local copy:
+## Introduction
 
-1. Download the [latest build](https://github.com/matafokka/SynthFlight/releases/latest) for the browser *(if you plan to use it in a browser)* or for your OS and platform *(if you want a standalone application)*.
+There are numerous ways to set up SynthFlight, listed from most to least preferred:
+
+1. **PWA** - works offline, requires low storage space, updates are silent and fast.
+1. [**Browser**](https://matafokka.github.io/SynthFlight/) - that's what SynthFlight is built for.
+1. [**Desktop builds**](https://github.com/matafokka/SynthFlight/releases/latest) - works offline and has a nice UI, but requires ~100 Mb of storage. Useful for environments where PWAs are not available.
+1. **Opening a local copy in a browser** - it works but might impose performance issues.
+1. **Outdated browser** - ew, but SynthFlight [got you covered](#for-browser).
+
+## Installing desktop builds
+
+1. Download the [latest build](https://github.com/matafokka/SynthFlight/releases/latest) for your OS and platform.
 1. Extract the downloaded archive wherever you want.
-1. Run SynthFlight:
-    1. If you've downloaded the browser build, open `index.html` file.
-    1. Otherwise, navigate to the extracted folder, open it and run `SynthFlight` executable file.
+1. Navigate to the extracted folder, open it and run `SynthFlight` executable file.
 
 ***Warning 1:** only browser and Windows x64 builds has been tested so far.*
 
-***Warning 2:** macOS builds are not signed.*
-
-# Usage
-
-After running SynthFlight, you can see:
-1. **Zoom buttons** in the top left corner. You can also zoom by rotating a mouse wheel.
-1. **Current cursor position** in the bottom left corner.
-1. **Menu button** in the top right corner.
-
-In the menu, you can:
-1. Close the menu by clicking **"x" button** on the top of the menu.
-1. Change map provider in the **drop-down menu** on the top of the menu.
-1. Add a new layer by clicking **"+" button** on the top of the menu. A **wizard menu** will show up containing:
-    1. **Drop-down menu** where you can select layer type to add.
-    1. Layer-specific controls.
-    1. **Cancel button** to cancel creating new layer.
-    1. **Add button** to confirm adding layer.
-1. Remove selected layer by clicking **button with the trash icon** on the top of the menu.
-1. Work with layers:
-    1. To select a layer, click on it.
-    1. Open or close a layer menu by clicking **button with the gear icon**.
-    1. Change layer's settings by using controls in a menu. Each layer type has its own menu.
-    1. Hide or show a layer by clicking button with the **eye icon**.
-    1. Reorder layer by dragging the button with the **arrows icon**.
-1. Export project to GeoJSON by clicking "Export" button at the bottom of the menu. Warning: other buttons do not work for now.
+***Warning 2:** macOS builds are not signed, thus require disabling the Gatekeeper or something.*
 
 # System requirements
 
-For **standalone application**:
+## For PWA
+
+A browser that supports it.
+
+## For browser
+
+One of:
+
+* Chrome 8 or later.
+* Firefox 22 or later.
+* Safari 6 or later.
+* Internet Explorer 9 or later.
+* Any other modern desktop or mobile browser.
+
+**Problems with outdated browsers:**
+
+1. Can't read files. Chromium-based browsers have a "feature" that prevents FileReader from reading local files. **How to solve:** run browser with `--allow-file-access-from-files` flag or [host SynthFlight](#hosting) on a custom server.
+1. Can't save files. **How to solve:** update your browser.
+1. App page doesn't load (browser can't verify SSL certificate). **How to solve:** configure your browser or [host SynthFlight](#hosting) on a custom server using protocols and/or certificates that your browser supports.
+
+
+## For desktop builds
 
 * **Operating system** - one of:
     * **Windows 7** or later. ARM64, x86 and x64 platforms are supported.
     * **Linux** with X11 installed (basically all modern distros). ARM32, ARM64, x86 and x64 platforms are supported.
-    * **macOS**. I have no idea which versions are supported. Try and see if it works.
+    * **macOS**. I have no idea which versions are supported. Try and see if it works. Also, these builds are not signed.
 * **CPU**: One that can handle web surfing. If you can browse the internet, SynthFlight will work fine.
 * **RAM**: 1 GB or more.
-
-For **browser version** - one of:
-
-* Chrome 7 or later.
-* Firefox 22 or later.
-* Internet Explorer 9 or later.
-* Any other modern desktop or mobile browser.
-
-***Note 1.*** *Outdated Chromium-based browsers have a "feature" that prevents FileReader from reading local files. If you're using such browser, please, either host SynthFlight on a web server or add ` --allow-file-access-from-files` flag when running browser.*
-
-***Note 2:*** *Some outdated browsers can't download files normally. Please, update your browser for better user experience.*
 
 # Building
 
@@ -86,14 +80,14 @@ If you want to build SynthFlight yourself, do the following:
 
 You can easily host SynthFlight on your server:
 1. Since SynthFlight is a fully client-side software, you can use your favorite HTTP server. So go ahead and install it.
-1. Download the `browser` build or build SynthFlight for the browser manually.
+1. Download the `browser` build [from here](https://github.com/matafokka/SynthFlight/releases/latest) or [build SynthFlight](#building) for the browser manually.
 1. Configure your server to serve `index.html` file in that build.
 
 # Contributing
 
-There's a "Development" branch which you can fork and commit to. If you plan to contribute to this project, please, notify me before doing so because I might be working on a big feature and not commit until it's ready. I'll commit more often if someone will work with me.
+There's a [development](https://github.com/matafokka/SynthFlight/tree/development) branch which you can fork and commit to. If you plan to contribute to this project, please, notify me before doing so because I might be working on a big feature and not commit until it's ready. I'll commit more often if someone will work with me.
 
-If you speak any language other than Russian or English, you can help with the translation. Locales are located at `js/LeafletAdvancedLayerSystem/locales` and `js/SynthFlightModules/locales` directories. Locales are plain JS objects where key is being used in the program itself and value is a string that's being added to the page. Only values needs translation. Copy one of the locales to a new file, change locale name and translate all the values.
+Translating this app will be much appreciated. SynthFlight locales can be found in [`locales`](https://github.com/matafokka/SynthFlight/tree/development/locales) directory and ALS locales are available [here](https://github.com/matafokka/leaflet-advanced-layer-system/tree/master/locales). Both of these needs to be translated. Locales are plain JS objects where key is being used in the program itself and value is a string that's being added to the page. Only values needs translation. Copy one of the locales to a new file, change locale name and translate all the values.
 
 You can also contribute by reporting bugs, requesting API changes, new functionality or something else. Please, create an issue and describe your request.
 
@@ -102,8 +96,9 @@ You can also contribute by reporting bugs, requesting API changes, new functiona
 ## Can a local copy work offline?
 Yes.
 
-## Why did you release such an unstable version?
-To pass a subject.
+## Projects compatibility?
+
+There will be no compatibility between SynthFlight versions until first stable release.
 
 ## Will this project will ever be finished?
 Yes, because it's my master's degree.

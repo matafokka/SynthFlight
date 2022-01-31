@@ -46,8 +46,8 @@ L.ALS.SynthPolygonLayer.prototype._calculatePolygonParameters = function () {
 		let layer = this.polygons[name], latLngs = layer.getLatLngs()[0];
 		let widgetContainer = this.polygonsWidgets[name];
 
-		layer.lngCellSizeInMeters = this.getLineLengthMeters([latLngs[0], latLngs[1]], false);
-		layer.latCellSizeInMeters = this.getLineLengthMeters([latLngs[1], latLngs[2]], false);
+		layer.lngCellSizeInMeters = this.getParallelOrMeridianLineLength(latLngs[0], latLngs[1], false);
+		layer.latCellSizeInMeters = this.getParallelOrMeridianLineLength(latLngs[1], latLngs[2], false);
 
 		this.selectedArea += layer.lngCellSizeInMeters * layer.latCellSizeInMeters;
 

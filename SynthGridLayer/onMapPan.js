@@ -105,7 +105,7 @@ L.ALS.SynthGridLayer.prototype._onMapPan = function () {
 
 			// 1:1 000 000. This part is always present
 			let index = Math.floor(Math.abs(fixedLat) / 4);
-			let letter = this._alphabet[index];
+			let letter = L.ALS.locale.alphabet[index];
 			let number = Math.floor(fixedLng / 6) + 31;
 			let polygonName = letter + "-" + number;
 
@@ -148,9 +148,9 @@ L.ALS.SynthGridLayer.prototype._onMapPan = function () {
 				polygonName += "-" + sheetNumber(12);
 
 			if (this._currentStandardScale <= 50000 && this._currentStandardScale > 5000) {
-				polygonName += "-" + this._alphabet[sheetNumber(2, 2 / 6, 3 / 6) - 1]; // 1:50 000. Always present.
+				polygonName += "-" + L.ALS.locale.alphabet[sheetNumber(2, 2 / 6, 3 / 6) - 1]; // 1:50 000. Always present.
 				if (this._currentStandardScale <= 25000)
-					polygonName += "-" + this._alphabet[sheetNumber(2, 1 / 6, 15 / 60) - 1].toLowerCase();
+					polygonName += "-" + L.ALS.locale.alphabet[sheetNumber(2, 1 / 6, 15 / 60) - 1].toLowerCase();
 				if (this._currentStandardScale <= 10000)
 					polygonName += "-" + sheetNumber(2, 5 / 60, 7.5 / 60);
 			} else if (this._currentStandardScale <= 5000) {
@@ -163,7 +163,7 @@ L.ALS.SynthGridLayer.prototype._onMapPan = function () {
 						index -= 6;
 					else
 						index += 3;
-					polygonName += "-" + this._alphabet[index].toLowerCase();
+					polygonName += "-" + L.ALS.locale.alphabet[index].toLowerCase();
 				}
 				polygonName += ")";
 			}

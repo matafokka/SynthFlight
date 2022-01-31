@@ -9,7 +9,6 @@ require("./SynthGridWizard.js");
 L.ALS.SynthGridLayer = L.ALS.SynthPolygonLayer.extend({
 
 	defaultName: "Grid Layer",
-	_alphabet: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
 	useZoneNumbers: true,
 	borderColorLabel: "gridBorderColor",
 	fillColorLabel: "gridFillColor",

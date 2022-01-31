@@ -8,7 +8,7 @@ function createWindow () {
 	const mainWindow = new BrowserWindow({
 		width: 1280,
 		height: 720,
-		icon: "logo.ico",
+		icon: "img/logo.ico",
 		frame: false,
 		titleBarStyle: 'customButtonsOnHover',
 		webPreferences: {

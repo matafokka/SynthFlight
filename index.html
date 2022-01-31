@@ -2,9 +2,13 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8" />
+	<meta name="theme-color" media="(prefers-color-scheme: light)" content="#f8f8f8">
+	<meta name="theme-color" media="(prefers-color-scheme: dark)"  content="#2d2d2d">
 
 	<title>SynthFlight</title>
-	<link rel="shortcut icon" type="image/x-icon" href="logo.ico" />
+	<link rel="shortcut icon" type="image/x-icon" href="img/logo.ico" />
+	<link rel="apple-touch-icon" href="img/logo-apple.png">
+	<link rel="manifest" href="manifest.json">
 
 	<!-- ALS polyfills -->
 	<script src="node_modules/leaflet-advanced-layer-system/dist/polyfills.js"></script>
@@ -25,6 +29,11 @@
 	<!-- SynthFlight stylesheet -->
 	<link rel="stylesheet" href="css/styles.css" />
 
+	<script>
+		// The first condition is Electron detection
+		if(navigator.userAgent.indexOf("Electron") === -1 && "serviceWorker" in navigator)
+			navigator.serviceWorker.register("PWAServiceWorker.js", {scope: "./"});
+	</script>
 </head>
 
 <body>

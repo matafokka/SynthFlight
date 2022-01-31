@@ -95,7 +95,7 @@ persistify({
 
 // Copy styles and scripts referenced in index.html
 
-let toCopy = ["index.html", "logo.ico",
+let toCopy = ["index.html", "img/logo.ico", "img/logo.svg", "img/logo.png", "img/logo-apple.png", "manifest.json",
 	"node_modules/leaflet-advanced-layer-system/dist/css",
 	"node_modules/leaflet-advanced-layer-system/dist/polyfills.js",
 	"node_modules/leaflet/dist/leaflet.css",
@@ -110,15 +110,31 @@ let toCopy = ["index.html", "logo.ico",
 if (!onlyBrowser)
 	toCopy.push(...electronDeps) // Needed for Electron, will be removed after packaging
 
-let promises = [];
-for (let target of toCopy)
+// Copy files and insert file list to the service worker
+let promises = [], swContent = fs.readFileSync("PWAServiceWorker.js").toString(),
+	insertAt = swContent.indexOf("/** to_cache_list */"),
+	buildFileTree = (path) => {
+		if (!fs.lstatSync(path).isDirectory()) {
+			swContent = swContent.slice(0, insertAt) + `"${path}",` + swContent.slice(insertAt);
+			return;
+		}
+
+		let content = fs.readdirSync(path);
+		for (let file of content)
+			buildFileTree(path + "/" + file);
+	}
+
+for (let target of toCopy) {
 	promises.push(new Promise((resolve) => {
 		fse.copy(target, dir + target).then(resolve());
 	}));
+	buildFileTree(target);
+}
 
 Promise.all(promises).then(() => {
+	fs.writeFileSync(dir + "PWAServiceWorker.js", swContent);
 	copyPromiseFinished = true;
 	buildElectron();
 }).catch(error => {
-	console.error(error.message)
+	console.error(error.message);
 });

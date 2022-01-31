@@ -50,7 +50,7 @@ module.exports = `
 
 </style>
 
-<h1><img src="logo.ico" alt="Logo" />SynthFlight Alpha</h1>
+<h1><img src="img/logo.ico" alt="Logo" />SynthFlight Alpha</h1>
 
 <p data-als-locale-property="firstParagraph"></p>
 

@@ -139,7 +139,7 @@ L.ALS.SynthPolygonLayer.prototype._drawPathsWorker = function (isParallels) {
 				newClippedLine.push([point[0], point[1]]);
 
 			// Extend the line, so it'll hold whole number of images + double basis, i.e. two images from each side
-			let length = this.getLineLengthMeters(newClippedLine, false),
+			let length = this.getParallelOrMeridianLineLength(newClippedLine[0], newClippedLine[1], false),
 				numberOfImages = Math.ceil(length / this.Bx) + 4,
 				extendBy = (this.Bx * numberOfImages - length) / 2,
 				multiplier = isParallels ? -1 : 1; // We'll start from the leftmost or topmost point

@@ -53,7 +53,9 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend({
 	},
 
 	onEditEnd: function () {
-		// we need to extend paths to hold whole number of images + double basis from each side and draw capture points.
+		// TODO: Remove this code when new leaflet-geodesic version will be released, it'll get fully working line lengthening
+
+		// We need to extend paths to hold whole number of images + double basis from each side and draw capture points.
 		// To do both, we have to "draw" a line given length (Bx) along the given (drawn by the user) line.
 
 		// Consider a spherical triangle formed by lat and lng with the line as hypotenuse.
@@ -114,6 +116,7 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend({
 			for (let i = 0; i < points.length - 1; i++) {
 				let lineP1 = L.LatLngUtil.cloneLatLng(points[i]),
 					lineP2 = L.LatLngUtil.cloneLatLng(points[i + 1]),
+					origP1 = L.LatLngUtil.cloneLatLng(lineP1), origP2 = L.LatLngUtil.cloneLatLng(lineP2),
 					p1, p2;
 
 				// Swap points when needed, so we can always subtract from first point and add to the second point
@@ -138,17 +141,33 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend({
 				p1.lat -= moveByLat;
 				p2.lng += moveByLng;
 				p2.lat += moveByLat;
-				this.pathsGroup.addLayer(L.polyline([p1, p2], lineOptions));
+				console.log(moveByLat, moveByLng);
+
+
+				/*let lineParams = MathTools.getSlopeAndIntercept([[origP1.lng, origP1.lat], [origP2.lng, origP2.lat]]),
+					newPoints = [];
+
+				for (let p of [p1, p2]) {
+					newPoints.push([
+						p.lat,
+						(p.lat - lineParams.intercept) / lineParams.slope
+					])
+				}*/
+
+				this.pathsGroup.addLayer(L.geodesic([p1, p2], lineOptions));
+				//this.pathsGroup.addLayer(L.polyline(newPoints, {color: "#8400ff"}));
+				//this.map.addLayer(L.polyline([origP1, origP2]));
 
 				// Add capture points
 				sinC = this.sineOfSideC(this.Bx);
 				moveByLat = this.sideLength(sinA, sinC) * latSign;
 				moveByLng = this.sideLength(sinB, sinC);
-				let {lat, lng} = p1, toCompare = [p2.lat, p2.lng];
-				while (!MathTools.arePointsEqual([lat - moveByLat, lng - moveByLng], toCompare)) {
+				let {lat, lng} = p1, currentImage = 0;
+				while (currentImage < numberOfImages) {
 					this.pointsGroup.addLayer(this.createCapturePoint([lat, lng], color));
 					lat += moveByLat;
 					lng += moveByLng;
+					currentImage++;
 				}
 			}
 		}
@@ -172,7 +191,7 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend({
 	},
 
 	sideLength: function (sinAngle, sinC) {
-		return turfHelpers.radiansToDegrees(Math.asin(sinAngle * sinC));
+		return Math.abs(turfHelpers.radiansToDegrees(Math.asin(sinAngle * sinC)));
 	},
 
 	statics: {

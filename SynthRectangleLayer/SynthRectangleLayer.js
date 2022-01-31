@@ -31,9 +31,29 @@ L.ALS.SynthRectangleLayer = L.ALS.SynthPolygonLayer.extend({
 			this.removePolygon(this.polygons[name], false);
 		this.polygons = {}
 
-		let layers = this.polygonGroup.getLayers();
-		for (let i = 0; i < layers.length; i++)
-			this.addPolygon(layers[i]);
+		let layers = this.polygonGroup.getLayers(), layersWereRemoved = false;
+
+		for (let i = 0; i < layers.length; i++) {
+			let layer = layers[i], bounds = layer.getBounds(), topLeft = bounds.getNorthWest(),
+				arrTopLeft = [topLeft.lng, topLeft.lat],
+				lngDiff = Math.abs(bounds.getWest() - bounds.getEast()),
+				latDiff = Math.abs(bounds.getNorth() - bounds.getSouth()),
+				lngLength = this.getArcAngleByLength(arrTopLeft, this.By, false),
+				latLength = this.getArcAngleByLength(arrTopLeft, this.By, true),
+				lngPathsCount = Math.round(lngDiff / lngLength), latPathsCount = Math.round(latDiff / latLength);
+
+			// Limit polygon size by limiting total approximate paths count. This is not 100% accurate but close enough.
+			if (lngPathsCount + latPathsCount > 150) {
+				layersWereRemoved = true;
+				this.polygonGroup.removeLayer(layer);
+				continue;
+			}
+
+			this.addPolygon(layer);
+		}
+
+		if (layersWereRemoved)
+			window.alert(L.ALS.locale.rectangleLayersRemoved);
 
 		this.map.addLayer(this.labelsGroup); // Nothing in the base layer hides or shows it, so it's only hidden in code above
 		this._updateLayersVisibility();
