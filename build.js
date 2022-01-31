@@ -33,7 +33,7 @@ let buildElectron = () => {
 			}
 			return false;
 		},
-		icon: "logo.ico",
+		icon: "img/logo.ico",
 	}).then(() => {
 		for (let file of electronDeps)
 			fs.unlink(dir + file, () => {});
