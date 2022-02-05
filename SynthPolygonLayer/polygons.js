@@ -1,10 +1,29 @@
+/**
+ * Serializable button handler for getting mean height from min and max heights
+ *
+ * @class
+ * @extends L.ALS.Serializable
+ */
+L.ALS.MeanHeightButtonHandler = L.ALS.Serializable.extend( /**@lends L.ALS.MeanHeightButtonHandler.prototype */ {
+
+	initialize: function (controlsContainer) {
+		this._widgetable = controlsContainer;
+	},
+
+	handle: function () {
+		this._widgetable.getWidgetById("meanHeight").setValue(
+			(this._widgetable.getWidgetById("minHeight").getValue() + this._widgetable.getWidgetById("maxHeight").getValue()) / 2
+		);
+	}
+})
+
 L.ALS.SynthPolygonLayer.prototype.addPolygon = function (polygon) {
 	polygon._intName = this._generatePolygonName(polygon);
 
 	polygon.setStyle({fill: true});
 	this.polygons[polygon._intName] = polygon;
 
-	let controlsContainer = new L.WidgetLayer(polygon.getLatLngs()[0][1], "topLeft");
+	let controlsContainer = new L.WidgetLayer(polygon.getLatLngs()[0][1], "topLeft"),  handler = new L.ALS.MeanHeightButtonHandler(controlsContainer);
 
 	if (this.useZoneNumbers)
 		controlsContainer.addWidget(new L.ALS.Widgets.Number("zoneNumber", "zoneNumber", this, "_calculatePolygonParameters").setMin(1).setValue(1));
@@ -12,7 +31,8 @@ L.ALS.SynthPolygonLayer.prototype.addPolygon = function (polygon) {
 	controlsContainer.addWidgets(
 		new L.ALS.Widgets.Number("minHeight", "minHeight", this, "_calculatePolygonParameters").setMin(1).setValue(1),
 		new L.ALS.Widgets.Number("maxHeight", "maxHeight", this, "_calculatePolygonParameters").setMin(1).setValue(1),
-		new L.ALS.Widgets.ValueLabel("meanHeight", "meanHeight", "m"),
+		new L.ALS.Widgets.Number("meanHeight", "meanHeight", this, "_calculatePolygonParameters").setMin(1).setValue(1),
+		new L.ALS.Widgets.Button("meanFromMinMax", "meanFromMinMax", handler, "handle"),
 		new L.ALS.Widgets.ValueLabel("absoluteHeight", "absoluteHeight", "m"),
 		new L.ALS.Widgets.ValueLabel("elevationDifference", "elevationDifference"),
 		new L.ALS.Widgets.ValueLabel("reliefType", "reliefType"),
@@ -21,7 +41,7 @@ L.ALS.SynthPolygonLayer.prototype.addPolygon = function (polygon) {
 		new L.ALS.Widgets.ValueLabel("latCellSizeInMeters", "latCellSizeInMeters", "m").setNumberOfDigitsAfterPoint(0),
 	);
 
-	let toFormatNumbers = ["meanHeight", "absoluteHeight", "elevationDifference", "lngCellSizeInMeters", "latCellSizeInMeters"];
+	let toFormatNumbers = ["absoluteHeight", "elevationDifference", "lngCellSizeInMeters", "latCellSizeInMeters"];
 	for (let id of toFormatNumbers)
 		controlsContainer.getWidgetById(id).setFormatNumbers(true);
 
@@ -37,7 +57,7 @@ L.ALS.SynthPolygonLayer.prototype.removePolygon = function (polygon, removeFromO
 	delete this.polygonsWidgets[name];
 }
 
-L.ALS.SynthPolygonLayer.prototype._calculatePolygonParameters = function () {
+L.ALS.SynthPolygonLayer.prototype._calculatePolygonParameters = function (widget) {
 	this.selectedArea = 0;
 	for (let name in this.polygons) {
 		if (!this.polygons.hasOwnProperty(name))
@@ -64,7 +84,7 @@ L.ALS.SynthPolygonLayer.prototype._calculatePolygonParameters = function () {
 		}
 		errorLabel.setValue("");
 
-		layer.meanHeight = Math.round((layer.maxHeight + layer.minHeight) / 2);
+		layer.meanHeight = widgetContainer.getWidgetById("meanHeight").getValue();
 		layer.absoluteHeight = this["flightHeight"] + layer.meanHeight;
 
 		layer.elevationDifference = (layer.maxHeight - layer.minHeight) / this["flightHeight"];

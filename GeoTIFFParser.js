@@ -6,6 +6,7 @@ const intersect = require("@turf/intersect").default;
 const toProj4 = require("geotiff-geokeys-to-proj4");
 const proj4 = require("proj4");
 const MathTools = require("./MathTools.js");
+const ESRIGridParser = require("./ESRIGridParser.js");
 
 /**
  * Parses GeoTIFF files
@@ -79,7 +80,7 @@ module.exports = async function (file, projectionString, initialData) {
 			// geotiff.js will mash all pixels into one array.
 			// To easily keep track of coordinates and reduce memory consumption, we need to read image row by row.
 			let [minX, currentY, maxX, maxY] = imageWindow,
-				stats = {min: Infinity, max: -Infinity} // Stats for current polygon
+				stats = ESRIGridParser.createStatsObject(); // Stats for current polygon
 
 			for (currentY; currentY <= maxY; currentY++) {
 				let currentX = minX;
@@ -107,11 +108,7 @@ module.exports = async function (file, projectionString, initialData) {
 					let multipliedValue = value * zScale;
 					if (value === nodata || multipliedValue === nodata)
 						continue;
-
-					if (multipliedValue < stats.min)
-						stats.min = multipliedValue;
-					if (multipliedValue > stats.max)
-						stats.max = multipliedValue;
+					ESRIGridParser.addToStats(multipliedValue, stats);
 				}
 			}
 			polygonStats[name] = stats;

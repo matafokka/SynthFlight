@@ -129,7 +129,6 @@ L.ALS.SynthPolygonLayer.prototype.onDEMLoadWorker = async function (widget) {
 			});
 		});
 	}
-
 };
 
 L.ALS.SynthPolygonLayer.prototype.getFileBaseName = function (filename) {
