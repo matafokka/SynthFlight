@@ -11,6 +11,9 @@ try {
 
 /**
  * Base layer for rectangle-based planning
+ *
+ * @class
+ * @extends L.ALS.SynthBaseLayer
  */
 L.ALS.SynthPolygonLayer = L.ALS.SynthBaseLayer.extend( /** @lends L.ALS.SynthPolygonLayer.prototype */ {
 

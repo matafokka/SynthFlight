@@ -3,7 +3,13 @@ require("./SynthLineSettings.js");
 const turfHelpers = require("@turf/helpers");
 const MathTools = require("../MathTools.js");
 
-L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend({
+/**
+ * Geodesic line layer
+ *
+ * @class
+ * @extends L.ALS.SynthBaseLayer
+ */
+L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend(/** @lends L.ALS.SynthLineLayer.prototype */{
 	defaultName: "Line Layer",
 	hideCapturePoints: true,
 	hidePathsConnections: false,

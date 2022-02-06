@@ -35,7 +35,6 @@ L.ALS.SynthBaseLayer.prototype.calculateParameters = function () {
 
 	let names = ["flightHeight", "lx", "Lx", "Bx", "ly", "Ly", "GSI", "IFOV", "GIFOV", "FOV", "GFOV", "timeBetweenCaptures"];
 
-
 	if (this.hasYOverlay) {
 		this.By = this.Ly * (100 - this["overlayBetweenPaths"]) / 100; // Distance between paths
 		names.push("By");

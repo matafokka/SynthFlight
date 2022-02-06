@@ -3,7 +3,7 @@ require("./SynthGeometrySettings.js");
 const shp = require("shpjs");
 
 /**
- * Shapefile layer
+ * Layer with geometry from shapefile or GeoJSON
  * @class
  * @extends L.ALS.Layer
  */

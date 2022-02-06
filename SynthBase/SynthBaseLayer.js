@@ -3,6 +3,14 @@ const turfHelpers = require("@turf/helpers");
 const MathTools = require("../MathTools.js");
 
 /**
+ * @typedef {Object} PathData
+ * @property {L.FeatureGroup} pathGroup Group with the path
+ * @property {L.FeatureGroup} connectionsGroup Group with the connections
+ * @property {string} colorLabel Label for the color input
+ * @property {L.Layer[]} toUpdateColors Layers to update colors of
+ */
+
+/**
  * Base layer. Provides airport markers, basic calculations and menu entries for them.
  *
  * Call {@link L.ALS.SynthBaseLayer#init} after you've created a menu!
@@ -30,6 +38,11 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 
 	init: function (settings, pathGroup1, connectionsGroup1, colorLabel1, path1AdditionalLayers = [], pathGroup2 = undefined, connectionsGroup2 = undefined, colorLabel2 = undefined, path2AdditionalLayers = []) {
 
+		/**
+		 * Settings passed from ALS
+		 * @type {Object}
+		 * @private
+		 */
 		this._settings = settings;
 
 		/**
@@ -39,6 +52,10 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 		 */
 		this._pathsWidgetsNumber = 1;
 
+		/**
+		 * Data related to the first path
+		 * @type PathData
+		 */
 		this.path1 = {
 			pathGroup: pathGroup1,
 			connectionsGroup: connectionsGroup1,
@@ -46,6 +63,10 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 			toUpdateColors: [pathGroup1, connectionsGroup1, ...path1AdditionalLayers]
 		}
 
+		/**
+		 * Data related to the second path
+		 * @type PathData
+		 */
 		this.path2 = pathGroup2 ? {
 			pathGroup: pathGroup2,
 			connectionsGroup: connectionsGroup2,
@@ -53,9 +74,18 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 			toUpdateColors: [pathGroup2, connectionsGroup2, ...path2AdditionalLayers]
 		} : undefined;
 
+		/**
+		 * Indicates whether this layer has Y overlay, i.e. if it has parallel paths
+		 * @type {boolean}
+		 */
 		this.hasYOverlay = !!this.path2;
 
+		/**
+		 * Array of paths to work with
+		 * @type {PathData[]}
+		 */
 		this.paths = [this.path1];
+
 		if (this.hasYOverlay)
 			this.paths.push(this.path2);
 
@@ -90,6 +120,10 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 			html: "<div class='grd-lyr-airport-icon ri ri-flight-takeoff-line'></div>"
 		})
 
+		/**
+		 * Airport marker
+		 * @protected
+		 */
 		this._airportMarker = L.marker(this.map.getCenter(), {
 			icon: icon,
 			draggable: true
@@ -100,6 +134,9 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 		this.addLayers(this._airportMarker);
 	},
 
+	/**
+	 * Adds basic parameters' widgets to the menu. Should be called at the constructor!
+	 */
 	addBaseParametersInputSection: function () {
 		this.addWidget(
 			new L.ALS.Widgets.Number("lineThickness", "lineThickness", this, "setLineThickness").setMin(1).setMax(20).setValue(this._settings.lineThicknessValue),
@@ -138,6 +175,9 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 		this._airportMarker.fire("drag"); // Just to set values
 	},
 
+	/**
+	 * Adds basic parameters' widgets to the menu. Should be called at the constructor!
+	 */
 	addBaseParametersOutputSection: function () {
 		let yWidgets = [];
 		if (this.hasYOverlay)
@@ -186,6 +226,10 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 		this.updateDrawThickness();
 	},
 
+	/**
+	 * Sets paths' colors, i.e. colors of layers in {@link PathData.toUpdateColors}
+	 * @private
+	 */
 	_setPathsColor: function () {
 		for (let i = 0; i < this.paths.length; i++) {
 			let style = {color: this.getWidgetById(`color${i}`).getValue()},
@@ -194,6 +238,7 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 				group.setStyle(style);
 		}
 	},
+
 
 	setAirportLatLng: function () {
 		this._airportMarker.setLatLng([
