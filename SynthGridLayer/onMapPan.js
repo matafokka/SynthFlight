@@ -105,7 +105,7 @@ L.ALS.SynthGridLayer.prototype._onMapPan = function () {
 
 			// 1:1 000 000. This part is always present
 			let index = Math.floor(Math.abs(fixedLat) / 4);
-			let letter = L.ALS.locale.alphabet[index];
+			let letter = L.ALS.Locales.English.alphabet[index];
 			let number = Math.floor(fixedLng / 6) + 31;
 			let polygonName = letter + "-" + number;
 
