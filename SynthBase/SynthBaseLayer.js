@@ -476,7 +476,7 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 	flashPath: function (widget) {
 		// Close menu on mobile
 		if (L.ALS.Helpers.isMobile)
-			L.ALS.Helpers.dispatchEvent(this._layerSystem._menuCloseButton, "click");
+			this.layerSystem.clickOnMenu();
 
 		for (let group of widget.toFlash) {
 			let layers = group instanceof L.FeatureGroup ? group.getLayers() : [group];
