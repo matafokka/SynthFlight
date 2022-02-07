@@ -84,6 +84,7 @@
     "leaflet-draw": "^1.0.4",
     "leaflet.coordinates": "~0.1.5",
     "leaflet.geodesic": "^2.5.5-0",
+    "package-json-versionify": "^1.0.4",
     "persistify": "^2.0.1",
     "polybooljs": "^1.2.0",
     "postcss": "^8.2.4",

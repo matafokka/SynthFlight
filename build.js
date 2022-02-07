@@ -80,7 +80,9 @@ let mainFile = "main.js";
 persistify({
 	entries: [mainFile],
 	debug: debug
-}).require("./node_modules/geotiff/src/geotiff.js", {expose: "geotiff"}) // Thanks to parcel for this nightmare
+})
+	.require("./node_modules/geotiff/src/geotiff.js", {expose: "geotiff"}) // Thanks to parcel for this nightmare
+	.transform("package-json-versionify")
 	.transform("babelify", {
 		presets: ["@babel/preset-env"],
 		global: true, // ShpJS is built without polyfills and uses async functions. So we have to build node_modules too. Maybe other modules are built that way too.
