@@ -40,7 +40,7 @@ L.ALS.SynthPolygonLayer.prototype._drawPaths = function () {
 	if (this.mergedPolygons.length === 0)
 		return;
 
-	this._drawPathsWorker(true)
+	this._drawPathsWorker(true);
 	this._drawPathsWorker(false);
 	this.updatePathsMeta();
 	this.labelsGroup.redraw();

@@ -131,7 +131,7 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthBaseLayer.extend( /** @lends L.ALS.SynthPol
 		this.getWidgetById("hideCapturePoints").callCallback();
 	},
 
-	// TODO: I don't remember what this is for, use it or remove it
+	// It overrides parent method, my IDE can't see it
 	getPathLength: function (layer) {
 		// Basically, inverse of L.ALS.SynthBaseLayer#getArcAngleByLength
 		let latLngs = layer instanceof Array ? layer : layer.getLatLngs(), length = 0;
