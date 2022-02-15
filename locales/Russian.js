@@ -69,7 +69,8 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 	zoneNumber: "Номер участка",
 	minHeight: "Мин. высота (m):",
 	maxHeight: "Макс. высота (m):",
-	meanHeight: "Ср. высота",
+	meanHeight: "Ср. высота (m)",
+	meanFromMinMax: "Вычислить ср. высоту из мин. и макс. высот",
 	absoluteHeight: "Абс. высота",
 	elevationDifference: "(Макс. высота - Мин. высота) / Высота полета",
 	reliefType: "Тип рельефа",
@@ -131,7 +132,7 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 
 	// About
 
-	firstParagraph: "SynthFlight – это полностью клиентское программное обеспечение для проектирования аэрофотосъемочных работ. Это alpha-версия, поэтому ожидаемы баги, ошибки, отсутсвие функциональности, изменения API и т.д.",
+	firstParagraph: "SynthFlight – это полностью клиентское программное обеспечение для проектирования аэрофотосъемочных работ. Это beta-версия, поэтому ожидаемы баги, большие изменения API, отсутствие обратной совместимости и т.д.",
 
 	secondParagraphPart1: "Посетите",
 	secondParagraphPart2: "страницу проекта на GitHub",

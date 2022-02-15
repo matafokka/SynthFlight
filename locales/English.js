@@ -74,7 +74,8 @@ L.ALS.Locales.addLocaleProperties("English", {
 	zoneNumber: "Zone number",
 	minHeight: "Min. height (m):",
 	maxHeight: "Max. height (m):",
-	meanHeight: "Mean height",
+	meanHeight: "Mean height (m)",
+	meanFromMinMax: "Get mean height from min. and max. heights",
 	absoluteHeight: "Absolute height",
 	elevationDifference: "(Max. height - Min. height) / Flight height",
 	reliefType: "Relief type",
@@ -136,7 +137,7 @@ L.ALS.Locales.addLocaleProperties("English", {
 
 	// About
 
-	firstParagraph: "SynthFlight is a fully client-side software for planning aerial photography. This is an alpha version, so expect bugs, crashes, errors, missing functions, API changes, etc.",
+	firstParagraph: "SynthFlight is a fully client-side software for planning aerial photography. This is a beta version so bugs, huge API changes and lack of backwards compatibility are to be expected.",
 
 	secondParagraphPart1: "Visit project's",
 	secondParagraphPart2: "GitHub page",

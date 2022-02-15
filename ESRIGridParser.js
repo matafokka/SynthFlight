@@ -226,13 +226,10 @@ class ESRIGridParser {
 						continue;
 
 					if (!this.polygonsStats[name])
-						this.polygonsStats[name] = {min: Infinity, max: -Infinity}
+						this.polygonsStats[name] = ESRIGridParser.createStatsObject();
 
 					let stats = this.polygonsStats[name];
-					if (pixelValue < stats.min)
-						stats.min = pixelValue;
-					if (pixelValue > stats.max)
-						stats.max = pixelValue;
+					ESRIGridParser.addToStats(pixelValue, stats);
 				}
 			} else if (!isSpace && !isLineBreak)
 				this.value += symbol;
@@ -268,7 +265,7 @@ class ESRIGridParser {
 	copyStats(layer = undefined) {
 		let l = this.layer || layer;
 		if (!l)
-			throw new Error("Error, can't copy statistics? If you're using ESRIGridParser in a WebWorker, call this method outside of WebWorker!");
+			throw new Error("Can't copy statistics. If you're using ESRIGridParser in a WebWorker, call this method outside of WebWorker!");
 		ESRIGridParser.copyStats(l, this.polygonsStats);
 		this.clearState();
 	}
@@ -340,10 +337,25 @@ class ESRIGridParser {
 		for (let name in stats) {
 			let widgetable = layer.polygonsWidgets[name];
 			let s = stats[name];
+			s.mean = s.sum / s.count;
 			widgetable.getWidgetById("minHeight").setValue(s.min);
 			widgetable.getWidgetById("maxHeight").setValue(s.max);
+			widgetable.getWidgetById("meanHeight").setValue(s.mean);
 		}
 		layer.updateAll();
+	}
+
+	static createStatsObject() {
+		return {min: Infinity, max: -Infinity, mean: 0, sum: 0, count: 0}
+	}
+
+	static addToStats(value, stats) {
+		if (value < stats.min)
+			stats.min = value;
+		if (value > stats.max)
+			stats.max = value;
+		stats.sum += value;
+		stats.count++;
 	}
 
 }

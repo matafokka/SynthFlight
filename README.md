@@ -1,14 +1,12 @@
-# SynthFlight Alpha
+# SynthFlight Beta
 
 SynthFlight is a fully client-side software for planning aerial photography. Run it either on the desktop or in a [browser online](https://matafokka.github.io/SynthFlight/).
 
-This is an alpha version, so expect bugs, crashes, errors, missing functions, API changes, etc.
+This is a beta version, so bugs, huge API changes and lack of backwards compatibility are to be expected.
 
-For now, it only can plan photography by a graticule or grid. However, planning by custom polygons or flight paths is on its way.
+Most of the planned functionality is here, however, a number of small changes will be introduced.
 
-SynthFlight also features an advanced extendable layer system for Leaflet that will be released as a separate package when it'll be ready.
-
-You can use layers to try and compare different parameters to choose which ones suites you best.
+A stable version will be released in May or June 2022.
 
 # Setup
 
@@ -100,5 +98,5 @@ Yes.
 
 There will be no compatibility between SynthFlight versions until first stable release.
 
-## Will this project will ever be finished?
-Yes, because it's my master's degree.
+## When a stable release will be available?
+May or June 2022

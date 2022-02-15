@@ -323,6 +323,16 @@ class MathTools {
 		return {x: "lng", y: "lat"}
 	}
 
+	/**
+	 * Wraps lng2 to lng1
+	 * @param lng1 {number} Anchor lng
+	 * @param lng2 {number} Lng to wrap
+	 * @return {number} Wrapped lng2
+	 */
+	static wrapLng(lng1, lng2) {
+		return lng2 - Math.round((lng2 - lng1) / 360);
+	}
+
 }
 
 module.exports = MathTools;

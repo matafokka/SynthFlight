@@ -6,7 +6,7 @@ require("./SynthGridWizard.js");
  * @class
  * @extends L.ALS.Layer
  */
-L.ALS.SynthGridLayer = L.ALS.SynthPolygonLayer.extend({
+L.ALS.SynthGridLayer = L.ALS.SynthPolygonLayer.extend(/** @lends L.ALS.SynthGridLayer.prototype */{
 
 	defaultName: "Grid Layer",
 	useZoneNumbers: true,

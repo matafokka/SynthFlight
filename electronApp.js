@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require("electron");
+const { app, BrowserWindow, shell } = require("electron");
 const remote = require("@electron/remote/main");
 remote.initialize();
 const integrate = require("leaflet-advanced-layer-system/ElectronIntegration");
@@ -28,6 +28,12 @@ function createWindow () {
 	integrate(mainWindow, {
 		useToolbarAsFrame: true,
 	});
+
+	// Open links in a browser
+	mainWindow.webContents.setWindowOpenHandler(details => {
+		shell.openExternal(details.url);
+		return {action: "deny"}
+	})
 }
 
 app.commandLine.appendSwitch("enable-experimental-web-platform-features");

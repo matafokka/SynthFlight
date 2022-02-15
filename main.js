@@ -8,7 +8,15 @@
 // I've spend hours struggling with this issue, so don't try to reorganise the code, you'll fail and, as it seems, break compatibility with the older Electron versions.
 
 //require("fastestsmallesttextencoderdecoder");
-L.Geodesic = require("leaflet.geodesic");
+window.L = require("leaflet");
+
+/**
+ * Segments number to use when displaying L.Geodesic
+ * @type {number}
+ */
+L.GEODESIC_SEGMENTS = 1000;
+
+L.Geodesic = require("leaflet.geodesic").GeodesicLine;
 require("leaflet-draw");
 require("./DrawGeodesic.js");
 require("leaflet-advanced-layer-system");

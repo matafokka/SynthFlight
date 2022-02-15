@@ -30,14 +30,14 @@ L.ALS.SynthGridLayer.prototype._onMapZoom = function () {
 	}
 
 	this._shouldHideEverything = distancePx < 200;
-	if (this.isDisplayed && !this._doHidePolygonWidgets)
-		this.hideOrShowLayer(this._shouldHideEverything, this.widgetsGroup);
+	this.hideOrShowLayer(this._doHidePolygonWidgets || this._shouldHideEverything, this.widgetsGroup);
 
 	this._onMapPan(); // Redraw polygons
 }
 
 L.ALS.SynthGridLayer.prototype.hideOrShowGroups = function (hide) {
-	let groups = [this.polygonGroup, this.bordersGroup, this.labelsGroup, this.widgetsGroup];
+	let groups = [this.polygonGroup, this.bordersGroup, this.labelsGroup];
+
 	for (let group of groups)
 		this.hideOrShowLayer(hide, group);
 }

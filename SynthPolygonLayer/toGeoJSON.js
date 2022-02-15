@@ -25,12 +25,10 @@ L.ALS.SynthPolygonLayer.prototype.toGeoJSON = function () {
 	}
 
 	// See _calculateParameters
-	let parallelsProps = {name: "Flight paths by parallels"},
-		meridiansProps = {name: "Flight paths by meridians"},
-		params = ["cameraWidth", "cameraHeight", "pixelWidth", "focalLength", "flightHeight", "overlayBetweenPaths", "overlayBetweenImages", "imageScale", "ly", "Ly", "By", "lx", "Lx", "Bx", "GSI", "IFOV", "GIFOV", "FOV", "GFOV", "selectedArea", "timeBetweenCaptures"];
+	let parallelsProps = {name: "Flight paths by parallels"}, meridiansProps = {name: "Flight paths by meridians"};
 
 	for (let prop of [parallelsProps, meridiansProps]) {
-		for (let param of params)
+		for (let param of this.propertiesToExport)
 			prop[param] = this[param];
 	}
 

@@ -169,9 +169,9 @@ L.ALS.SynthBaseLayer.prototype.buildHull = function (path, color) {
  * @return {{upper: L.LatLng[], lower: L.LatLng[]}} Convex hull of given points
  */
 L.ALS.SynthBaseLayer.prototype.getConvexHull = function (points) {
-	// Find convex hull of the points using monotone chain.
+	// Find convex hull of the points using monotone chain
 	points.sort((a, b) => {
-		return a.lng === b.lng ? a.lat - b.lat : a.lng - b.lng;
+		return MathTools.isEqual(a.lng, b.lng) ? a.lat - b.lat : a.lng - MathTools.wrapLng(a.lng, b.lng);
 	});
 
 	let lower = [];
@@ -392,22 +392,8 @@ L.ALS.SynthBaseLayer.prototype.getOrderedPathFromHull = function (prevPoint, con
 	return copyTo[copyTo.length - 1]; // Return the last added point which will become a previous point for the next iteration
 }
 
-/**
- * Calculates length of a polyline
- * @param line {L.Polyline | L.LatLng[] | number[][]} Line to calculate length of
- * @return {number} Line length
- */
-L.ALS.SynthBaseLayer.prototype.getLineLength = function (line) {
-	let latLngs = line instanceof Array ? line : line.getLatLngs(), length = 0,
-		{x, y} = MathTools.getXYPropertiesForPoint(latLngs[0]);
-
-	for (let i = 0; i < latLngs.length - 1; i++) {
-		const p1 = latLngs[i], p2 = latLngs[i + 1];
-		length += Math.sqrt((p1[x] - p2[x]) ** 2 + (p1[y] - p2[y]) ** 2);
-	}
-	return length;
-}
-
 L.ALS.SynthBaseLayer.prototype.cross = function (a, b, o) {
-	return (a.lng - o.lng) * (b.lat - o.lat) - (a.lat - o.lat) * (b.lng - o.lng);
+	// It calculates only direction, so it should be good enough. Also, we wrap lngs to get correct direction on
+	// lng differences > 90 and near map's edges
+	return (MathTools.wrapLng(o.lng, a.lng) - o.lng) * (b.lat - o.lat) - (a.lat - o.lat) * (MathTools.wrapLng(o.lng, b.lng) - o.lng);
 }

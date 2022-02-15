@@ -80,7 +80,9 @@ let mainFile = "main.js";
 persistify({
 	entries: [mainFile],
 	debug: debug
-}).require("./node_modules/geotiff/src/geotiff.js", {expose: "geotiff"}) // Thanks to parcel for this nightmare
+})
+	.require("./node_modules/geotiff/src/geotiff.js", {expose: "geotiff"}) // Thanks to parcel for this nightmare
+	.transform("package-json-versionify")
 	.transform("babelify", {
 		presets: ["@babel/preset-env"],
 		global: true, // ShpJS is built without polyfills and uses async functions. So we have to build node_modules too. Maybe other modules are built that way too.
@@ -99,10 +101,8 @@ let toCopy = ["index.html", "img/logo.ico", "img/logo.svg", "img/logo.png", "img
 	"node_modules/leaflet-advanced-layer-system/dist/css",
 	"node_modules/leaflet-advanced-layer-system/dist/polyfills.js",
 	"node_modules/leaflet/dist/leaflet.css",
-	"node_modules/leaflet/dist/leaflet.js",
 	"node_modules/leaflet/dist/images",
 	"node_modules/leaflet.coordinates/dist/Leaflet.Coordinates-0.1.5.css",
-	"node_modules/leaflet.coordinates/dist/Leaflet.Coordinates-0.1.5.min.js",
 	"node_modules/leaflet-draw/dist/leaflet.draw.css",
 	"node_modules/leaflet-draw/dist/images",
 ];

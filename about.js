@@ -1,3 +1,5 @@
+const {version} = require("./package.json");
+
 module.exports = `
 <style>
 .als-about-container p {
@@ -17,13 +19,6 @@ module.exports = `
 
 .als-dark .als-about-container a:hover {
 	color: pink;
-}
-
-.als-about-container ul {
-	font-family: Consolas, consolas, monospace;
-	max-height: 5rem;
-	overflow: auto;
-	border: 1px solid #ccc;
 }
 
 .als-about-container h1 {
@@ -47,22 +42,21 @@ module.exports = `
 	text-align: center;
 	border-top: 1px solid #ccc;
 }
-
 </style>
 
-<h1><img src="img/logo.ico" alt="Logo" />SynthFlight Alpha</h1>
+<h1><img src="img/logo.ico" alt="Logo" />SynthFlight ${version}</h1>
 
 <p data-als-locale-property="firstParagraph"></p>
 
-<p><span data-als-locale-property="secondParagraphPart1"></span> <a href="https://github.com/matafokka/SynthFlight" data-als-locale-property="secondParagraphPart2"></a> <span data-als-locale-property="secondParagraphPart3"></span></p>
+<p><span data-als-locale-property="secondParagraphPart1"></span> <a href="https://github.com/matafokka/SynthFlight" target="_blank" data-als-locale-property="secondParagraphPart2"></a> <span data-als-locale-property="secondParagraphPart3"></span></p>
 
 <p data-als-locale-property="thirdParagraph"></p>
 
 <p data-als-locale-property="fourthParagraph"></p>
 <ul>
-	<li>OpenStreetMaps</li>
-	<li>Google Maps</li>
-	<li>Yandex Maps</li>
+	<li><a href="https://www.openstreetmap.org" target="_blank">OpenStreetMap</a></li>
+	<li><a href="https://www.maps.google.com" target="_blank">Google Maps</a></li>
+	<li><a href="https://www.yandex.ru/maps" target="_blank">Yandex Maps</a></li>
 </ul>
 
 <footer><a href="https://github.com/matafokka">© matafokka, ${(new Date()).getFullYear()}</a></footer>
