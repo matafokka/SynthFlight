@@ -1,7 +1,6 @@
 require("./SynthLineWizard.js");
 require("./SynthLineSettings.js");
-const turfHelpers = require("@turf/helpers");
-const MathTools = require("../MathTools.js");
+const geojsonMerge = require("@mapbox/geojson-merge"); // Using this since turfHelpers.featureCollection() discards previously defined properties.
 
 /**
  * Geodesic line layer
@@ -27,7 +26,7 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend(/** @lends L.ALS.SynthLineLay
 				shapeOptions: {
 					color: "#ff0000",
 					weight: this.lineThicknessValue,
-					segmentsNumber: L.GEODESIC_SEGMENTS,
+					segmentsNumber: Math.round(L.GEODESIC_SEGMENTS / 4),
 				}
 			}
 		}, this.drawingGroup);
@@ -107,8 +106,45 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend(/** @lends L.ALS.SynthLineLay
 		this.onEditEnd();
 	},
 
+	toGeoJSON: function () {
+		let pathsMeta = {};
+		for (let prop of this.propertiesToExport) {
+			if (this[prop] !== undefined)
+				pathsMeta[prop] = this[prop];
+		}
+
+		return geojsonMerge.merge([
+			L.ALS.SynthBaseLayer.prototype.toGeoJSON.call(this, pathsMeta),
+			this.pointsGroup.toGeoJSON(),
+		]);
+	},
+
+	serialize: function (seenObjects) {
+		let layers = this.drawingGroup.getLayers(), lines = [];
+
+		for (let layer of layers)
+			lines.push(layer.getLatLngs());
+
+		let serialized = this.getObjectToSerializeTo(seenObjects);
+		serialized.lines = L.ALS.Serializable.serializeAnyObject(lines, seenObjects);
+		return serialized;
+	},
+
 	statics: {
 		wizard: L.ALS.SynthLineWizard,
 		settings: new L.ALS.SynthLineSettings(),
+
+		deserialize: function (serialized, layerSystem, settings, seenObjects) {
+			let object = L.ALS.Layer.deserialize(serialized, layerSystem, settings, seenObjects),
+				lines = L.ALS.Serializable.deserialize(serialized.lines, seenObjects);
+
+			for (let line of lines)
+				object.drawingGroup.addLayer(new L.Geodesic(line, object.drawControls.polyline.shapeOptions));
+
+			object.onEditEnd();
+
+			delete object.lines;
+			return object;
+		}
 	}
 });

@@ -35,7 +35,7 @@ L.ALS.SynthGridLayer.prototype._onMapZoom = function () {
 	this._onMapPan(); // Redraw polygons
 }
 
-L.ALS.SynthGridLayer.prototype.hideOrShowGroups = function (hide, shouldHideWidgets) {
+L.ALS.SynthGridLayer.prototype.hideOrShowGroups = function (hide) {
 	let groups = [this.polygonGroup, this.bordersGroup, this.labelsGroup];
 
 	for (let group of groups)

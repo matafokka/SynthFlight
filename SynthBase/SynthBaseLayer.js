@@ -113,6 +113,12 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 
 		this.serializationIgnoreList.push("_airportMarker", "toUpdateThickness");
 
+		/**
+		 * Properties to copy to GeoJSON when exporting
+		 * @type {string[]}
+		 */
+		this.propertiesToExport = ["cameraWidth", "cameraHeight", "pixelWidth", "focalLength", "flightHeight", "overlayBetweenPaths", "overlayBetweenImages", "imageScale", "ly", "Ly", "By", "lx", "Lx", "Bx", "GSI", "IFOV", "GIFOV", "FOV", "GFOV", "selectedArea", "timeBetweenCaptures"];
+
 		// Add airport
 		let icon = L.divIcon({
 			iconSize: null,
