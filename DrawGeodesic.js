@@ -23,7 +23,11 @@ function _createGeodesic (coords, opts = {}) {
 	return geodesic;
 }
 
-function _polyRedraw(poly) {
+/**
+ * Redraws Leaflet layer or geodesic line
+ * @param poly {L.Layer | L.Geodesic} Layer to redraw
+ */
+L.redrawLayer = function (poly) {
 	if (poly.updateGeometry)
 		poly.updateGeometry();
 	else
@@ -321,7 +325,6 @@ L.Draw.Polyline = L.Draw.Feature.extend({
 
 	_shouldAbortMouseEvent: function (e) {
 		let {lat, lng} = e.latlng;
-		console.log(e, !this.options.shapeOptions.naturalDrawing && (lat > 85 || lat < -85 || lng < -180 || lng > 180))
 		return !this.options.shapeOptions.naturalDrawing && (lat > 85 || lat < -85 || lng < -180 || lng > 180);
 	},
 
@@ -864,7 +867,7 @@ L.Edit.PolyVerticesEdit = L.Handler.extend({
 		var latlngs = this._defaultShape();
 		var removed = [].splice.apply(latlngs, arguments);
 		this._poly._convertLatLngs(latlngs, true);
-		_polyRedraw(this._poly);
+		L.redrawLayer(this._poly);
 		return removed;
 	},
 
@@ -939,7 +942,7 @@ L.Edit.PolyVerticesEdit = L.Handler.extend({
 		this._poly._bounds._northEast = L.latLng(-Infinity, -Infinity);
 		var latlngs = this._poly.getLatLngs();
 		this._poly._convertLatLngs(latlngs, true);
-		_polyRedraw(this._poly);
+		L.redrawLayer(this._poly);
 		this._poly.fire('editdrag');
 	},
 
@@ -1001,7 +1004,7 @@ L.Edit.PolyVerticesEdit = L.Handler.extend({
 			marker._middleRight.setLatLng(this._getMiddleLatLng(marker, marker._next));
 		}
 
-		_polyRedraw(this._poly);
+		L.redrawLayer(this._poly);
 		this.updateMarkers();
 	},
 

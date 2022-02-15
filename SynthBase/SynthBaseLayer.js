@@ -400,7 +400,7 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 			let layers = path.connectionsGroup.getLayers();
 			for (let layer of layers) {
 				layer.getLatLngs()[1] = airportPos;
-				layer.redraw();
+				L.redrawLayer(layer);
 				layer.updateWidgets(layer.pathLength + this.getLineLengthMeters(layer));
 			}
 		}
@@ -469,7 +469,7 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 			color,
 			dashArray: this.dashedLine,
 			weight: this.lineThicknessValue,
-			segmentsNumber: 500,
+			segmentsNumber: L.GEODESIC_SEGMENTS,
 		}
 	},
 

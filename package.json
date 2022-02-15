@@ -83,7 +83,7 @@
     "leaflet": "^1.7.1",
     "leaflet-draw": "^1.0.4",
     "leaflet.coordinates": "~0.1.5",
-    "leaflet.geodesic": "^2.5.5-0",
+    "leaflet.geodesic": "github:matafokka/Leaflet.Geodesic",
     "package-json-versionify": "^1.0.4",
     "persistify": "^2.0.1",
     "polybooljs": "^1.2.0",
