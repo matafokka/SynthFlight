@@ -137,7 +137,7 @@ L.ALS.Locales.addLocaleProperties("English", {
 
 	// About
 
-	firstParagraph: "SynthFlight is a fully client-side software for planning aerial photography. This is an alpha version, so expect bugs, crashes, errors, missing functions, API changes, etc.",
+	firstParagraph: "SynthFlight is a fully client-side software for planning aerial photography. This is a beta version so bugs, huge API changes and lack of backwards compatibility are to be expected.",
 
 	secondParagraphPart1: "Visit project's",
 	secondParagraphPart2: "GitHub page",
