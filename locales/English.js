@@ -28,6 +28,7 @@ L.ALS.Locales.addLocaleProperties("English", {
 	gridStandardScales: "Grid scale:",
 	gridLngDistance: "Distance between parallels:",
 	gridLatDistance: "Distance between meridians:",
+	gridShouldMergeCells: "Merge couples of adjacent cells when latitude exceeds 60° and merge again when it exceeds 76° (except 1:1 000 000 and 1:2 000 scales when cells above 76° triple-merged instead of quadruple-merged)",
 
 	// SynthGridLayer
 
