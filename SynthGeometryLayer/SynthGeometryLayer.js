@@ -72,7 +72,11 @@ L.ALS.SynthGeometryLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGeometryLay
 	_displayFile: function (geoJson) {
 		let borderColor = new L.ALS.Widgets.Color("borderColor", "geometryBorderColor", this, "_setColor").setValue(this.borderColor),
 			fillColor = new L.ALS.Widgets.Color("fillColor", "geometryFillColor", this, "_setColor").setValue(this.fillColor),
-			menu = [borderColor, fillColor];
+			menu = [borderColor, fillColor],
+			popupOptions = {
+				maxWidth: 500,
+				maxHeight: 500,
+			};
 
 		if (this.isShapefile) {
 			let type = geoJson.features[0].geometry.type;
@@ -85,7 +89,22 @@ L.ALS.SynthGeometryLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGeometryLay
 		for (let widget of menu)
 			this.addWidget(widget);
 
-		this._layer = L.geoJSON(geoJson);
+		this._layer = L.geoJSON(geoJson, {
+			onEachFeature: (feature, layer) => {
+				let popup = "";
+				for (let name in feature.properties) {
+					if (!feature.properties.hasOwnProperty(name))
+						continue;
+					popup += `
+						<p>
+							<b>${name}:</b> <span>${feature.properties[name]}</span>
+						</p>
+					`
+				}
+				layer.bindPopup(`<div class="synth-popup">${popup}</div>`, popupOptions);
+			}
+		});
+
 		this.addLayers(this._layer);
 		this._setLayerColors();
 	},

@@ -120,6 +120,7 @@ L.ALS.Locales.addLocaleProperties("English", {
 
 	geometryDisplayName: "Geometry Layer",
 	geometryFileLabel: "Zipped shapefile or GeoJSON:",
+	geometryNotification: "Click/tap on features to see the semantics", // TODO: Add tip for searching by semantics when search will be added
 
 	// SynthGeometryLayer
 

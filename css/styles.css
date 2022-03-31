@@ -25,3 +25,25 @@
 	background: rgba(0, 0, 100, 1) !important;
 	cursor: move;
 }
+
+.synth-popup {
+	font-family: Consolas, consolas, monospace;
+	overflow: auto;
+}
+
+.synth-popup p {
+	margin: 0;
+	padding: 0;
+	border-bottom: 1px solid #ccc;
+	box-sizing: border-box;
+	word-break: break-all;
+}
+
+/* TODO: Move font color to ALS */
+.als-dark .synth-popup {
+	color: #ccc;
+}
+
+.als-dark .synth-popup p {
+	border-bottom: 1px solid #696969;
+}

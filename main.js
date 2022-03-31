@@ -97,7 +97,7 @@ let layerSystem = new L.ALS.System(map, {
 });
 
 
-let osmLayer = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+let osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 	maxZoom: 19,
 	noWrap: true,
 });
