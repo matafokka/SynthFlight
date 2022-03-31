@@ -11,6 +11,7 @@ L.ALS.SynthGeometryLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGeometryLay
 
 	defaultName: "geometryDisplayName",
 	isShapeFile: false,
+	writeToHistoryOnInit: false,
 
 	init: function (wizardResults, settings) {
 		this.copySettingsToThis(settings);
@@ -107,6 +108,7 @@ L.ALS.SynthGeometryLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGeometryLay
 
 		this.addLayers(this._layer);
 		this._setLayerColors();
+		this.writeToHistory();
 	},
 
 	_deleteInvalidLayer: function (message = L.ALS.locale.geometryInvalidFile) {
@@ -142,7 +144,7 @@ L.ALS.SynthGeometryLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGeometryLay
 		let json = {
 			widgets: this.serializeWidgets(seenObjects),
 			name: this.getName(),
-			geoJson: this.toGeoJSON(),
+			geoJson: this._layer.toGeoJSON(),
 			serializationID: this.serializationID
 		};
 

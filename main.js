@@ -96,34 +96,37 @@ let layerSystem = new L.ALS.System(map, {
 	makeMapFullscreen: true,
 });
 
-
-let osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+// CartoDB
+layerSystem.addBaseLayer(L.tileLayer("http://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png", {
 	maxZoom: 19,
 	noWrap: true,
-});
-layerSystem.addBaseLayer(osmLayer, "Open Street Maps");
+}), "CartoDB");
+
+// OSM
+layerSystem.addBaseLayer(L.tileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+	maxZoom: 19,
+	noWrap: true,
+}), "Open Street Maps");
 
 // Google maps
 let letters = [["m", "Streets"], ["s", "Satellite"], ["p", "Terrain"], ["s,h", "Hybrid"]];
 for (let letter of letters) {
-	let layer = L.tileLayer("http://{s}.google.com/vt/lyrs=" + letter[0] + "&x={x}&y={y}&z={z}", {
+	layerSystem.addBaseLayer(L.tileLayer("http://{s}.google.com/vt/lyrs=" + letter[0] + "&x={x}&y={y}&z={z}", {
 		maxZoom: 20,
 		noWrap: true,
 		subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
-	});
-	layerSystem.addBaseLayer(layer, "Google " + letter[1]);
+	}), "Google " + letter[1]);
 }
 
 // Yandex maps
 let countries = ["ru_RU", "en_US", "uk_UA", "tr_TR"];
 for (let country of countries) {
-	let layer = L.tileLayer(`https://core-renderer-tiles.maps.yandex.net/tiles?l=map&v=21.07.25-1-b210701140430&x={x}&y={y}&z={z}&scale=1&lang=${country}&experimental_data_poi=no_extra_orgs`, {
+	layerSystem.addBaseLayer(L.tileLayer(`https://core-renderer-tiles.maps.yandex.net/tiles?l=map&v=21.07.25-1-b210701140430&x={x}&y={y}&z={z}&scale=1&lang=${country}&experimental_data_poi=no_extra_orgs`, {
 		subdomains: ['01', '02', '03', '04'],
 		reuseTiles: true,
 		updateWhenIdle: false,
 		noWrap: true,
-	});
-	layerSystem.addBaseLayer(layer, "Yandex " + country[3] + country[4]);
+	}), "Yandex " + country[3] + country[4]);
 }
 
 // Empty layer

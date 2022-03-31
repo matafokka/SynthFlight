@@ -54,6 +54,7 @@ module.exports = `
 
 <p data-als-locale-property="fourthParagraph"></p>
 <ul>
+	<li><a href="https://basemaps.cartocdn.com" target="_blank">CartoDB</a></li>
 	<li><a href="https://www.openstreetmap.org" target="_blank">OpenStreetMap</a></li>
 	<li><a href="https://www.maps.google.com" target="_blank">Google Maps</a></li>
 	<li><a href="https://www.yandex.ru/maps" target="_blank">Yandex Maps</a></li>

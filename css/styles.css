@@ -39,11 +39,6 @@
 	word-break: break-all;
 }
 
-/* TODO: Move font color to ALS */
-.als-dark .synth-popup {
-	color: #ccc;
-}
-
 .als-dark .synth-popup p {
 	border-bottom: 1px solid #696969;
 }

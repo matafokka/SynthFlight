@@ -1,4 +1,4 @@
-const { app, BrowserWindow, shell } = require("electron");
+const { app, BrowserWindow, shell, session } = require("electron");
 const remote = require("@electron/remote/main");
 remote.initialize();
 const integrate = require("leaflet-advanced-layer-system/ElectronIntegration");
@@ -18,8 +18,21 @@ function createWindow () {
 		}
 	});
 
+	// Fix OSM denying requests from Electron. Headers are what Chrome on my machine sends.
+	session.defaultSession.webRequest.onBeforeSendHeaders({urls: ["http://*.tile.openstreetmap.org/*"]}, (details, callback) => {
+		details.requestHeaders["Referer"] = "https://matafokka.github.io/";
+		details.requestHeaders["sec-ch-ua"] = '" Not A;Brand";v="99", "Chromium";v="99", "Google Chrome";v="99"';
+		details.requestHeaders["sec-ch-ua-mobile"] = "?0";
+		details.requestHeaders["sec-ch-ua-platform"] = "Windows";
+		details.requestHeaders["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.84 Safari/537.36";
+		callback({ requestHeaders: details.requestHeaders });
+	});
+
+	// Security warnings creates annoying warning about HTTP. We're using HTTP to support older browsers.
+	// So we better off with just suppressing those warnings.
+	process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = true;
+
 	mainWindow.loadFile("index.html");
-	process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = true; // Security warnings creates annoying warning about HTTP. We're using HTTP to support older browsers. So we better off with just suppressing those warnings.
 	if (process.argv.indexOf("-d") !== -1)
 		mainWindow.webContents.openDevTools();
 	mainWindow.removeMenu();
