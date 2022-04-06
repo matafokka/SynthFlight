@@ -90,22 +90,48 @@ L.ALS.SynthGeometryLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGeometryLay
 		for (let widget of menu)
 			this.addWidget(widget);
 
+		let docs = [], fields = []; // Search documents
+
 		this._layer = L.geoJSON(geoJson, {
 			onEachFeature: (feature, layer) => {
-				let popup = "";
+				let popup = "", doc = {};
+				console.log(feature, layer);
+
+				// Calculate bbox for zooming
+				if (!feature.geometry.bbox) {
+					if (layer.getBounds) {
+						let bounds = layer.getBounds();
+						feature.geometry.bbox = [bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()];
+					} else {
+						let latLng = layer.getLatLng(), size = 0.008;
+						feature.geometry.bbox = [latLng.lng - size, latLng.lat - size, latLng.lng + size, latLng.lat + size];
+					}
+				}
+
+				// Copy properties to the popup and search doc
 				for (let name in feature.properties) {
 					if (!feature.properties.hasOwnProperty(name))
 						continue;
+					let value = feature.properties[name]
 					popup += `
 						<p>
-							<b>${name}:</b> <span>${feature.properties[name]}</span>
+							<b>${name}:</b> <span>${value}</span>
 						</p>
-					`
+					`;
+					doc[name] = value;
+					fields.push(name);
 				}
+
 				layer.bindPopup(`<div class="synth-popup">${popup}</div>`, popupOptions);
+
+				doc._miniSearchId = L.ALS.Helpers.generateID();
+				doc.bbox = feature.geometry.bbox;
+				doc.properties = feature.properties;
+				docs.push(doc);
 			}
 		});
 
+		L.ALS.searchWindow.addToSearch(this.id, docs, fields); // Add GeoJSON to search
 		this.addLayers(this._layer);
 		this._setLayerColors();
 		this.writeToHistory();
@@ -133,6 +159,10 @@ L.ALS.SynthGeometryLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGeometryLay
 				fill: layer instanceof L.Polygon
 			});
 		}
+	},
+
+	onDelete: function () {
+		L.ALS.searchWindow.removeFromSearch(this.id);
 	},
 
 	serialize: function (seenObjects) {

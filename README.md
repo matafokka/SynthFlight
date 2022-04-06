@@ -26,7 +26,7 @@ There are numerous ways to set up SynthFlight, listed from most to least preferr
 1. Extract the downloaded archive wherever you want.
 1. Navigate to the extracted folder, open it and run `SynthFlight` executable file.
 
-***Warning 1:** only browser and Windows x64 builds has been tested so far.*
+***Warning 1:** only Windows x64 builds has been tested so far.*
 
 ***Warning 2:** macOS builds are not signed, thus require disabling the Gatekeeper or something.*
 
@@ -48,9 +48,12 @@ One of:
 
 **Problems with outdated browsers:**
 
-1. Can't read files. Chromium-based browsers have a "feature" that prevents FileReader from reading local files. **How to solve:** run browser with `--allow-file-access-from-files` flag or [host SynthFlight](#hosting) on a custom server.
+1. Can't read files. Chromium-based browsers have a "feature" that prevents `FileReader` from reading local files. **How to solve:** run browser with `--allow-file-access-from-files` flag or [host SynthFlight](#hosting) on a custom server.
 1. Can't save files. **How to solve:** update your browser.
-1. App page doesn't load (browser can't verify SSL certificate). **How to solve:** configure your browser or [host SynthFlight](#hosting) on a custom server using protocols and/or certificates that your browser supports.
+1. App page doesn't load in legacy browsers (browser can't verify SSL certificate). **How to solve:** enable TLS 1.3 support in your browser or [host SynthFlight](#hosting) on a custom server using protocols and/or certificates that your browser supports.
+1. OSM search doesn't work in browsers that doesn't support TLS >= 1.2. **How to solve:** update your browser. **For IE9**, you need to serve SynthFlight over HTTPS and make sure your users have TLS 1.2 support enabled.
+
+Of course, requirements for TLS might change in future with the new TLS versions coming out and GitHub and OSM changing their policies. You can't prevent this from happening, the only thing you can do is using an evergreen browser.
 
 
 ## For desktop builds

@@ -60,5 +60,7 @@ module.exports = `
 	<li><a href="https://www.yandex.ru/maps" target="_blank">Yandex Maps</a></li>
 </ul>
 
+<p><span data-als-locale-property="fifthParagraph"></span> <a href="https://nominatim.org/" target="_blank">Nominatim API</a></p>
+
 <footer><a href="https://github.com/matafokka">© matafokka, ${(new Date()).getFullYear()}</a></footer>
 `;

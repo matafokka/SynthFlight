@@ -30,6 +30,8 @@ require("./SynthPolygonLayer/SynthPolygonLayer.js");
 require("./SynthGridLayer/SynthGridLayer.js");
 require("./SynthRectangleLayer/SynthRectangleLayer.js");
 require("./SynthLineLayer/SynthLineLayer.js");
+require("./SearchControl.js");
+require("./SearchWindow.js");
 
 L.ALS.System.initializeSystem();
 
@@ -47,33 +49,6 @@ let map = L.map("map", {
 	keyboard: false,
 }).setView([51.505, -0.09], 13);
 map.doubleClickZoom.disable();
-
-// TODO: Remove when Leaflet.Geodesic will be fully integrated with Leaflet.Draw
-/*let group = L.featureGroup();
-group.addTo(map);
-
-let control = new L.Control.Draw({
-	draw: {
-		polyline: {
-			shapeOptions: {
-				color: "#ff0000",
-				weight: 4,
-				wrap: false,
-			}
-		}
-	},
-	edit: {
-		featureGroup: group,
-		remove: true,
-	}
-})
-control.addTo(map);
-
-map.on("draw:created", (e) => {
-	group.addLayer(e.layer);
-	console.log(e.layer)
-});
-*/
 
 // Show coordinates via Leaflet.Control plugin. It doesn't look good on phones, so we won't add it in this case.
 if (!L.ALS.Helpers.isMobile) {
@@ -94,6 +69,7 @@ let layerSystem = new L.ALS.System(map, {
 	enableHistory: true,
 	enableToolbar: true,
 	makeMapFullscreen: true,
+	toolbarZoomControl: new L.ALS.ControlZoom({vertical: true}),
 });
 
 // CartoDB
@@ -129,6 +105,14 @@ for (let country of countries) {
 	}), "Yandex " + country[3] + country[4]);
 }
 
+// On menu position change
+/*document.addEventListener("als-set-menu-to-left", () => setSearchPos("topright"));
+document.addEventListener("als-set-menu-to-right", () => setSearchPos("topleft"));
+document.addEventListener("click", e => {
+	if (!searchControl.getContainer().contains(e.target))
+		searchControl.hide();
+})*/
+
 // Empty layer
 layerSystem.addBaseLayer(L.tileLayer(""), "Empty");
 
@@ -137,3 +121,18 @@ layerSystem.addLayerType(L.ALS.SynthGridLayer);
 layerSystem.addLayerType(L.ALS.SynthRectangleLayer);
 layerSystem.addLayerType(L.ALS.SynthLineLayer);
 layerSystem.addLayerType(L.ALS.SynthGeometryLayer);
+
+// Add search
+
+let searchButton;
+if (L.ALS.Helpers.isMobile) {
+	let control = new L.SearchControl();
+	layerSystem.addControl(control, "top", "follow-menu");
+	searchButton = control.getContainer();
+} else {
+	searchButton = L.ALS._createSearchButton();
+	let panel = document.getElementsByClassName("als-top-panel")[0];
+	panel.insertBefore(searchButton, panel.getElementsByClassName("als-menu-add")[0]);
+}
+
+L.ALS.searchWindow = new L.ALS.SearchWindow(map, searchButton);

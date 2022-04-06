@@ -39,6 +39,44 @@
 	word-break: break-all;
 }
 
-.als-dark .synth-popup p {
-	border-bottom: 1px solid #696969;
+/* Search */
+.search-window {
+	overflow: hidden;
+}
+
+.search-window .search-input {
+	height: 2rem;
+	width: 100%;
+	border-width: 0;
+	border-bottom-width: 1px;
+}
+
+.search-window-container div.als-button-base {
+	text-align: left;
+	width: 100%;
+}
+
+.search-window-container {
+	height: 20rem;
+	overflow: auto;
+}
+
+.search-window-container .als-button-base {
+	border-width: 0;
+	border-bottom-width: 1px;
+}
+
+.search-window-container .error a {
+	color: inherit;
+	transition: color 0.2s, text-shadow 0.2s;
+}
+
+.search-window-container .error a:hover {
+	color: darkred;
+	text-shadow: pink 0 0 5px;
+	transition: color 0.2s, text-shadow 0.2s;
+}
+
+.als-dark .search-window-container .error a:hover {
+	color: pink;
 }

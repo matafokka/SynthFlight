@@ -84,6 +84,7 @@
     "leaflet-draw": "^1.0.4",
     "leaflet.coordinates": "~0.1.5",
     "leaflet.geodesic": "github:matafokka/Leaflet.Geodesic",
+    "minisearch": "^4.0.3",
     "package-json-versionify": "^1.0.4",
     "persistify": "^2.0.1",
     "polybooljs": "^1.2.0",
@@ -99,6 +100,6 @@
   },
   "dependencies": {
     "@electron/remote": "^2.0.1",
-    "leaflet-advanced-layer-system": "^2.1.9"
+    "leaflet-advanced-layer-system": "^2.1.10"
   }
 }
