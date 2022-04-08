@@ -80,18 +80,6 @@ map.on("moveend zoomend resize", () => {
 	labelLayer.redraw();
 });
 
-// Show coordinates via Leaflet.Control plugin. It doesn't look good on phones, so we won't add it in this case.
-if (!L.ALS.Helpers.isMobile) {
-	L.control.coordinates({
-		position: "bottomleft",
-		decimals: 5,
-		labelTemplateLat: "Lat (y): {y}",
-		labelTemplateLng: "Lng (x): {x}",
-		enableUserInput: false,
-		useLatLngOrder: true,
-	}).addTo(map);
-}
-
 // Initialize layer system. Create and add base layers.
 let layerSystem = new L.ALS.System(map, {
 	aboutHTML: require("./about.js"),
@@ -135,14 +123,6 @@ for (let country of countries) {
 	}), "Yandex " + country[3] + country[4]);
 }
 
-// On menu position change
-/*document.addEventListener("als-set-menu-to-left", () => setSearchPos("topright"));
-document.addEventListener("als-set-menu-to-right", () => setSearchPos("topleft"));
-document.addEventListener("click", e => {
-	if (!searchControl.getContainer().contains(e.target))
-		searchControl.hide();
-})*/
-
 // Empty layer
 layerSystem.addBaseLayer(L.tileLayer(""), "Empty");
 
@@ -151,6 +131,18 @@ layerSystem.addLayerType(L.ALS.SynthGridLayer);
 layerSystem.addLayerType(L.ALS.SynthRectangleLayer);
 layerSystem.addLayerType(L.ALS.SynthLineLayer);
 layerSystem.addLayerType(L.ALS.SynthGeometryLayer);
+
+// Show coordinates via Leaflet.Control plugin. It doesn't look good on phones, so we won't add it in this case.
+if (!L.ALS.Helpers.isMobile) {
+	layerSystem.addControl(L.control.coordinates({
+		position: "bottomleft",
+		decimals: 5,
+		labelTemplateLat: "Lat (y): {y}",
+		labelTemplateLng: "Lng (x): {x}",
+		enableUserInput: false,
+		useLatLngOrder: true,
+	}), "bottom");
+}
 
 // Add search
 
