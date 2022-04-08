@@ -41,14 +41,44 @@ let map = L.map("map", {
 	zoomControl: false,
 	minZoom: 1,
 	maxBounds: L.latLngBounds(
-		L.latLng(90, -180),
-		L.latLng(-90, 180)
+		L.latLng(90, -Infinity),
+		L.latLng(-90, Infinity)
 	),
 	maxBoundsViscosity: 1,
 	preferCanvas: true, // Canvas is faster than SVG renderer
 	keyboard: false,
+	worldCopyJump: true,
 }).setView([51.505, -0.09], 13);
 map.doubleClickZoom.disable();
+
+
+// Display a notification that users can move the map farther to jump to the other side of the world
+let labelLayer = new L.ALS.LeafletLayers.LabelLayer(false), maxLabelWidth = 3,
+	labelOpts = {
+		maxWidth: 10,
+		breakWords: false,
+	},
+	westOpts = {origin: "rightCenter", ...labelOpts},
+	eastOpts = {origin: "leftCenter", ...labelOpts};
+labelLayer.addTo(map);
+
+map.on("moveend zoomend resize", () => {
+	labelLayer.deleteAllLabels();
+
+	let bounds = map.getBounds(), container = map.getContainer(),
+		// Calculate label position by converting map's center from pixels to LatLng
+		middleLat = map.containerPointToLatLng(L.point(container.clientWidth / 2, container.clientHeight / 2)).lat;
+
+	if (bounds.getWest() <= -180) {
+		labelLayer.addLabel("west", [middleLat, -180], L.ALS.locale.moveLabelWest, westOpts);
+	}
+
+	if (bounds.getEast() >= +180) {
+		labelLayer.addLabel("east", [middleLat, 180], L.ALS.locale.moveLabelEast, eastOpts);
+	}
+
+	labelLayer.redraw();
+});
 
 // Show coordinates via Leaflet.Control plugin. It doesn't look good on phones, so we won't add it in this case.
 if (!L.ALS.Helpers.isMobile) {

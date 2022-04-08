@@ -1,4 +1,7 @@
 L.ALS.Locales.addLocaleProperties("English", {
+	// Labels on dateline
+	moveLabelWest: "Pan further to the left to get to the Eastern side",
+	moveLabelEast: "Pan further to the right to get to the Western side",
 
 	// SynthBaseLayer
 	connectionMethod: "Path connection method",

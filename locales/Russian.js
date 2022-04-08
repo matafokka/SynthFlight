@@ -1,4 +1,7 @@
 L.ALS.Locales.addLocaleProperties("Русский", {
+	// Labels on dateline
+	moveLabelWest: "Сдвиньте карту дальше влево, чтобы перейти на восточную сторону",
+	moveLabelEast: "Сдвиньте карту дальше вправо, чтобы перейти на западную сторону",
 
 	// SynthBaseLayer
 	connectionMethod: "Метод соединения маршрутов",

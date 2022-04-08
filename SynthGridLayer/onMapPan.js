@@ -80,6 +80,9 @@ L.ALS.SynthGridLayer.prototype._onMapPan = function () {
 		lngTo = this._closestGreater(lngTo, lngDistance);
 
 		for (let lng = lngFrom; lng <= lngTo; lng += lngDistance) { // From left (West) to right (East)
+			if (lng < -180 || lng > 180 -  lngDistance)
+				continue;
+
 			if (isFirstIteration)
 				createLabel([mapLatLng.lat, lng], this.toFixed(lng), "topCenter", true);
 
