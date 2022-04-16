@@ -223,4 +223,8 @@ L.ALS.SynthGridLayer.prototype._onMapPan = function () {
 		isFirstIteration = false;
 	}
 	this.labelsGroup.redraw();
+
+	let toBack = [this.bordersGroup, this.polygonGroup];
+	for (let group of toBack)
+		group.bringToBack();
 }

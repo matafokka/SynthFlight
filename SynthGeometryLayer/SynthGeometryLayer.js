@@ -95,7 +95,6 @@ L.ALS.SynthGeometryLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGeometryLay
 		this._layer = L.geoJSON(geoJson, {
 			onEachFeature: (feature, layer) => {
 				let popup = "", doc = {};
-				console.log(feature, layer);
 
 				// Calculate bbox for zooming
 				if (!feature.geometry.bbox) {
@@ -131,7 +130,8 @@ L.ALS.SynthGeometryLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGeometryLay
 			}
 		});
 
-		L.ALS.searchWindow.addToSearch(this.id, docs, fields); // Add GeoJSON to search
+		if (L.ALS.searchWindow)
+			L.ALS.searchWindow.addToSearch(this.id, docs, fields); // Add GeoJSON to search
 		this.addLayers(this._layer);
 		this._setLayerColors();
 		this.writeToHistory();
@@ -162,7 +162,8 @@ L.ALS.SynthGeometryLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGeometryLay
 	},
 
 	onDelete: function () {
-		L.ALS.searchWindow.removeFromSearch(this.id);
+		if (L.ALS.searchWindow)
+			L.ALS.searchWindow.removeFromSearch(this.id);
 	},
 
 	serialize: function (seenObjects) {

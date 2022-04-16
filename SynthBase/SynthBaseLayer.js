@@ -1,6 +1,7 @@
 require("./SynthBaseSettings.js");
 const turfHelpers = require("@turf/helpers");
 const MathTools = require("../MathTools.js");
+const debounce = require("debounce");
 
 /**
  * @typedef {Object} PathData
@@ -36,7 +37,18 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 	 */
 	dashedLine: "4 4",
 
+	isAfterDeserialization: false,
+
 	init: function (settings, pathGroup1, connectionsGroup1, colorLabel1, path1AdditionalLayers = [], pathGroup2 = undefined, connectionsGroup2 = undefined, colorLabel2 = undefined, path2AdditionalLayers = []) {
+
+		/**
+		 * {@link L.ALS.Layer#writeToHistory} but debounced for use in repeated calls
+		 * @type {function()}
+		 */
+		this.writeToHistoryDebounced = debounce(() => {
+			if (!this.isAfterDeserialization)
+				this.writeToHistory()
+		}, 300);
 
 		/**
 		 * Settings passed from ALS
@@ -111,7 +123,7 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 			this.toUpdateThickness.push(path.pathGroup, path.connectionsGroup);
 		}
 
-		this.serializationIgnoreList.push("_airportMarker", "toUpdateThickness");
+		this.serializationIgnoreList.push("_airportMarker", "toUpdateThickness", "writeToHistoryDebounced");
 
 		/**
 		 * Properties to copy to GeoJSON when exporting

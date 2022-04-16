@@ -31,7 +31,6 @@ require("./SynthGridLayer/SynthGridLayer.js");
 require("./SynthRectangleLayer/SynthRectangleLayer.js");
 require("./SynthLineLayer/SynthLineLayer.js");
 require("./SearchControl.js");
-require("./SearchWindow.js");
 
 L.ALS.System.initializeSystem();
 
@@ -87,6 +86,7 @@ let layerSystem = new L.ALS.System(map, {
 	enableHistory: true,
 	enableToolbar: true,
 	makeMapFullscreen: true,
+	historySize: L.ALS.Helpers.supportsFlexbox ? 40 : 20, // Old browsers might have lower RAM limits
 	toolbarZoomControl: new L.ALS.ControlZoom({vertical: true}),
 });
 
@@ -144,17 +144,23 @@ if (!L.ALS.Helpers.isMobile) {
 	}), "bottom");
 }
 
-// Add search
+// Add search. Symbol is not polyfilled in Chrome 7, 8 and, probably, some other versions.
 
-let searchButton;
-if (L.ALS.Helpers.isMobile) {
-	let control = new L.SearchControl();
-	layerSystem.addControl(control, "top", "follow-menu");
-	searchButton = control.getContainer();
-} else {
-	searchButton = L.ALS._createSearchButton();
-	let panel = document.getElementsByClassName("als-top-panel")[0];
-	panel.insertBefore(searchButton, panel.getElementsByClassName("als-menu-add")[0]);
+if (window.Symbol) {
+	require("./SearchWindow.js");
+	let searchButton;
+	if (L.ALS.Helpers.isMobile) {
+		let control = new L.SearchControl();
+		layerSystem.addControl(control, "top", "follow-menu");
+		searchButton = control.getContainer();
+	} else {
+		searchButton = L.ALS._createSearchButton();
+		let panel = document.getElementsByClassName("als-top-panel")[0];
+		panel.insertBefore(searchButton, panel.getElementsByClassName("als-menu-add")[0]);
+	}
+
+	/**
+	 * Search window. Will not be present in really old Chrome versions where Symbol can't be polyfilled
+	 */
+	L.ALS.searchWindow = new L.ALS.SearchWindow(map, searchButton);
 }
-
-L.ALS.searchWindow = new L.ALS.SearchWindow(map, searchButton);

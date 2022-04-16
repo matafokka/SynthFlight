@@ -48,7 +48,7 @@ L.ALS.SynthGridLayer = L.ALS.SynthPolygonLayer.extend(/** @lends L.ALS.SynthGrid
 			this.addPolygon(polygon);
 
 		this.updateAll();
-		this.writeToHistory();
+		this.writeToHistoryDebounced();
 	},
 
 	updateAll: function () {

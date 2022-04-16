@@ -79,7 +79,7 @@ worker.on("exit", () => {
 let mainFile = "main.js";
 persistify({
 	entries: [mainFile],
-	debug: debug
+	debug: debug,
 })
 	.require("./node_modules/geotiff/src/geotiff.js", {expose: "geotiff"}) // Thanks to parcel for this nightmare
 	.transform("package-json-versionify")
@@ -115,7 +115,7 @@ let promises = [], swContent = fs.readFileSync("PWAServiceWorker.js").toString()
 	insertAt = swContent.indexOf("/** to_cache_list */"),
 	buildFileTree = (path) => {
 		if (!fs.lstatSync(path).isDirectory()) {
-			swContent = swContent.slice(0, insertAt) + `"${path}",` + swContent.slice(insertAt);
+			swContent = swContent.slice(0, insertAt) + `"/${path}",` + swContent.slice(insertAt);
 			return;
 		}
 

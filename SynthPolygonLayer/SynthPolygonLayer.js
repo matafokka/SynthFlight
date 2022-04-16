@@ -64,7 +64,7 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthBaseLayer.extend( /** @lends L.ALS.SynthPol
 		this.meridiansInternalConnections = L.featureGroup();
 		this.meridiansExternalConnections = L.featureGroup();
 
-		this.addLayers(this.polygonGroup, this.widgetsGroup, this.bordersGroup, this.latPointsGroup, this.lngPointsGroup, this.labelsGroup);
+		this.addLayers(this.polygonGroup, this.widgetsGroup, this.bordersGroup, this.latPointsGroup, this.lngPointsGroup, this.labelsGroup, this.pathsByParallels, this.pathsByMeridians);
 
 		L.ALS.SynthBaseLayer.prototype.init.call(this, settings,
 			this.parallelsInternalConnections, this.parallelsExternalConnections, "parallelsColor", [this.pathsByParallels],
@@ -92,9 +92,7 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthBaseLayer.extend( /** @lends L.ALS.SynthPol
 			new L.ALS.Widgets.Checkbox("hideCapturePoints", "hideCapturePoints", this, "_updateLayersVisibility").setValue(true),
 			new L.ALS.Widgets.Checkbox("hidePathsConnections", "hidePathsConnections", this, "_updateLayersVisibility"),
 			new L.ALS.Widgets.Checkbox("hidePathsByMeridians", "hidePathsByMeridians", this, "_updateLayersVisibility"),
-			new L.ALS.Widgets.Checkbox("hidePathsByParallels", "hidePathsByParallels", this, "_updateLayersVisibility")
-		);
-		this.addWidgets(
+			new L.ALS.Widgets.Checkbox("hidePathsByParallels", "hidePathsByParallels", this, "_updateLayersVisibility"),
 			new L.ALS.Widgets.Color("borderColor", this.borderColorLabel, this, "_setColor").setValue(this.borderColor),
 			new L.ALS.Widgets.Color("fillColor", this.fillColorLabel, this, "_setColor").setValue(this.fillColor),
 		);
@@ -123,6 +121,7 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthBaseLayer.extend( /** @lends L.ALS.SynthPol
 				scaleWithoutSpaces += char;
 			}
 			this._currentStandardScale = parseInt(scaleWithoutSpaces);
+			this.setName(`${this.defaultName}, ${scale}`);
 		} else
 			this._currentStandardScale = Infinity;
 		this.calculateThreshold(settings); // Update hiding threshold
