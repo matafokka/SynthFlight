@@ -20,6 +20,7 @@ L.ALS.SynthPolygonLayer._toUpdateColors = ["borderColor", "fillColor", "color0",
 
 L.ALS.SynthPolygonLayer.deserialize = function (serialized, layerSystem, settings, seenObjects) {
 	let object = L.ALS.Layer.deserialize(serialized, layerSystem, settings, seenObjects);
+	object.isAfterDeserialization = true;
 
 	for (let prop in serialized.polygons) {
 		let value = serialized.polygons[prop];

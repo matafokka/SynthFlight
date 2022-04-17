@@ -13,7 +13,10 @@ L.ALS.SynthGeometryWizard = L.ALS.Wizard.extend( /** @lends L.ALS.SynthGeometryW
 			this.addWidget(new L.ALS.Widgets.SimpleLabel("lbl", "geometryBrowserNotSupported", "center", "error"));
 			return;
 		}
-		this.addWidget(new L.ALS.Widgets.File("geometryFileLabel", "geometryFileLabel"));
+		this.addWidgets(
+			new L.ALS.Widgets.File("geometryFileLabel", "geometryFileLabel"),
+			new L.ALS.Widgets.SimpleLabel("geometryNotification", "geometryNotification", "center", "message")
+		);
 	}
 
 });

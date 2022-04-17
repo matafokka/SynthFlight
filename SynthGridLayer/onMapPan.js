@@ -42,14 +42,12 @@ L.ALS.SynthGridLayer.prototype._onMapPan = function () {
 		lngTo = bottomRight.lng;
 	}
 
-	// Calculate correct start and end points for given distances
+	// Calculate correct start and end points for given lat
 	latFrom = this._closestLess(latFrom, this.latDistance);
 	latTo = this._closestGreater(latTo, this.latDistance);
-	lngFrom = this._closestLess(lngFrom, this.lngDistance)
-	lngTo = this._closestGreater(lngTo, this.lngDistance);
 
-	let mapLatLng = this.map.getBounds().getNorthWest();
-	let isFirstIteration = true;
+	let mapLatLng = this.map.getBounds().getNorthWest(),
+		isFirstIteration = true;
 
 	let createLabel = (latLng, content, origin = "center", colorful = false) => {
 		let id = L.ALS.Helpers.generateID();
@@ -62,16 +60,37 @@ L.ALS.SynthGridLayer.prototype._onMapPan = function () {
 	// We will use toFixed() to generate lat and lng labels and to fix floating point errors in generating polygons' names
 
 	for (let lat = latFrom; lat <= latTo; lat += this.latDistance) { // From bottom (South) to top (North)
-		createLabel([lat, mapLatLng.lng], this.toFixed(lat), "leftCenter", true);
-		for (let lng = lngFrom; lng <= lngTo; lng += this.lngDistance) { // From left (West) to right (East)
+		let absLat = this.toFixed(lat > 0 ? lat - this.latDistance : lat);
+		createLabel([lat, mapLatLng.lng], absLat, "leftCenter", true);
+
+		// Merge sheets when lat exceeds certain value. Implemented as specified by this document:
+		// https://docs.cntd.ru/document/456074853
+		let mergedSheetsCount = 1;
+		if (this.shouldMergeCells) {
+			absLat = Math.abs(lat);
+			if (absLat > 76)
+				mergedSheetsCount = (this._currentStandardScale === 200000 || this._currentStandardScale === 2000) ? 3 : 4;
+			else if (absLat > 60)
+				mergedSheetsCount = 2;
+		}
+		let lngDistance = this.lngDistance * mergedSheetsCount;
+
+		// Calculate correct start and end points for given lng
+		lngFrom = this._closestLess(lngFrom, lngDistance)
+		lngTo = this._closestGreater(lngTo, lngDistance);
+
+		for (let lng = lngFrom; lng <= lngTo; lng += lngDistance) { // From left (West) to right (East)
+			if (lng < -180 || lng > 180 -  lngDistance)
+				continue;
+
 			if (isFirstIteration)
 				createLabel([mapLatLng.lat, lng], this.toFixed(lng), "topCenter", true);
 
 			let polygon = L.polygon([
 				[lat, lng],
 				[lat + this.latDistance, lng],
-				[lat + this.latDistance, lng + this.lngDistance],
-				[lat, lng + this.lngDistance],
+				[lat + this.latDistance, lng + lngDistance],
+				[lat, lng + lngDistance],
 			]);
 
 			// If this polygon has been selected, we should fill it and replace it in the array.
@@ -104,21 +123,30 @@ L.ALS.SynthGridLayer.prototype._onMapPan = function () {
 			let fixedLng = this.toFixed(lng + this.lngDistance / 2);
 
 			// 1:1 000 000. This part is always present
-			let index = Math.floor(Math.abs(fixedLat) / 4);
-			let letter = L.ALS.Locales.English.alphabet[index];
-			let number = Math.floor(fixedLng / 6) + 31;
-			let polygonName = letter + "-" + number;
+			let index = Math.floor(Math.abs(fixedLat) / 4),
+				polygonName = L.ALS.Locales.English.alphabet[index] + "-",
+				number = Math.floor(fixedLng / 6) + 31,
+				stackUntil = this._currentStandardScale === 1000000 ? mergedSheetsCount : 1;
+
+			// When cells are merged, fill name with numbers
+			for (let i = 0; i < stackUntil; i++) {
+				polygonName += number;
+				number++;
+				if (i + 1 < stackUntil)
+					polygonName += ",";
+			}
 
 			/**
 			 * Splits a sheet of given size to given number of columns and rows.
 			 * Counts parts from left to right and from top to bottom.
 			 * Returns number of part containing current point with coordinates (fixedLat, fixedLng).
 			 * @param colsAndRowsCount Number of both columns and rows. I.e., if you'll pass 3, it will divide sheet to 9 equal parts.
+			 * @param stackNumbers {"none"|"alphabet"|"numbers"|"roman"} How to stack numbers for the last part of the polygon name
 			 * @param sheetLat Size of sheet by latitude
 			 * @param sheetLng Size of sheet by longitude
-			 * @return {number} Number of part containing current point with coordinates (fixedLat, fixedLng)
+			 * @return {string} Number of part containing current point with coordinates (fixedLat, fixedLng)
 			 */
-			let sheetNumber = (colsAndRowsCount, sheetLat = 4, sheetLng = 6) => {
+			let sheetNumber = (colsAndRowsCount, stackNumbers = "none", sheetLat = 4, sheetLng = 6) => {
 				let fixedLatScale = this.toFixed(sheetLat); // Truncate sheet sizes to avoid floating point errors.
 				let fixedLngScale = this.toFixed(sheetLng);
 
@@ -133,47 +161,70 @@ L.ALS.SynthGridLayer.prototype._onMapPan = function () {
 				let row = colsAndRowsCount + Math.floor((bottomLat - fixedLat) / (fixedLatScale / colsAndRowsCount)) + 1;
 				let col = -Math.floor((leftLng - fixedLng) / (fixedLngScale / colsAndRowsCount));
 
-				return colsAndRowsCount * (row - 1) + col;
+				let stackUntil = stackNumbers === "none" ? 1 : mergedSheetsCount,
+					toReturn = "",
+					number = colsAndRowsCount * (row - 1) + col;
+
+				// A hack for 1:2000 scale which I don't quite remember what for.
+				if (this._currentStandardScale === 2000)
+					number += number >= 6 ? -6 : +3;
+
+				// When cells are merged, fill name with numbers
+				for (let i = 0; i < stackUntil; i++) {
+					switch (stackNumbers) {
+						case "alphabet":
+							toReturn +=  L.ALS.locale.alphabet[number - 1];
+							break;
+						case "roman":
+							toReturn += RomanNumerals.toRoman(number);
+							break;
+						default:
+							toReturn += number;
+					}
+					number++;
+					if (i + 1 < stackUntil)
+						toReturn += ",";
+				}
+
+				return toReturn;
 				//return " | Row: " + row + " Col: " + col;
 
 			}
 
 			if (this._currentStandardScale === 500000) // 1:500 000
-				polygonName += "-" + sheetNumber(2);
+				polygonName += "-" + sheetNumber(2, "numbers");
 			else if (this._currentStandardScale === 300000) // 1:300 000
-				polygonName = RomanNumerals.toRoman(sheetNumber(3)) + "-" + polygonName;
+				polygonName = sheetNumber(3, "roman") + "-" + polygonName;
 			else if (this._currentStandardScale === 200000)  // 1:200 000
-				polygonName += "-" + RomanNumerals.toRoman(sheetNumber(6));
+				polygonName += "-" + sheetNumber(6, "roman");
 			else if (this._currentStandardScale <= 100000) // 1:100 000. This part is always present if scale is less than or equal to 1:100 000.
-				polygonName += "-" + sheetNumber(12);
+				polygonName += "-" + sheetNumber(12, this._currentStandardScale === 100000 ? "numbers" : "none");
 
 			if (this._currentStandardScale <= 50000 && this._currentStandardScale > 5000) {
-				polygonName += "-" + L.ALS.locale.alphabet[sheetNumber(2, 2 / 6, 3 / 6) - 1]; // 1:50 000. Always present.
+				polygonName += "-" + sheetNumber(2, this._currentStandardScale === 50000 ? "alphabet" : "none", 2 / 6, 3 / 6); // 1:50 000. Always present.
 				if (this._currentStandardScale <= 25000)
-					polygonName += "-" + L.ALS.locale.alphabet[sheetNumber(2, 1 / 6, 15 / 60) - 1].toLowerCase();
+					polygonName += "-" + sheetNumber(2, this._currentStandardScale === 25000 ? "alphabet" : "none", 1 / 6, 15 / 60).toLowerCase();
 				if (this._currentStandardScale <= 10000)
-					polygonName += "-" + sheetNumber(2, 5 / 60, 7.5 / 60);
+					polygonName += "-" + sheetNumber(2, "numbers", 5 / 60, 7.5 / 60);
 			} else if (this._currentStandardScale <= 5000) {
 				polygonName += "("
 				if (this._currentStandardScale <= 5000)
-					polygonName += sheetNumber(16, 2 / 6, 3 / 6);
-				if (this._currentStandardScale === 2000) {
-					let index = sheetNumber(3, (1 + 15 / 60) / 60, (1 + 52.5 / 60) / 60) - 1;
-					if (index >= 6)
-						index -= 6;
-					else
-						index += 3;
-					polygonName += "-" + L.ALS.locale.alphabet[index].toLowerCase();
-				}
+					polygonName += sheetNumber(16, this._currentStandardScale === 5000 ? "numbers" : "none", 2 / 6, 3 / 6);
+				if (this._currentStandardScale === 2000)
+					polygonName += "-" + sheetNumber(3, "alphabet", (1 + 15 / 60) / 60, (1 + 52.5 / 60) / 60).toLowerCase();
 				polygonName += ")";
 			}
 
 			if (lat < 0)
 				polygonName += " (S)";
 			polygon.polygonName = polygonName;
-			createLabel([lat + this.latDistance / 2, lng + this.lngDistance / 2], polygonName);
+			createLabel([lat + this.latDistance / 2, lng + lngDistance / 2], polygonName);
 		}
 		isFirstIteration = false;
 	}
 	this.labelsGroup.redraw();
+
+	let toBack = [this.bordersGroup, this.polygonGroup];
+	for (let group of toBack)
+		group.bringToBack();
 }

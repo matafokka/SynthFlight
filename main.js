@@ -30,6 +30,7 @@ require("./SynthPolygonLayer/SynthPolygonLayer.js");
 require("./SynthGridLayer/SynthGridLayer.js");
 require("./SynthRectangleLayer/SynthRectangleLayer.js");
 require("./SynthLineLayer/SynthLineLayer.js");
+require("./SearchControl.js");
 
 L.ALS.System.initializeSystem();
 
@@ -39,53 +40,44 @@ let map = L.map("map", {
 	zoomControl: false,
 	minZoom: 1,
 	maxBounds: L.latLngBounds(
-		L.latLng(90, -180),
-		L.latLng(-90, 180)
+		L.latLng(90, -Infinity),
+		L.latLng(-90, Infinity)
 	),
 	maxBoundsViscosity: 1,
 	preferCanvas: true, // Canvas is faster than SVG renderer
 	keyboard: false,
+	worldCopyJump: true,
 }).setView([51.505, -0.09], 13);
 map.doubleClickZoom.disable();
 
-// TODO: Remove when Leaflet.Geodesic will be fully integrated with Leaflet.Draw
-/*let group = L.featureGroup();
-group.addTo(map);
 
-let control = new L.Control.Draw({
-	draw: {
-		polyline: {
-			shapeOptions: {
-				color: "#ff0000",
-				weight: 4,
-				wrap: false,
-			}
-		}
+// Display a notification that users can move the map farther to jump to the other side of the world
+let labelLayer = new L.ALS.LeafletLayers.LabelLayer(false), maxLabelWidth = 3,
+	labelOpts = {
+		maxWidth: 10,
+		breakWords: false,
 	},
-	edit: {
-		featureGroup: group,
-		remove: true,
+	westOpts = {origin: "rightCenter", ...labelOpts},
+	eastOpts = {origin: "leftCenter", ...labelOpts};
+labelLayer.addTo(map);
+
+map.on("moveend zoomend resize", () => {
+	labelLayer.deleteAllLabels();
+
+	let bounds = map.getBounds(), container = map.getContainer(),
+		// Calculate label position by converting map's center from pixels to LatLng
+		middleLat = map.containerPointToLatLng(L.point(container.clientWidth / 2, container.clientHeight / 2)).lat;
+
+	if (bounds.getWest() <= -180) {
+		labelLayer.addLabel("west", [middleLat, -180], L.ALS.locale.moveLabelWest, westOpts);
 	}
-})
-control.addTo(map);
 
-map.on("draw:created", (e) => {
-	group.addLayer(e.layer);
-	console.log(e.layer)
+	if (bounds.getEast() >= +180) {
+		labelLayer.addLabel("east", [middleLat, 180], L.ALS.locale.moveLabelEast, eastOpts);
+	}
+
+	labelLayer.redraw();
 });
-*/
-
-// Show coordinates via Leaflet.Control plugin. It doesn't look good on phones, so we won't add it in this case.
-if (!L.ALS.Helpers.isMobile) {
-	L.control.coordinates({
-		position: "bottomleft",
-		decimals: 5,
-		labelTemplateLat: "Lat (y): {y}",
-		labelTemplateLng: "Lng (x): {x}",
-		enableUserInput: false,
-		useLatLngOrder: true,
-	}).addTo(map);
-}
 
 // Initialize layer system. Create and add base layers.
 let layerSystem = new L.ALS.System(map, {
@@ -94,36 +86,41 @@ let layerSystem = new L.ALS.System(map, {
 	enableHistory: true,
 	enableToolbar: true,
 	makeMapFullscreen: true,
+	historySize: L.ALS.Helpers.supportsFlexbox ? 40 : 20, // Old browsers might have lower RAM limits
+	toolbarZoomControl: new L.ALS.ControlZoom({vertical: true}),
 });
 
-
-let osmLayer = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+// CartoDB
+layerSystem.addBaseLayer(L.tileLayer("http://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png", {
 	maxZoom: 19,
 	noWrap: true,
-});
-layerSystem.addBaseLayer(osmLayer, "Open Street Maps");
+}), "CartoDB");
+
+// OSM
+layerSystem.addBaseLayer(L.tileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+	maxZoom: 19,
+	noWrap: true,
+}), "Open Street Maps");
 
 // Google maps
 let letters = [["m", "Streets"], ["s", "Satellite"], ["p", "Terrain"], ["s,h", "Hybrid"]];
 for (let letter of letters) {
-	let layer = L.tileLayer("http://{s}.google.com/vt/lyrs=" + letter[0] + "&x={x}&y={y}&z={z}", {
+	layerSystem.addBaseLayer(L.tileLayer("http://{s}.google.com/vt/lyrs=" + letter[0] + "&x={x}&y={y}&z={z}", {
 		maxZoom: 20,
 		noWrap: true,
 		subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
-	});
-	layerSystem.addBaseLayer(layer, "Google " + letter[1]);
+	}), "Google " + letter[1]);
 }
 
 // Yandex maps
 let countries = ["ru_RU", "en_US", "uk_UA", "tr_TR"];
 for (let country of countries) {
-	let layer = L.tileLayer(`https://core-renderer-tiles.maps.yandex.net/tiles?l=map&v=21.07.25-1-b210701140430&x={x}&y={y}&z={z}&scale=1&lang=${country}&experimental_data_poi=no_extra_orgs`, {
+	layerSystem.addBaseLayer(L.tileLayer(`https://core-renderer-tiles.maps.yandex.net/tiles?l=map&v=21.07.25-1-b210701140430&x={x}&y={y}&z={z}&scale=1&lang=${country}&experimental_data_poi=no_extra_orgs`, {
 		subdomains: ['01', '02', '03', '04'],
 		reuseTiles: true,
 		updateWhenIdle: false,
 		noWrap: true,
-	});
-	layerSystem.addBaseLayer(layer, "Yandex " + country[3] + country[4]);
+	}), "Yandex " + country[3] + country[4]);
 }
 
 // Empty layer
@@ -134,3 +131,36 @@ layerSystem.addLayerType(L.ALS.SynthGridLayer);
 layerSystem.addLayerType(L.ALS.SynthRectangleLayer);
 layerSystem.addLayerType(L.ALS.SynthLineLayer);
 layerSystem.addLayerType(L.ALS.SynthGeometryLayer);
+
+// Show coordinates via Leaflet.Control plugin. It doesn't look good on phones, so we won't add it in this case.
+if (!L.ALS.Helpers.isMobile) {
+	layerSystem.addControl(L.control.coordinates({
+		position: "bottomleft",
+		decimals: 5,
+		labelTemplateLat: "Lat (y): {y}",
+		labelTemplateLng: "Lng (x): {x}",
+		enableUserInput: false,
+		useLatLngOrder: true,
+	}), "bottom");
+}
+
+// Add search. Symbol is not polyfilled in Chrome 7, 8 and, probably, some other versions.
+
+if (window.Symbol) {
+	require("./SearchWindow.js");
+	let searchButton;
+	if (L.ALS.Helpers.isMobile) {
+		let control = new L.SearchControl();
+		layerSystem.addControl(control, "top", "follow-menu");
+		searchButton = control.getContainer();
+	} else {
+		searchButton = L.ALS._createSearchButton();
+		let panel = document.getElementsByClassName("als-top-panel")[0];
+		panel.insertBefore(searchButton, panel.getElementsByClassName("als-menu-add")[0]);
+	}
+
+	/**
+	 * Search window. Will not be present in really old Chrome versions where Symbol can't be polyfilled
+	 */
+	L.ALS.searchWindow = new L.ALS.SearchWindow(map, searchButton);
+}

@@ -126,4 +126,6 @@ L.ALS.SynthPolygonLayer.prototype._calculatePolygonParameters = function (widget
 		));
 	}
 	this._drawPaths();
+
+	this.writeToHistoryDebounced();
 }

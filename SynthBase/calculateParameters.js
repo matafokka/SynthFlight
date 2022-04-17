@@ -54,4 +54,5 @@ L.ALS.SynthBaseLayer.prototype.calculateParameters = function () {
 		this.getWidgetById(name).setValue(value);
 	}
 
+	this.writeToHistoryDebounced();
 }

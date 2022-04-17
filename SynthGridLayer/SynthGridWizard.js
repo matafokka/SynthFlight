@@ -31,9 +31,10 @@ L.ALS.SynthGridWizard = L.ALS.Wizard.extend( /** @lends L.ALS.SynthGridWizard.pr
 		dropDownList.addItem("Custom").selectItem("1:25 000");
 
 		this.addWidgets(dropDownList,
-			(new L.ALS.Widgets.Number("gridLngDistance", "gridLngDistance")).setMin(0.0001).setMax(180).setStep(0.001),
-			(new L.ALS.Widgets.Number("gridLatDistance", "gridLatDistance")).setMin(0.0001).setMax(90).setStep(0.001),
-			(new L.ALS.Widgets.SimpleLabel("notificationLabel", "gridWizardNotification")).setStyle("message")
+			new L.ALS.Widgets.Number("gridLngDistance", "gridLngDistance").setMin(0.0001).setMax(180).setStep(0.001),
+			new L.ALS.Widgets.Number("gridLatDistance", "gridLatDistance").setMin(0.0001).setMax(90).setStep(0.001),
+			new L.ALS.Widgets.Checkbox("gridShouldMergeCells", "gridShouldMergeCells"),
+			new L.ALS.Widgets.SimpleLabel("notificationLabel", "gridWizardNotification").setStyle("message")
 		);
 	},
 

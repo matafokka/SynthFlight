@@ -1,4 +1,7 @@
 L.ALS.Locales.addLocaleProperties("Русский", {
+	// Labels on dateline
+	moveLabelWest: "Сдвиньте карту дальше влево, чтобы перейти на восточную сторону",
+	moveLabelEast: "Сдвиньте карту дальше вправо, чтобы перейти на западную сторону",
 
 	// SynthBaseLayer
 	connectionMethod: "Метод соединения маршрутов",
@@ -28,6 +31,7 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 	gridStandardScales: "Масштаб сетки:",
 	gridLngDistance: "Расстояние между параллелями:",
 	gridLatDistance: "Расстояние между меридианами:",
+	gridShouldMergeCells: "Объединять пары соседних трапеций при широте выше 60° и снова объединять при широте выше 76° (кроме масштабов 1:1 000 000 и 1:2 000, при которых трапеции с широтой больше 76° объединяются по 3, а не по 4)",
 
 	// SynthGridLayer
 
@@ -114,6 +118,7 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 
 	geometryDisplayName: "Слой Геометрии",
 	geometryFileLabel: "Сжатый shapefile (zip-архив) или GeoJSON:",
+	geometryNotification: "Чтобы просмотреть семантику объекта, нажмите на него", // TODO: Add tip for searching by semantics when search will be added
 
 	// SynthShapefileLayer
 
@@ -130,6 +135,24 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 	geometryDefaultFillColor: "Цвет заливки по умолчанию:",
 	geometryDefaultBorderColor: "Цвет обводки по умолчанию:",
 
+	// Search
+	searchButtonTitle: "Поиск в Слоях Геометрии и OSM",
+	searchPlaceholder: "Начните вводить для поиска...",
+	searchCloseButton: "Закрыть",
+	searchNoOSMResults: "Нет результатов в OSM",
+	searchOSMResults: "Результаты в OSM",
+	searchNoLayersResults: "Нет результатов в Слоях Геометрии",
+	searchLayersResults: "Результаты в слоях геометрии",
+
+	searchInvalidJson: "GeoJSON, полученный от сервера OSM, невалидный. У них что-то не работает, поэтому поиск в OSM временно недоступен.",
+	searchCantConnect: "Невозможно подключиться к серверу OSM. Пожалуйста, проверьте ваше подключение к Интернету. Также сервер OSM может не работать, в таком случае поиск в OSM временно недоступен.",
+
+	searchBadResponse1: "Ошибка, сервер OSM отправил следующее сообщение",
+	searchBadResponse2: "Пожалуйста, попробуйте открыть",
+	searchBadResponse3: "поиск OSM в браузере",
+	searchBadResponse4: "Если он не работает, поиск в OSM временно недоступен. Иначе, пожалуйста, создайте сообщение об ошибке в",
+	searchBadResponse5: "репозитории SynthFlight",
+
 	// About
 
 	firstParagraph: "SynthFlight – это полностью клиентское программное обеспечение для проектирования аэрофотосъемочных работ. Это beta-версия, поэтому ожидаемы баги, большие изменения API, отсутствие обратной совместимости и т.д.",
@@ -141,5 +164,7 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 	thirdParagraph: "Разработка SynthFlight возможна, благодаря различному свободному ПО.",
 
 	fourthParagraph: "Использование карт возможно, благодаря следующим геосервисам:",
+
+	fifthParagraph: "Поиск по Интернету осуществляется через OpenStreetMaps при помощи", // ... Nominatim API
 
 });

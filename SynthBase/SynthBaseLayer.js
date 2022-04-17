@@ -1,6 +1,7 @@
 require("./SynthBaseSettings.js");
 const turfHelpers = require("@turf/helpers");
 const MathTools = require("../MathTools.js");
+const debounce = require("debounce");
 
 /**
  * @typedef {Object} PathData
@@ -36,7 +37,18 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 	 */
 	dashedLine: "4 4",
 
+	isAfterDeserialization: false,
+
 	init: function (settings, pathGroup1, connectionsGroup1, colorLabel1, path1AdditionalLayers = [], pathGroup2 = undefined, connectionsGroup2 = undefined, colorLabel2 = undefined, path2AdditionalLayers = []) {
+
+		/**
+		 * {@link L.ALS.Layer#writeToHistory} but debounced for use in repeated calls
+		 * @type {function()}
+		 */
+		this.writeToHistoryDebounced = debounce(() => {
+			if (!this.isAfterDeserialization)
+				this.writeToHistory()
+		}, 300);
 
 		/**
 		 * Settings passed from ALS
@@ -111,7 +123,7 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 			this.toUpdateThickness.push(path.pathGroup, path.connectionsGroup);
 		}
 
-		this.serializationIgnoreList.push("_airportMarker", "toUpdateThickness");
+		this.serializationIgnoreList.push("_airportMarker", "toUpdateThickness", "writeToHistoryDebounced");
 
 		/**
 		 * Properties to copy to GeoJSON when exporting
@@ -245,20 +257,36 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 		}
 	},
 
-
 	setAirportLatLng: function () {
-		this._airportMarker.setLatLng([
-			this.getWidgetById("airportLat").getValue(),
-			this.getWidgetById("airportLng").getValue()
-		]);
+		let latWidget = this.getWidgetById("airportLat"), lngWidget = this.getWidgetById("airportLng"),
+			fixedLatLng = this._limitAirportPos(latWidget.getValue(), lngWidget.getValue());
+
+		latWidget.setValue(fixedLatLng.lat);
+		lngWidget.setValue(fixedLatLng.lng);
+		this._airportMarker.setLatLng(fixedLatLng);
 		this.connectToAirport();
 	},
 
 	onMarkerDrag: function () {
-		let latLng = this._airportMarker.getLatLng();
-		this.getWidgetById("airportLat").setValue(latLng.lat.toFixed(5));
-		this.getWidgetById("airportLng").setValue(latLng.lng.toFixed(5));
+		let latLng = this._airportMarker.getLatLng(),
+			fixedLatLng = this._limitAirportPos(latLng.lat, latLng.lng);
+		this._airportMarker.setLatLng(fixedLatLng);
+		this.getWidgetById("airportLat").setValue(fixedLatLng.lat.toFixed(5));
+		this.getWidgetById("airportLng").setValue(fixedLatLng.lng.toFixed(5));
 		this.connectToAirport();
+	},
+
+	_limitAirportPos: function (lat, lng) {
+		if (lat > 85)
+			lat = 85;
+		if (lat < -85)
+			lat = -85;
+		if (lng > 180)
+			lng = 180;
+		if (lng < -180)
+			lng = -180;
+
+		return L.latLng(lat, lng);
 	},
 
 	onNameChange: function () {

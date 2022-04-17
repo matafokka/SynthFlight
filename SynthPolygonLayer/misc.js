@@ -66,7 +66,7 @@ L.ALS.SynthPolygonLayer.prototype.updateAll = function () {
  * Generates polygon name for adding into this.polygons
  * @param polygon Polygon to generate name for
  * @return {string} Name for given polygon
- * @private
+ * @protected
  */
 L.ALS.SynthPolygonLayer.prototype._generatePolygonName = function (polygon) {
 	let firstPoint = polygon.getLatLngs()[0][0];

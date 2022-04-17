@@ -24,6 +24,12 @@ L.ALS.SynthGridLayer = L.ALS.SynthPolygonLayer.extend(/** @lends L.ALS.SynthGrid
 
 		L.ALS.SynthPolygonLayer.prototype.init.call(this, wizardResults, settings);
 
+		/**
+		 * Whether or not cells above 60 lat should be merged
+		 * @type {boolean}
+		 */
+		this.shouldMergeCells = wizardResults.gridShouldMergeCells;
+
 		this.addEventListenerTo(this.map, "zoomend", "_onMapZoom");
 		this.addEventListenerTo(this.map, "moveend resize", "_onMapPan");
 	},
@@ -42,7 +48,7 @@ L.ALS.SynthGridLayer = L.ALS.SynthPolygonLayer.extend(/** @lends L.ALS.SynthGrid
 			this.addPolygon(polygon);
 
 		this.updateAll();
-		this.writeToHistory();
+		this.writeToHistoryDebounced();
 	},
 
 	updateAll: function () {

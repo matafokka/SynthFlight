@@ -1,4 +1,7 @@
 L.ALS.Locales.addLocaleProperties("English", {
+	// Labels on dateline
+	moveLabelWest: "Pan further to the left to get to the Eastern side",
+	moveLabelEast: "Pan further to the right to get to the Western side",
 
 	// SynthBaseLayer
 	connectionMethod: "Path connection method",
@@ -28,6 +31,7 @@ L.ALS.Locales.addLocaleProperties("English", {
 	gridStandardScales: "Grid scale:",
 	gridLngDistance: "Distance between parallels:",
 	gridLatDistance: "Distance between meridians:",
+	gridShouldMergeCells: "Merge couples of adjacent cells when latitude exceeds 60° and merge again when it exceeds 76° (except 1:1 000 000 and 1:2 000 scales when cells above 76° triple-merged instead of quadruple-merged)",
 
 	// SynthGridLayer
 
@@ -119,6 +123,7 @@ L.ALS.Locales.addLocaleProperties("English", {
 
 	geometryDisplayName: "Geometry Layer",
 	geometryFileLabel: "Zipped shapefile or GeoJSON:",
+	geometryNotification: "Click/tap on features to see the semantics", // TODO: Add tip for searching by semantics when search will be added
 
 	// SynthGeometryLayer
 
@@ -135,6 +140,24 @@ L.ALS.Locales.addLocaleProperties("English", {
 	geometryDefaultFillColor: "Default fill color:",
 	geometryDefaultBorderColor: "Default border color:",
 
+	// Search
+	searchButtonTitle: "Search Geometry Layers or OSM",
+	searchPlaceholder: "Type to search...",
+	searchCloseButton: "Close",
+	searchNoOSMResults: "No results in OSM",
+	searchOSMResults: "Results in OSM",
+	searchNoLayersResults: "No results in Geometry Layers",
+	searchLayersResults: "Results in Geometry Layers",
+
+	searchInvalidJson: "GeoJSON returned by the OSM server is invalid. Something's not working here, so OSM search is temporarily unavailable.",
+	searchCantConnect: "Can't connect to the OSM server. Please, check your Internet connection. Also, OSM might be down in which case OSM search is temporarily unavailable.",
+
+	searchBadResponse1: "Error, OSM server responded with the following message",
+	searchBadResponse2: "Please, try opening",
+	searchBadResponse3: "OSM search in browser",
+	searchBadResponse4: "If it doesn't work, OSM search is temporarily unavailable. Otherwise, please, create an issue at",
+	searchBadResponse5: "SynthFlight repository",
+
 	// About
 
 	firstParagraph: "SynthFlight is a fully client-side software for planning aerial photography. This is a beta version so bugs, huge API changes and lack of backwards compatibility are to be expected.",
@@ -146,5 +169,7 @@ L.ALS.Locales.addLocaleProperties("English", {
 	thirdParagraph: "Developing SynthFlight is possible thanks to various open-source software.",
 
 	fourthParagraph: "Using maps is possible thanks to following geoservices:",
+
+	fifthParagraph: "Web search is powered by OpenStreetMaps and", // ... Nominatim API
 
 });
