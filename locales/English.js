@@ -123,7 +123,7 @@ L.ALS.Locales.addLocaleProperties("English", {
 
 	geometryDisplayName: "Geometry Layer",
 	geometryFileLabel: "Zipped shapefile or GeoJSON:",
-	geometryNotification: "Click/tap on features to see the semantics", // TODO: Add tip for searching by semantics when search will be added
+	geometryNotification: "Click/tap on features to see the semantics. You cam search by semantics later by clicking \"Search\" button on the program's panel.",
 
 	// SynthGeometryLayer
 

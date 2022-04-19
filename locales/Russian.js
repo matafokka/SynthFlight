@@ -118,7 +118,7 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 
 	geometryDisplayName: "Слой Геометрии",
 	geometryFileLabel: "Сжатый shapefile (zip-архив) или GeoJSON:",
-	geometryNotification: "Чтобы просмотреть семантику объекта, нажмите на него", // TODO: Add tip for searching by semantics when search will be added
+	geometryNotification: "Чтобы просмотреть семантику объекта, нажмите на него. Позже вы можете выполнить поиск по семантике, нажав кнопку поиска на панели программы.",
 
 	// SynthShapefileLayer
 
