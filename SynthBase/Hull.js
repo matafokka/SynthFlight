@@ -275,12 +275,16 @@ L.ALS.SynthBaseLayer.prototype.connectHullToAirport = function () {
  */
 L.ALS.SynthBaseLayer.prototype.connectHull = function () {
 	for (let i = 0; i < this.paths.length; i++) {
-		let path = this.paths[i];
+		let path = this.paths[i], selectedArea = 0;
 		path.hullLength = 0;
-		let layers = path.pathGroup.getLayers();
-		for (let layer of layers)
+
+		path.pathGroup.eachLayer((layer) => {
 			path.hullLength += this.getPathLength(layer);
-		this._createPathWidget(path, 1, path.toUpdateColors);
+			if (layer.selectedArea)
+				selectedArea += layer.selectedArea;
+		});
+
+		this._createPathWidget(path, 1, path.toUpdateColors, selectedArea);
 		this.buildHull(path, this.getWidgetById(`color${i}`).getValue());
 	}
 	this.connectHullToAirport();

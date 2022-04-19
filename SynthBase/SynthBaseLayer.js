@@ -129,7 +129,7 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 		 * Properties to copy to GeoJSON when exporting
 		 * @type {string[]}
 		 */
-		this.propertiesToExport = ["cameraWidth", "cameraHeight", "pixelWidth", "focalLength", "flightHeight", "overlayBetweenPaths", "overlayBetweenImages", "imageScale", "ly", "Ly", "By", "lx", "Lx", "Bx", "GSI", "IFOV", "GIFOV", "FOV", "GFOV", "selectedArea", "timeBetweenCaptures"];
+		this.propertiesToExport = ["cameraWidth", "cameraHeight", "pixelWidth", "focalLength", "flightHeight", "overlayBetweenPaths", "overlayBetweenImages", "imageScale", "ly", "Ly", "By", "lx", "Lx", "Bx", "GSI", "IFOV", "GIFOV", "FOV", "GFOV", "timeBetweenCaptures"];
 
 		// Add airport
 		let icon = L.divIcon({
@@ -316,7 +316,7 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 			this.connectHull();
 	},
 
-	_createPathWidget: function (layer, length, toFlash) {
+	_createPathWidget: function (layer, length, toFlash, selectedArea = 0) {
 		let id = L.ALS.Helpers.generateID(),
 			button = new L.ALS.Widgets.Button("flashPath" + id, "flashPath", this, "flashPath"),
 			lengthWidget = new L.ALS.Widgets.ValueLabel("pathLength" + id, "pathLength", "m").setFormatNumbers(true).setNumberOfDigitsAfterPoint(0),
@@ -329,10 +329,19 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 			timeWidget.setValue(time.formatted);
 			warning.setValue(time.number > 4 ? "flightTimeWarning" : "");
 		}
+
 		this.pathsDetailsSpoiler.addWidgets(
 			new L.ALS.Widgets.SimpleLabel("pathLabel" + id, `${L.ALS.locale.pathTitle} ${this._pathsWidgetsNumber}`, "center", "message"),
-			button, lengthWidget, timeWidget, warning,
+			button
 		);
+
+		if (selectedArea) {
+			this.pathsDetailsSpoiler.addWidget(
+				new L.ALS.Widgets.ValueLabel("selectedArea" + id, "selectedArea", "sq.m.").setNumberOfDigitsAfterPoint(0).setFormatNumbers(true).setValue(selectedArea)
+			);
+		}
+
+		this.pathsDetailsSpoiler.addWidgets(lengthWidget, timeWidget, warning);
 
 		button.toFlash = toFlash;
 		this._pathsWidgetsNumber++;
@@ -449,12 +458,12 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 	connectOnePerFlight: function () {
 		for (let i = 0; i < this.paths.length; i++) {
 
-			let path = this.paths[i], {connectionsGroup, pathGroup} = path, layers = pathGroup.getLayers(),
+			let path = this.paths[i], {connectionsGroup, pathGroup} = path,
 				lineOptions = this.getConnectionLineOptions(this.getWidgetById(`color${i}`).getValue());
 
 			connectionsGroup.clearLayers();
 
-			for (let layer of layers) {
+			pathGroup.eachLayer((layer) => {
 				layer.pathLength = this.getPathLength(layer);
 
 				let latLngs = layer.getLatLngs(),
@@ -464,9 +473,9 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 				if (layer.actualPaths)
 					toFlash.push(...layer.actualPaths);
 
-				this._createPathWidget(connectionLine, 1, toFlash);
+				this._createPathWidget(connectionLine, 1, toFlash, layer.selectedArea);
 				connectionsGroup.addLayer(connectionLine);
-			}
+			});
 		}
 		this.connectOnePerFlightToAirport(); // So we'll end up with only one place that updates widgets
 	},

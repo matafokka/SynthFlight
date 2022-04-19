@@ -102,7 +102,6 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthBaseLayer.extend( /** @lends L.ALS.SynthPol
 		this.addWidgets(
 			new L.ALS.Widgets.File("DEMFiles", DEMFilesLabel, this, "onDEMLoad").setMultiple(true),
 			new L.ALS.Widgets.Divider("div3"),
-			new L.ALS.Widgets.ValueLabel("selectedArea", "selectedArea", "sq.m.").setNumberOfDigitsAfterPoint(0).setFormatNumbers(true),
 		);
 
 		this.addBaseParametersOutputSection();

@@ -61,6 +61,7 @@
     "@babel/preset-env": "^7.12.1",
     "@babel/runtime-corejs3": "^7.12.5",
     "@mapbox/geojson-merge": "^1.1.1",
+    "@turf/area": "^6.5.0",
     "@turf/bbox": "^6.0.1",
     "@turf/bbox-polygon": "^6.4.0",
     "@turf/helpers": "^6.1.4",

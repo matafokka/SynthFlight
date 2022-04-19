@@ -1,4 +1,5 @@
 const bbox = require("@turf/bbox").default;
+const turfArea = require("@turf/area").default;
 const MathTools = require("../MathTools.js");
 const turfHelpers = require("@turf/helpers");
 
@@ -93,6 +94,7 @@ L.ALS.SynthPolygonLayer.prototype._drawPathsWorker = function (isParallels) {
 			prevLine, shouldDraw = true;
 
 		connectionLine.actualPaths = [];
+		connectionLine.selectedArea = turfArea(turfPolygon);
 
 		while (shouldDraw) {
 			let lineCoordinates;

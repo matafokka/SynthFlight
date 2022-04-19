@@ -58,7 +58,6 @@ L.ALS.SynthPolygonLayer.prototype.removePolygon = function (polygon, removeFromO
 }
 
 L.ALS.SynthPolygonLayer.prototype._calculatePolygonParameters = function (widget) {
-	this.selectedArea = 0;
 	for (let name in this.polygons) {
 		if (!this.polygons.hasOwnProperty(name))
 			continue;
@@ -68,8 +67,6 @@ L.ALS.SynthPolygonLayer.prototype._calculatePolygonParameters = function (widget
 
 		layer.lngCellSizeInMeters = this.getParallelOrMeridianLineLength(latLngs[0], latLngs[1], false);
 		layer.latCellSizeInMeters = this.getParallelOrMeridianLineLength(latLngs[1], latLngs[2], false);
-
-		this.selectedArea += layer.lngCellSizeInMeters * layer.latCellSizeInMeters;
 
 		widgetContainer.getWidgetById("lngCellSizeInMeters").setValue(layer.lngCellSizeInMeters);
 		widgetContainer.getWidgetById("latCellSizeInMeters").setValue(layer.latCellSizeInMeters);
@@ -101,7 +98,6 @@ L.ALS.SynthPolygonLayer.prototype._calculatePolygonParameters = function (widget
 			widgetContainer.getWidgetById(name).setValue(value);
 		}
 	}
-	this.getWidgetById("selectedArea").setValue(this.selectedArea);
 
 	// Draw thick borders around selected polygons
 	this.mergePolygons();
