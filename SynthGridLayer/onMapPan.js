@@ -16,38 +16,14 @@ L.ALS.SynthGridLayer.prototype._onMapPan = function () {
 		this.labelsGroup.deleteLabel(id);
 	this._namesIDs = [];
 
-	// Get viewport bounds
-	let bounds = this.map.getBounds();
-	let topLeft = bounds.getNorthWest(),
-		topRight = bounds.getNorthEast(),
-		bottomLeft = bounds.getSouthWest(),
-		bottomRight = bounds.getSouthEast();
+	// Get viewport bounds and calculate correct start and end coords for lng and lat
+	let bounds = this.map.getBounds(), north = bounds.getNorth(), west = bounds.getWest(),
+		lngFrom = this._closestLess(west, this.lngDistance),
+		lngTo = this._closestGreater(bounds.getEast(), this.lngDistance),
+		latFrom = this._closestLess(bounds.getSouth(), this.latDistance),
+		latTo = this._closestGreater(north, this.latDistance);
 
-	// Determine the longest sides of the window
-	let latFrom, latTo, lngFrom, lngTo;
-
-	if (topLeft.lat > topRight.lat) {
-		latFrom = bottomLeft.lat;
-		latTo = topLeft.lat;
-	} else {
-		latFrom = bottomRight.lat;
-		latTo = topRight.lat;
-	}
-
-	if (topRight.lng > bottomRight.lng) {
-		lngFrom = topLeft.lng;
-		lngTo = topRight.lng;
-	} else {
-		lngFrom = bottomLeft.lng;
-		lngTo = bottomRight.lng;
-	}
-
-	// Calculate correct start and end points for given lat
-	latFrom = this._closestLess(latFrom, this.latDistance);
-	latTo = this._closestGreater(latTo, this.latDistance);
-
-	let mapLatLng = this.map.getBounds().getNorthWest(),
-		isFirstIteration = true;
+	let isFirstIteration = true;
 
 	let createLabel = (latLng, content, origin = "center", colorful = false) => {
 		let id = L.ALS.Helpers.generateID();
@@ -61,7 +37,7 @@ L.ALS.SynthGridLayer.prototype._onMapPan = function () {
 
 	for (let lat = latFrom; lat <= latTo; lat += this.latDistance) { // From bottom (South) to top (North)
 		let absLat = this.toFixed(lat > 0 ? lat - this.latDistance : lat);
-		createLabel([lat, mapLatLng.lng], absLat, "leftCenter", true);
+		createLabel([lat, west], absLat, "leftCenter", true);
 
 		// Merge sheets when lat exceeds certain value. Implemented as specified by this document:
 		// https://docs.cntd.ru/document/456074853
@@ -75,16 +51,12 @@ L.ALS.SynthGridLayer.prototype._onMapPan = function () {
 		}
 		let lngDistance = this.lngDistance * mergedSheetsCount;
 
-		// Calculate correct start and end points for given lng
-		lngFrom = this._closestLess(lngFrom, lngDistance)
-		lngTo = this._closestGreater(lngTo, lngDistance);
-
 		for (let lng = lngFrom; lng <= lngTo; lng += lngDistance) { // From left (West) to right (East)
 			if (lng < -180 || lng > 180 -  lngDistance)
 				continue;
 
 			if (isFirstIteration)
-				createLabel([mapLatLng.lat, lng], this.toFixed(lng), "topCenter", true);
+				createLabel([north, lng], this.toFixed(lng), "topCenter", true);
 
 			let polygon = L.polygon([
 				[lat, lng],
@@ -150,7 +122,7 @@ L.ALS.SynthGridLayer.prototype._onMapPan = function () {
 				let fixedLatScale = this.toFixed(sheetLat); // Truncate sheet sizes to avoid floating point errors.
 				let fixedLngScale = this.toFixed(sheetLng);
 
-				// Ok, imagine a ruler. It looks like |...|...|...|. In our case, | is sheet's border. Our point lies between these borders.
+				// Ok, imagine a ruler which looks like this: |...|...|...|. In our case, | is sheet's border. Our point lies between these borders.
 				// We need to find how much borders we need to reach our point. We do that for both lat and lng.
 				// Here we're finding coordinates of these borders
 				let bottomLat = this.toFixed(this._closestLess(fixedLat, fixedLatScale));
@@ -187,8 +159,6 @@ L.ALS.SynthGridLayer.prototype._onMapPan = function () {
 				}
 
 				return toReturn;
-				//return " | Row: " + row + " Col: " + col;
-
 			}
 
 			if (this._currentStandardScale === 500000) // 1:500 000
@@ -207,9 +177,7 @@ L.ALS.SynthGridLayer.prototype._onMapPan = function () {
 				if (this._currentStandardScale <= 10000)
 					polygonName += "-" + sheetNumber(2, "numbers", 5 / 60, 7.5 / 60);
 			} else if (this._currentStandardScale <= 5000) {
-				polygonName += "("
-				if (this._currentStandardScale <= 5000)
-					polygonName += sheetNumber(16, this._currentStandardScale === 5000 ? "numbers" : "none", 2 / 6, 3 / 6);
+				polygonName += " (" + sheetNumber(16, this._currentStandardScale === 5000 ? "numbers" : "none", 2 / 6, 3 / 6);
 				if (this._currentStandardScale === 2000)
 					polygonName += "-" + sheetNumber(3, "alphabet", (1 + 15 / 60) / 60, (1 + 52.5 / 60) / 60).toLowerCase();
 				polygonName += ")";
