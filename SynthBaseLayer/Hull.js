@@ -53,6 +53,8 @@ L.ALS.SynthBaseLayer.prototype.buildHull = function (path, color) {
 	}
 
 	let {lower, upper} = this.getConvexHull(points);
+	lower.pop();
+	upper.pop();
 
 	// Normalize path-connection order by appending other point of the first path, if it's not connected already.
 	let [p1, p2] = lower;
@@ -189,8 +191,6 @@ L.ALS.SynthBaseLayer.prototype.getConvexHull = function (points) {
 		upper.push(point);
 	}
 
-	lower.pop();
-	upper.pop();
 	return {upper, lower}
 }
 

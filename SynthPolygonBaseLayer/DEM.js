@@ -8,7 +8,7 @@ try {
 } catch (e) {}
 const work = require("webworkify");
 
-L.ALS.SynthPolygonLayer.prototype.onDEMLoad = async function (widget) {
+L.ALS.SynthPolygonBaseLayer.prototype.onDEMLoad = async function (widget) {
 	let clear = () => {
 		L.ALS.operationsWindow.removeOperation("dem");
 		widget.clearFileArea();
@@ -48,7 +48,7 @@ L.ALS.SynthPolygonLayer.prototype.onDEMLoad = async function (widget) {
  * Being called upon DEM load
  * @param widget {L.ALS.Widgets.File}
  */
-L.ALS.SynthPolygonLayer.prototype.onDEMLoadWorker = async function (widget) {
+L.ALS.SynthPolygonBaseLayer.prototype.onDEMLoadWorker = async function (widget) {
 	let files = widget.getValue();
 	let parser = new ESRIGridParser(this);
 	let fileReader = new FileReader();
@@ -65,7 +65,14 @@ L.ALS.SynthPolygonLayer.prototype.onDEMLoadWorker = async function (widget) {
 			continue;
 
 		// Try to find aux or prj file for current file and get projection string from it
-		let baseName = this.getFileBaseName(file.name), projectionString = "";
+		let baseName = "", projectionString = "";
+
+		for (let symbol of file.name) {
+			if (symbol === ".")
+				break;
+			baseName += symbol;
+		}
+
 		for (let file2 of files) {
 			let ext2 = L.ALS.Helpers.getFileExtension(file2.name).toLowerCase();
 			let isPrj = (ext2 === "prj");
@@ -92,7 +99,7 @@ L.ALS.SynthPolygonLayer.prototype.onDEMLoadWorker = async function (widget) {
 			let startIndex = text.indexOf(start) + start.length;
 			let endIndex = text.indexOf(end);
 			if (startIndex === start.length - 1 || endIndex === -1)
-				continue; // Continue in hope of finding not broken xml or prj file.
+				continue; // Continue in hope of finding correct xml or prj file.
 			projectionString = text.substring(startIndex, endIndex);
 			break;
 		}
@@ -100,21 +107,18 @@ L.ALS.SynthPolygonLayer.prototype.onDEMLoadWorker = async function (widget) {
 		if (isTiff) {
 			if (!GeoTIFFParser)
 				continue;
-			let stats = await GeoTIFFParser(file, projectionString, ESRIGridParser.getInitialData(this));
+			let stats = await GeoTIFFParser(file, projectionString, ESRIGridParser.getInitialData(this, false));
 			ESRIGridParser.copyStats(this, stats);
 			continue;
 		}
 
 		if (!supportsWorker) {
 			await new Promise((resolve) => {
-				ESRIGridParser.parseFile(file, parser, fileReader, () => {
-					resolve();
-				})
+				ESRIGridParser.parseFile(file, parser, fileReader, () => resolve())
 			});
 			continue;
 		}
 
-		//let workerFn = isTiff ? GeoTIFFParserWorker : ESRIGridParserWorker; // In case we'll define another parser
 		let worker = work(ESRIGridParserWorker);
 		await new Promise(resolve => {
 			worker.addEventListener("message", (e) => {
@@ -129,14 +133,4 @@ L.ALS.SynthPolygonLayer.prototype.onDEMLoadWorker = async function (widget) {
 			});
 		});
 	}
-};
-
-L.ALS.SynthPolygonLayer.prototype.getFileBaseName = function (filename) {
-	let baseName = "";
-	for (let symbol of filename) {
-		if (symbol === ".")
-			return baseName;
-		baseName += symbol;
-	}
-	return baseName;
 };

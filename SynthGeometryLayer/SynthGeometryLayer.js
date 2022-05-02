@@ -71,8 +71,8 @@ L.ALS.SynthGeometryLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGeometryLay
 	},
 
 	_displayFile: function (geoJson) {
-		let borderColor = new L.ALS.Widgets.Color("borderColor", "geometryBorderColor", this, "_setColor").setValue(this.borderColor),
-			fillColor = new L.ALS.Widgets.Color("fillColor", "geometryFillColor", this, "_setColor").setValue(this.fillColor),
+		let borderColor = new L.ALS.Widgets.Color("borderColor", "geometryBorderColor", this, "setColor").setValue(this.borderColor),
+			fillColor = new L.ALS.Widgets.Color("fillColor", "geometryFillColor", this, "setColor").setValue(this.fillColor),
 			menu = [borderColor, fillColor],
 			popupOptions = {
 				maxWidth: 500,
@@ -142,23 +142,22 @@ L.ALS.SynthGeometryLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGeometryLay
 		this.deleteLayer();
 	},
 
-	_setColor(widget) {
+	setColor(widget) {
 		this[widget.id] = widget.getValue();
 		this._setLayerColors();
 	},
 
 	_setLayerColors() {
-		let layers = this._layer.getLayers();
-		for (let layer of layers) {
+		this._layer.eachLayer((layer) => {
 			if (!layer.setStyle)
-				continue;
+				return;
 
 			layer.setStyle({
 				color: this.borderColor,
 				fillColor: this.fillColor,
 				fill: layer instanceof L.Polygon
 			});
-		}
+		});
 	},
 
 	onDelete: function () {

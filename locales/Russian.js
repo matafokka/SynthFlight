@@ -97,6 +97,9 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 	notGridNotSupported: "Извините, ваш браузер не поддерживает ничего, кроме ASCII Grid. Пожалуйста, выберете файл ASCII Grid.",
 	DEMError: "Извините, во время загрузки одного из ваших файлов произошла ошибка",
 
+	jsonNoPaths1: "Маршруты не были добавлены в слое",
+	jsonNoPaths2: "будет экспортирована только геометрия и положение аэропорта.",
+
 	// SynthGridSettings
 
 	defaultGridBorderColor: "Цвет обводки сетки по умолчанию:",
@@ -114,13 +117,13 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 	rectangleFillColor: "Цвет заливки прямоугольников:",
 	rectangleLayersRemoved: "Один или несколько прямоугольников были удалены, так как они слишком большие",
 
-	// SynthShapefileWizard
+	// SynthGeometryWizard
 
 	geometryDisplayName: "Слой Геометрии",
 	geometryFileLabel: "Сжатый shapefile (zip-архив) или GeoJSON:",
 	geometryNotification: "Чтобы просмотреть семантику объекта, нажмите на него. Позже вы можете выполнить поиск по семантике, нажав кнопку поиска на панели программы.",
 
-	// SynthShapefileLayer
+	// SynthGeometryLayer
 
 	geometryOutOfBounds: "Объекты в выбранном файле выходят за границы видимой области. Пожалуйста, проверьте проекцию и/или добавьте в архив файл .prj",
 	geometryInvalidFile: "Этот файл не является shapefile-ом или файлом GeoJSON",
@@ -130,10 +133,15 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 	geometryBrowserNotSupported: "Ваш браузер не поддерживает добавление данного слоя, но вы можете открывать проекты, использующие этот слой.",
 	geometryNoFileSelected: "Файл не был выбран. Пожалуйста, выберете файл, который хотите добавить, и попробуйте снова.",
 
-	// Shapefile settings
+	// SynthGeometrySettings
 
 	geometryDefaultFillColor: "Цвет заливки по умолчанию:",
 	geometryDefaultBorderColor: "Цвет обводки по умолчанию:",
+
+	// SynthPolygonLayer
+
+	polygonPathsColor: "Цвет маршрутов:",
+	polygonHidePaths: "Скрыть маршруты",
 
 	// Search
 	searchButtonTitle: "Поиск в Слоях Геометрии и OSM",

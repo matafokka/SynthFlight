@@ -39,7 +39,26 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 
 	isAfterDeserialization: false,
 
-	init: function (settings, pathGroup1, connectionsGroup1, colorLabel1, path1AdditionalLayers = [], pathGroup2 = undefined, connectionsGroup2 = undefined, colorLabel2 = undefined, path2AdditionalLayers = []) {
+	/**
+	 * Indicates whether this layer has Y overlay, i.e. if it has parallel paths
+	 * @type {boolean}
+	 */
+	hasYOverlay: true,
+
+	init: function (
+		settings,
+		// Path 1 args
+		pathGroup1,
+		connectionsGroup1,
+		colorLabel1,
+		path1AdditionalLayers = [],
+
+		// Path 2 args
+		pathGroup2 = undefined,
+		connectionsGroup2 = undefined,
+		colorLabel2 = undefined,
+		path2AdditionalLayers = []
+	) {
 
 		/**
 		 * {@link L.ALS.Layer#writeToHistory} but debounced for use in repeated calls
@@ -87,18 +106,12 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 		} : undefined;
 
 		/**
-		 * Indicates whether this layer has Y overlay, i.e. if it has parallel paths
-		 * @type {boolean}
-		 */
-		this.hasYOverlay = !!this.path2;
-
-		/**
 		 * Array of paths to work with
 		 * @type {PathData[]}
 		 */
 		this.paths = [this.path1];
 
-		if (this.hasYOverlay)
+		if (this.path2)
 			this.paths.push(this.path2);
 
 		/**
@@ -250,7 +263,8 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 	 */
 	_setPathsColor: function () {
 		for (let i = 0; i < this.paths.length; i++) {
-			let style = {color: this.getWidgetById(`color${i}`).getValue()},
+			let color = this.getWidgetById(`color${i}`).getValue(),
+				style = {fillColor: color, color},
 				path = this.paths[i];
 			for (let group of path.toUpdateColors)
 				group.setStyle(style);
@@ -375,7 +389,7 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 	 * @return {number} Line length
 	 */
 	getLineLengthMeters: function (line, useFlightHeight = true) {
-		let r = this._getEarthRadius(useFlightHeight), points = line instanceof Array ? line : line.getLatLngs(), distance = 0;
+		let r = this.getEarthRadius(useFlightHeight), points = line instanceof Array ? line : line.getLatLngs(), distance = 0;
 		if (points.length === 0)
 			return 0;
 
@@ -404,7 +418,7 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 	 * @return {number} By how much you should modify (add or remove to) lng or lat to get a line of given length
 	 */
 	getArcAngleByLength: function (startingPoint, length, isVertical, useFlightHeight = false) {
-		let r = this._getEarthRadius(useFlightHeight);
+		let r = this.getEarthRadius(useFlightHeight);
 
 		// For vertical lines, we can simply use arc length since any two equal angles will form two equal arcs along any meridian.
 		if (isVertical)
@@ -420,7 +434,7 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 		return turfHelpers.radiansToDegrees(length / newR);
 	},
 
-	_getEarthRadius: function (useFlightHeight = false) {
+	getEarthRadius: function (useFlightHeight = false) {
 		return 6378137 + (useFlightHeight ? this.flightHeight : 0);
 	},
 
@@ -440,12 +454,11 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 		let airportPos = this._airportMarker.getLatLng();
 
 		for (let path of this.paths) {
-			let layers = path.connectionsGroup.getLayers();
-			for (let layer of layers) {
+			path.connectionsGroup.eachLayer((layer) => {
 				layer.getLatLngs()[1] = airportPos;
 				L.redrawLayer(layer);
 				layer.updateWidgets(layer.pathLength + this.getLineLengthMeters(layer));
-			}
+			});
 		}
 
 	},
@@ -486,18 +499,17 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 	 * @return {LatLng[][]} Cycles
 	 */
 	onePerFlightToCycles: function (path) {
-		let layers = path.pathGroup.getLayers();
-
-		if (layers.length === 0)
-			return undefined;
-
 		let cycles = [], airportPos = this._airportMarker.getLatLng();
-		for (let layer of layers) {
+
+		path.pathGroup.eachLayer((layer) => {
 			let latLngs = layer.getLatLngs(), toPush = [airportPos, ...latLngs, airportPos];
 			toPush.pathLength = layer.pathLength + this.getLineLengthMeters([latLngs[0], airportPos]) +
 				this.getLineLengthMeters([latLngs[latLngs.length - 1], airportPos]);
 			cycles.push(toPush);
-		}
+		})
+
+		if (cycles.length === 0)
+			return undefined;
 
 		return cycles;
 	},
@@ -522,9 +534,11 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 			this.layerSystem.clickOnMenu();
 
 		for (let group of widget.toFlash) {
-			let layers = group instanceof L.FeatureGroup ? group.getLayers() : [group];
-			for (let layer of layers)
-				this.flashLine(layer);
+			if (!group instanceof L.FeatureGroup) {
+				this.flashLine(group);
+				continue;
+			}
+			group.eachLayer(layer => this.flashLine(layer));
 		}
 	},
 

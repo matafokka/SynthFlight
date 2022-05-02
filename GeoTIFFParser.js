@@ -42,23 +42,22 @@ module.exports = async function (file, projectionString, initialData) {
 		let projectionFromWGS = proj4("WGS84", projectionString);
 
 		for (let name in initialData) {
-			// Let's project each polygon to the image, get their intersection part and calculate statistics for it
+			// Project each polygon to the image, get their intersection part and calculate statistics for it
 			let polygon = initialData[name],
-				oldBbox = [
-				polygon[0], [polygon[1][0], polygon[0][1]], polygon[1], [polygon[0][0], polygon[1][1]], polygon[0]
-			],
-				newBbox = [];
+				coords = polygon.length > 2 ? polygon : [
+					polygon[0], [polygon[1][0], polygon[0][1]],
+					polygon[1], [polygon[0][0], polygon[1][1]], polygon[0]
+				],
+				projPolygon = [];
 
-			for (let point of oldBbox)
-				newBbox.push(projectionFromWGS.forward(point));
+			for (let coord of coords)
+				projPolygon.push(projectionFromWGS.forward(coord));
 
-			newBbox = bboxPolygon(
-				bbox(
-					turfHelpers.polygon([newBbox])
-				)
-			);
+			let polygonBbox = bboxPolygon(bbox(
+				turfHelpers.polygon([projPolygon])
+			));
 
-			let intersection = intersect(imagePolygon, newBbox);
+			let intersection = intersect(imagePolygon, polygonBbox);
 			if (!intersection)
 				continue;
 
@@ -98,7 +97,7 @@ module.exports = async function (file, projectionString, initialData) {
 					currentX++; // So we can continue without incrementing
 					index++;
 
-					if (!MathTools.isPointInRectangle(point, polygon))
+					if (!MathTools.isPointInPolygon(point, projPolygon))
 						continue;
 
 					let value = 0;

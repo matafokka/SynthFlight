@@ -102,6 +102,9 @@ L.ALS.Locales.addLocaleProperties("English", {
 	notGridNotSupported: "Sorry, your browser doesn't support anything other than ASCII Grid. Please, select a valid ASCII Grid file.",
 	DEMError: "Sorry, an error occurred while loading one of your files", //TODO: Add file name
 
+	jsonNoPaths1: "No paths has been drawn in layer",
+	jsonNoPaths2: "only selected geometry and airport position will be exported.",
+
 	// SynthGridSettings
 
 	defaultGridBorderColor: "Default grid border color:",
@@ -139,6 +142,10 @@ L.ALS.Locales.addLocaleProperties("English", {
 
 	geometryDefaultFillColor: "Default fill color:",
 	geometryDefaultBorderColor: "Default border color:",
+
+	// SynthPolygonLayer
+	polygonPathsColor: "Paths color:",
+	polygonHidePaths: "Hide paths",
 
 	// Search
 	searchButtonTitle: "Search Geometry Layers or OSM",

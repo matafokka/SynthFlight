@@ -23,8 +23,7 @@ class MathTools {
 	 * @return {boolean} true, if does. False otherwise.
 	 */
 	static isPointOnLine(point, line) {
-		let p1 = line[0], p2 = line[1];
-		let p1x = p1[0], p1y = p1[1], p2x = p2[0], p2y = p2[1], px = point[0], py = point[1];
+		let [p1, p2] = line,  [p1x, p1y] = p1, [p2x, p2y] = p2, [px, py] = point;
 
 		// Determine if px and py is between line's points. If not, the point is not on the line.
 		let minX = Math.min(p1x, p2x);
@@ -134,7 +133,7 @@ class MathTools {
 			if (notOnVertex)
 				intersections++;
 		}
-		//console.log(point, intersections);
+
 		return (intersections % 2 !== 0);
 	}
 
@@ -180,39 +179,49 @@ class MathTools {
 	 * @return {*[]|undefined} Clipped line where points are sorted from left to right or, if x coordinates are equal, from top to bottom. Or undefined if line doesn't intersect the polygon.
 	 */
 	static clipLineByPolygon(line, polygon) {
-		if (line.length !== 2)
+		if (line.length < 2)
 			return undefined;
 
-		// Find intersection of each edge with the line and put it to the array
+		// Find intersection of each edge with each segment of the line and put it to the array
 		let intersections = [];
 		for (let i = 0; i < polygon.length - 1; i++) {
 			let edge = [polygon[i], polygon[i + 1]];
-			let intersection = this.linesIntersection(line, edge);
-			if (intersection === undefined)
-				continue;
 
-			for (let point of intersection)
-				intersections.push(point);
+			for (let j = 0; j < line.length - 1; j++) {
+				let intersection = this.linesIntersection([line[j], line[j + 1]], edge);
+
+				if (intersection === undefined)
+					continue;
+
+				for (let point of intersection)
+					intersections.push(point);
+			}
+
 		}
 
+		if (intersections.length < 2)
+			return undefined;
+
 		// Find two points that will produce greatest length. It will yield the segment inside the whole polygon.
-		let point1, point2, previousLength;
+		let point1, point2, previousLength = 0;
 		for (let i = 0; i < intersections.length; i++) {
+			let p1 = intersections[i];
+
 			for (let j = i + 1; j < intersections.length; j++) {
-				let p1 = intersections[i], p2 = intersections[j];
-				let length = this.distanceBetweenPoints(p1, p2);
-				if (previousLength !== undefined && this.isLessThanOrEqualTo(length, previousLength))
+				let p2 = intersections[j], length = this.distanceBetweenPoints(p1, p2);
+
+				if (length <= previousLength)
 					continue;
+
 				point1 = p1;
 				point2 = p2;
 				previousLength = length;
 			}
+
 		}
-		if (previousLength === undefined)
-			return undefined;
 
 		// Sort points from left to right and, if x coordinates are equal, from top to bottom.
-		let x1 = point1[0], x2 = point2[0], y1 = point1[1], y2 = point2[1];
+		let [x1, y1] = point1, [x2, y2] = point2;
 		if (this.isEqual(x1, x2)) {
 			if (this.isGreaterThanOrEqualTo(y1, y2))
 				return [point1, point2];
@@ -242,15 +251,13 @@ class MathTools {
 	 * @return {*[]|undefined} One of: Array of intersections or, if lines doesn't intersect, undefined
 	 */
 	static linesIntersection(line1, line2) {
-		let p11 = line1[0], p21 = line2[0];
-		let x1 = p11[0], x3 = p21[0];
-
-		let params1 = this.getSlopeAndIntercept(line1);
-		let params2 = this.getSlopeAndIntercept(line2);
+		let x1 = line1[0][0], x3 = line2[0][0],
+			params1 = this.getSlopeAndIntercept(line1),
+			params2 = this.getSlopeAndIntercept(line2);
 
 		// Case when only one of the lines is vertical
-		let x, verticalLine, otherLine;
-		let shouldIterateOverPoints = false; // In case of parallel and overlapping lines we should use another method of detection intersections
+		let x, verticalLine, otherLine,
+			shouldIterateOverPoints = false; // In case of parallel and overlapping lines we should use another method of detection intersections
 		if (params1 === undefined && params2 !== undefined) {
 			x = x1;
 			verticalLine = line1;
@@ -271,8 +278,8 @@ class MathTools {
 		}
 
 		if (!shouldIterateOverPoints) {
-			let slopeDiff = params1.slope - params2.slope;
-			let interceptDiff = params2.intercept - params1.intercept;
+			let slopeDiff = params1.slope - params2.slope,
+				interceptDiff = params2.intercept - params1.intercept;
 
 			 // Case when lines are parallel...
 			if (this.isEqual(slopeDiff, 0)) {

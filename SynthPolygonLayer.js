@@ -1,4 +1,4 @@
-L.ALS.SynthPolygonLayer = L.ALS.SynthBaseDrawLayer.extend({
+L.ALS.SynthRectangleBaseLayer = L.ALS.SynthBaseDrawLayer.extend({
 	defaultName: "Polygon Layer",
 	drawControls: {
 		polygon: {

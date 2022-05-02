@@ -3,18 +3,16 @@ const turfArea = require("@turf/area").default;
 const MathTools = require("../MathTools.js");
 const turfHelpers = require("@turf/helpers");
 
-L.ALS.SynthPolygonLayer.prototype._clearPaths = function () {
-	let groupsToClear = [this.pathsByParallels, this.pathsByMeridians, this.meridiansExternalConnections, this.meridiansInternalConnections, this.parallelsExternalConnections, this.parallelsInternalConnections, this.latPointsGroup, this.lngPointsGroup];
-	for (let group of groupsToClear)
-		group.clearLayers();
+L.ALS.SynthRectangleBaseLayer.prototype.clearPaths = function () {
+	L.ALS.SynthPolygonBaseLayer.prototype.clearPaths.call(this);
 
 	for (let id of this._pathsLabelsIDs)
 		this.labelsGroup.deleteLabel(id);
 	this._pathsLabelsIDs = [];
 }
 
-L.ALS.SynthPolygonLayer.prototype._drawPaths = function () {
-	this._clearPaths();
+L.ALS.SynthRectangleBaseLayer.prototype._drawPaths = function () {
+	this.clearPaths();
 
 	// Validate estimated paths count
 
@@ -51,26 +49,25 @@ L.ALS.SynthPolygonLayer.prototype._drawPaths = function () {
  * Draws flight paths. Use _drawPaths wrapper to draw paths instead of this.
  * @private
  */
-L.ALS.SynthPolygonLayer.prototype._drawPathsWorker = function (isParallels) {
+L.ALS.SynthRectangleBaseLayer.prototype._drawPathsWorker = function (isParallels) {
 
-	let pathName, nameForOutput, color, connectionsGroup, widgetId, extensionIndex;
+	let pathGroup, nameForOutput, color, connectionsGroup, widgetId, extensionIndex;
 	if (isParallels) {
-		pathName = "pathsByParallels";
+		pathGroup = this.pathsByParallels;
 		connectionsGroup = this.parallelsInternalConnections;
 		nameForOutput = "lng";
 		color = this["color0"];
 		widgetId = "hidePathsByParallels";
 		extensionIndex = 0;
 	} else {
-		pathName = "pathsByMeridians";
+		pathGroup = this.pathsByMeridians;
 		connectionsGroup = this.meridiansInternalConnections;
 		nameForOutput = "lat";
 		color = this["color1"];
 		widgetId = "hidePathsByMeridians";
 		extensionIndex = 1;
 	}
-	let pathGroup = this[pathName],
-		pointsName = nameForOutput + "PointsGroup",
+	let pointsName = nameForOutput + "PointsGroup",
 		lineOptions = {
 			color,
 			weight: this.lineThicknessValue

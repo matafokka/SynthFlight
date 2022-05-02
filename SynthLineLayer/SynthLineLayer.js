@@ -62,11 +62,11 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend(/** @lends L.ALS.SynthLineLay
 		this.pathsGroup.clearLayers();
 		this.pointsGroup.clearLayers();
 
-		let layers = this.drawingGroup.getLayers(), color = this.getWidgetById("color0").getValue(), lineOptions = {
+		let color = this.getWidgetById("color0").getValue(), lineOptions = {
 			color, thickness: this.lineThicknessValue, segmentsNumber: L.GEODESIC_SEGMENTS,
 		};
 
-		for (let layer of layers) {
+		this.drawingGroup.eachLayer((layer) => {
 			let latLngs = layer.getLatLngs();
 			for (let i = 1; i < latLngs.length; i++) {
 				let extendedGeodesic = new L.Geodesic([latLngs[i - 1], latLngs[i]], lineOptions),
@@ -78,14 +78,13 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend(/** @lends L.ALS.SynthLineLay
 
 				// Capture points made by constructing a line with segments number equal to the number of images
 				let points = new L.Geodesic(extendedGeodesic.getLatLngs(), {
-					...lineOptions,
-					segmentsNumber: numberOfImages
+					...lineOptions, segmentsNumber: numberOfImages
 				}).getActualLatLngs()[0];
 
 				for (let point of points)
-					this.pointsGroup.addLayer(this.createCapturePoint([point.lat, point.lng], color));
+					this.pointsGroup.addLayer(this.createCapturePoint(point, color));
 			}
-		}
+		});
 
 		this.updatePathsMeta();
 
@@ -120,10 +119,8 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend(/** @lends L.ALS.SynthLineLay
 	},
 
 	serialize: function (seenObjects) {
-		let layers = this.drawingGroup.getLayers(), lines = [];
-
-		for (let layer of layers)
-			lines.push(layer.getLatLngs());
+		let lines = [];
+		this.drawingGroup.eachLayer(layer => lines.push(layer.getLatLngs()));
 
 		let serialized = this.getObjectToSerializeTo(seenObjects);
 		serialized.lines = L.ALS.Serializable.serializeAnyObject(lines, seenObjects);

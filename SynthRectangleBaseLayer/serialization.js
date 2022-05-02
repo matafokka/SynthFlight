@@ -1,4 +1,4 @@
-L.ALS.SynthPolygonLayer.prototype.serialize = function (seenObjects) {
+L.ALS.SynthRectangleBaseLayer.prototype.serialize = function (seenObjects) {
 	let serialized = this.getObjectToSerializeTo(seenObjects);
 
 	serialized.polygonsWidgets = L.ALS.Serializable.serializeAnyObject(this.polygonsWidgets, seenObjects);
@@ -16,9 +16,9 @@ L.ALS.SynthPolygonLayer.prototype.serialize = function (seenObjects) {
 	return serialized;
 }
 
-L.ALS.SynthPolygonLayer._toUpdateColors = ["borderColor", "fillColor", "color0", "color1"];
+L.ALS.SynthRectangleBaseLayer._toUpdateColors = ["borderColor", "fillColor", "color0", "color1"];
 
-L.ALS.SynthPolygonLayer.deserialize = function (serialized, layerSystem, settings, seenObjects) {
+L.ALS.SynthRectangleBaseLayer.deserialize = function (serialized, layerSystem, settings, seenObjects) {
 	let object = L.ALS.Layer.deserialize(serialized, layerSystem, settings, seenObjects);
 	object.isAfterDeserialization = true;
 
@@ -34,10 +34,10 @@ L.ALS.SynthPolygonLayer.deserialize = function (serialized, layerSystem, setting
 	}
 
 	for (let color of this._toUpdateColors)
-		object._setColor(object.getWidgetById(color));
+		object.setColor(object.getWidgetById(color));
 
 	object.setAirportLatLng();
-	object.updateAll();
+	object.calculateParameters();
 
 	return object;
 }

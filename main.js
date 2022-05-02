@@ -14,7 +14,7 @@ window.L = require("leaflet");
  * Segments number to use when displaying L.Geodesic
  * @type {number}
  */
-L.GEODESIC_SEGMENTS = 1000;
+L.GEODESIC_SEGMENTS = 500;
 
 L.Geodesic = require("leaflet.geodesic").GeodesicLine;
 require("leaflet-draw");
@@ -25,11 +25,13 @@ require("./node_modules/leaflet.coordinates/dist/Leaflet.Coordinates-0.1.5.min.j
 require("./locales/English.js");
 require("./locales/Russian.js");
 require("./SynthGeometryLayer/SynthGeometryLayer.js");
-require("./SynthBase/SynthBaseLayer.js");
-require("./SynthPolygonLayer/SynthPolygonLayer.js");
+require("./SynthBaseLayer/SynthBaseLayer.js");
+require("./SynthPolygonBaseLayer/SynthPolygonBaseLayer.js");
+require("./SynthRectangleBaseLayer/SynthRectangleBaseLayer.js");
 require("./SynthGridLayer/SynthGridLayer.js");
 require("./SynthRectangleLayer/SynthRectangleLayer.js");
 require("./SynthLineLayer/SynthLineLayer.js");
+require("./SynthPolygonLayer/SynthPolygonLayer.js");
 require("./SearchControl.js");
 
 L.ALS.System.initializeSystem();
@@ -127,6 +129,7 @@ for (let country of countries) {
 layerSystem.addBaseLayer(L.tileLayer(""), "Empty");
 
 // Add layer types
+layerSystem.addLayerType(L.ALS.SynthPolygonLayer);
 layerSystem.addLayerType(L.ALS.SynthGridLayer);
 layerSystem.addLayerType(L.ALS.SynthRectangleLayer);
 layerSystem.addLayerType(L.ALS.SynthLineLayer);

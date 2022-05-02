@@ -2,21 +2,21 @@ const MathTools = require("./MathTools.js");
 const proj4 = require("proj4");
 
 /**
- * A stateful ESRI Grid parser. Calculates min and max values for selected polygons in {@link L.ALS.SynthPolygonLayer}. Can parse huge files by chunks.
+ * A stateful ESRI Grid parser. Calculates min and max values for selected polygons in {@link L.ALS.SynthRectangleBaseLayer}. Can parse huge files by chunks.
  */
 class ESRIGridParser {
 
 	/**
 	 * Constructs a ESRI Grid parser.
 	 *
-	 * @param layer {L.ALS.SynthPolygonLayer} A layer to apply parsed values to.
+	 * @param layer {L.ALS.SynthRectangleBaseLayer} A layer to apply parsed values to.
 	 * @param projectionString {string} Proj4 projection string. If not given, WGS84 assumed.
 	 */
 	constructor(layer = undefined, projectionString = "") {
 
 		/**
 		 * Layer to apply parsed values to
-		 * @type {L.ALS.SynthPolygonLayer}
+		 * @type {L.ALS.SynthRectangleBaseLayer}
 		 */
 		this.layer = layer
 
@@ -199,12 +199,6 @@ class ESRIGridParser {
 				if (!this.DEMParams.nodata_value)
 					this.DEMParams.nodata_value = -9999;
 
-				/*let rect = L.rectangle([
-					[this.y, this.x],
-					[this.y - this.DEMParams.nrows * this.DEMParams.cellsize, this.x + this.DEMParams.ncols * this.DEMParams.cellsize]
-				], {color: "#ff7800", weight: 2});
-				this.layer.addLayers(rect);*/
-
 				this.DEMParamsCalculated = true;
 			}
 
@@ -222,7 +216,18 @@ class ESRIGridParser {
 				let oldPoint = [this.x, this.y];
 				let point = (this.hasProj) ? this.projectionFromWGS.inverse(oldPoint) : oldPoint;
 				for (let name in this.polygonsCoordinates) {
-					if (!MathTools.isPointInRectangle(point, this.polygonsCoordinates[name]))
+					let poly = this.polygonsCoordinates[name], fn, projPoint;
+
+					if (poly.length > 2) {
+						fn = MathTools.isPointInPolygon;
+						let {x, y} = this.layer.map.project([point[0], point[1]], 0);
+						projPoint = [x, y];
+					} else {
+						fn = MathTools.isPointInRectangle;
+						projPoint = point;
+					}
+
+					if (!fn(projPoint, poly))
 						continue;
 
 					if (!this.polygonsStats[name])
@@ -260,7 +265,7 @@ class ESRIGridParser {
 	 *
 	 * This method is NOT thread-safe! Call it outside of your WebWorker and pass your layer as an argument.
 	 *
-	 * @param layer {L.ALS.SynthPolygonLayer} If you're not using it in a WebWorker, don't pass anything. Otherwise, pass your layer.
+	 * @param layer {L.ALS.SynthRectangleBaseLayer} If you're not using it in a WebWorker, don't pass anything. Otherwise, pass your layer.
 	 */
 	copyStats(layer = undefined) {
 		let l = this.layer || layer;
@@ -311,26 +316,42 @@ class ESRIGridParser {
 
 	/**
 	 * Generates initial parameters for the layer.
-	 * @param layer {L.ALS.SynthPolygonLayer} Layer to copy data from
+	 * @param layer {L.ALS.SynthRectangleBaseLayer} Layer to copy data from
+	 * @param project {boolean} Whether polygon coordinates should be reprojected, if `layer.useRect` is `false`
 	 */
-	static getInitialData(layer) {
+	static getInitialData(layer, project = true) {
 		let polygonsCoordinates = {};
 		for (let name in layer.polygons) {
 			if (!layer.polygons.hasOwnProperty(name))
 				continue;
 
-			let rect = layer.polygons[name].getBounds();
-			polygonsCoordinates[name] = [
-				[rect.getWest(), rect.getNorth()],
-				[rect.getEast(), rect.getSouth()]
-			];
+			let polygon = layer.polygons[name];
+			if (layer.useRect) {
+				let rect = polygon.getBounds();
+				polygonsCoordinates[name] = [
+					[rect.getWest(), rect.getNorth()],
+					[rect.getEast(), rect.getSouth()]
+				];
+			} else {
+				let coords = polygon.getLatLngs();
+				polygonsCoordinates[name] = [];
+				for (let coord of coords) {
+					if (!project) {
+						polygonsCoordinates.push([coord.lng, coord.lat]);
+						continue;
+					}
+
+					let {x, y} = layer.map.project(coord, 0);
+					polygonsCoordinates[name].push([x, y]);
+				}
+			}
 		}
 		return polygonsCoordinates;
 	}
 
 	/**
 	 * Copies stats from any ESRIGridParser to a given layer
-	 * @param layer {L.ALS.SynthPolygonLayer} Layer to copy stats to
+	 * @param layer {L.ALS.SynthRectangleBaseLayer} Layer to copy stats to
 	 * @param stats {Object} Stats from any ESRIGridParser
 	 */
 	static copyStats(layer, stats) {
@@ -342,7 +363,7 @@ class ESRIGridParser {
 			widgetable.getWidgetById("maxHeight").setValue(s.max);
 			widgetable.getWidgetById("meanHeight").setValue(s.mean);
 		}
-		layer.updateAll();
+		layer.calculateParameters();
 	}
 
 	static createStatsObject() {

@@ -6,7 +6,7 @@ require("./SynthGridWizard.js");
  * @class
  * @extends L.ALS.Layer
  */
-L.ALS.SynthGridLayer = L.ALS.SynthPolygonLayer.extend(/** @lends L.ALS.SynthGridLayer.prototype */{
+L.ALS.SynthGridLayer = L.ALS.SynthRectangleBaseLayer.extend(/** @lends L.ALS.SynthGridLayer.prototype */{
 
 	defaultName: "Grid Layer",
 	useZoneNumbers: true,
@@ -22,7 +22,7 @@ L.ALS.SynthGridLayer = L.ALS.SynthPolygonLayer.extend(/** @lends L.ALS.SynthGrid
 		 */
 		this._namesIDs = [];
 
-		L.ALS.SynthPolygonLayer.prototype.init.call(this, wizardResults, settings);
+		L.ALS.SynthRectangleBaseLayer.prototype.init.call(this, wizardResults, settings);
 
 		/**
 		 * Whether or not cells above 60 lat should be merged
@@ -47,13 +47,13 @@ L.ALS.SynthGridLayer = L.ALS.SynthPolygonLayer.extend(/** @lends L.ALS.SynthGrid
 		} else
 			this.addPolygon(polygon);
 
-		this.updateAll();
+		this.calculateParameters();
 		this.writeToHistoryDebounced();
 	},
 
-	updateAll: function () {
+	calculateParameters: function () {
 		this._onMapZoom();
-		L.ALS.SynthPolygonLayer.prototype.updateAll.call(this);
+		L.ALS.SynthRectangleBaseLayer.prototype.calculateParameters.call(this);
 	},
 
 	statics: {
