@@ -74,6 +74,11 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend(/** @lends L.ALS.SynthLineLay
 					numberOfImages = Math.ceil(length / this.Bx) + 4,
 					extendBy = (this.Bx * numberOfImages - length) / 2 / length;
 				extendedGeodesic.changeLength("both", extendBy);
+
+				if (MathTools.isEqual(length, extendedGeodesic.statistics.sphericalLengthMeters)) {
+					// TODO: Do something about really short lines
+				}
+
 				this.pathsGroup.addLayer(extendedGeodesic);
 
 				// Capture points made by constructing a line with segments number equal to the number of images

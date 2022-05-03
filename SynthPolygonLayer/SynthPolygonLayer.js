@@ -13,6 +13,12 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend({
 	init: function (wizardResults, settings) {
 		this.copySettingsToThis(settings);
 
+		/**
+		 * 60 degrees geodesic line length in meters
+		 * @type {number}
+		 */
+		this.maxGeodesicLengthMeters = this.getEarthRadius() * 60;
+
 		this.internalConnections = L.featureGroup();
 		this.externalConnections = L.featureGroup();
 		this.pathGroup = L.featureGroup();
@@ -75,17 +81,18 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend({
 		// For building perpendicular lines, we'll use gnomonic projection to which we can transfer some
 		// properties of Euclidean 2D space.
 		this.polygonGroup.eachLayer((layer) => {
-			let latLngs = layer.getLatLngs()[0],
+			let center = layer.getBounds().getCenter(),
+				proj = proj4("+proj=longlat +ellps=sphere +no_defs", `+proj=gnom +lat_0=${center.lat} +lon_0=${center.lng} +x_0=0 +y_0=0 +ellps=sphere +datum=WGS84 +units=m +no_defs`),
+				latLngs = layer.getLatLngs()[0],
 				{upper, lower} = this.getConvexHull(L.LatLngUtil.cloneLatLngs(latLngs)),
-				projectedPolygon = [], minLength = Infinity, shortestPath, shortestPathConnections, shortestPathPoints;
+				projectedPolygon = [],
+				minLength = Infinity, shortestPath, shortestPathConnections, shortestPathPoints;
 
 			// Convert polygon coords to layer points, so we can use MathTools
-			for (let coord of latLngs) {
-				let {x, y} = this.map.project(coord, 0);
-				projectedPolygon.push([x, y]);
-			}
+			for (let coord of latLngs)
+				projectedPolygon.push(proj.forward([coord.lng, coord.lat]));
+
 			projectedPolygon.push(projectedPolygon[0]);
-			latLngs.push(latLngs[0]);
 
 			// For upper part, perpendiculars should be headed downwards, for lower, upwards
 			upper.direction = -1;
@@ -94,78 +101,85 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend({
 			for (let part of [upper, lower]) {
 				for (let i = 0; i < part.length - 1; i++) {
 					// Get a directional line
-					let line = this.perpendicularLine(part[i], part[i + 1], this.By, "end", part.direction),
-						perpLinePoints = line.getActualLatLngs()[0],
+					let origP1 = part[i], origP2 = part[i + 1],
+						edgeP1 = proj.forward([origP1.lng, origP1.lat]), edgeP2 = proj.forward([origP2.lng, origP2.lat]),
+						directionalLine = this.perpendicularLine(proj, edgeP1, edgeP2, "end", part.direction),
 						currentPath = [], currentConnections = [], currentLength = 0, currentPoints = [],
-						shouldSwapPoints = false, lineAfterPolygonAdded = false;
+						shouldSwapPoints = false, lineAfterPolygonAdded = false,
+						length = MathTools.distanceBetweenPoints(...directionalLine);
 
-					// For each point in line (points lying somewhere on path's geodesic) build a path
-					for (let j = 0; j < perpLinePoints.length - 1; j++) {
+					// Move along the line by By
+					for (let deltaBy = 0; deltaBy < length; deltaBy += this.By) {
 						if (lineAfterPolygonAdded)
 							break;
 
-						let p1 = perpLinePoints[j], p2 = perpLinePoints[j + 1],
-							line = this.perpendicularLine(p1, p2, this.Bx, "both"),
-							linePoints = line.getActualLatLngs()[0],
-							projectedLine = [];
-
-						// Project perpendicular line. Also find indices of two closest points to the
-						// current vertex.
-						let indexP1, indexP2, lengthP1 = Infinity, lengthP2 = Infinity;
-						for (let k = 0; k < linePoints.length - 1; k++) {
-							let coord = linePoints[k],
-								{x, y} = this.map.project(coord, 0);
-							projectedLine.push([x, y]);
-
-							if (j !== 0)
-								continue;
-
-							let length = this.getLineLengthMeters(L.polyline([p1, coord]));
-
-							if (coord.lng < p1.lng && length < lengthP1) {
-								lengthP1 = length;
-								indexP1 = k;
-							}
-
-							if (coord.lng > p1.lng && length < lengthP2) {
-								lengthP2 = length;
-								indexP2 = k;
-							}
-						}
-
-						let intersection = MathTools.clipLineByPolygon(projectedLine, projectedPolygon);
+						let p1 = this.scaleLine(directionalLine, deltaBy)[1],
+							p2 = this.scaleLine(directionalLine, deltaBy + this.By)[1],
+							line = this.perpendicularLine(proj, p1, p2, "both"),
+							intersection = MathTools.clipLineByPolygon(line, projectedPolygon);
 
 						if (!intersection) {
-							// If it's the first point, and there's no intersection, use closest points as
-							// an intersection with two bases in mind. This doesn't seem to happen, but let's be
-							// cautious anyway
-							if (j === 0) {
+							// If it's the first point, use an edge as intersection
+							if (deltaBy === 0)
+								intersection = [edgeP1, edgeP2];
+							else {
+								// Move line along perpendicular. See details here: https://math.stackexchange.com/questions/2593627/i-have-a-line-i-want-to-move-the-line-a-certain-distance-away-parallelly
+								let [p1, p2] = currentPath[currentPath.length - 1].getLatLngs(),
+									[p1x, p1y] = proj.forward([p1.lng, p1.lat]),
+									[p2x, p2y] = proj.forward([p2.lng, p2.lat]),
+									dx = p2x - p1x, dy = p2y - p1y,
+									dr = this.By / Math.sqrt(dx ** 2 + dy ** 2),
+									xMod = dr * (p1y - p2y), yMod = dr * (p2x - p1x);
+
+								if (Math.sign(yMod) !== part.direction) {
+									xMod = -xMod;
+									yMod = -yMod;
+								}
+
 								intersection = [
-									projectedLine[indexP1 - 2],
-									projectedLine[indexP1 + 2]
+									[p1x + xMod, p1y + yMod],
+									[p2x + xMod, p2y + yMod],
 								];
-							} else {
-								let [newP1, newP2] = currentPath[currentPath.length - 1].getLatLngs(),
-									interP1 = this.map.project([p1.lat, newP1.lng], 0),
-									interP2 = this.map.project([p1.lat, newP2.lng], 0);
-								intersection = [[interP1.x, interP1.y], [interP2.x, interP2.y]];
 								lineAfterPolygonAdded = true;
 							}
 						}
 
-						let [pathP1, pathP2] = intersection,
-							pathPoints = shouldSwapPoints ? [pathP2, pathP1] : [pathP1, pathP2];
+						if (shouldSwapPoints)
+							intersection.reverse();
 
 						shouldSwapPoints = !shouldSwapPoints;
 
 						let path = L.geodesic([
-								this.map.unproject(pathPoints[0], 0),
-								this.map.unproject(pathPoints[1], 0),
-							], lineOptions),
+								proj.inverse(intersection[0]).reverse(),
+								proj.inverse(intersection[1]).reverse(),
+							], {
+							...lineOptions, color: lineAfterPolygonAdded ? "red" : "blue",
+						}),
 							length = path.statistics.sphericalLengthMeters,
-							numberOfImages = Math.ceil(length / this.Bx) + 4,
+							numberOfImages = Math.ceil(length / this.Bx), extendBy;
+
+						// Don't extend copied line
+						if (lineAfterPolygonAdded) {
+							extendBy = 0;
+						} else {
+							numberOfImages += 4;
 							extendBy = (this.Bx * numberOfImages - length) / 2 / length;
-						path.changeLength("both", extendBy);
+						}
+
+						// If current length is already greater than previous, break loop and save some time
+						let tempLength = currentLength + length + length * extendBy;
+						if (tempLength >= minLength) {
+							currentLength = tempLength;
+							break;
+						}
+
+						if (!lineAfterPolygonAdded) {
+							path.changeLength("both", extendBy);
+
+							if (MathTools.isEqual(length, path.statistics.sphericalLengthMeters)) {
+								// TODO: Do something about really short lines
+							}
+						}
 
 						currentPath.push(path);
 						currentLength += path.statistics.sphericalLengthMeters;
@@ -222,36 +236,41 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend({
 		this.writeToHistory();
 	},
 
-	perpendicularLine: function (p1, p2, basis, extendFrom = "end", direction = 1) {
+	perpendicularLine: function (proj, p1, p2, extendFrom = "end", direction = 1) {
 		// Project coordinates to the gnomonic projection and work with lines as with vectors.
-		let proj = this.getProjFromWgs(p1.lng, p1.lat),
-			[p2x, p2y] = proj.forward([p2.lng, p2.lat]),
+		let [p1x, p1y] = p1, [p2x, p2y] = p2,
+			x = p2x - p1x, y = p2y - p1y,
 			// Find an orthogonal vector
 			perpX = 1000,
-			perpY = -perpX * p2x / p2y,
-			[perpLng, perpLat] = proj.inverse([perpX, perpY]);
+			perpY = -perpX * x / y;
 
 		// Check if orthogonal vector in correct direction. If not, reverse it.
-		if (Math.sign(perpLat - p1.lat) !== direction) {
+		if (Math.sign(perpY) !== direction) {
 			perpX = -perpX;
 			perpY = -perpY;
-			[perpLng, perpLat] = proj.inverse([perpX, perpY]);
 		}
 
-		// Build 175 degrees long geodesic
-		// TODO: Make it be less than 180 after extending
-		let targetLength = 175 / 180 * this.getEarthRadius(false),
-			segmentsNumber = Math.ceil(targetLength / basis),
-			geodesic = new L.Geodesic([p1, [perpLat, perpLng]], {segmentsNumber}),
-			length = geodesic.statistics.sphericalLengthMeters,
-			extendBy = (segmentsNumber * basis - length) / length;
+		// Move vector back
+		perpX += p1x;
+		perpY += p1y;
 
-		geodesic.changeLength(extendFrom, extendBy);
-		return geodesic;
+		// Scale line
+
+		let line = this.scaleLine([[p1x, p1y], [perpX, perpY]], this.maxGeodesicLengthMeters);
+
+		if (extendFrom !== "both")
+			return line;
+
+		return [this.perpendicularLine(proj, p1, p2, "end", -direction)[1], line[1]];
 	},
 
-	getProjFromWgs: function (lng0, lat0) {
-		return proj4("+proj=longlat +ellps=sphere +no_defs", `+proj=gnom +lat_0=${lat0} +lon_0=${lng0} +x_0=0 +y_0=0 +ellps=sphere +datum=WGS84 +units=m +no_defs`);
+	scaleLine: function (line, targetLength) {
+		let [p1, p2] = line, [p1x, p1y] = p1, [p2x, p2y] = p2,
+			dx = p2x - p1x, dy = p2y - p1y,
+			lengthModifier = targetLength / Math.sqrt(dx ** 2 + dy ** 2);
+		dx *= lengthModifier;
+		dy *= lengthModifier;
+		return [[p1x, p1y], [dx + p1x, dy + p1y]];
 	},
 
 	statics: {

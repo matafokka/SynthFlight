@@ -203,7 +203,7 @@ class MathTools {
 			return undefined;
 
 		// Find two points that will produce greatest length. It will yield the segment inside the whole polygon.
-		let point1, point2, previousLength = 0;
+		let point1, point2, previousLength = -1;
 		for (let i = 0; i < intersections.length; i++) {
 			let p1 = intersections[i];
 
