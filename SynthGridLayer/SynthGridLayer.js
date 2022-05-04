@@ -1,5 +1,6 @@
 require("./SynthGridSettings.js");
 require("./SynthGridWizard.js");
+const turfHelpers = require("@turf/helpers");
 
 /**
  * Layer that allows users to plan aerial photography using grid
@@ -20,7 +21,7 @@ L.ALS.SynthGridLayer = L.ALS.SynthRectangleBaseLayer.extend(/** @lends L.ALS.Syn
 		 * @type {string[]}
 		 * @private
 		 */
-		this._namesIDs = [];
+		this.gridLabelsIDs = [];
 
 		L.ALS.SynthRectangleBaseLayer.prototype.init.call(this, wizardResults, settings);
 
@@ -54,6 +55,47 @@ L.ALS.SynthGridLayer = L.ALS.SynthRectangleBaseLayer.extend(/** @lends L.ALS.Syn
 	calculateParameters: function () {
 		this._onMapZoom();
 		L.ALS.SynthRectangleBaseLayer.prototype.calculateParameters.call(this);
+	},
+
+	/**
+	 * Estimates paths count based on given cell size in degrees
+	 * @param cellSizeDeg
+	 * @returns {number}
+	 */
+	estimatePathsCount: function (cellSizeDeg) {
+		return Math.ceil(
+			turfHelpers.radiansToLength(turfHelpers.degreesToRadians(cellSizeDeg), "meters") /
+			this.By
+		);
+	},
+
+	drawPaths: function () {
+		this.clearPaths();
+
+		// Calculate estimated paths count for a polygon. Values are somewhat true for equatorial regions.
+		// We'll check if it's too small (in near-polar regions, there'll be only one path when value is 2) or too big.
+
+		let errorLabel = this.getWidgetById("calculateParametersError"),
+			parallelsPathsCount = this.estimatePathsCount(this.lngPathsCount),
+			meridiansPathsCount = this.estimatePathsCount(this.latPathsCount);
+
+		if (parallelsPathsCount === undefined) {
+			errorLabel.setValue("errorDistanceHasNotBeenCalculated");
+			return;
+		}
+
+		if (parallelsPathsCount >= 20 || meridiansPathsCount >= 20) {
+			errorLabel.setValue("errorPathsCountTooBig");
+			return;
+		}
+
+		if (parallelsPathsCount <= 2 || meridiansPathsCount <= 2) {
+			errorLabel.setValue("errorPathsCountTooSmall");
+			return;
+		}
+		errorLabel.setValue("");
+
+		L.ALS.SynthRectangleBaseLayer.prototype.drawPaths.call(this);
 	},
 
 	statics: {

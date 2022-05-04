@@ -4,21 +4,12 @@ const turfHelpers = require("@turf/helpers");
 
 L.ALS.SynthRectangleBaseLayer.prototype.calculateParameters = function () {
 	L.ALS.SynthBaseLayer.prototype.calculateParameters.call(this);
-
-	// Calculate estimated paths count for a polygon. Values are somewhat true for equatorial regions.
-	// We'll check if it's too small (in near-polar regions, there'll be only one path when value is 2) or too big.
-	let latLngs = ["lat", "lng"];
-	for (let name of latLngs) {
-		let cellSize = Math.round(turfHelpers.radiansToLength(turfHelpers.degreesToRadians(this[name + "Distance"]), "meters"));
-		this[name + "FakePathsCount"] = Math.ceil(cellSize / this.By);
-	}
-
 	this.calculatePolygonParameters();
 }
 
 L.ALS.SynthRectangleBaseLayer.prototype.updateLayersVisibility = function () {
 	L.ALS.SynthPolygonBaseLayer.prototype.updateLayersVisibility.call(this);
-	this._drawPaths(); // We have to redraw paths both for hiding one of the paths and hiding numbers
+	this.drawPaths(); // We have to redraw paths both for hiding one of the paths and hiding numbers
 }
 
 L.ALS.SynthRectangleBaseLayer.prototype._closestGreater = function (current, divider) {
@@ -54,7 +45,7 @@ L.ALS.SynthRectangleBaseLayer.prototype.calculatePolygonParameters = function (w
 			}
 		));
 	}
-	this._drawPaths();
+	this.drawPaths();
 
 	this.writeToHistoryDebounced();
 }

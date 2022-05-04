@@ -115,7 +115,7 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 	defaultRectangleFillColor: "Цвет заливки прямоугольников по умолчанию:",
 	rectangleBorderColor: "Цвет обводки прямоугольников:",
 	rectangleFillColor: "Цвет заливки прямоугольников:",
-	rectangleLayersRemoved: "Один или несколько прямоугольников были удалены, так как они слишком большие",
+	rectangleLayersSkipped: "Один или несколько прямоугольников были пропущены, так как они слишком большие. Данные прямоугольники имеют красный цвет.",
 
 	// SynthGeometryWizard
 

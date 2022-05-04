@@ -120,7 +120,7 @@ L.ALS.Locales.addLocaleProperties("English", {
 	defaultRectangleFillColor: "Default rectangle fill color:",
 	rectangleBorderColor: "Rectangle border color:",
 	rectangleFillColor: "Rectangle fill color:",
-	rectangleLayersRemoved: "One or more rectangles has been removed because they're too big",
+	rectangleLayersSkipped: "One or more rectangles has been skipped because they're too big. These rectangles have red color.",
 
 	// SynthGeometryWizard
 

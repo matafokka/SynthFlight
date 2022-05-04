@@ -11,10 +11,7 @@ L.ALS.SynthGridLayer.prototype._onMapPan = function () {
 		return;
 
 	this.polygonGroup.clearLayers();
-
-	for (let id of this._namesIDs)
-		this.labelsGroup.deleteLabel(id);
-	this._namesIDs = [];
+	this.clearLabels("gridLabelsIDs");
 
 	// Get viewport bounds and calculate correct start and end coords for lng and lat
 	let bounds = this.map.getBounds(), north = bounds.getNorth(), west = bounds.getWest(),
@@ -27,7 +24,7 @@ L.ALS.SynthGridLayer.prototype._onMapPan = function () {
 
 	let createLabel = (latLng, content, origin = "center", colorful = false) => {
 		let id = L.ALS.Helpers.generateID();
-		this._namesIDs.push(id);
+		this.gridLabelsIDs.push(id);
 		this.labelsGroup.addLabel(id, latLng, content, {origin: origin});
 		if (colorful)
 			this.labelsGroup.setLabelDisplayOptions(id, L.LabelLayer.DefaultDisplayOptions.Success);

@@ -5,51 +5,26 @@ const turfHelpers = require("@turf/helpers");
 
 L.ALS.SynthRectangleBaseLayer.prototype.clearPaths = function () {
 	L.ALS.SynthPolygonBaseLayer.prototype.clearPaths.call(this);
-
-	for (let id of this._pathsLabelsIDs)
-		this.labelsGroup.deleteLabel(id);
-	this._pathsLabelsIDs = [];
+	this.clearLabels("pathsLabelsIds");
 }
 
-L.ALS.SynthRectangleBaseLayer.prototype._drawPaths = function () {
+L.ALS.SynthRectangleBaseLayer.prototype.drawPaths = function () {
 	this.clearPaths();
-
-	// Validate estimated paths count
-
-	let errorLabel = this.getWidgetById("calculateParametersError"),
-		parallelsPathsCount = this["lngFakePathsCount"],
-		meridiansPathsCount = this["latFakePathsCount"];
-
-	if (parallelsPathsCount === undefined) {
-		errorLabel.setValue("errorDistanceHasNotBeenCalculated");
-		return;
-	}
-
-	if (parallelsPathsCount >= 20 || meridiansPathsCount >= 20) {
-		errorLabel.setValue("errorPathsCountTooBig");
-		return;
-	}
-
-	if (parallelsPathsCount <= 2 || meridiansPathsCount <= 2) {
-		errorLabel.setValue("errorPathsCountTooSmall");
-		return;
-	}
-	errorLabel.setValue("");
 
 	if (this.mergedPolygons.length === 0)
 		return;
 
-	this._drawPathsWorker(true);
-	this._drawPathsWorker(false);
+	this.drawPathsWorker(true);
+	this.drawPathsWorker(false);
 	this.updatePathsMeta();
 	this.labelsGroup.redraw();
 }
 
 /**
- * Draws flight paths. Use _drawPaths wrapper to draw paths instead of this.
+ * Draws flight paths. Use drawPaths wrapper to draw paths instead of this.
  * @private
  */
-L.ALS.SynthRectangleBaseLayer.prototype._drawPathsWorker = function (isParallels) {
+L.ALS.SynthRectangleBaseLayer.prototype.drawPathsWorker = function (isParallels) {
 
 	let pathGroup, nameForOutput, color, connectionsGroup, widgetId, extensionIndex;
 	if (isParallels) {
@@ -171,7 +146,7 @@ L.ALS.SynthRectangleBaseLayer.prototype._drawPathsWorker = function (isParallels
 					continue;
 
 				let labelId = L.ALS.Helpers.generateID();
-				this._pathsLabelsIDs.push(labelId);
+				this.pathsLabelsIds.push(labelId);
 				this.labelsGroup.addLabel(labelId, coord, number, L.LabelLayer.DefaultDisplayOptions[isParallels ? "Message" : "Error"]);
 				number++;
 			}

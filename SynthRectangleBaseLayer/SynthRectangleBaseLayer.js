@@ -61,7 +61,7 @@ L.ALS.SynthRectangleBaseLayer = L.ALS.SynthPolygonBaseLayer.extend( /** @lends L
 		 * @type {string[]}
 		 * @private
 		 */
-		this._pathsLabelsIDs = [];
+		this.pathsLabelsIds = [];
 
 		this.lngDistance = parseFloat(wizardResults["gridLngDistance"]);
 		this.latDistance = parseFloat(wizardResults["gridLatDistance"]);

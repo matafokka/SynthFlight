@@ -228,7 +228,7 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend({
 		return;
 
 		if (layersWereRemoved)
-			window.alert(L.ALS.locale.rectangleLayersRemoved);
+			window.alert(L.ALS.locale.rectangleLayersSkipped);
 
 		this.map.addLayer(this.labelsGroup); // Nothing in the base layer hides or shows it, so it's only hidden in code above
 		this.updateLayersVisibility();
@@ -255,7 +255,6 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend({
 		perpY += p1y;
 
 		// Scale line
-
 		let line = this.scaleLine([[p1x, p1y], [perpX, perpY]], this.maxGeodesicLengthMeters);
 
 		if (extendFrom !== "both")

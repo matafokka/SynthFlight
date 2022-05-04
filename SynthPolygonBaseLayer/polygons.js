@@ -109,3 +109,11 @@ L.ALS.SynthPolygonBaseLayer.prototype.calculatePolygonParameters = function (wid
 		}
 	}
 }
+
+L.ALS.SynthPolygonBaseLayer.prototype.denyPolygon = function (polygon, reason) {
+	polygon.setStyle({color: "red", fillColor: "red"});
+	let {lat, lng} = polygon.getBounds().getCenter(),
+		id = L.ALS.Helpers.generateID();
+	this.labelsGroup.addLabel(id, [lat, lng], reason, L.ALS.LeafletLayers.LabelLayer.DefaultDisplayOptions.Error);
+	this.polygonErrorsLabelsIDs.push(id);
+}
