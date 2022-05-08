@@ -83,6 +83,7 @@
     "keyboardevent-key-polyfill": "^1.1.0",
     "leaflet": "^1.7.1",
     "leaflet-draw": "^1.0.4",
+    "leaflet-draw-locales": "^1.2.1",
     "leaflet.coordinates": "~0.1.5",
     "leaflet.geodesic": "github:matafokka/Leaflet.Geodesic",
     "minisearch": "^4.0.3",

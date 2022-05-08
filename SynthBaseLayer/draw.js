@@ -34,7 +34,13 @@ L.ALS.SynthBaseLayer.prototype.enableDraw = function (drawControls, drawingGroup
 	this.addEventListenerTo(this.map, "draw:created", "onDraw");
 	this.addEventListenerTo(this.map, "draw:drawstart draw:editstart draw:deletestart", "onEditStart");
 	this.addEventListenerTo(this.map, "draw:drawstop draw:editstop draw:deletestop", "onEditEnd");
-	this.addControl(this.drawControl, "top", "follow-menu");
+	let addDrawControl = () => this.addControl(this.drawControl, "top", "follow-menu");
+	addDrawControl();
+
+	document.body.addEventListener("synthflight-locale-changed", () => {
+		this.removeControl(this.drawControl);
+		addDrawControl();
+	});
 }
 
 L.ALS.SynthBaseLayer.prototype.onDraw = function (e) {

@@ -33,6 +33,16 @@ require("./SynthRectangleLayer/SynthRectangleLayer.js");
 require("./SynthLineLayer/SynthLineLayer.js");
 require("./SynthPolygonLayer/SynthPolygonLayer.js");
 require("./SearchControl.js");
+const drawLocales = require("leaflet-draw-locales").default;
+
+// Update L.Draw locale on ALS locale change
+let oldChangeLocale = L.ALS.Locales.changeLocale;
+
+L.ALS.Locales.changeLocale = function (locale) {
+	oldChangeLocale.call(this, locale);
+	L.drawLocal = drawLocales(L.ALS.locale.language);
+	L.ALS.Helpers.dispatchEvent(document.body, "synthflight-locale-changed");
+}
 
 L.ALS.System.initializeSystem();
 
