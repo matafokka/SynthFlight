@@ -68,6 +68,7 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend({
 		for (let name in this.polygons)
 			this.removePolygon(this.polygons[name], false);
 
+		this.labelsGroup.deleteAllLabels();
 		this.polygons = {}
 		this.invalidPolygons = {};
 
@@ -250,8 +251,18 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend({
 				...lineOptions, dashArray: this.dashedLine
 			}));
 
-			for (let path of shortestPath)
+			let number = 0;
+			for (let path of shortestPath) {
 				this.pathGroup.addLayer(path);
+
+				// Add numbers
+				let latLngs = path.getLatLngs();
+
+				for (let point of latLngs) {
+					this.labelsGroup.addLabel("", [point.lat, point.lng], number, L.LabelLayer.DefaultDisplayOptions.Message);
+					number++;
+				}
+			}
 
 			for (let marker of shortestPathPoints)
 				this.pointsGroup.addLayer(marker);
@@ -265,6 +276,11 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend({
 		this.updateLayersVisibility();
 		this.calculateParameters();
 		this.writeToHistoryDebounced();
+	},
+
+	updateLayersVisibility: function () {
+		L.ALS.SynthPolygonBaseLayer.prototype.updateLayersVisibility.call(this);
+		this.hideOrShowLayer(this._doHidePathsNumbers || this.getWidgetById("polygonHidePaths").getValue(), this.labelsGroup);
 	},
 
 	/**

@@ -40,7 +40,7 @@ L.ALS.SynthPolygonBaseLayer.deserialize = function (serialized, layerSystem, set
 				newPoly = L[value.serializableClassName === "L.LatLngBounds" ? "rectangle" : "polygon"](value);
 
 			if (objName === "invalidPolygons")
-				object.invalidatePolygon(newPoly)
+				object.invalidatePolygon(newPoly);
 			else
 				deserializedPolyObj[prop] = newPoly;
 
