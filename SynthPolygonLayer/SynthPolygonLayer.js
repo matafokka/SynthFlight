@@ -2,6 +2,7 @@ require("./SynthPolygonWizard.js");
 require("./SynthPolygonSettings.js");
 const MathTools = require("../MathTools.js");
 const proj4 = require("proj4");
+const debounce = require("debounce")
 
 L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend({
 
@@ -50,8 +51,8 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend({
 		}, this.polygonGroup);
 
 		this.calculateThreshold(settings); // Update hiding threshold
+		this.onEditEndDebounced = debounce(() => this.onEditEnd(), 300); // Math operations are too slow for immediate update
 		this.calculateParameters();
-		this.updateLayersVisibility();
 
 		this.isAfterDeserialization = false;
 	},
@@ -274,8 +275,12 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend({
 		this.map.addLayer(this.labelsGroup); // Nothing in the base layer hides or shows it, so it's only hidden in code above
 		this.updatePathsMeta();
 		this.updateLayersVisibility();
-		this.calculateParameters();
 		this.writeToHistoryDebounced();
+	},
+
+	calculateParameters: function () {
+		L.ALS.SynthPolygonBaseLayer.prototype.calculateParameters.call(this);
+		this.onEditEndDebounced();
 	},
 
 	updateLayersVisibility: function () {

@@ -54,8 +54,11 @@ L.ALS.SynthPolygonBaseLayer.deserialize = function (serialized, layerSystem, set
 			object.widgetsGroup.addLayer(widget);
 	}
 
-	for (let color of this._toUpdateColors)
-		object.setColor(object.getWidgetById(color));
+	for (let color of this._toUpdateColors) {
+		let widget = object.getWidgetById(color);
+		if (widget)
+			object.setColor(widget);
+	}
 
 	object.setAirportLatLng();
 	object.calculateParameters();
