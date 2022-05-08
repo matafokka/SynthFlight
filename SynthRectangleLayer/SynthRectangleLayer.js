@@ -21,6 +21,9 @@ L.ALS.SynthRectangleLayer = L.ALS.SynthRectangleBaseLayer.extend({
 	},
 
 	onEditEnd: function () {
+		if (!this.isSelected)
+			return;
+
 		for (let name in this.polygons)
 			this.removePolygon(this.polygons[name], false);
 		this.polygons = {}

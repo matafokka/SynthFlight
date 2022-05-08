@@ -209,6 +209,9 @@ L.ALS.SynthPolygonBaseLayer = L.ALS.SynthBaseLayer.extend( /** @lends L.ALS.Synt
 	},
 
 	onEditStart: function () {
+		if (!this.isSelected)
+			return;
+
 		for (let group of this.groupsToHideOnEditStart) {
 			if (group)
 				this.hideOrShowLayer(true, group);

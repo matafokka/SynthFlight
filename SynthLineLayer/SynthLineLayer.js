@@ -55,6 +55,9 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend(/** @lends L.ALS.SynthLineLay
 	},
 
 	onEditStart: function () {
+		if (!this.isSelected)
+			return;
+
 		this.map.removeLayer(this.pathsGroup);
 		this.map.removeLayer(this.connectionsGroup);
 		this.map.removeLayer(this.pointsGroup);
@@ -62,6 +65,9 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend(/** @lends L.ALS.SynthLineLay
 	},
 
 	onEditEnd: function () {
+		if (!this.isSelected)
+			return;
+
 		this.pathsGroup.clearLayers();
 		this.pointsGroup.clearLayers();
 		this.errorGroup.clearLayers();

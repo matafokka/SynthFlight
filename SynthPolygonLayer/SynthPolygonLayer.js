@@ -55,6 +55,9 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend({
 	},
 
 	onEditEnd: function () {
+		if (!this.isSelected)
+			return;
+
 		let color = this.getWidgetById("color0").getValue(),
 			lineOptions = {
 				color, thickness: this.lineThicknessValue, segmentsNumber: L.GEODESIC_SEGMENTS,

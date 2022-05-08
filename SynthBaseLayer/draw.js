@@ -38,6 +38,9 @@ L.ALS.SynthBaseLayer.prototype.enableDraw = function (drawControls, drawingGroup
 }
 
 L.ALS.SynthBaseLayer.prototype.onDraw = function (e) {
+	if (!this.isSelected)
+		return;
+
 	this._drawingGroup.addLayer(e.layer);
 
 	let borderColorId, fillColor;
