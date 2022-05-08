@@ -20,9 +20,9 @@ L.ALS.Locales.addLocaleProperties("English", {
 	// SynthLineLayer
 	lineLayerColor: "Line color:",
 	settingsLineLayerColor: "Default line color:",
+	lineLayersSkipped: "One or more lines has been skipped because they're too long. These lines have red color.",
 
 	// SynthGridWizard
-
 	gridWizardDisplayName: "Grid Layer",
 	gridWizardNotification: `If map scale is too low, grid will be hidden. Please, zoom in to see it.
 	
@@ -144,8 +144,10 @@ L.ALS.Locales.addLocaleProperties("English", {
 	geometryDefaultBorderColor: "Default border color:",
 
 	// SynthPolygonLayer
+	polygonLayerName: "Polygon Layer",
 	polygonPathsColor: "Paths color:",
 	polygonHidePaths: "Hide paths",
+	polygonLayersSkipped: "One or more polygons has been skipped because they're too big. These polygons have red color.",
 
 	// Search
 	searchButtonTitle: "Search Geometry Layers or OSM",

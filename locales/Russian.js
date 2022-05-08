@@ -20,6 +20,7 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 	// SynthLineLayer
 	lineLayerColor: "Цвет линий:",
 	settingsLineLayerColor: "Цвет линий по умолчанию:",
+	lineLayersSkipped: "Одна или несколько линий были пропущены, так как они слишком длинные. Данные линии имеют красный цвет.",
 
 	// SynthGridWizard
 
@@ -139,9 +140,10 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 	geometryDefaultBorderColor: "Цвет обводки по умолчанию:",
 
 	// SynthPolygonLayer
-
+	polygonLayerName: "Слой Полигонов",
 	polygonPathsColor: "Цвет маршрутов:",
 	polygonHidePaths: "Скрыть маршруты",
+	polygonLayersSkipped: "Один или несколько полигонов были пропущены, так как они слишком большие. Данные полигоны имеют красный цвет.",
 
 	// Search
 	searchButtonTitle: "Поиск в Слоях Геометрии и OSM",

@@ -14,10 +14,10 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend({
 		this.copySettingsToThis(settings);
 
 		/**
-		 * 60 degrees geodesic line length in meters
+		 * 89 degrees geodesic line length in meters. Gnomonic projection can't display points starting from 90 deg from the center.
 		 * @type {number}
 		 */
-		this.maxGeodesicLengthMeters = this.getEarthRadius() * 60;
+		this.maxGnomonicPointDistance = this.getEarthRadius() * 89 * Math.PI / 180;
 
 		this.internalConnections = L.featureGroup();
 		this.externalConnections = L.featureGroup();
@@ -35,6 +35,13 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend({
 
 		this.enableDraw({
 			polygon: {
+				shapeOptions: {
+					color: "#ff0000",
+					weight: this.lineThicknessValue
+				}
+			},
+
+			rectangle: {
 				shapeOptions: {
 					color: "#ff0000",
 					weight: this.lineThicknessValue
@@ -59,7 +66,7 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend({
 
 		this.clearPaths();
 
-		let layersWereRemoved = false;
+		let layersWereInvalidated = false;
 
 		// Build paths for each polygon.
 
@@ -69,145 +76,167 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend({
 		// To build parallel paths, first, we build a line that is perpendicular to the edge (let's call it directional).
 		// Then, for each intermediate point (distances between points are equal to By) of the directional line,
 		// we build a line that is perpendicular to the directional line - a path.
-		// Then we crop the path by polygon by projecting both path and polygon to the WebMercator.
 
-		// Sometimes we can't use an edge (i.e. when polygon is star-shaped).
-		// To fix that, we'll build paths using convex hull which'll allow us to get rid of two problems:
+		// Sometimes we can't use an edge (i.e. when polygon is star-shaped) because directional line won't cover the
+		// whole polygon. To fix that, we'll build paths using convex hull which'll allow us to get rid of two problems:
 
 		// 1. Star-shaped polygons.
-		// 2. Determining where directional line should be headed. For upper part of the convex hull the direction
-		// is downwards. For lower, upwards.
+		// 2. Crop the line by polygon to determine correct perpendicular direction. To do so, we'll draw a directional
+		// line from the center of the edge. I haven't found any other way of determining direction when drawing from
+		// the first point of the edge, there's just no common properties of polygon's configurations I've tested.
 
-		// For building perpendicular lines, we'll use gnomonic projection to which we can transfer some
-		// properties of Euclidean 2D space.
+		// To work with geodesics as vectors and lines, we'll use gnomonic projection.
+		// We'll also crop the paths by the hull, so there won't be empty space along the paths.
+
 		this.polygonGroup.eachLayer((layer) => {
+			// Build projection. The center will be the center of the polygon. It doesn't matter that much, but center
+			// Allows us to expand polygon size a bit when it's close to the projection's coordinates limits.
 			let center = layer.getBounds().getCenter(),
-				proj = proj4("+proj=longlat +ellps=sphere +no_defs", `+proj=gnom +lat_0=${center.lat} +lon_0=${center.lng} +x_0=0 +y_0=0 +ellps=sphere +datum=WGS84 +units=m +no_defs`),
-				latLngs = layer.getLatLngs()[0],
-				{upper, lower} = this.getConvexHull(L.LatLngUtil.cloneLatLngs(latLngs)),
+				proj = proj4("+proj=longlat +ellps=sphere +no_defs", `+proj=gnom +lat_0=${center.lat} +lon_0=${center.lng} +x_0=0 +y_0=0 +ellps=sphere +R=${this.getEarthRadius()} +units=m +no_defs`),
+
+				// Get convex hull and initialize variables for the shortest path
+				{upper, lower} = this.getConvexHull(L.LatLngUtil.cloneLatLngs(layer.getLatLngs()[0])),
 				projectedPolygon = [],
 				minLength = Infinity, shortestPath, shortestPathConnections, shortestPathPoints;
 
-			// Convert polygon coords to layer points, so we can use MathTools
-			for (let coord of latLngs)
-				projectedPolygon.push(proj.forward([coord.lng, coord.lat]));
+			// Remove same points from the hull
+			upper.pop();
+			lower.pop();
 
-			projectedPolygon.push(projectedPolygon[0]);
-
-			// For upper part, perpendiculars should be headed downwards, for lower, upwards
-			upper.direction = -1;
-			lower.direction = 1;
-
-			for (let part of [upper, lower]) {
-				for (let i = 0; i < part.length - 1; i++) {
-					// Get a directional line
-					let origP1 = part[i], origP2 = part[i + 1],
-						edgeP1 = proj.forward([origP1.lng, origP1.lat]), edgeP2 = proj.forward([origP2.lng, origP2.lat]),
-						directionalLine = this.perpendicularLine(proj, edgeP1, edgeP2, "end", part.direction),
-						currentPath = [], currentConnections = [], currentLength = 0, currentPoints = [],
-						shouldSwapPoints = false, lineAfterPolygonAdded = false,
-						length = MathTools.distanceBetweenPoints(...directionalLine);
-
-					// Move along the line by By
-					for (let deltaBy = 0; deltaBy < length; deltaBy += this.By) {
-						if (lineAfterPolygonAdded)
-							break;
-
-						let p1 = this.scaleLine(directionalLine, deltaBy)[1],
-							p2 = this.scaleLine(directionalLine, deltaBy + this.By)[1],
-							line = this.perpendicularLine(proj, p1, p2, "both"),
-							intersection = MathTools.clipLineByPolygon(line, projectedPolygon);
-
-						if (!intersection) {
-							// If it's the first point, use an edge as intersection
-							if (deltaBy === 0)
-								intersection = [edgeP1, edgeP2];
-							else {
-								// Move line along perpendicular. See details here: https://math.stackexchange.com/questions/2593627/i-have-a-line-i-want-to-move-the-line-a-certain-distance-away-parallelly
-								let [p1, p2] = currentPath[currentPath.length - 1].getLatLngs(),
-									[p1x, p1y] = proj.forward([p1.lng, p1.lat]),
-									[p2x, p2y] = proj.forward([p2.lng, p2.lat]),
-									dx = p2x - p1x, dy = p2y - p1y,
-									dr = this.By / Math.sqrt(dx ** 2 + dy ** 2),
-									xMod = dr * (p1y - p2y), yMod = dr * (p2x - p1x);
-
-								if (Math.sign(yMod) !== part.direction) {
-									xMod = -xMod;
-									yMod = -yMod;
-								}
-
-								intersection = [
-									[p1x + xMod, p1y + yMod],
-									[p2x + xMod, p2y + yMod],
-								];
-								lineAfterPolygonAdded = true;
-							}
-						}
-
-						if (shouldSwapPoints)
-							intersection.reverse();
-
-						shouldSwapPoints = !shouldSwapPoints;
-
-						let path = L.geodesic([
-								proj.inverse(intersection[0]).reverse(),
-								proj.inverse(intersection[1]).reverse(),
-							], {
-							...lineOptions, color: lineAfterPolygonAdded ? "red" : "blue",
-						}),
-							length = path.statistics.sphericalLengthMeters,
-							numberOfImages = Math.ceil(length / this.Bx), extendBy;
-
-						// Don't extend copied line
-						if (lineAfterPolygonAdded) {
-							extendBy = 0;
-						} else {
-							numberOfImages += 4;
-							extendBy = (this.Bx * numberOfImages - length) / 2 / length;
-						}
-
-						// If current length is already greater than previous, break loop and save some time
-						let tempLength = currentLength + length + length * extendBy;
-						if (tempLength >= minLength) {
-							currentLength = tempLength;
-							break;
-						}
-
-						if (!lineAfterPolygonAdded) {
-							path.changeLength("both", extendBy);
-
-							if (MathTools.isEqual(length, path.statistics.sphericalLengthMeters)) {
-								// TODO: Do something about really short lines
-							}
-						}
-
-						currentPath.push(path);
-						currentLength += path.statistics.sphericalLengthMeters;
-						currentConnections.push(...path.getLatLngs());
-
-						let capturePoints = L.geodesic(path.getLatLngs(), {segmentsNumber: numberOfImages}).getActualLatLngs()[0];
-						for (let point of capturePoints)
-							currentPoints.push(this.createCapturePoint(point, color));
+			// Project the hull
+			for (let part of [lower, upper]) {
+				for (let coord of part) {
+					let point = proj.forward([coord.lng, coord.lat]);
+					if (!this.isPointValid(point)) {
+						layersWereInvalidated = true;
+						this.invalidatePolygon(layer);
+						return;
 					}
-
-					if (currentLength >= minLength)
-						continue;
-
-					minLength = currentLength;
-					shortestPath = currentPath;
-					shortestPathConnections = currentConnections;
-					shortestPathPoints = currentPoints;
+					projectedPolygon.push(point);
 				}
 			}
 
-			// Limit polygon size by limiting total approximate paths count. This is not 100% accurate but close enough.
-			/*if (!shortestPath) {
-				layersWereRemoved = true;
-				this.polygonGroup.removeLayer(layer);
-				return;
+			projectedPolygon.push(projectedPolygon[0]); // Close the polygon
+
+			// For each edge
+			for (let i = 0; i < projectedPolygon.length - 1; i++) {
+				// Build a directional line
+				let edgeP1 = projectedPolygon[i], edgeP2 = projectedPolygon[i + 1],
+					directionalLine = this.perpendicularLine(edgeP1, edgeP2, projectedPolygon, true),
+					// Initialize variables for the current path
+					currentPath = [], currentConnections = [], currentLength = 0, currentPoints = [],
+					shouldSwapPoints = false, lineAfterPolygonAdded = false;
+
+				// Move along the line by By until we reach the end of the polygon and add an additional line
+				// or exceed the limit of 300 paths
+				let deltaBy = 0;
+				while (true) {
+					if (lineAfterPolygonAdded)
+						break;
+
+					if (deltaBy / this.By > 300) {
+						layersWereInvalidated = true;
+						this.invalidatePolygon(layer);
+						return;
+					}
+
+					// Scale the directional line, so endpoints of scaled line will be the start and end points of the
+					// line that we'll build a perpendicular (a path) to. The distance between these points is By.
+					let p1 = this.scaleLine(directionalLine, deltaBy)[1],
+						p2 = this.scaleLine(directionalLine, deltaBy + this.By)[1],
+						line = this.perpendicularLine(p1, p2, projectedPolygon);
+
+					if (!line) {
+						// If it's the first point, use an edge as an intersection. This shouldn't happen but I like to
+						// be extra careful.
+						if (deltaBy === 0)
+							line = [edgeP1, edgeP2];
+						else {
+							// Otherwise, we've passed the polygon and we have to add another line, i.e. move it along
+							// directional line. To do so, get x and y differences between current path and previous
+							// path. Then move cloned path by these differences.
+							let dx = p2[0] - p1[0],
+								dy = p2[1] - p1[1],
+								[prevPathP1, prevPathP2] = currentPath[currentPath.length - 1].getLatLngs(),
+								[p1x, p1y] = proj.forward([prevPathP1.lng, prevPathP1.lat]),
+								[p2x, p2y] = proj.forward([prevPathP2.lng, prevPathP2.lat]);
+							p1x += dx;
+							p2x += dx;
+							p1y += dy;
+							p2y += dy;
+
+							line = [[p1x, p1y], [p2x, p2y]];
+							lineAfterPolygonAdded = true;
+						}
+					}
+
+					// Swap points of each odd path
+					if (shouldSwapPoints)
+						line.reverse();
+
+					shouldSwapPoints = !shouldSwapPoints;
+
+					// Build a path
+					let path = L.geodesic([
+							proj.inverse(line[0]).reverse(),
+							proj.inverse(line[1]).reverse(),
+						], lineOptions),
+						length = path.statistics.sphericalLengthMeters,
+						numberOfImages = Math.ceil(length / this.Bx), extendBy;
+
+					if (lineAfterPolygonAdded) {
+						extendBy = 0; // Don't extend copied line
+					} else {
+						numberOfImages += 4;
+						extendBy = (this.Bx * numberOfImages - length) / 2 / length;
+					}
+
+					if (numberOfImages > 100) {
+						layersWereInvalidated = true;
+						this.invalidatePolygon(layer);
+						return;
+					}
+
+					// If current length is already greater than previous, break loop and save some time
+					if (currentLength + length + length * extendBy >= minLength) {
+						currentLength = Infinity;
+						break;
+					}
+
+					// Try change length to fit new basis. GeodesicLine will throw when new length exceeds 180 degrees.
+					// In this case, invalidate current polygon.
+					if (!lineAfterPolygonAdded) {
+						try {
+							path.changeLength("both", extendBy);
+						} catch (e) {
+							layersWereInvalidated = true;
+							this.invalidatePolygon(layer);
+							return;
+						}
+					}
+
+					// Push the stuff related to the current paths to the arrays
+					currentPath.push(path);
+					currentLength += path.statistics.sphericalLengthMeters;
+					currentConnections.push(...path.getLatLngs());
+
+					// Fill in capture points.
+					let capturePoints = L.geodesic(path.getLatLngs(), {segmentsNumber: numberOfImages}).getActualLatLngs()[0];
+					for (let point of capturePoints)
+						currentPoints.push(this.createCapturePoint(point, color));
+
+					deltaBy += this.By;
+				}
+
+				if (currentLength >= minLength)
+					continue;
+
+				minLength = currentLength;
+				shortestPath = currentPath;
+				shortestPathConnections = currentConnections;
+				shortestPathPoints = currentPoints;
 			}
 
-			this.pathsGroup.addLayer(shortestPath);*/
 			this.addPolygon(layer);
 
 			this.internalConnections.addLayer(L.geodesic(shortestPathConnections, {
@@ -219,50 +248,80 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend({
 
 			for (let marker of shortestPathPoints)
 				this.pointsGroup.addLayer(marker);
-
-
 		});
+
+		if (layersWereInvalidated)
+			window.alert(L.ALS.locale.polygonLayersSkipped);
+
+		this.map.addLayer(this.labelsGroup); // Nothing in the base layer hides or shows it, so it's only hidden in code above
 		this.updatePathsMeta();
 		this.updateLayersVisibility();
 		this.calculateParameters();
-		return;
-
-		if (layersWereRemoved)
-			window.alert(L.ALS.locale.rectangleLayersSkipped);
-
-		this.map.addLayer(this.labelsGroup); // Nothing in the base layer hides or shows it, so it's only hidden in code above
-		this.updateLayersVisibility();
-		this.calculateParameters();
-		this.writeToHistory();
+		this.writeToHistoryDebounced();
 	},
 
-	perpendicularLine: function (proj, p1, p2, extendFrom = "end", direction = 1) {
-		// Project coordinates to the gnomonic projection and work with lines as with vectors.
+	/**
+	 * Builds an "infinite" perpendicular line to the given line defined by p1 and p2 (let's call it reference line).
+	 * Then crops the perpendicular by the given polygon and returns it.
+	 *
+	 * First point of the perpendicular always lies on the reference line.
+	 *
+	 * @param p1 {number[]} First point of the reference line
+	 * @param p2 {number[]} Second point of the reference line
+	 * @param polygon {number[][]} Polygon to crop perpendicular with.
+	 * @param moveToCenter {boolean} If true, perpendicular will be drawn from the center of the reference line. Otherwise, perpendicular will be drawn from p1.
+	 * @returns {number[][]|undefined} Perpendicular or undefined, if line doesn't intersect the polygon.
+	 */
+	perpendicularLine: function (p1, p2, polygon, moveToCenter = false) {
 		let [p1x, p1y] = p1, [p2x, p2y] = p2,
 			x = p2x - p1x, y = p2y - p1y,
-			// Find an orthogonal vector
-			perpX = 1000,
-			perpY = -perpX * x / y;
+			perpX, perpY;
 
-		// Check if orthogonal vector in correct direction. If not, reverse it.
-		if (Math.sign(perpY) !== direction) {
-			perpX = -perpX;
-			perpY = -perpY;
+		// Find an orthogonal vector
+		if (y === 0) {
+			// Build vertical line for horizontal reference lines
+			perpX = 0;
+			perpY = 1000;
+		} else {
+			// Build orthogonal vectors for other lines
+			perpX = 1000;
+			perpY = -perpX * x / y;
 		}
 
-		// Move vector back
-		perpX += p1x;
-		perpY += p1y;
+		// For each negative and positive directions
+		let line = [];
+		for (let sign of [1, -1]) {
+			// Scale the perpendicular to the maximum distance in gnomonic projection
+			let [px, py] = this.scaleLine([[0, 0], [sign * perpX, sign * perpY]], this.maxGnomonicPointDistance)[1];
 
-		// Scale line
-		let line = this.scaleLine([[p1x, p1y], [perpX, perpY]], this.maxGeodesicLengthMeters);
+			// Move perpendicular back
+			px += p1x;
+			py += p1y;
 
-		if (extendFrom !== "both")
-			return line;
+			if (moveToCenter) {
+				// Move perpendicular by the half of the original vector
+				px += x / 2;
+				py += y / 2;
+			}
 
-		return [this.perpendicularLine(proj, p1, p2, "end", -direction)[1], line[1]];
+			line.push([px, py]);
+		}
+
+		let clippedLine = MathTools.clipLineByPolygon(line, polygon);
+
+		if (!clippedLine)
+			return;
+
+		return MathTools.isPointOnLine(clippedLine[0], [p1, p2]) ? clippedLine : clippedLine.reverse();
 	},
 
+	/**
+	 * Scales the line from the first point to the target length
+	 *
+	 * @param line {number[][]} Line to scale
+	 * @param targetLength {number} Target line length in meters
+	 * @returns {number[][]} Scaled line
+	 */
 	scaleLine: function (line, targetLength) {
 		let [p1, p2] = line, [p1x, p1y] = p1, [p2x, p2y] = p2,
 			dx = p2x - p1x, dy = p2y - p1y,
@@ -270,6 +329,10 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend({
 		dx *= lengthModifier;
 		dy *= lengthModifier;
 		return [[p1x, p1y], [dx + p1x, dy + p1y]];
+	},
+
+	isPointValid: function (point) {
+		return Math.sqrt(point[0] ** 2 + point[1] ** 2) <= this.maxGnomonicPointDistance;
 	},
 
 	statics: {

@@ -50,7 +50,6 @@ L.ALS.SynthPolygonBaseLayer = L.ALS.SynthBaseLayer.extend( /** @lends L.ALS.Synt
 		this.bordersGroup = L.featureGroup();
 		this.bordersGroup.thicknessMultiplier = 4;
 		this.labelsGroup = new L.LabelLayer(false);
-		this.polygonErrorsLabelsIDs = [];
 
 		L.ALS.SynthBaseLayer.prototype.init.call(this, settings,
 			path1InternalConnections, path1ExternalConnections, colorLabel1, [path1ActualPathGroup],

@@ -25,26 +25,24 @@ L.ALS.SynthRectangleLayer = L.ALS.SynthRectangleBaseLayer.extend({
 			this.removePolygon(this.polygons[name], false);
 		this.polygons = {}
 
-		this.clearLabels("polygonErrorsLabelsIDs");
-
-		let layersWereRemoved = false;
+		let layersWereInvalidated = false;
 
 		this.polygonGroup.eachLayer((layer) => {
+			// Limit polygon size by limiting total paths count
 			let bounds = layer.getBounds(), topLeft = bounds.getNorthWest(),
 				parallelsPathsCount = Math.ceil(this.getParallelOrMeridianLineLength(topLeft, bounds.getSouthWest()) / this.By) + 1,
 				meridiansPathsCount = Math.ceil(this.getParallelOrMeridianLineLength(topLeft, bounds.getNorthEast()) / this.By) + 1;
 
-			// Limit polygon size by limiting total approximate paths count. This is not 100% accurate but close enough.
 			if (meridiansPathsCount + parallelsPathsCount > 150) {
-				layersWereRemoved = true;
-				this.denyPolygon(layer, "polygonTooBig");
+				layersWereInvalidated = true;
+				this.invalidatePolygon(layer);
 				return;
 			}
 
 			this.addPolygon(layer);
 		});
 
-		if (layersWereRemoved)
+		if (layersWereInvalidated)
 			window.alert(L.ALS.locale.rectangleLayersSkipped);
 
 		this.map.addLayer(this.labelsGroup); // Nothing in the base layer hides or shows it, so it's only hidden in code above

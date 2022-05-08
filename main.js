@@ -14,7 +14,7 @@ window.L = require("leaflet");
  * Segments number to use when displaying L.Geodesic
  * @type {number}
  */
-L.GEODESIC_SEGMENTS = 500;
+L.GEODESIC_SEGMENTS = 1000;
 
 L.Geodesic = require("leaflet.geodesic").GeodesicLine;
 require("leaflet-draw");

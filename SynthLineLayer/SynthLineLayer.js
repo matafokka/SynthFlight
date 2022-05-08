@@ -1,6 +1,7 @@
 require("./SynthLineWizard.js");
 require("./SynthLineSettings.js");
 const geojsonMerge = require("@mapbox/geojson-merge"); // Using this since turfHelpers.featureCollection() discards previously defined properties.
+const MathTools = require("../MathTools.js");
 
 /**
  * Geodesic line layer
@@ -18,8 +19,10 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend(/** @lends L.ALS.SynthLineLay
 		this.pathsGroup = L.featureGroup();
 		this.drawingGroup = L.featureGroup();
 		this.connectionsGroup = L.featureGroup();
+		this.errorGroup = L.featureGroup();
 
 		L.ALS.SynthBaseLayer.prototype.init.call(this, settings, this.pathsGroup, this.connectionsGroup, "lineLayerColor");
+		this.addLayers(this.errorGroup);
 
 		this.enableDraw({
 			polyline: {
@@ -61,10 +64,13 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend(/** @lends L.ALS.SynthLineLay
 	onEditEnd: function () {
 		this.pathsGroup.clearLayers();
 		this.pointsGroup.clearLayers();
+		this.errorGroup.clearLayers();
 
-		let color = this.getWidgetById("color0").getValue(), lineOptions = {
-			color, thickness: this.lineThicknessValue, segmentsNumber: L.GEODESIC_SEGMENTS,
-		};
+		let color = this.getWidgetById("color0").getValue(),
+			lineOptions = {
+				color, thickness: this.lineThicknessValue, segmentsNumber: L.GEODESIC_SEGMENTS,
+			},
+			linesWereInvalidated = false;
 
 		this.drawingGroup.eachLayer((layer) => {
 			let latLngs = layer.getLatLngs();
@@ -72,11 +78,20 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend(/** @lends L.ALS.SynthLineLay
 				let extendedGeodesic = new L.Geodesic([latLngs[i - 1], latLngs[i]], lineOptions),
 					length = extendedGeodesic.statistics.sphericalLengthMeters,
 					numberOfImages = Math.ceil(length / this.Bx) + 4,
-					extendBy = (this.Bx * numberOfImages - length) / 2 / length;
-				extendedGeodesic.changeLength("both", extendBy);
+					shouldInvalidateLine = numberOfImages > 10000; // Line is way too long for calculated Bx
 
-				if (MathTools.isEqual(length, extendedGeodesic.statistics.sphericalLengthMeters)) {
-					// TODO: Do something about really short lines
+				// This will throw an error when new length exceeds 180 degrees
+				try {
+					extendedGeodesic.changeLength("both", (this.Bx * numberOfImages - length) / 2 / length);
+				} catch (e) {
+					shouldInvalidateLine = true;
+				}
+
+				if (shouldInvalidateLine) {
+					extendedGeodesic.setStyle({color: "red"});
+					this.errorGroup.addLayer(extendedGeodesic);
+					linesWereInvalidated = true;
+					continue;
 				}
 
 				this.pathsGroup.addLayer(extendedGeodesic);
@@ -101,6 +116,9 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend(/** @lends L.ALS.SynthLineLay
 
 		this.map.removeLayer(this.drawingGroup);
 		this.map.addLayer(this.pathsGroup);
+
+		if (linesWereInvalidated)
+			window.alert(L.ALS.locale.lineLayersSkipped);
 
 		this.writeToHistory();
 	},
