@@ -18,6 +18,7 @@ L.ALS.SynthRectangleLayer = L.ALS.SynthRectangleBaseLayer.extend({
 				}
 			}
 		}, this.polygonGroup);
+		this.isAfterDeserialization = false;
 	},
 
 	onEditEnd: function () {
@@ -26,7 +27,9 @@ L.ALS.SynthRectangleLayer = L.ALS.SynthRectangleBaseLayer.extend({
 
 		for (let name in this.polygons)
 			this.removePolygon(this.polygons[name], false);
+
 		this.polygons = {}
+		this.invalidPolygons = {};
 
 		let layersWereInvalidated = false;
 
@@ -51,7 +54,7 @@ L.ALS.SynthRectangleLayer = L.ALS.SynthRectangleBaseLayer.extend({
 		this.map.addLayer(this.labelsGroup); // Nothing in the base layer hides or shows it, so it's only hidden in code above
 		this.updateLayersVisibility();
 		this.calculateParameters();
-		this.writeToHistory();
+		this.writeToHistoryDebounced();
 	},
 
 	statics: {

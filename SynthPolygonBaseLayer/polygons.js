@@ -111,5 +111,7 @@ L.ALS.SynthPolygonBaseLayer.prototype.calculatePolygonParameters = function (wid
 }
 
 L.ALS.SynthPolygonBaseLayer.prototype.invalidatePolygon = function (polygon) {
+	polygon._intName = this._generatePolygonName(polygon);
 	polygon.setStyle({color: "red", fillColor: "red"});
+	this.invalidPolygons[polygon._intName] = polygon;
 }

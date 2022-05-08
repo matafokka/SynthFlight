@@ -120,5 +120,4 @@ L.ALS.SynthRectangleBaseLayer = L.ALS.SynthPolygonBaseLayer.extend( /** @lends L
 
 require("./drawPaths.js");
 require("./misc.js");
-require("./serialization.js");
 require("./toGeoJSON.js");

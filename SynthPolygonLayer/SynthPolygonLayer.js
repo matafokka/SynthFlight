@@ -52,6 +52,8 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend({
 		this.calculateThreshold(settings); // Update hiding threshold
 		this.calculateParameters();
 		this.updateLayersVisibility();
+
+		this.isAfterDeserialization = false;
 	},
 
 	onEditEnd: function () {
@@ -65,7 +67,9 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend({
 
 		for (let name in this.polygons)
 			this.removePolygon(this.polygons[name], false);
+
 		this.polygons = {}
+		this.invalidPolygons = {};
 
 		this.clearPaths();
 

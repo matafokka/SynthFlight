@@ -44,6 +44,8 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend(/** @lends L.ALS.SynthLineLay
 
 		this.pointsGroup = L.featureGroup();
 		this.calculateParameters();
+
+		this.isAfterDeserialization = false;
 	},
 
 	_hideCapturePoints: function (widget) {
@@ -126,7 +128,7 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend(/** @lends L.ALS.SynthLineLay
 		if (linesWereInvalidated)
 			window.alert(L.ALS.locale.lineLayersSkipped);
 
-		this.writeToHistory();
+		this.writeToHistoryDebounced();
 	},
 
 	calculateParameters: function () {
@@ -161,12 +163,13 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend(/** @lends L.ALS.SynthLineLay
 		settings: new L.ALS.SynthLineSettings(),
 
 		deserialize: function (serialized, layerSystem, settings, seenObjects) {
-			let object = L.ALS.Layer.deserialize(serialized, layerSystem, settings, seenObjects),
+			let object = L.ALS.SynthBaseLayer.deserialize(serialized, layerSystem, settings, seenObjects),
 				lines = L.ALS.Serializable.deserialize(serialized.lines, seenObjects);
 
 			for (let line of lines)
 				object.drawingGroup.addLayer(new L.Geodesic(line, object.drawControls.polyline.shapeOptions));
 
+			object.isAfterDeserialization = true;
 			object.onEditEnd();
 
 			delete object.lines;

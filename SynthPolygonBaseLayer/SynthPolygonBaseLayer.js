@@ -42,8 +42,9 @@ L.ALS.SynthPolygonBaseLayer = L.ALS.SynthBaseLayer.extend( /** @lends L.ALS.Synt
 		hidePaths2WidgetId = "hidePathsByMeridians",
 	) {
 		this.polygons = {};
+		this.invalidPolygons = {};
 		this.polygonsWidgets = {};
-		this.serializationIgnoreList.push("polygons", "lngDistance", "latDistance", "_currentStandardScale");
+		this.serializationIgnoreList.push("polygons", "invalidPolygons", "lngDistance", "latDistance", "_currentStandardScale");
 
 		this.polygonGroup = L.featureGroup();
 		this.widgetsGroup = L.featureGroup();
@@ -266,17 +267,8 @@ L.ALS.SynthPolygonBaseLayer = L.ALS.SynthBaseLayer.extend( /** @lends L.ALS.Synt
 		return parseFloat(n.toFixed(5));
 	},
 
-	statics: {
-		deserialize: function (serialized, layerSystem, settings, seenObjects) {
-			let deserialized = L.ALS.SynthRectangleBaseLayer.deserialize(serialized, layerSystem, settings, seenObjects);
-			for (let id in deserialized.polygons)
-				deserialized.polygonGroup.addLayer(deserialized.polygons[id]);
-			deserialized.updatePolygonsColors();
-			return deserialized;
-		},
-	}
-
 });
 
 require("./DEM.js");
 require("./polygons.js");
+require("./serialization.js");
