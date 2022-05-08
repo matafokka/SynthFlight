@@ -74,7 +74,6 @@ L.ALS.SynthPolygonBaseLayer = L.ALS.SynthBaseLayer.extend( /** @lends L.ALS.Synt
 			this.widgetsGroup, this.labelsGroup,
 		];
 
-		// TODO: Fix thickness
 		this.addLayers(this.polygonGroup, this.widgetsGroup, this.bordersGroup, pointsGroup1, path1ActualPathGroup, this.labelsGroup);
 		this.toUpdateThickness.push(this.polygonGroup, this.bordersGroup, pointsGroup1, path1ActualPathGroup);
 

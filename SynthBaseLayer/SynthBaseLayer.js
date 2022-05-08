@@ -127,7 +127,14 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 		 *
 		 * @type {L.FeatureGroup[]}
 		 */
-		this.toUpdateThickness = [...path1AdditionalLayers, ...path2AdditionalLayers];
+		this.toUpdateThickness = [];
+
+		for (let arr of [path1AdditionalLayers, path2AdditionalLayers]) {
+			for (let item of arr) {
+				if (item !== undefined)
+					this.toUpdateThickness.push(item);
+			}
+		}
 
 		for (let i = 0; i < this.paths.length; i++) {
 			let path = this.paths[i];
