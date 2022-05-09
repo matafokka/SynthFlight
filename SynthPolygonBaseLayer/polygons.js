@@ -19,6 +19,7 @@ L.ALS.MeanHeightButtonHandler = L.ALS.Serializable.extend( /**@lends L.ALS.MeanH
 
 L.ALS.SynthPolygonBaseLayer.prototype.addPolygon = function (polygon) {
 	polygon._intName = this._generatePolygonName(polygon);
+	delete this.invalidPolygons[polygon._intName];
 
 	polygon.setStyle({fill: true});
 	this.polygons[polygon._intName] = polygon;
@@ -55,6 +56,9 @@ L.ALS.SynthPolygonBaseLayer.prototype.addPolygon = function (polygon) {
 
 	this.polygonsWidgets[polygon._intName] = controlsContainer;
 	this.widgetsGroup.addLayer(controlsContainer);
+
+	if (polygon.linkedLayer)
+		polygon.linkedLayer.setStyle(polygon.options);
 }
 
 L.ALS.SynthPolygonBaseLayer.prototype.removePolygon = function (polygon, removeFromObject = true) {
@@ -112,6 +116,70 @@ L.ALS.SynthPolygonBaseLayer.prototype.calculatePolygonParameters = function (wid
 
 L.ALS.SynthPolygonBaseLayer.prototype.invalidatePolygon = function (polygon) {
 	polygon._intName = this._generatePolygonName(polygon);
-	polygon.setStyle({color: "red", fillColor: "red"});
+
+	for (let poly of [polygon, polygon.linkedLayer]) {
+		if (poly)
+			poly.setStyle({color: "red", fillColor: "red"});
+	}
 	this.invalidPolygons[polygon._intName] = polygon;
+	delete this.polygons[polygon._intName];
+}
+
+L.ALS.SynthPolygonBaseLayer.prototype._getRectOrPolyCoords = function (layer) {
+	if (layer instanceof L.Rectangle) {
+		let {_northEast, _southWest} = layer.getBounds();
+		return [_northEast, _southWest];
+	}
+	return layer.getLatLngs()[0];
+}
+
+L.ALS.SynthPolygonBaseLayer.prototype._setRectOrPolyCoords = function (layer, coords) {
+	if (layer instanceof L.Rectangle)
+		layer.setBounds(coords);
+	else
+		layer.setLatLngs(coords);
+}
+
+L.ALS.SynthPolygonBaseLayer.prototype.cloneLayerIfNeeded = function (layer) {
+	// Clone layers that crosses antimeridians
+	let bounds = layer.getBounds(),
+		crossingWest = bounds.getWest() < -180,
+		crossingEast = bounds.getEast() > 180,
+		crossingOne = crossingWest || crossingEast,
+		crossingBoth = crossingEast && crossingWest
+
+	if (!layer.linkedLayer && crossingOne && !crossingBoth) {
+		let clonedLayer = layer instanceof L.Rectangle ? L.rectangle(bounds) : L.polygon([]),
+			moveTo = crossingWest ? 1 : -1,
+			setLinkedLatLngs = (editedLayer) => {
+				let latlngs = this._getRectOrPolyCoords(editedLayer), newLatLngs = [];
+
+				for (let coord of latlngs)
+					newLatLngs.push([coord.lat, coord.lng + (editedLayer.linkedLayer.isCloned ? 1 : -1) * moveTo * 360]);
+
+				this._setRectOrPolyCoords(editedLayer.linkedLayer, newLatLngs);
+			}
+
+		clonedLayer.isCloned = true;
+		clonedLayer.linkedLayer = layer;
+		layer.linkedLayer = clonedLayer;
+		this.polygonGroup.addLayer(clonedLayer);
+
+		for (let lyr of [layer, clonedLayer]) {
+			let editHandler = () => {
+				setLinkedLatLngs(lyr);
+				lyr.linkedLayer.editing.updateMarkers();
+			}
+
+			lyr.on("editdrag", editHandler);
+			lyr.editHandler = editHandler;
+		}
+
+		setLinkedLatLngs(layer);
+	} else if (layer.linkedLayer && (!crossingOne || crossingBoth)) {
+		layer.off("editdrag", layer.editHandler);
+		this.polygonGroup.removeLayer(layer.linkedLayer);
+		delete layer.editHandler;
+		delete layer.linkedLayer;
+	}
 }

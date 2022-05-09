@@ -98,6 +98,19 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend({
 		// We'll also crop the paths by the hull, so there won't be empty space along the paths.
 
 		this.polygonGroup.eachLayer((layer) => {
+			// Remove a linked layer when a layer either original or cloned has been removed
+			if (layer.linkedLayer && !this.polygonGroup.hasLayer(layer.linkedLayer)) {
+				this.polygonGroup.removeLayer(layer);
+				return;
+			}
+
+			// Skip cloned layers
+			if (layer.isCloned) {
+				return;
+			}
+
+			this.cloneLayerIfNeeded(layer);
+
 			// Build projection. The center will be the center of the polygon. It doesn't matter that much, but center
 			// Allows us to expand polygon size a bit when it's close to the projection's coordinates limits.
 			let center = layer.getBounds().getCenter(),
@@ -260,7 +273,8 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend({
 				let latLngs = path.getLatLngs();
 
 				for (let point of latLngs) {
-					this.labelsGroup.addLabel("", [point.lat, point.lng], number, L.LabelLayer.DefaultDisplayOptions.Message);
+					let {lat, lng} = point.wrap();
+					this.labelsGroup.addLabel("", [lat, lng], number, L.LabelLayer.DefaultDisplayOptions.Message);
 					number++;
 				}
 			}
