@@ -14,7 +14,7 @@ window.L = require("leaflet");
  * Segments number to use when displaying L.Geodesic
  * @type {number}
  */
-L.GEODESIC_SEGMENTS = 1000;
+L.GEODESIC_SEGMENTS = 500;
 
 L.Geodesic = require("leaflet.geodesic").GeodesicLine;
 require("leaflet-draw");
@@ -24,6 +24,7 @@ L.ALS.Locales.AdditionalLocales.Russian();
 require("./node_modules/leaflet.coordinates/dist/Leaflet.Coordinates-0.1.5.min.js");
 require("./locales/English.js");
 require("./locales/Russian.js");
+require("./SynthGeometryBaseWizard.js");
 require("./SynthGeometryLayer/SynthGeometryLayer.js");
 require("./SynthBaseLayer/SynthBaseLayer.js");
 require("./SynthPolygonBaseLayer/SynthPolygonBaseLayer.js");

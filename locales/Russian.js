@@ -32,7 +32,7 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 	gridStandardScales: "Масштаб сетки:",
 	gridLngDistance: "Расстояние между параллелями:",
 	gridLatDistance: "Расстояние между меридианами:",
-	gridShouldMergeCells: "Объединять пары соседних трапеций при широте выше 60° и снова объединять при широте выше 76° (кроме масштабов 1:1 000 000 и 1:2 000, при которых трапеции с широтой больше 76° объединяются по 3, а не по 4)",
+	gridShouldMergeCells: "Объединять соседние трапеции при широте выше 60°",
 
 	// SynthGridLayer
 
@@ -127,8 +127,8 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 	// SynthGeometryLayer
 
 	geometryOutOfBounds: "Объекты в выбранном файле выходят за границы видимой области. Пожалуйста, проверьте проекцию и/или добавьте в архив файл .prj",
-	geometryInvalidFile: "Этот файл не является shapefile-ом или файлом GeoJSON",
-	geometryNoFeatures: "Этот файл не содержит объектов, поэтому не будет добавлен",
+	geometryInvalidFile: "Выбранный файл не является shapefile-ом или файлом GeoJSON",
+	geometryNoFeatures: "Выбранный файл не содержит объектов, поэтому не будет добавлен",
 	geometryBorderColor: "Цвет обводки:",
 	geometryFillColor: "Цвет заливки:",
 	geometryBrowserNotSupported: "Ваш браузер не поддерживает добавление данного слоя, но вы можете открывать проекты, использующие этот слой.",
@@ -144,6 +144,11 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 	polygonPathsColor: "Цвет маршрутов:",
 	polygonHidePaths: "Скрыть маршруты",
 	polygonLayersSkipped: "Один или несколько полигонов были пропущены, так как они слишком большие. Данные полигоны имеют красный цвет.",
+
+	// GeoJSON initial features
+	initialFeaturesFileLabelPolygon: "Загрузить исходные полигоны из сжатого shapefile (zip-архива) или GeoJSON (типы, отличные от полигона, будут пропущены):",
+	initialFeaturesFileLabelLine: "Загрузить исходные полилинии из сжатого shapefile (zip-архива) или GeoJSON (типы, отличные от пололинии, будут пропущены):",
+	initialFeaturesNoFeatures: "Выбранный файл не содержит ни одного объекта, поддерживаемого добавляемым слоем",
 
 	// Search
 	searchButtonTitle: "Поиск в Слоях Геометрии и OSM",

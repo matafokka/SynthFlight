@@ -1,6 +1,5 @@
 require("./SynthGeometryWizard.js");
 require("./SynthGeometrySettings.js");
-const shp = require("shpjs");
 
 /**
  * Layer with geometry from shapefile or GeoJSON
@@ -25,52 +24,25 @@ L.ALS.SynthGeometryLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGeometryLay
 			return;
 		}
 
-		let file = wizardResults["geometryFileLabel"][0], fileReader = new FileReader();
-
-		if (!file) {
-			this._deleteInvalidLayer(L.ALS.locale.geometryNoFileSelected);
-			return;
-		}
-
-		this.setName(file.name);
-
-		// Try to read as shapefile
-		fileReader.addEventListener("load", (event) => {
-			this.isShapefile = true; // Will hide unneeded widgets using this
-			shp(event.target.result).then((geoJson) => {
-				if (geoJson.features.length === 0) {
-					this._deleteInvalidLayer(L.ALS.locale.geometryNoFeatures);
-					return;
-				}
-
-				this._displayFile(geoJson);
-				// Check if bounds are valid
-				let bounds = this._layer.getBounds();
-				if (bounds._northEast.lng > 180 || bounds._northEast.lat > 90 || bounds._southWest.lng < -180 || bounds._southWest.lat < -90)
-					window.alert(L.ALS.locale.geometryOutOfBounds);
-
-			}).catch((reason) => {
-				console.log(reason);
-
-				// If reading as shapefile fails, try to read as GeoJSON.
-				// We won't check bounds because we assume GeoJSON being in WGS84.
-				let fileReader2 = new FileReader();
-				fileReader2.addEventListener("load", (event) => {
-					try {this._displayFile(JSON.parse(event.target.result));}
-					catch (e) {
-						console.log(e);
-						this._deleteInvalidLayer();
-					}
-				});
-				fileReader2.readAsText(file);
-			});
-		});
-
-		try {fileReader.readAsArrayBuffer(file);}
-		catch (e) {}
+		L.ALS.SynthGeometryBaseWizard.getGeoJSON(wizardResults, (geoJson, name) => this._displayFile(geoJson, name));
 	},
 
-	_displayFile: function (geoJson) {
+	_displayFile: function (geoJson, fileName) {
+		if (fileName)
+			this.setName(fileName);
+
+		switch (geoJson) {
+			case "NoFileSelected":
+				this._deleteInvalidLayer(L.ALS.locale.geometryNoFileSelected);
+				return;
+			case "NoFeatures":
+				this._deleteInvalidLayer(L.ALS.locale.geometryNoFeatures);
+				return;
+			case "InvalidFileType":
+				this._deleteInvalidLayer(L.ALS.locale.geometryInvalidFile);
+				return;
+		}
+
 		let borderColor = new L.ALS.Widgets.Color("borderColor", "geometryBorderColor", this, "setColor").setValue(this.borderColor),
 			fillColor = new L.ALS.Widgets.Color("fillColor", "geometryFillColor", this, "setColor").setValue(this.fillColor),
 			menu = [borderColor, fillColor],
@@ -130,6 +102,16 @@ L.ALS.SynthGeometryLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGeometryLay
 			}
 		});
 
+		// Check if bounds are valid
+		let bounds = this._layer.getBounds();
+		if (
+			bounds._northEast.lng > 180 ||
+			bounds._northEast.lat > 90 ||
+			bounds._southWest.lng < -180 ||
+			bounds._southWest.lat < -90
+		)
+			window.alert(L.ALS.locale.geometryOutOfBounds);
+
 		if (L.ALS.searchWindow)
 			L.ALS.searchWindow.addToSearch(this.id, docs, fields); // Add GeoJSON to search
 		this.addLayers(this._layer);
@@ -137,7 +119,7 @@ L.ALS.SynthGeometryLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGeometryLay
 		this.writeToHistory();
 	},
 
-	_deleteInvalidLayer: function (message = L.ALS.locale.geometryInvalidFile) {
+	_deleteInvalidLayer: function (message) {
 		window.alert(message);
 		this.deleteLayer();
 	},

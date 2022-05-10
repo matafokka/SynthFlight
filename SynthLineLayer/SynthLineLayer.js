@@ -43,9 +43,7 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend(/** @lends L.ALS.SynthLineLay
 		this.addBaseParametersOutputSection();
 
 		this.pointsGroup = L.featureGroup();
-		this.calculateParameters();
-
-		this.isAfterDeserialization = false;
+		L.ALS.SynthGeometryBaseWizard.initializePolygonOrPolylineLayer(this, wizardResults);
 	},
 
 	_hideCapturePoints: function (widget) {

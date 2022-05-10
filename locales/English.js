@@ -31,7 +31,7 @@ L.ALS.Locales.addLocaleProperties("English", {
 	gridStandardScales: "Grid scale:",
 	gridLngDistance: "Distance between parallels:",
 	gridLatDistance: "Distance between meridians:",
-	gridShouldMergeCells: "Merge couples of adjacent cells when latitude exceeds 60° and merge again when it exceeds 76° (except 1:1 000 000 and 1:2 000 scales when cells above 76° triple-merged instead of quadruple-merged)",
+	gridShouldMergeCells: "Merge adjacent cells when latitude exceeds 60°",
 
 	// SynthGridLayer
 
@@ -131,8 +131,8 @@ L.ALS.Locales.addLocaleProperties("English", {
 	// SynthGeometryLayer
 
 	geometryOutOfBounds: "Features in selected file are out of visible area. Please, check projection and/or add .prj file to the archive.",
-	geometryInvalidFile: "This file is not valid zipped shapefile or GeoJSON file",
-	geometryNoFeatures: "This file doesn't contain any features, so it won't be added",
+	geometryInvalidFile: "Selected file is not valid zipped shapefile or GeoJSON file",
+	geometryNoFeatures: "Selected file doesn't contain any features, so it won't be added",
 	geometryBorderColor: "Border color:",
 	geometryFillColor: "Fill color:",
 	geometryBrowserNotSupported: "Your browser doesn't support adding this layer. You still can open projects with this layer though.",
@@ -148,6 +148,11 @@ L.ALS.Locales.addLocaleProperties("English", {
 	polygonPathsColor: "Paths color:",
 	polygonHidePaths: "Hide paths",
 	polygonLayersSkipped: "One or more polygons has been skipped because they're too big. These polygons have red color.",
+
+	// GeoJSON initial features
+	initialFeaturesFileLabelPolygon: "Load initial polygons from zipped shapefile or GeoJSON (non-polygon features will be skipped):",
+	initialFeaturesFileLabelLine: "Load initial polylines from zipped shapefile or GeoJSON (non-polyline features will be skipped):",
+	initialFeaturesNoFeatures: "Selected file doesn't contain any features supported by the added layer",
 
 	// Search
 	searchButtonTitle: "Search Geometry Layers or OSM",

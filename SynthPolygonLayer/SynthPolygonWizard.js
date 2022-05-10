@@ -1,3 +1,4 @@
-L.ALS.SynthPolygonWizard = L.ALS.EmptyWizard.extend({
-	displayName: "polygonLayerName"
+L.ALS.SynthPolygonWizard = L.ALS.SynthGeometryBaseWizard.extend({
+	displayName: "polygonLayerName",
+	fileLabel: "initialFeaturesFileLabelPolygon",
 });

@@ -52,9 +52,8 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend({
 
 		this.calculateThreshold(settings); // Update hiding threshold
 		this.onEditEndDebounced = debounce(() => this.onEditEnd(), 300); // Math operations are too slow for immediate update
-		this.calculateParameters();
 
-		this.isAfterDeserialization = false;
+		L.ALS.SynthGeometryBaseWizard.initializePolygonOrPolylineLayer(this, wizardResults);
 	},
 
 	onEditEnd: function () {
@@ -149,18 +148,19 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend({
 					currentPath = [], currentConnections = [], currentLength = 0, currentPoints = [],
 					shouldSwapPoints = false, lineAfterPolygonAdded = false;
 
+				// Precalculate paths' count and invalidate layer if this count is too high
+				if (MathTools.distanceBetweenPoints(...directionalLine) / this.By > 50) {
+					layersWereInvalidated = true;
+					this.invalidatePolygon(layer);
+					return;
+				}
+
 				// Move along the line by By until we reach the end of the polygon and add an additional line
 				// or exceed the limit of 300 paths
 				let deltaBy = 0;
 				while (true) {
 					if (lineAfterPolygonAdded)
 						break;
-
-					if (deltaBy / this.By > 300) {
-						layersWereInvalidated = true;
-						this.invalidatePolygon(layer);
-						return;
-					}
 
 					// Scale the directional line, so endpoints of scaled line will be the start and end points of the
 					// line that we'll build a perpendicular (a path) to. The distance between these points is By.
@@ -265,7 +265,7 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend({
 				...lineOptions, dashArray: this.dashedLine
 			}));
 
-			let number = 0;
+			let number = 1;
 			for (let path of shortestPath) {
 				this.pathGroup.addLayer(path);
 
