@@ -64,7 +64,7 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend(/** @lends L.ALS.SynthLineLay
 		this.map.addLayer(this.drawingGroup);
 	},
 
-	onEditEnd: function () {
+	onEditEnd: function (notifyIfLayersSkipped = true) {
 		if (!this.isSelected)
 			return;
 
@@ -77,6 +77,8 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend(/** @lends L.ALS.SynthLineLay
 				color, thickness: this.lineThicknessValue, segmentsNumber: L.GEODESIC_SEGMENTS,
 			},
 			linesWereInvalidated = false;
+
+		notifyIfLayersSkipped = typeof notifyIfLayersSkipped === "boolean" ? notifyIfLayersSkipped : true;
 
 		this.drawingGroup.eachLayer((layer) => {
 			let latLngs = layer.getLatLngs();
@@ -103,12 +105,14 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend(/** @lends L.ALS.SynthLineLay
 				this.pathsGroup.addLayer(extendedGeodesic);
 
 				// Capture points made by constructing a line with segments number equal to the number of images
-				let points = new L.Geodesic(extendedGeodesic.getLatLngs(), {
+				let pointsArrays = new L.Geodesic(extendedGeodesic.getLatLngs(), {
 					...lineOptions, segmentsNumber: numberOfImages
-				}).getActualLatLngs()[0];
+				}).getActualLatLngs();
 
-				for (let point of points)
-					this.pointsGroup.addLayer(this.createCapturePoint(point, color));
+				for (let array of pointsArrays) {
+					for (let point of array)
+						this.pointsGroup.addLayer(this.createCapturePoint(point, color));
+				}
 			}
 		});
 
@@ -123,15 +127,15 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend(/** @lends L.ALS.SynthLineLay
 		this.map.removeLayer(this.drawingGroup);
 		this.map.addLayer(this.pathsGroup);
 
-		if (linesWereInvalidated)
+		if (linesWereInvalidated && notifyIfLayersSkipped)
 			window.alert(L.ALS.locale.lineLayersSkipped);
 
 		this.writeToHistoryDebounced();
 	},
 
-	calculateParameters: function () {
+	calculateParameters: function (notifyIfLayersSkipped = false) {
 		L.ALS.SynthBaseLayer.prototype.calculateParameters.call(this);
-		this.onEditEnd();
+		this.onEditEnd(typeof notifyIfLayersSkipped === "boolean" ? notifyIfLayersSkipped : false);
 	},
 
 	toGeoJSON: function () {

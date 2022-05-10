@@ -89,7 +89,7 @@ L.ALS.SynthGeometryBaseWizard = L.ALS.Wizard.extend({
 		initializePolygonOrPolylineLayer: function (synthLayer, wizardResults) {
 			let groupToAdd, layerType, CastTo,
 				finishLoading = () => {
-					synthLayer.calculateParameters();
+					synthLayer.calculateParameters(true);
 					synthLayer.isAfterDeserialization = false;
 				}
 
@@ -119,7 +119,7 @@ L.ALS.SynthGeometryBaseWizard = L.ALS.Wizard.extend({
 				}
 
 				let layersAdded = false;
-				L.geoJson(geoJson, {
+				let geoJsonLayer = L.geoJson(geoJson, {
 					onEachFeature: (feature, layer) => {
 						if (!(layer instanceof layerType))
 							return;
@@ -129,11 +129,25 @@ L.ALS.SynthGeometryBaseWizard = L.ALS.Wizard.extend({
 					}
 				});
 
-				if (!layersAdded)
+				if(layersAdded)
+					this.checkGeoJSONBounds(geoJson);
+				else
 					window.alert(L.ALS.locale.initialFeaturesNoFeatures);
 
 				finishLoading();
 			});
-		}
+		},
+
+		checkGeoJSONBounds: function (layer) {
+			// TODO: When wrapping will be done, expand checking to [-360; 360] range
+			let {_northEast, _southWest} = layer.getBounds();
+			if (
+				_northEast.lng > 180 ||
+				_northEast.lat > 90 ||
+				_southWest.lng < -180 ||
+				_southWest.lat < -90
+			)
+				window.alert(L.ALS.locale.geometryOutOfBounds);
+		},
 	}
 })

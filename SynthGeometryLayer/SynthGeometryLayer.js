@@ -103,14 +103,7 @@ L.ALS.SynthGeometryLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGeometryLay
 		});
 
 		// Check if bounds are valid
-		let bounds = this._layer.getBounds();
-		if (
-			bounds._northEast.lng > 180 ||
-			bounds._northEast.lat > 90 ||
-			bounds._southWest.lng < -180 ||
-			bounds._southWest.lat < -90
-		)
-			window.alert(L.ALS.locale.geometryOutOfBounds);
+		L.ALS.SynthGeometryBaseWizard.checkGeoJSONBounds(this._layer);
 
 		if (L.ALS.searchWindow)
 			L.ALS.searchWindow.addToSearch(this.id, docs, fields); // Add GeoJSON to search

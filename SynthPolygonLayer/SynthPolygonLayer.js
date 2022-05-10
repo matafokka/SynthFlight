@@ -51,12 +51,12 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend({
 		}, this.polygonGroup);
 
 		this.calculateThreshold(settings); // Update hiding threshold
-		this.onEditEndDebounced = debounce(() => this.onEditEnd(), 300); // Math operations are too slow for immediate update
+		this.onEditEndDebounced = debounce((notifyIfLayersSkipped = false) => this.onEditEnd(notifyIfLayersSkipped), 300); // Math operations are too slow for immediate update
 
 		L.ALS.SynthGeometryBaseWizard.initializePolygonOrPolylineLayer(this, wizardResults);
 	},
 
-	onEditEnd: function () {
+	onEditEnd: function (notifyIfLayersSkipped = true) {
 		if (!this.isSelected)
 			return;
 
@@ -75,6 +75,7 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend({
 		this.clearPaths();
 
 		let layersWereInvalidated = false;
+		notifyIfLayersSkipped = typeof notifyIfLayersSkipped === "boolean" ? notifyIfLayersSkipped : true;
 
 		// Build paths for each polygon.
 
@@ -243,9 +244,12 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend({
 					currentConnections.push(...path.getLatLngs());
 
 					// Fill in capture points.
-					let capturePoints = L.geodesic(path.getLatLngs(), {segmentsNumber: numberOfImages}).getActualLatLngs()[0];
-					for (let point of capturePoints)
-						currentPoints.push(this.createCapturePoint(point, color));
+					let pointsArrays = L.geodesic(path.getLatLngs(), {segmentsNumber: numberOfImages}).getActualLatLngs();
+
+					for (let array of pointsArrays) {
+						for (let point of array)
+							currentPoints.push(this.createCapturePoint(point, color));
+					}
 
 					deltaBy += this.By;
 				}
@@ -283,7 +287,7 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend({
 				this.pointsGroup.addLayer(marker);
 		});
 
-		if (layersWereInvalidated)
+		if (layersWereInvalidated && notifyIfLayersSkipped)
 			window.alert(L.ALS.locale.polygonLayersSkipped);
 
 		this.map.addLayer(this.labelsGroup); // Nothing in the base layer hides or shows it, so it's only hidden in code above
@@ -292,9 +296,9 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend({
 		this.writeToHistoryDebounced();
 	},
 
-	calculateParameters: function () {
+	calculateParameters: function (notifyIfLayersSkipped = false) {
 		L.ALS.SynthPolygonBaseLayer.prototype.calculateParameters.call(this);
-		this.onEditEndDebounced();
+		this.onEditEndDebounced(typeof notifyIfLayersSkipped === "boolean" ? notifyIfLayersSkipped : false);
 	},
 
 	updateLayersVisibility: function () {
