@@ -1,3 +1,15 @@
+#map {
+	background: black;
+}
+
+.leaflet-pane.leaflet-mapLabels-pane {
+	z-index: 600;
+}
+
+.leaflet-pane.leaflet-blackOverlay-pane {
+	z-index: 500;
+}
+
 .leaflet-control-coordinates .uiElement {
 	font-size: 0.75rem !important;
 	margin-top: 0;
