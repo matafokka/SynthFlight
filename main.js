@@ -125,8 +125,9 @@ map.createPane("blackOverlayPane");
 let overlayLayer = new L.BlackOverlayLayer({
 	noWrap: true,
 	pane: "blackOverlayPane",
+	updateWhenIdle: false,
+	updateWhenZooming: false,
 }).addTo(map);
-
 
 // When drawing starts, hide notifications and black overlay, but add red datelines
 
