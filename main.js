@@ -17,6 +17,7 @@ window.L = require("leaflet");
 L.GEODESIC_SEGMENTS = 500;
 
 L.Geodesic = require("leaflet.geodesic").GeodesicLine;
+require("./WrappedPolyline.js");
 require("leaflet-draw");
 require("./DrawGeodesic.js");
 require("leaflet-advanced-layer-system");
@@ -132,8 +133,7 @@ let overlayLayer = new L.BlackOverlayLayer({
 // When drawing starts, hide notifications and black overlay, but add red datelines
 
 let datelines = L.featureGroup();
-for (let sign of [1, -1]) {
-	let lng = 180 * sign;
+for (let lng of [180, -180]) {
 	datelines.addLayer(L.polyline([[90, lng], [-90, lng]], {
 		color: "red",
 		weight: 1,

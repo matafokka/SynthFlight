@@ -34,6 +34,18 @@ L.ALS.SynthRectangleLayer = L.ALS.SynthRectangleBaseLayer.extend({
 		let layersWereInvalidated = false;
 
 		this.polygonGroup.eachLayer((layer) => {
+			// Remove a linked layer when a layer either original or cloned has been removed
+			if (layer.linkedLayer && !this.polygonGroup.hasLayer(layer.linkedLayer)) {
+				this.polygonGroup.removeLayer(layer);
+				return;
+			}
+
+			// Skip cloned layers
+			if (layer.isCloned)
+				return;
+
+			this.cloneLayerIfNeeded(layer);
+
 			// Limit polygon size by limiting total paths count
 			let bounds = layer.getBounds(), topLeft = bounds.getNorthWest(),
 				parallelsPathsCount = Math.ceil(this.getParallelOrMeridianLineLength(topLeft, bounds.getSouthWest()) / this.By) + 1,

@@ -105,9 +105,8 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend({
 			}
 
 			// Skip cloned layers
-			if (layer.isCloned) {
+			if (layer.isCloned)
 				return;
-			}
 
 			this.cloneLayerIfNeeded(layer);
 

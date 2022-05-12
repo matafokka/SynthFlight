@@ -62,7 +62,7 @@ L.ALS.SynthRectangleBaseLayer.prototype.drawPathsWorker = function (isParallels)
 
 			lat = startLat, lng = startLng,
 			turfPolygonCoordinates = turfPolygon.geometry.coordinates[0], // MathTools accepts coordinates of the polygon, not polygon itself
-			number = 1, connectionLine = L.polyline([], connLineOptions),
+			number = 1, connectionLine = new L.WrappedPolyline([], connLineOptions),
 			prevLine, shouldDraw = true;
 
 		connectionLine.actualPaths = [];
@@ -133,7 +133,7 @@ L.ALS.SynthRectangleBaseLayer.prototype.drawPathsWorker = function (isParallels)
 				secondPoint = endPoint;
 			}
 
-			let line = L.polyline([], lineOptions); // Contains paths with turns, i.e. internal connections
+			let line = new L.WrappedPolyline([], lineOptions); // Contains paths with turns, i.e. internal connections
 
 			for (let point of [firstPoint, secondPoint]) {
 				// Add points to the path
@@ -147,7 +147,7 @@ L.ALS.SynthRectangleBaseLayer.prototype.drawPathsWorker = function (isParallels)
 
 				let labelId = L.ALS.Helpers.generateID();
 				this.pathsLabelsIds.push(labelId);
-				this.labelsGroup.addLabel(labelId, coord, number, L.LabelLayer.DefaultDisplayOptions[isParallels ? "Message" : "Error"]);
+				this.labelsGroup.addLabel(labelId, L.latLng(coord).wrap(), number, L.LabelLayer.DefaultDisplayOptions[isParallels ? "Message" : "Error"]);
 				number++;
 			}
 
