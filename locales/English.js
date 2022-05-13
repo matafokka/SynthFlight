@@ -35,6 +35,16 @@ L.ALS.Locales.addLocaleProperties("English", {
 
 	// SynthGridLayer
 
+	// Confirmation text when distances don't divide map into the whole number of cells
+	gridCorrectDistancesMain1: "Distances don't divide Earth into the whole number of segments.",
+	gridCorrectDistancesMain2: "Would you like to use distance in",
+	gridCorrectDistancesLat: "for parallels",
+	gridCorrectDistancesAnd: "and",
+	gridCorrectDistancesLng: "for meridians",
+	gridCorrectDistancesMain3: "Click \"OK\" to use the suggested distances. Click \"Cancel\" to cancel adding this layer.",
+
+	// Main stuff
+
 	alphabet: "ABCDEFGHIJKLMNOPQRSTUVWXYZ", // Don't add it, if you don't need different symbols in cells' names
 	gridLayerDefaultName: "Grid Layer",
 	hidePolygonWidgets: "Hide widgets on the map",

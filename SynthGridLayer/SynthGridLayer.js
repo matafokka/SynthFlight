@@ -1,11 +1,12 @@
 require("./SynthGridSettings.js");
 require("./SynthGridWizard.js");
+const MathTools = require("../MathTools.js");
 const turfHelpers = require("@turf/helpers");
 
 /**
  * Layer that allows users to plan aerial photography using grid
  * @class
- * @extends L.ALS.Layer
+ * @extends L.ALS.SynthRectangleBaseLayer
  */
 L.ALS.SynthGridLayer = L.ALS.SynthRectangleBaseLayer.extend(/** @lends L.ALS.SynthGridLayer.prototype */{
 
@@ -13,8 +14,40 @@ L.ALS.SynthGridLayer = L.ALS.SynthRectangleBaseLayer.extend(/** @lends L.ALS.Syn
 	useZoneNumbers: true,
 	borderColorLabel: "gridBorderColor",
 	fillColorLabel: "gridFillColor",
+	writeToHistoryOnInit: false,
 
-	init: function (wizardResults, settings) {
+	init: function (wizardResults, settings, fn) {
+		// Verify that distances split map into whole number of segments. If not, ask user if they want to use corrected
+		// distances.
+
+		// Distances don't divide Earth into the whole number of segments.
+		// Would you like to use <value> for parallels and <value> for meridians?
+		let confirmText = L.ALS.locale.gridCorrectDistancesMain1 + "\n\n" + L.ALS.locale.gridCorrectDistancesMain2,
+			shouldAlert = false;
+
+		for (let name of ["Lat", "Lng"]) {
+			let wizardDistanceName = `grid${name}Distance`,
+				userDistance = parseFloat(wizardResults[wizardDistanceName]),
+				correctedDistance = 360 / Math.round(360 / userDistance);
+
+			if (MathTools.isEqual((360 / userDistance) % 1, 0))
+				continue;
+
+			shouldAlert = true;
+			wizardResults[wizardDistanceName] = correctedDistance;
+			confirmText += ` ${correctedDistance}° ` +
+				L.ALS.locale[`gridCorrectDistances${name}`] + ` ${L.ALS.locale.gridCorrectDistancesAnd}`;
+		}
+
+		if (shouldAlert) {
+			confirmText = confirmText.substring(0, confirmText.lastIndexOf(" " + L.ALS.locale.gridCorrectDistancesAnd)) + "?" +
+				"\n\n" + L.ALS.locale.gridCorrectDistancesMain3;
+
+			if (!window.confirm(confirmText)) {
+				fn();
+				return;
+			}
+		}
 
 		/**
 		 * Contains polygons' names' IDs

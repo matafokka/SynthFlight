@@ -156,7 +156,8 @@ L.ALS.SynthPolygonBaseLayer = L.ALS.SynthBaseLayer.extend( /** @lends L.ALS.Synt
 	},
 
 	onDelete: function () {
-		this.onHide();
+		if (!this.creationCancelled)
+			this.onHide();
 	},
 
 	updateLayersVisibility: function () {

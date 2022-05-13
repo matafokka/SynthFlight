@@ -63,8 +63,8 @@ L.ALS.SynthRectangleBaseLayer = L.ALS.SynthPolygonBaseLayer.extend( /** @lends L
 		 */
 		this.pathsLabelsIds = [];
 
-		this.lngDistance = parseFloat(wizardResults["gridLngDistance"]);
-		this.latDistance = parseFloat(wizardResults["gridLatDistance"]);
+		this.lngDistance = parseFloat(wizardResults.gridLngDistance);
+		this.latDistance = parseFloat(wizardResults.gridLatDistance);
 
 		// Determine whether this grid uses standard scale or not
 		let scale = wizardResults.gridStandardScales;

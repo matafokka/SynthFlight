@@ -36,6 +36,16 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 
 	// SynthGridLayer
 
+	// Confirmation text when distances don't divide map into the whole number of cells
+	gridCorrectDistancesMain1: "Расстояния не разделяют Землю на равное число сегментов.",
+	gridCorrectDistancesMain2: "Хотите ли вы использовать расстояние в",
+	gridCorrectDistancesLat: "для параллелей",
+	gridCorrectDistancesAnd: "и",
+	gridCorrectDistancesLng: "для меридианов",
+	gridCorrectDistancesMain3: "Нажмите \"Ок\", чтобы использовать предложенные расстояния. Нажмите \"Отмена\", чтобы отменить создание данного слоя.",
+
+	// Main stuff
+
 	alphabet: "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ", // Don't add it, if you don't need different symbols in cells' names
 	gridLayerDefaultName: "Слой Сетки",
 	hidePolygonWidgets: "Скрыть виджеты на карте",
