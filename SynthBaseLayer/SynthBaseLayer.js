@@ -342,7 +342,7 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 			button = new L.ALS.Widgets.Button("flashPath" + id, "flashPath", this, "flashPath"),
 			lengthWidget = new L.ALS.Widgets.ValueLabel("pathLength" + id, "pathLength", "m").setFormatNumbers(true).setNumberOfDigitsAfterPoint(0),
 			timeWidget = new L.ALS.Widgets.ValueLabel("flightTime" + id, "flightTime", "h:mm"),
-			warning = new L.ALS.Widgets.SimpleLabel("warning" + id, "", "center", "warning");
+			warning = new L.ALS.Widgets.SimpleLabel("warning" + id, "", "left", "warning");
 
 		layer.updateWidgets = (length) => {
 			lengthWidget.setValue(length);
