@@ -109,8 +109,8 @@ L.ALS.SynthGridLayer = L.ALS.SynthRectangleBaseLayer.extend(/** @lends L.ALS.Syn
 		// We'll check if it's too small (in near-polar regions, there'll be only one path when value is 2) or too big.
 
 		let errorLabel = this.getWidgetById("calculateParametersError"),
-			parallelsPathsCount = this.estimatePathsCount(this.lngPathsCount),
-			meridiansPathsCount = this.estimatePathsCount(this.latPathsCount);
+			parallelsPathsCount = this.estimatePathsCount(this.lngDistance),
+			meridiansPathsCount = this.estimatePathsCount(this.latDistance);
 
 		if (parallelsPathsCount === undefined) {
 			errorLabel.setValue("errorDistanceHasNotBeenCalculated");
