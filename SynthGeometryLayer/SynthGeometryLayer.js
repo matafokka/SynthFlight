@@ -12,7 +12,7 @@ L.ALS.SynthGeometryLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGeometryLay
 	isShapeFile: false,
 	writeToHistoryOnInit: false,
 
-	init: function (wizardResults, settings) {
+	init: function (wizardResults, settings, cancelCreation) {
 		this.copySettingsToThis(settings);
 		this.setConstructorArguments(["deserialized"]);
 
@@ -20,7 +20,8 @@ L.ALS.SynthGeometryLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGeometryLay
 			return;
 
 		if (!window.FileReader) {
-			this._deleteInvalidLayer(L.ALS.locale.geometryBrowserNotSupported);
+			window.alert(L.ALS.locale.geometryBrowserNotSupported);
+			cancelCreation();
 			return;
 		}
 
