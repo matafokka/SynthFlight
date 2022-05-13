@@ -24,6 +24,7 @@ L.ALS.SynthGeometryBaseWizard = L.ALS.Wizard.extend({
 		 * @callback getGeoJSONCallback
 		 * @param {Object|"NoFileSelected"|"NoFeatures"|"InvalidFileType"} geoJson GeoJSON or an error message
 		 * @param {string|undefined} [fileName=undefined] Name of the loaded file
+		 * @param {boolean|undefined} [isShapefile=undefined] If selected file is shapefile
 		 */
 
 		/**
@@ -51,7 +52,7 @@ L.ALS.SynthGeometryBaseWizard = L.ALS.Wizard.extend({
 						return;
 					}
 
-					callback(geoJson, file.name);
+					callback(geoJson, file.name, true);
 
 				}).catch((reason) => {
 					console.log(reason);
@@ -70,7 +71,7 @@ L.ALS.SynthGeometryBaseWizard = L.ALS.Wizard.extend({
 							return;
 						}
 
-						callback(json, file.name);
+						callback(json, file.name, false);
 					});
 					fileReader2.readAsText(file);
 				});
@@ -119,7 +120,7 @@ L.ALS.SynthGeometryBaseWizard = L.ALS.Wizard.extend({
 				}
 
 				let layersAdded = false;
-				let geoJsonLayer = L.geoJson(geoJson, {
+				L.geoJson(geoJson, {
 					onEachFeature: (feature, layer) => {
 						if (!(layer instanceof layerType))
 							return;
@@ -139,12 +140,11 @@ L.ALS.SynthGeometryBaseWizard = L.ALS.Wizard.extend({
 		},
 
 		checkGeoJSONBounds: function (layer) {
-			// TODO: When wrapping will be done, expand checking to [-360; 360] range
 			let {_northEast, _southWest} = layer.getBounds();
 			if (
-				_northEast.lng > 180 ||
+				_northEast.lng > 360 ||
 				_northEast.lat > 90 ||
-				_southWest.lng < -180 ||
+				_southWest.lng < -360 ||
 				_southWest.lat < -90
 			)
 				window.alert(L.ALS.locale.geometryOutOfBounds);

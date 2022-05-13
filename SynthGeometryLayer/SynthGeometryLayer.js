@@ -28,7 +28,7 @@ L.ALS.SynthGeometryLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGeometryLay
 		L.ALS.SynthGeometryBaseWizard.getGeoJSON(wizardResults, (geoJson, name) => this._displayFile(geoJson, name));
 	},
 
-	_displayFile: function (geoJson, fileName) {
+	_displayFile: function (geoJson, fileName, isShapefile) {
 		if (fileName)
 			this.setName(fileName);
 
@@ -44,6 +44,8 @@ L.ALS.SynthGeometryLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGeometryLay
 				return;
 		}
 
+		this.originalGeoJson = geoJson;
+
 		let borderColor = new L.ALS.Widgets.Color("borderColor", "geometryBorderColor", this, "setColor").setValue(this.borderColor),
 			fillColor = new L.ALS.Widgets.Color("fillColor", "geometryFillColor", this, "setColor").setValue(this.fillColor),
 			menu = [borderColor, fillColor],
@@ -51,6 +53,8 @@ L.ALS.SynthGeometryLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGeometryLay
 				maxWidth: 500,
 				maxHeight: 500,
 			};
+
+		this.isShapefile = this.isShapefile || isShapefile;
 
 		if (this.isShapefile) {
 			let type = geoJson.features[0].geometry.type;
@@ -63,21 +67,60 @@ L.ALS.SynthGeometryLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGeometryLay
 		for (let widget of menu)
 			this.addWidget(widget);
 
-		let docs = [], fields = []; // Search documents
+		let docs = [], fields = [], clonedLayers = []; // Search documents
 
 		this._layer = L.geoJSON(geoJson, {
 			onEachFeature: (feature, layer) => {
-				let popup = "", doc = {};
+				let popup = "", doc = {}, bbox;
 
 				// Calculate bbox for zooming
-				if (!feature.geometry.bbox) {
-					if (layer.getBounds) {
-						let bounds = layer.getBounds();
-						feature.geometry.bbox = [bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()];
-					} else {
-						let latLng = layer.getLatLng(), size = 0.008;
-						feature.geometry.bbox = [latLng.lng - size, latLng.lat - size, latLng.lng + size, latLng.lat + size];
+				if (layer.getBounds) {
+					let bounds = layer.getBounds(), west = bounds.getWest(), east = bounds.getEast();
+					bbox = [west, bounds.getSouth(), east, bounds.getNorth()];
+
+					// Check if layer crosses one of antimeridians
+					let moveBy = 0, crossesLeft = west < -180, crossesRight = east > 180;
+
+					if (crossesLeft && crossesRight)
+						moveBy = 0;
+					else if (crossesLeft)
+						moveBy = 360;
+					else if (crossesRight)
+						moveBy = -360;
+
+					// Clone layer
+					if (moveBy) {
+						// Move bbox
+						for (let i = 0; i <= 2; i += 2)
+							bbox += moveBy;
+
+						// Clone coordinates
+						let latLngs = layer.getLatLngs(), clonedLatLngs = [];
+
+						if (latLngs.length === 0 || latLngs[0] instanceof L.LatLng)
+							latLngs = [latLngs];
+
+						for (let array of latLngs) {
+							let clonedArray = [];
+							console.log(array)
+							for (let coord of array) {
+								let clonedCoord = coord.clone();
+								clonedCoord.lng += moveBy;
+								clonedArray.push(clonedCoord);
+							}
+							clonedLatLngs.push(clonedArray);
+						}
+
+						// Create cloned layer
+						let clonedLayer = layer instanceof L.Polygon ? new L.Polygon(clonedLatLngs) :
+							new L.Polyline(clonedLatLngs);
+						layer.clone = clonedLayer;
+						clonedLayers.push(clonedLayer);
 					}
+				} else {
+					let latLng = layer.getLatLng().wrap(), size = 0.008;
+					layer.setLatLng(latLng); // Wrap points
+					bbox = [latLng.lng - size, latLng.lat - size, latLng.lng + size, latLng.lat + size];
 				}
 
 				// Copy properties to the popup and search doc
@@ -94,14 +137,23 @@ L.ALS.SynthGeometryLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGeometryLay
 					fields.push(name);
 				}
 
-				layer.bindPopup(`<div class="synth-popup">${popup}</div>`, popupOptions);
+				if (!popup)
+					popup = "<div>No data</div>";
+
+				for (let lyr of [layer, layer.clone]) {
+					if (lyr)
+						lyr.bindPopup(`<div class="synth-popup">${popup}</div>`, popupOptions);
+				}
 
 				doc._miniSearchId = L.ALS.Helpers.generateID();
-				doc.bbox = feature.geometry.bbox;
+				doc.bbox = bbox;
 				doc.properties = feature.properties;
 				docs.push(doc);
 			}
 		});
+
+		for (let layer of clonedLayers)
+			this._layer.addLayer(layer);
 
 		// Check if bounds are valid
 		L.ALS.SynthGeometryBaseWizard.checkGeoJSONBounds(this._layer);
@@ -150,7 +202,7 @@ L.ALS.SynthGeometryLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGeometryLay
 		let json = {
 			widgets: this.serializeWidgets(seenObjects),
 			name: this.getName(),
-			geoJson: this._layer.toGeoJSON(),
+			geoJson: this.originalGeoJson,
 			serializationID: this.serializationID
 		};
 
