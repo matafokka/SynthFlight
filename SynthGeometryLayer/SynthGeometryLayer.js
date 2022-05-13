@@ -102,7 +102,6 @@ L.ALS.SynthGeometryLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGeometryLay
 
 						for (let array of latLngs) {
 							let clonedArray = [];
-							console.log(array)
 							for (let coord of array) {
 								let clonedCoord = coord.clone();
 								clonedCoord.lng += moveBy;
