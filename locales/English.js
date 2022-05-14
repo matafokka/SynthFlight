@@ -26,7 +26,7 @@ L.ALS.Locales.addLocaleProperties("English", {
 	gridWizardDisplayName: "Grid Layer",
 	gridWizardNotification: `If map scale is too low, grid will be hidden. Please, zoom in to see it.
 	
-	To select a polygon, either click right mouse button (or tap and hold) or double-click (or double-tap) on it.`,
+	To select a polygon, either click right mouse button (or tap and hold on sensor display) or double-click (or double-tap) on it.`,
 
 	gridStandardScales: "Grid scale:",
 	gridLngDistance: "Distance between parallels:",
@@ -184,16 +184,17 @@ L.ALS.Locales.addLocaleProperties("English", {
 
 	// About
 
-	firstParagraph: "SynthFlight is a fully client-side software for planning aerial photography. This is a beta version so bugs, huge API changes and lack of backwards compatibility are to be expected.",
+	about1: "SynthFlight is a fully client-side software for planning aerial photography.",
 
-	secondParagraphPart1: "Visit project's",
-	secondParagraphPart2: "GitHub page",
-	secondParagraphPart3: "for more information.",
+	about2Part1: "Visit project's",
+	about2Part2: "GitHub page",
+	about2Part3: "for more information.",
 
-	thirdParagraph: "Developing SynthFlight is possible thanks to various open-source software.",
+	about3Part1: "User guide is located in",
+	about3Part2: "SynthFlight Wiki.",
 
-	fourthParagraph: "Using maps is possible thanks to following geoservices:",
-
-	fifthParagraph: "Web search is powered by OpenStreetMaps and", // ... Nominatim API
+	about4: "Developing SynthFlight is possible thanks to various open-source software.",
+	about5: "Using maps is possible thanks to following geoservices:",
+	about6: "Web search is powered by OpenStreetMaps and", // ... Nominatim API
 
 });
