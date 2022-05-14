@@ -17,14 +17,23 @@ L.ALS.MeanHeightButtonHandler = L.ALS.Serializable.extend( /**@lends L.ALS.MeanH
 	}
 })
 
-L.ALS.SynthPolygonBaseLayer.prototype.addPolygon = function (polygon) {
+L.ALS.SynthPolygonBaseLayer.prototype.addPolygon = function (polygon, alignToCenter = false) {
 	polygon._intName = this._generatePolygonName(polygon);
 	delete this.invalidPolygons[polygon._intName];
 
 	polygon.setStyle({fill: true});
 	this.polygons[polygon._intName] = polygon;
 
-	let controlsContainer = new L.WidgetLayer(polygon.getLatLngs()[0][1], "topLeft"),  handler = new L.ALS.MeanHeightButtonHandler(controlsContainer);
+	let anchorPoint, anchor;
+	if (alignToCenter) {
+		anchorPoint = polygon.getBounds().getCenter();
+		anchor = "center";
+	} else {
+		anchorPoint = polygon.getLatLngs()[0][1];
+		anchor = "topLeft";
+	}
+
+	let controlsContainer = new L.WidgetLayer(anchorPoint, anchor),  handler = new L.ALS.MeanHeightButtonHandler(controlsContainer);
 
 	if (this.useZoneNumbers)
 		controlsContainer.addWidget(new L.ALS.Widgets.Number("zoneNumber", "zoneNumber", this, "calculatePolygonParameters").setMin(1).setValue(1));

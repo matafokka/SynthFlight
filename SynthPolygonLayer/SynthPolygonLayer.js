@@ -269,7 +269,7 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend(/** @lends L.ALS.Sy
 				shortestPathPoints = currentPoints;
 			}
 
-			this.addPolygon(layer);
+			this.addPolygon(layer, center);
 
 			this.internalConnections.addLayer(new L.Geodesic(shortestPathConnections, {
 				...lineOptions,
