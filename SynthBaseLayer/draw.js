@@ -47,6 +47,17 @@ L.ALS.SynthBaseLayer.prototype.onDraw = function (e) {
 	if (!this.isSelected)
 		return;
 
+	// Don't add layers of size less than 3x3 px
+	if (e.layer.getBounds) {
+		let {_northEast, _southWest} = e.layer.getBounds(),
+			zoom = this.map.getZoom(),
+			min = this.map.project(_northEast, zoom),
+			max = this.map.project(_southWest, zoom);
+
+		if (Math.abs(max.x - min.x) <= 3 && Math.abs(max.y - min.y) <= 3)
+			return;
+	}
+
 	this._drawingGroup.addLayer(e.layer);
 
 	let borderColorId, fillColor;
