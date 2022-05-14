@@ -162,7 +162,7 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 		 * Airport marker
 		 * @protected
 		 */
-		this._airportMarker = L.marker(this.map.getCenter(), {
+		this._airportMarker = new L.Marker(this.map.getCenter(), {
 			icon: icon,
 			draggable: true
 		});
@@ -564,7 +564,7 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 	},
 
 	createCapturePoint: function (coord, color) {
-		return L.circleMarker(coord, {
+		return new L.CircleMarker(coord, {
 			radius: this.lineThicknessValue * 2,
 			stroke: false,
 			fillOpacity: 1,

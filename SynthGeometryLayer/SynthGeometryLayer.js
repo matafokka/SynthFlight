@@ -72,7 +72,7 @@ L.ALS.SynthGeometryLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGeometryLay
 
 		let docs = [], fields = [], clonedLayers = []; // Search documents
 
-		this._layer = L.geoJSON(geoJson, {
+		this._layer = new L.GeoJSON(geoJson, {
 			onEachFeature: (feature, layer) => {
 				let popup = "", doc = {}, bbox;
 

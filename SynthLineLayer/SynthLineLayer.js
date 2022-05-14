@@ -1,7 +1,6 @@
 require("./SynthLineWizard.js");
 require("./SynthLineSettings.js");
 const geojsonMerge = require("@mapbox/geojson-merge"); // Using this since turfHelpers.featureCollection() discards previously defined properties.
-const MathTools = require("../MathTools.js");
 
 /**
  * Geodesic line layer
@@ -16,10 +15,10 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend(/** @lends L.ALS.SynthLineLay
 	hasYOverlay: false,
 
 	init: function (wizardResults, settings) {
-		this.pathsGroup = L.featureGroup();
-		this.drawingGroup = L.featureGroup();
-		this.connectionsGroup = L.featureGroup();
-		this.errorGroup = L.featureGroup();
+		this.pathsGroup = new L.FeatureGroup();
+		this.drawingGroup = new L.FeatureGroup();
+		this.connectionsGroup = new L.FeatureGroup();
+		this.errorGroup = new L.FeatureGroup();
 
 		L.ALS.SynthBaseLayer.prototype.init.call(this, settings, this.pathsGroup, this.connectionsGroup, "lineLayerColor");
 		this.addLayers(this.errorGroup);
@@ -42,7 +41,7 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend(/** @lends L.ALS.SynthLineLay
 		this.addBaseParametersInputSection();
 		this.addBaseParametersOutputSection();
 
-		this.pointsGroup = L.featureGroup();
+		this.pointsGroup = new L.FeatureGroup();
 		L.ALS.SynthGeometryBaseWizard.initializePolygonOrPolylineLayer(this, wizardResults);
 	},
 

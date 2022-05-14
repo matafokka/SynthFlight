@@ -46,9 +46,9 @@ L.ALS.SynthPolygonBaseLayer = L.ALS.SynthBaseLayer.extend( /** @lends L.ALS.Synt
 		this.polygonsWidgets = {};
 		this.serializationIgnoreList.push("polygons", "invalidPolygons", "lngDistance", "latDistance", "_currentStandardScale");
 
-		this.polygonGroup = L.featureGroup();
-		this.widgetsGroup = L.featureGroup();
-		this.bordersGroup = L.featureGroup();
+		this.polygonGroup = new L.FeatureGroup();
+		this.widgetsGroup = new L.FeatureGroup();
+		this.bordersGroup = new L.FeatureGroup();
 		this.bordersGroup.thicknessMultiplier = 4;
 		this.labelsGroup = new L.LabelLayer(false);
 

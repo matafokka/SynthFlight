@@ -39,7 +39,7 @@ L.ALS.SynthRectangleBaseLayer.prototype.calculatePolygonParameters = function (w
 		if (!this.useZoneNumbers)
 			continue;
 
-		this.bordersGroup.addLayer(L.polyline(latLngs, {
+		this.bordersGroup.addLayer(new L.Polyline(latLngs, {
 				weight: this.lineThicknessValue * this.bordersGroup.thicknessMultiplier,
 				color: this.getWidgetById("borderColor").getValue()
 			}

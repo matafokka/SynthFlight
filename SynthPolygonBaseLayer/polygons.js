@@ -149,7 +149,7 @@ L.ALS.SynthPolygonBaseLayer.prototype.cloneLayerIfNeeded = function (layer) {
 		crossingBoth = crossingEast && crossingWest
 
 	if (!layer.linkedLayer && crossingOne && !crossingBoth) {
-		let clonedLayer = layer instanceof L.Rectangle ? L.rectangle(bounds) : L.polygon([]),
+		let clonedLayer = layer instanceof L.Rectangle ? L.rectangle(bounds) : new L.Polygon([]),
 			moveTo = crossingWest ? 1 : -1,
 			setLinkedLatLngs = (editedLayer) => {
 				let latlngs = this._getRectOrPolyCoords(editedLayer), newLatLngs = [];

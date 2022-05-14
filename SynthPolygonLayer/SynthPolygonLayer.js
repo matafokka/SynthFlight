@@ -4,7 +4,13 @@ const MathTools = require("../MathTools.js");
 const proj4 = require("proj4");
 const debounce = require("debounce")
 
-L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend({
+/**
+ * Polygon layer
+ *
+ * @class
+ * @extends L.ALS.SynthPolygonBaseLayer
+ */
+L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend(/** @lends L.ALS.SynthPolygonLayer.prototype */{
 
 	calculateCellSizeForPolygons: false,
 	defaultName: "Polygon Layer",
@@ -20,10 +26,10 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend({
 		 */
 		this.maxGnomonicPointDistance = this.getEarthRadius() * 89 * Math.PI / 180;
 
-		this.internalConnections = L.featureGroup();
-		this.externalConnections = L.featureGroup();
-		this.pathGroup = L.featureGroup();
-		this.pointsGroup = L.featureGroup();
+		this.internalConnections = new L.FeatureGroup();
+		this.externalConnections = new L.FeatureGroup();
+		this.pathGroup = new L.FeatureGroup();
+		this.pointsGroup = new L.FeatureGroup();
 
 		L.ALS.SynthPolygonBaseLayer.prototype.init.call(this, settings,
 			this.internalConnections,

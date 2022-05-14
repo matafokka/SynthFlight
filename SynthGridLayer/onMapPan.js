@@ -55,7 +55,7 @@ L.ALS.SynthGridLayer.prototype._onMapPan = function () {
 			if (isFirstIteration)
 				createLabel([north, lng], this.toFixed(lng), "topCenter", true);
 
-			let polygon = L.polygon([
+			let polygon = new L.Polygon([
 				[lat, lng],
 				[lat + this.latDistance, lng],
 				[lat + this.latDistance, lng + lngDistance],

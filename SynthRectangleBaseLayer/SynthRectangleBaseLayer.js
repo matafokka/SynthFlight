@@ -27,16 +27,16 @@ L.ALS.SynthRectangleBaseLayer = L.ALS.SynthPolygonBaseLayer.extend( /** @lends L
 		// Additional redrawing actually won't introduce any noticeable delay.
 
 		// Create empty groups containing our stuff. Yeah, I hate copying too, but I want code completion :D
-		this.latPointsGroup = L.featureGroup();
-		this.lngPointsGroup = L.featureGroup();
+		this.latPointsGroup = new L.FeatureGroup();
+		this.lngPointsGroup = new L.FeatureGroup();
 
-		this.pathsByParallels = L.featureGroup();
-		this.parallelsInternalConnections = L.featureGroup();
-		this.parallelsExternalConnections = L.featureGroup();
+		this.pathsByParallels = new L.FeatureGroup();
+		this.parallelsInternalConnections = new L.FeatureGroup();
+		this.parallelsExternalConnections = new L.FeatureGroup();
 
-		this.pathsByMeridians = L.featureGroup();
-		this.meridiansInternalConnections = L.featureGroup();
-		this.meridiansExternalConnections = L.featureGroup();
+		this.pathsByMeridians = new L.FeatureGroup();
+		this.meridiansInternalConnections = new L.FeatureGroup();
+		this.meridiansExternalConnections = new L.FeatureGroup();
 
 		L.ALS.SynthPolygonBaseLayer.prototype.init.call(this, settings,
 			// Parallels args

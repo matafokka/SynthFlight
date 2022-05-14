@@ -1,7 +1,13 @@
 require("./SynthRectangleWizard.js");
 require("./SynthRectangleSettings.js");
 
-L.ALS.SynthRectangleLayer = L.ALS.SynthRectangleBaseLayer.extend({
+/**
+ * Rectangle layer
+ *
+ * @class
+ * @extends L.ALS.SynthRectangleBaseLayer
+ */
+L.ALS.SynthRectangleLayer = L.ALS.SynthRectangleBaseLayer.extend(/** @lends L.ALS.SynthRectangleLayer.prototype */{
 
 	defaultName: "Rectangle Layer",
 	borderColorLabel: "rectangleBorderColor",

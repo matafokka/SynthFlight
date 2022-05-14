@@ -132,9 +132,9 @@ let overlayLayer = new L.BlackOverlayLayer({
 
 // When drawing starts, hide notifications and black overlay, but add red datelines
 
-let datelines = L.featureGroup();
+let datelines = new L.FeatureGroup();
 for (let lng of [180, -180]) {
-	datelines.addLayer(L.polyline([[90, lng], [-90, lng]], {
+	datelines.addLayer(new L.Polyline([[90, lng], [-90, lng]], {
 		color: "red",
 		weight: 1,
 	}));
