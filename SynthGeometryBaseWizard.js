@@ -1,6 +1,11 @@
 const shp = require("shpjs");
 
-L.ALS.SynthGeometryBaseWizard = L.ALS.Wizard.extend({
+/**
+ * Wizard with file reader and Shapefile and GeoJSON parser
+ * @class
+ * @extends L.ALS.Wizard
+ */
+L.ALS.SynthGeometryBaseWizard = L.ALS.Wizard.extend(/** @lends L.ALS.SynthGeometryBaseWizard.prototype */{
 
 	fileLabel: "geometryFileLabel",
 
@@ -22,7 +27,7 @@ L.ALS.SynthGeometryBaseWizard = L.ALS.Wizard.extend({
 		 * Callback to pass to {@link L.ALS.SynthGeometryBaseWizard.getGeoJSON}.
 		 *
 		 * @callback getGeoJSONCallback
-		 * @param {Object|"NoFileSelected"|"NoFeatures"|"InvalidFileType"} geoJson GeoJSON or an error message
+		 * @param {Object|"NoFileSelected"|"NoFeatures"|"InvalidFileType"|"ProjectionNotSupported"} geoJson GeoJSON or an error message
 		 * @param {string|undefined} [fileName=undefined] Name of the loaded file
 		 * @param {boolean|undefined} [isShapefile=undefined] If selected file is shapefile
 		 */
@@ -55,7 +60,11 @@ L.ALS.SynthGeometryBaseWizard = L.ALS.Wizard.extend({
 					callback(geoJson, file.name, true);
 
 				}).catch((reason) => {
-					console.log(reason);
+					// If reason is string, proj4js doesn't support file projection
+					if (typeof reason === "string") {
+						callback("ProjectionNotSupported");
+						return;
+					}
 
 					// If reading as shapefile fails, try to read as GeoJSON.
 					// We won't check bounds because we assume GeoJSON being in WGS84.
@@ -115,6 +124,10 @@ L.ALS.SynthGeometryBaseWizard = L.ALS.Wizard.extend({
 						return;
 					case "InvalidFileType":
 						window.alert(L.ALS.locale.geometryInvalidFile);
+						finishLoading();
+						return;
+					case "ProjectionNotSupported":
+						window.alert(L.ALS.locale.geometryProjectionNotSupported);
 						finishLoading();
 						return;
 				}

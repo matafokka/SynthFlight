@@ -148,6 +148,7 @@ L.ALS.Locales.addLocaleProperties("English", {
 	geometryFillColor: "Fill color:",
 	geometryBrowserNotSupported: "Your browser doesn't support adding this layer. You still can open projects with this layer though.",
 	geometryNoFileSelected: "No file has been selected. Please, select a file that you want to add and try again.",
+	geometryProjectionNotSupported: "Sorry, projection of selected file is not supported. Please, convert your file to another projection, preferably, WebMercator.",
 
 	// SynthGeometrySettings
 

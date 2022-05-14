@@ -144,6 +144,7 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 	geometryFillColor: "Цвет заливки:",
 	geometryBrowserNotSupported: "Ваш браузер не поддерживает добавление данного слоя, но вы можете открывать проекты, использующие этот слой.",
 	geometryNoFileSelected: "Файл не был выбран. Пожалуйста, выберете файл, который хотите добавить, и попробуйте снова.",
+	geometryProjectionNotSupported: "Извините проекция выбранного файла не поддерживается. Пожалуйста, переконвертируйте файл в другую проекцию, предпочтительно, в WebMercator.",
 
 	// SynthGeometrySettings
 

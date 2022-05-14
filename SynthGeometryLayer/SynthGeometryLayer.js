@@ -42,6 +42,9 @@ L.ALS.SynthGeometryLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGeometryLay
 			case "InvalidFileType":
 				this._deleteInvalidLayer(L.ALS.locale.geometryInvalidFile);
 				return;
+			case "ProjectionNotSupported":
+				this._deleteInvalidLayer(L.ALS.locale.geometryProjectionNotSupported);
+				return;
 		}
 
 		this.originalGeoJson = geoJson;

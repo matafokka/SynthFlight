@@ -75,7 +75,6 @@
     "debounce": "^1.2.1",
     "electron": "^16.0.3",
     "electron-packager": "^15.4.0",
-    "fastestsmallesttextencoderdecoder": "^1.0.22",
     "fs-extra": "^9.0.1",
     "geotiff": "^1.0.4",
     "geotiff-geokeys-to-proj4": "^2021.10.31",
