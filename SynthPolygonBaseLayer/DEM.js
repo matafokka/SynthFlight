@@ -2,6 +2,7 @@
 
 const ESRIGridParser = require("../ESRIGridParser.js");
 const ESRIGridParserWorker = require("../ESRIGridParserWorker.js");
+const proj4 = require("proj4");
 let GeoTIFFParser;
 try {
 	GeoTIFFParser = require("../GeoTIFFParser.js");
@@ -26,7 +27,12 @@ L.ALS.SynthPolygonBaseLayer.prototype.onDEMLoad = async function (widget) {
 	if (!window.FileReader) {
 		L.ALS.Helpers.readTextFile(widget.input, L.ALS.locale.notGridNotSupported, (grid) => {
 			let parser = new ESRIGridParser(this);
-			parser.readChunk(grid);
+			try {
+				parser.readChunk(grid);
+			} catch (e) {
+				this.showDEMError([widget.input.files[0].name]);
+				return;
+			}
 			parser.copyStats();
 			clear();
 		});
@@ -34,35 +40,53 @@ L.ALS.SynthPolygonBaseLayer.prototype.onDEMLoad = async function (widget) {
 	}
 
 	// For normal browsers
-	try {
-		await this.onDEMLoadWorker(widget);
-	} catch (e) {
-		console.error(e);
-		window.alert(L.ALS.locale.DEMError);
-	}
+	let {invalidFiles, invalidProjectionFiles} = await this.onDEMLoadWorker(widget);
 	clear();
 
+	if (invalidFiles.length !== 0)
+		this.showDEMError(invalidFiles, invalidProjectionFiles);
 };
+
+L.ALS.SynthPolygonBaseLayer.prototype.showDEMError = function (invalidFiles, invalidProjectionFiles = []) {
+	let errorMessage = L.ALS.locale.DEMError + " " + invalidFiles.join(", ");
+
+	if (invalidProjectionFiles.length !== 0)
+		errorMessage += "\n\n" + L.ALS.locale.DEMErrorProjFiles + " " + invalidProjectionFiles.join(", ");
+
+	window.alert(errorMessage + ".");
+}
+
+L.ALS.SynthPolygonBaseLayer.prototype._tryProjectionString = function (string) {
+	try {
+		proj4(string, "WGS84");
+		return true;
+	} catch (e) {
+		return false;
+	}
+}
 
 /**
  * Being called upon DEM load
  * @param widget {L.ALS.Widgets.File}
  */
 L.ALS.SynthPolygonBaseLayer.prototype.onDEMLoadWorker = async function (widget) {
-	let files = widget.getValue();
-	let parser = new ESRIGridParser(this);
-	let fileReader = new FileReader();
-	// noinspection JSUnresolvedVariable
-	let supportsWorker = (window.Worker && process.browser); // We're using webworkify which relies on browserify-specific stuff which isn't available in dev environment
+	let files = widget.getValue(),
+		parser = new ESRIGridParser(this),
+		fileReader = new FileReader(),
+		supportsWorker = (window.Worker && process.browser), // We're using webworkify which relies on browserify-specific stuff which isn't available in dev environment
+		invalidFiles = [], invalidProjectionFiles = [];
 
 	for (let file of files) {
 		let ext = L.ALS.Helpers.getFileExtension(file.name).toLowerCase();
 
-		let isTiff = (ext === "tif" || ext === "tiff" || ext === "geotif" || ext === "geotiff");
-		let isGrid = (ext === "asc" || ext === "grd");
+		let isTiff = (ext === "tif" || ext === "tiff" || ext === "geotif" || ext === "geotiff"),
+			isGrid = (ext === "asc" || ext === "grd");
 
-		if (!isTiff && !isGrid)
+		if (!isTiff && !isGrid) {
+			if (ext !== "prj" && ext !== "xml")
+				invalidFiles.push(file.name);
 			continue;
+		}
 
 		// Try to find aux or prj file for current file and get projection string from it
 		let baseName = "", projectionString = "";
@@ -74,8 +98,9 @@ L.ALS.SynthPolygonBaseLayer.prototype.onDEMLoadWorker = async function (widget) 
 		}
 
 		for (let file2 of files) {
-			let ext2 = L.ALS.Helpers.getFileExtension(file2.name).toLowerCase();
-			let isPrj = (ext2 === "prj");
+			let ext2 = L.ALS.Helpers.getFileExtension(file2.name).toLowerCase(),
+				isPrj = (ext2 === "prj");
+
 			if ((ext2 !== "xml" && !isPrj) || !file2.name.startsWith(baseName))
 				continue;
 
@@ -91,31 +116,45 @@ L.ALS.SynthPolygonBaseLayer.prototype.onDEMLoadWorker = async function (widget) 
 			// prj contains only projection string
 			if (isPrj) {
 				projectionString = text;
+
+				if (!this._tryProjectionString(projectionString)) {
+					invalidProjectionFiles.push(file2.name);
+					projectionString = "";
+				}
+
 				break;
 			}
 
 			// Parse XML
-			let start = "<SRS>", end = "</SRS>";
-			let startIndex = text.indexOf(start) + start.length;
-			let endIndex = text.indexOf(end);
-			if (startIndex === start.length - 1 || endIndex === -1)
-				continue; // Continue in hope of finding correct xml or prj file.
+			let start = "<SRS>", end = "</SRS>",
+				startIndex = text.indexOf(start) + start.length,
+				endIndex = text.indexOf(end);
+
 			projectionString = text.substring(startIndex, endIndex);
-			break;
+
+			if (projectionString.length !== 0 && this._tryProjectionString(projectionString))
+				break;
+
+			invalidProjectionFiles.push(file2.name);
+			projectionString = "";
 		}
 
 		if (isTiff) {
 			if (!GeoTIFFParser)
 				continue;
-			let stats = await GeoTIFFParser(file, projectionString, ESRIGridParser.getInitialData(this, false));
-			ESRIGridParser.copyStats(this, stats);
+			try {
+				let stats = await GeoTIFFParser(file, projectionString, ESRIGridParser.getInitialData(this, false));
+				ESRIGridParser.copyStats(this, stats);
+			} catch (e) {
+				invalidFiles.push(file.name);
+			}
 			continue;
 		}
 
 		if (!supportsWorker) {
 			await new Promise((resolve) => {
 				ESRIGridParser.parseFile(file, parser, fileReader, () => resolve())
-			});
+			}).catch(() => invalidFiles.push(file.name));
 			continue;
 		}
 
@@ -131,6 +170,8 @@ L.ALS.SynthPolygonBaseLayer.prototype.onDEMLoadWorker = async function (widget) 
 				projectionString: projectionString,
 				file: file,
 			});
-		});
+		}).catch(() => invalidFiles.push(file.name));
 	}
+
+	return {invalidFiles, invalidProjectionFiles};
 };

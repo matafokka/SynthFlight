@@ -110,7 +110,8 @@ L.ALS.Locales.addLocaleProperties("English", {
 	confirmDEMLoading: "Are you sure you want to load DEMs? It will override current statistics and take some time.",
 	loadingDEM: "Loading selected DEM files, it might take a while...",
 	notGridNotSupported: "Sorry, your browser doesn't support anything other than ASCII Grid. Please, select a valid ASCII Grid file.",
-	DEMError: "Sorry, an error occurred while loading one of your files", //TODO: Add file name
+	DEMError: "Following files are not valid DEM files:",
+	DEMErrorProjFiles: "Following files are not valid projection files:",
 
 	jsonNoPaths1: "No paths has been drawn in layer",
 	jsonNoPaths2: "only selected geometry and airport position will be exported.",
