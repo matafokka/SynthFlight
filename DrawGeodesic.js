@@ -15,7 +15,7 @@ L.Geodesic.prototype.getActualLatLngs = function () {
 // Writing these functions as class methods will result in an error being thrown. I don't know why.
 
 function _createGeodesic (coords, opts = {}) {
-	let geodesic = L.geodesic(coords, {...opts, wrap: true});
+	let geodesic = new L.Geodesic(coords, {...opts, wrap: true});
 	geodesic.geom.geodesic.ellipsoid.a = 6378137;
 	geodesic.geom.geodesic.ellipsoid.b = 6378137;
 	geodesic.geom.geodesic.ellipsoid.f = 0;

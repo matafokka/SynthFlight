@@ -72,9 +72,7 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend(/** @lends L.ALS.SynthLineLay
 		this.errorGroup.clearLayers();
 
 		let color = this.getWidgetById("color0").getValue(),
-			lineOptions = {
-				color, thickness: this.lineThicknessValue, segmentsNumber: L.GEODESIC_SEGMENTS,
-			},
+			lineOptions = {color, thickness: this.lineThicknessValue},
 			linesWereInvalidated = false;
 
 		notifyIfLayersSkipped = typeof notifyIfLayersSkipped === "boolean" ? notifyIfLayersSkipped : true;
@@ -82,7 +80,7 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend(/** @lends L.ALS.SynthLineLay
 		this.drawingGroup.eachLayer((layer) => {
 			let latLngs = layer.getLatLngs();
 			for (let i = 1; i < latLngs.length; i++) {
-				let extendedGeodesic = new L.Geodesic([latLngs[i - 1], latLngs[i]], lineOptions),
+				let extendedGeodesic = new L.Geodesic([latLngs[i - 1], latLngs[i]], {segmentsNumber: 2}),
 					length = extendedGeodesic.statistics.sphericalLengthMeters,
 					numberOfImages = Math.ceil(length / this.Bx) + 4,
 					shouldInvalidateLine = numberOfImages > 10000; // Line is way too long for calculated Bx
@@ -94,17 +92,22 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend(/** @lends L.ALS.SynthLineLay
 					shouldInvalidateLine = true;
 				}
 
+				let displayGeodesic = new L.Geodesic(extendedGeodesic.getLatLngs(), {
+					...lineOptions,
+					segmentsNumber: Math.max(numberOfImages, L.GEODESIC_SEGMENTS)
+				});
+
 				if (shouldInvalidateLine) {
-					extendedGeodesic.setStyle({color: "red"});
-					this.errorGroup.addLayer(extendedGeodesic);
+					displayGeodesic.setStyle({color: "red"});
+					this.errorGroup.addLayer(displayGeodesic);
 					linesWereInvalidated = true;
 					continue;
 				}
 
-				this.pathsGroup.addLayer(extendedGeodesic);
+				this.pathsGroup.addLayer(displayGeodesic);
 
 				// Capture points made by constructing a line with segments number equal to the number of images
-				let pointsArrays = new L.Geodesic(extendedGeodesic.getLatLngs(), {
+				let pointsArrays = new L.Geodesic(displayGeodesic.getLatLngs(), {
 					...lineOptions, segmentsNumber: numberOfImages
 				}).getActualLatLngs();
 

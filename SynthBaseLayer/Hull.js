@@ -31,7 +31,7 @@ L.ALS.SynthBaseLayer.prototype.buildHull = function (path, color) {
 
 	if (layers.length === 1) {
 		const latLngs = layers[0].getLatLngs();
-		connectionsGroup.addLayer(L.geodesic([latLngs[0], latLngs[latLngs.length - 1]], lineOptions));
+		connectionsGroup.addLayer(new L.Geodesic([latLngs[0], latLngs[latLngs.length - 1]], lineOptions));
 		connectionsGroup.addLayer(hullConnection);
 		path.hullConnections = [];
 		return;
@@ -160,7 +160,7 @@ L.ALS.SynthBaseLayer.prototype.buildHull = function (path, color) {
 	}
 
 	for (let pair of optConnections)
-		connectionsGroup.addLayer(L.geodesic(pair, lineOptions));
+		connectionsGroup.addLayer(new L.Geodesic(pair, lineOptions));
 	connectionsGroup.addLayer(hullConnection);
 	path.hullConnections = optConnections;
 }

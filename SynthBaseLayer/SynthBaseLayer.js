@@ -138,7 +138,7 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 
 		for (let i = 0; i < this.paths.length; i++) {
 			let path = this.paths[i];
-			path.hullConnection = L.geodesic([[0, 0], [0, 0]], this.getConnectionLineOptions(settings[`color${i}`]));
+			path.hullConnection = new L.Geodesic([[0, 0], [0, 0]], this.getConnectionLineOptions(settings[`color${i}`]));
 			this.addLayers(path.pathGroup, path.connectionsGroup);
 			this.toUpdateThickness.push(path.pathGroup, path.connectionsGroup);
 		}
@@ -487,7 +487,7 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 				layer.pathLength = this.getPathLength(layer);
 
 				let latLngs = layer.getLatLngs(),
-					connectionLine = L.geodesic([latLngs[0], [0, 0], latLngs[latLngs.length - 1]], lineOptions);
+					connectionLine = new L.Geodesic([latLngs[0], [0, 0], latLngs[latLngs.length - 1]], lineOptions);
 				connectionLine.pathLength = layer.pathLength;
 				let toFlash = [layer, connectionLine];
 				if (layer.actualPaths)

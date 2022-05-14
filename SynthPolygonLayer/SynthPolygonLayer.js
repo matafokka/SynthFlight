@@ -67,9 +67,8 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend(/** @lends L.ALS.Sy
 			return;
 
 		let color = this.getWidgetById("color0").getValue(),
-			lineOptions = {
-				color, thickness: this.lineThicknessValue, segmentsNumber: L.GEODESIC_SEGMENTS,
-			}
+			lineOptions = {color, thickness: this.lineThicknessValue, segmentsNumber: L.GEODESIC_SEGMENTS},
+			calculationsLineOptions = {segmentsNumber: 2}
 
 		for (let name in this.polygons)
 			this.removePolygon(this.polygons[name], false);
@@ -205,10 +204,10 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend(/** @lends L.ALS.Sy
 					shouldSwapPoints = !shouldSwapPoints;
 
 					// Build a path
-					let path = L.geodesic([
+					let path = new L.Geodesic([
 							proj.inverse(line[0]).reverse(),
 							proj.inverse(line[1]).reverse(),
-						], lineOptions),
+						], calculationsLineOptions),
 						length = path.statistics.sphericalLengthMeters,
 						numberOfImages = Math.ceil(length / this.Bx), extendBy;
 
@@ -244,12 +243,14 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend(/** @lends L.ALS.Sy
 					}
 
 					// Push the stuff related to the current paths to the arrays
+					let pathEndPoints = path.getLatLngs();
+
 					currentPath.push(path);
 					currentLength += path.statistics.sphericalLengthMeters;
-					currentConnections.push(...path.getLatLngs());
+					currentConnections.push(...pathEndPoints);
 
 					// Fill in capture points.
-					let pointsArrays = L.geodesic(path.getLatLngs(), {segmentsNumber: numberOfImages}).getActualLatLngs();
+					let pointsArrays = new L.Geodesic(pathEndPoints, {segmentsNumber: numberOfImages}).getActualLatLngs();
 
 					for (let array of pointsArrays) {
 						for (let point of array)
@@ -270,13 +271,14 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend(/** @lends L.ALS.Sy
 
 			this.addPolygon(layer);
 
-			this.internalConnections.addLayer(L.geodesic(shortestPathConnections, {
-				...lineOptions, dashArray: this.dashedLine
+			this.internalConnections.addLayer(new L.Geodesic(shortestPathConnections, {
+				...lineOptions,
+				dashArray: this.dashedLine,
 			}));
 
 			let number = 1;
 			for (let path of shortestPath) {
-				this.pathGroup.addLayer(path);
+				this.pathGroup.addLayer(new L.Geodesic(path.getLatLngs(), lineOptions));
 
 				// Add numbers
 				let latLngs = path.getLatLngs();
