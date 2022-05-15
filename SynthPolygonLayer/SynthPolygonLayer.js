@@ -298,6 +298,7 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend(/** @lends L.ALS.Sy
 			window.alert(L.ALS.locale.polygonLayersSkipped);
 
 		this.map.addLayer(this.labelsGroup); // Nothing in the base layer hides or shows it, so it's only hidden in code above
+		this.calculatePolygonParameters();
 		this.updatePathsMeta();
 		this.updateLayersVisibility();
 		this.writeToHistoryDebounced();

@@ -1,7 +1,5 @@
 // Misc methods, event handlers, etc which most likely won't change in future
 
-const turfHelpers = require("@turf/helpers");
-
 L.ALS.SynthRectangleBaseLayer.prototype.calculateParameters = function () {
 	L.ALS.SynthBaseLayer.prototype.calculateParameters.call(this);
 	this.calculatePolygonParameters();
