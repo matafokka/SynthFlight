@@ -333,11 +333,11 @@ class ESRIGridParser {
 					[rect.getEast(), rect.getSouth()]
 				];
 			} else {
-				let coords = polygon.getLatLngs();
+				let coords = polygon.getLatLngs()[0];
 				polygonsCoordinates[name] = [];
 				for (let coord of coords) {
 					if (!project) {
-						polygonsCoordinates.push([coord.lng, coord.lat]);
+						polygonsCoordinates[name].push([coord.lng, coord.lat]);
 						continue;
 					}
 

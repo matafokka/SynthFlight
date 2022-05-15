@@ -30,6 +30,7 @@ L.ALS.SynthPolygonBaseLayer.prototype.onDEMLoad = async function (widget) {
 			try {
 				parser.readChunk(grid);
 			} catch (e) {
+				console.log(e);
 				this.showDEMError([widget.input.files[0].name]);
 				return;
 			}
@@ -146,6 +147,7 @@ L.ALS.SynthPolygonBaseLayer.prototype.onDEMLoadWorker = async function (widget) 
 				let stats = await GeoTIFFParser(file, projectionString, ESRIGridParser.getInitialData(this, false));
 				ESRIGridParser.copyStats(this, stats);
 			} catch (e) {
+				console.log(e);
 				invalidFiles.push(file.name);
 			}
 			continue;
@@ -154,7 +156,10 @@ L.ALS.SynthPolygonBaseLayer.prototype.onDEMLoadWorker = async function (widget) 
 		if (!supportsWorker) {
 			await new Promise((resolve) => {
 				ESRIGridParser.parseFile(file, parser, fileReader, () => resolve())
-			}).catch(() => invalidFiles.push(file.name));
+			}).catch(e => {
+				console.log(e);
+				invalidFiles.push(file.name);
+			});
 			continue;
 		}
 
@@ -170,7 +175,10 @@ L.ALS.SynthPolygonBaseLayer.prototype.onDEMLoadWorker = async function (widget) 
 				projectionString: projectionString,
 				file: file,
 			});
-		}).catch(() => invalidFiles.push(file.name));
+		}).catch(e => {
+			console.log(e);
+			invalidFiles.push(file.name);
+		});
 	}
 
 	return {invalidFiles, invalidProjectionFiles};

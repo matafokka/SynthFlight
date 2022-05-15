@@ -46,12 +46,14 @@ module.exports = async function (file, projectionString, initialData) {
 			let polygon = initialData[name],
 				coords = polygon.length > 2 ? polygon : [
 					polygon[0], [polygon[1][0], polygon[0][1]],
-					polygon[1], [polygon[0][0], polygon[1][1]], polygon[0]
+					polygon[1], [polygon[0][0], polygon[1][1]]
 				],
 				projPolygon = [];
 
 			for (let coord of coords)
 				projPolygon.push(projectionFromWGS.forward(coord));
+
+			projPolygon.push([...projPolygon[0]]); // Clone first coordinate to avoid floating point errors
 
 			let polygonBbox = bboxPolygon(bbox(
 				turfHelpers.polygon([projPolygon])
