@@ -2,7 +2,6 @@ require("./SynthPolygonWizard.js");
 require("./SynthPolygonSettings.js");
 const MathTools = require("../MathTools.js");
 const proj4 = require("proj4");
-const debounce = require("debounce")
 
 /**
  * Polygon layer
@@ -57,30 +56,21 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend(/** @lends L.ALS.Sy
 		}, this.polygonGroup);
 
 		this.calculateThreshold(settings); // Update hiding threshold
-		this.onEditEndDebounced = debounce((notifyIfLayersSkipped = false) => this.onEditEnd(notifyIfLayersSkipped), 300); // Math operations are too slow for immediate update
 
 		L.ALS.SynthGeometryBaseWizard.initializePolygonOrPolylineLayer(this, wizardResults);
 	},
 
-	onEditEnd: function (notifyIfLayersSkipped = true) {
+	onEditEnd: function (e, notifyIfLayersSkipped = true) {
 		if (!this.isSelected)
 			return;
 
-		let color = this.getWidgetById("color0").getValue(),
-			lineOptions = {color, thickness: this.lineThicknessValue, segmentsNumber: L.GEODESIC_SEGMENTS},
-			calculationsLineOptions = {segmentsNumber: 2}
-
-		for (let name in this.polygons)
-			this.removePolygon(this.polygons[name], false);
-
 		this.labelsGroup.deleteAllLabels();
-		this.polygons = {}
-		this.invalidPolygons = {};
-
 		this.clearPaths();
 
-		let layersWereInvalidated = false;
-		notifyIfLayersSkipped = typeof notifyIfLayersSkipped === "boolean" ? notifyIfLayersSkipped : true;
+		let color = this.getWidgetById("color0").getValue(),
+			lineOptions = {color, thickness: this.lineThicknessValue, segmentsNumber: L.GEODESIC_SEGMENTS},
+			calculationsLineOptions = {segmentsNumber: 2},
+			layersWereInvalidated = false;
 
 		// Build paths for each polygon.
 
@@ -102,10 +92,10 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend(/** @lends L.ALS.Sy
 		// To work with geodesics as vectors and lines, we'll use gnomonic projection.
 		// We'll also crop the paths by the hull, so there won't be empty space along the paths.
 
-		this.polygonGroup.eachLayer((layer) => {
+		this.polygonGroup.eachLayer(layer => {
 			// Remove a linked layer when a layer either original or cloned has been removed
 			if (layer.linkedLayer && !this.polygonGroup.hasLayer(layer.linkedLayer)) {
-				this.polygonGroup.removeLayer(layer);
+				this.removePolygon(layer);
 				return;
 			}
 
@@ -294,19 +284,7 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend(/** @lends L.ALS.Sy
 				this.pointsGroup.addLayer(marker);
 		});
 
-		if (layersWereInvalidated && notifyIfLayersSkipped)
-			window.alert(L.ALS.locale.polygonLayersSkipped);
-
-		this.map.addLayer(this.labelsGroup); // Nothing in the base layer hides or shows it, so it's only hidden in code above
-		this.calculatePolygonParameters();
-		this.updatePathsMeta();
-		this.updateLayersVisibility();
-		this.writeToHistoryDebounced();
-	},
-
-	calculateParameters: function (notifyIfLayersSkipped = false) {
-		L.ALS.SynthPolygonBaseLayer.prototype.calculateParameters.call(this);
-		this.onEditEndDebounced(typeof notifyIfLayersSkipped === "boolean" ? notifyIfLayersSkipped : false);
+		this.afterEditEnd(L.ALS.locale.polygonLayersSkipped, layersWereInvalidated, e, !notifyIfLayersSkipped);
 	},
 
 	updateLayersVisibility: function () {

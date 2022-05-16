@@ -587,6 +587,32 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 		return hide;
 	},
 
+	/**
+	 * Displays a notification after layers has been edited
+	 * @param invalidLayersMessage {string} Message to display when layers has been invalidated
+	 * @param layersInvalidated {boolean} Whether layers has been invalidated
+	 * @param e {Event|undefined} Received L.Draw event, if present
+	 * @param shouldJustReturn {boolean} If this function should just return instead of displaying a notification
+	 */
+	notifyAfterEditing: function (invalidLayersMessage, layersInvalidated, e = undefined, shouldJustReturn = false) {
+		// The whole thing makes no sense when polygons are invalidated when user edits parameters.
+		// TODO: Somehow fix this?
+
+		if (!L.ALS.generalSettings.notificationsEnabled || shouldJustReturn)
+			return;
+
+		let notification = "";
+
+		if (layersInvalidated)
+			notification += invalidLayersMessage + "\n\n";
+
+		if (e && e.type === "draw:editstop")
+			notification += L.ALS.locale.afterEditingInvalidDEMValues + "\n\n";
+
+		if (notification !== "")
+			window.alert(notification + L.ALS.locale.afterEditingToDisableNotifications);
+	},
+
 	clearSerializedPathsWidgets: function (serialized) {
 		for (let i = 1; i <= this._pathsWidgetsNumber; i++)
 			delete serialized._widgets["pathWidget" + i];

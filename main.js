@@ -25,6 +25,7 @@ L.ALS.Locales.AdditionalLocales.Russian();
 require("./node_modules/leaflet.coordinates/dist/Leaflet.Coordinates-0.1.5.min.js");
 require("./locales/English.js");
 require("./locales/Russian.js");
+require("./SynthGeneralSettings.js");
 require("./SynthGeometryBaseWizard.js");
 require("./SynthGeometryLayer/SynthGeometryLayer.js");
 require("./SynthBaseLayer/SynthBaseLayer.js");
@@ -62,7 +63,7 @@ let map = L.map("map", {
 	keyboard: false,
 	worldCopyJump: true,
 	fadeAnimation: false
-}).setView([51.505, -0.09], 13);
+}).setView([55.75, 37.61], 13);
 map.doubleClickZoom.disable();
 
 
@@ -162,6 +163,7 @@ let layerSystem = new L.ALS.System(map, {
 	makeMapFullscreen: true,
 	historySize: L.ALS.Helpers.supportsFlexbox ? 40 : 20, // Old browsers might have lower RAM limits
 	toolbarZoomControl: new L.ALS.ControlZoom({vertical: true}),
+	generalSettings: L.ALS.SynthGeneralSettings
 });
 
 // CartoDB

@@ -119,15 +119,15 @@ class ESRIGridParser {
 		this.polygonsCoordinates = ESRIGridParser.getInitialData(this.layer);
 	}
 
-
 	/**
 	 * Reads a chunk
 	 * @param chunk {string} A chunk to read
 	 */
 	readChunk(chunk) {
 		for (let i = 0; i < chunk.length; i++) {
-			let symbol = chunk[i].toLowerCase();
-			let isSpace = (symbol === " "), isLineBreak = (symbol === "\n" || symbol === "\r");
+			let symbol = chunk[i].toLowerCase(),
+				isSpace = (symbol === " "),
+				isLineBreak = (symbol === "\n" || symbol === "\r");
 
 			// Skip multiple spaces and line breaks
 			let nameMap = [
@@ -151,8 +151,11 @@ class ESRIGridParser {
 			if (!this.allDEMParamsRead) {
 				// Read param name until we hit space
 				if (this.readingDEMParamName) {
-					if (symbol === " ")
+					if (isSpace) {
+						if (this.param === "")
+							continue;
 						this.readingDEMParamName = false;
+					}
 					// Stop reading when we hit minus or digit
 					else if (symbol === "-" || !isNaN(parseInt(symbol))) {
 						this.value = symbol;
@@ -219,15 +222,15 @@ class ESRIGridParser {
 					let poly = this.polygonsCoordinates[name], fn, projPoint;
 
 					if (poly.length > 2) {
-						fn = MathTools.isPointInPolygon;
+						fn = "isPointInPolygon";
 						let {x, y} = this.layer.map.project([point[0], point[1]], 0);
 						projPoint = [x, y];
 					} else {
-						fn = MathTools.isPointInRectangle;
+						fn = "isPointInRectangle";
 						projPoint = point;
 					}
 
-					if (!fn(projPoint, poly))
+					if (!MathTools[fn](projPoint, poly))
 						continue;
 
 					if (!this.polygonsStats[name])
@@ -235,6 +238,8 @@ class ESRIGridParser {
 
 					let stats = this.polygonsStats[name];
 					ESRIGridParser.addToStats(pixelValue, stats);
+
+					L.circleMarker([...point].reverse(), {color: `rgb(${pixelValue},${pixelValue},${pixelValue})`, fillOpacity: 1, stroke: false}).addTo(map);
 				}
 			} else if (!isSpace && !isLineBreak)
 				this.value += symbol;
@@ -316,36 +321,36 @@ class ESRIGridParser {
 
 	/**
 	 * Generates initial parameters for the layer.
-	 * @param layer {L.ALS.SynthRectangleBaseLayer} Layer to copy data from
+	 * @param layer {L.ALS.SynthPolygonBaseLayer} Layer to copy data from
 	 * @param project {boolean} Whether polygon coordinates should be reprojected, if `layer.useRect` is `false`
 	 */
 	static getInitialData(layer, project = true) {
 		let polygonsCoordinates = {};
-		for (let name in layer.polygons) {
-			if (!layer.polygons.hasOwnProperty(name))
-				continue;
+		layer.forEachValidPolygon(polygon => {
+			polygon.tempDemName = L.ALS.Helpers.generateID();
 
-			let polygon = layer.polygons[name];
 			if (layer.useRect) {
 				let rect = polygon.getBounds();
-				polygonsCoordinates[name] = [
+				polygonsCoordinates[polygon.tempDemName] = [
 					[rect.getWest(), rect.getNorth()],
 					[rect.getEast(), rect.getSouth()]
 				];
-			} else {
-				let coords = polygon.getLatLngs()[0];
-				polygonsCoordinates[name] = [];
-				for (let coord of coords) {
-					if (!project) {
-						polygonsCoordinates[name].push([coord.lng, coord.lat]);
-						continue;
-					}
-
-					let {x, y} = layer.map.project(coord, 0);
-					polygonsCoordinates[name].push([x, y]);
-				}
+				return;
 			}
-		}
+
+			let coords = polygon.getLatLngs()[0], coordsCopy = [];
+			polygonsCoordinates[polygon.tempDemName] = coordsCopy;
+			for (let coord of coords) {
+				if (!project) {
+					coordsCopy.push([coord.lng, coord.lat]);
+					continue;
+				}
+
+				let {x, y} = layer.map.project(coord, 0);
+				coordsCopy.push([x, y]);
+			}
+		});
+
 		return polygonsCoordinates;
 	}
 
@@ -355,14 +360,16 @@ class ESRIGridParser {
 	 * @param stats {Object} Stats from any ESRIGridParser
 	 */
 	static copyStats(layer, stats) {
-		for (let name in stats) {
-			let widgetable = layer.polygonsWidgets[name];
-			let s = stats[name];
-			s.mean = s.sum / s.count;
-			widgetable.getWidgetById("minHeight").setValue(s.min);
-			widgetable.getWidgetById("maxHeight").setValue(s.max);
-			widgetable.getWidgetById("meanHeight").setValue(s.mean);
-		}
+		layer.forEachValidPolygon(polygon => {
+			let entry = stats[polygon.tempDemName];
+			if (!entry)
+				return;
+
+			entry.mean = entry.sum / entry.count;
+			polygon.widgetable.getWidgetById("minHeight").setValue(entry.min);
+			polygon.widgetable.getWidgetById("maxHeight").setValue(entry.max);
+			polygon.widgetable.getWidgetById("meanHeight").setValue(entry.mean);
+		});
 		layer.calculateParameters();
 	}
 

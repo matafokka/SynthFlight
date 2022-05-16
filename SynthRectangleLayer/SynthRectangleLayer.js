@@ -27,22 +27,18 @@ L.ALS.SynthRectangleLayer = L.ALS.SynthRectangleBaseLayer.extend(/** @lends L.AL
 		this.isAfterDeserialization = false;
 	},
 
-	onEditEnd: function () {
+	onEditEnd: function (e, notifyIfLayersSkipped = true) {
 		if (!this.isSelected)
 			return;
 
-		for (let name in this.polygons)
-			this.removePolygon(this.polygons[name], false);
-
-		this.polygons = {}
-		this.invalidPolygons = {};
+		this.clearPaths();
 
 		let layersWereInvalidated = false;
 
-		this.polygonGroup.eachLayer((layer) => {
+		this.polygonGroup.eachLayer(layer => {
 			// Remove a linked layer when a layer either original or cloned has been removed
 			if (layer.linkedLayer && !this.polygonGroup.hasLayer(layer.linkedLayer)) {
-				this.polygonGroup.removeLayer(layer);
+				this.removePolygon(layer);
 				return;
 			}
 
@@ -66,13 +62,7 @@ L.ALS.SynthRectangleLayer = L.ALS.SynthRectangleBaseLayer.extend(/** @lends L.AL
 			this.addPolygon(layer);
 		});
 
-		if (layersWereInvalidated)
-			window.alert(L.ALS.locale.rectangleLayersSkipped);
-
-		this.map.addLayer(this.labelsGroup); // Nothing in the base layer hides or shows it, so it's only hidden in code above
-		this.updateLayersVisibility();
-		this.calculateParameters();
-		this.writeToHistoryDebounced();
+		this.afterEditEnd(L.ALS.locale.rectangleLayersSkipped, layersWereInvalidated, e, !notifyIfLayersSkipped);
 	},
 
 	statics: {

@@ -1,3 +1,5 @@
+const debounce = require("debounce");
+
 /**
  * Enables L.Draw on this layer
  * @param drawControls {Object} L.Draw controls to use
@@ -21,6 +23,8 @@ L.ALS.SynthBaseLayer.prototype.enableDraw = function (drawControls, drawingGroup
 			remove: true,
 		}
 	}
+
+	this.onEditEndDebounced = debounce((notifyIfLayersSkipped = false) => this.onEditEnd(undefined, notifyIfLayersSkipped), 300); // Math operations are too slow for immediate update
 
 	for (let control of this._drawTypes)
 		this._drawOptions.draw[control] = false;
@@ -47,7 +51,10 @@ L.ALS.SynthBaseLayer.prototype.onDraw = function (e) {
 	if (!this.isSelected)
 		return;
 
-	// Don't add layers of size less than 3x3 px
+	// Don't add layers of size less than 3x3 px and don't add geodesics with one point
+	if (e.layer instanceof L.Geodesic && e.layer.getLatLngs().length < 2)
+		return;
+
 	if (e.layer.getBounds) {
 		let {_northEast, _southWest} = e.layer.getBounds(),
 			zoom = this.map.getZoom(),

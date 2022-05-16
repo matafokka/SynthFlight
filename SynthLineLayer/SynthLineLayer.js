@@ -19,9 +19,10 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend(/** @lends L.ALS.SynthLineLay
 		this.drawingGroup = new L.FeatureGroup();
 		this.connectionsGroup = new L.FeatureGroup();
 		this.errorGroup = new L.FeatureGroup();
+		this.pointsGroup = new L.FeatureGroup();
 
 		L.ALS.SynthBaseLayer.prototype.init.call(this, settings, this.pathsGroup, this.connectionsGroup, "lineLayerColor");
-		this.addLayers(this.errorGroup);
+		this.addLayers(this.errorGroup, this.pointsGroup);
 
 		this.enableDraw({
 			polyline: {
@@ -40,8 +41,6 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend(/** @lends L.ALS.SynthLineLay
 
 		this.addBaseParametersInputSection();
 		this.addBaseParametersOutputSection();
-
-		this.pointsGroup = new L.FeatureGroup();
 		L.ALS.SynthGeometryBaseWizard.initializePolygonOrPolylineLayer(this, wizardResults);
 	},
 
@@ -63,7 +62,7 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend(/** @lends L.ALS.SynthLineLay
 		this.map.addLayer(this.drawingGroup);
 	},
 
-	onEditEnd: function (notifyIfLayersSkipped = true) {
+	onEditEnd: function (event, notifyIfLayersSkipped = true) {
 		if (!this.isSelected)
 			return;
 
@@ -129,15 +128,9 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend(/** @lends L.ALS.SynthLineLay
 		this.map.removeLayer(this.drawingGroup);
 		this.map.addLayer(this.pathsGroup);
 
-		if (linesWereInvalidated && notifyIfLayersSkipped)
-			window.alert(L.ALS.locale.lineLayersSkipped);
+		this.notifyAfterEditing(L.ALS.locale.lineLayersSkipped, linesWereInvalidated, undefined, !notifyIfLayersSkipped);
 
 		this.writeToHistoryDebounced();
-	},
-
-	calculateParameters: function (notifyIfLayersSkipped = false) {
-		L.ALS.SynthBaseLayer.prototype.calculateParameters.call(this);
-		this.onEditEnd(typeof notifyIfLayersSkipped === "boolean" ? notifyIfLayersSkipped : false);
 	},
 
 	toGeoJSON: function () {

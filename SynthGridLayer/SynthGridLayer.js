@@ -56,6 +56,8 @@ L.ALS.SynthGridLayer = L.ALS.SynthRectangleBaseLayer.extend(/** @lends L.ALS.Syn
 		 */
 		this.gridLabelsIDs = [];
 
+		this.polygons = {};
+
 		L.ALS.SynthRectangleBaseLayer.prototype.init.call(this, wizardResults, settings);
 
 		/**
@@ -77,9 +79,13 @@ L.ALS.SynthGridLayer = L.ALS.SynthRectangleBaseLayer.extend(/** @lends L.ALS.Syn
 
 		if (this.polygons[name]) {
 			polygon.setStyle({fill: false});
+			delete this.polygons[name];
 			this.removePolygon(polygon);
-		} else
+		} else {
+			polygon.setStyle({fill: true});
+			this.polygons[name] = polygon;
 			this.addPolygon(polygon);
+		}
 
 		this.calculateParameters();
 		this.writeToHistoryDebounced();
@@ -129,6 +135,13 @@ L.ALS.SynthGridLayer = L.ALS.SynthRectangleBaseLayer.extend(/** @lends L.ALS.Syn
 		errorLabel.setValue("");
 
 		L.ALS.SynthRectangleBaseLayer.prototype.drawPaths.call(this);
+
+		this.updatePathsMeta();
+	},
+
+	forEachValidPolygon: function (cb) {
+		for (let id in this.polygons)
+			cb(this.polygons[id]);
 	},
 
 	statics: {

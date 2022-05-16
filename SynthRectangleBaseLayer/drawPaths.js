@@ -9,14 +9,11 @@ L.ALS.SynthRectangleBaseLayer.prototype.clearPaths = function () {
 }
 
 L.ALS.SynthRectangleBaseLayer.prototype.drawPaths = function () {
-	this.clearPaths();
-
 	if (this.mergedPolygons.length === 0)
 		return;
 
 	this.drawPathsWorker(true);
 	this.drawPathsWorker(false);
-	this.updatePathsMeta();
 	this.labelsGroup.redraw();
 }
 

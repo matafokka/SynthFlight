@@ -6,8 +6,8 @@
  */
 L.ALS.MeanHeightButtonHandler = L.ALS.Serializable.extend( /**@lends L.ALS.MeanHeightButtonHandler.prototype */ {
 
-	initialize: function (controlsContainer) {
-		this._widgetable = controlsContainer;
+	initialize: function (widgetable) {
+		this._widgetable = widgetable;
 	},
 
 	handle: function () {
@@ -18,12 +18,11 @@ L.ALS.MeanHeightButtonHandler = L.ALS.Serializable.extend( /**@lends L.ALS.MeanH
 })
 
 L.ALS.SynthPolygonBaseLayer.prototype.addPolygon = function (polygon, alignToCenter = false) {
-	polygon._intName = this._generatePolygonName(polygon);
-	delete this.invalidPolygons[polygon._intName];
-
+	// Make polygon valid
 	polygon.setStyle({fill: true});
-	this.polygons[polygon._intName] = polygon;
+	polygon.isValid = true;
 
+	// Get anchor and anchor coordinates
 	let anchorPoint, anchor;
 	if (alignToCenter) {
 		anchorPoint = polygon.getBounds().getCenter();
@@ -33,12 +32,20 @@ L.ALS.SynthPolygonBaseLayer.prototype.addPolygon = function (polygon, alignToCen
 		anchor = "topLeft";
 	}
 
-	let controlsContainer = new L.WidgetLayer(anchorPoint, anchor),  handler = new L.ALS.MeanHeightButtonHandler(controlsContainer);
+	if (polygon.widgetable) {
+		polygon.widgetable.setLatLng(anchorPoint);
+		return;
+	}
+
+	polygon.widgetable = new L.WidgetLayer(anchorPoint, anchor);
+	polygon.widgetable.polygon = polygon;
+
+	let handler = new L.ALS.MeanHeightButtonHandler(polygon.widgetable);
 
 	if (this.useZoneNumbers)
-		controlsContainer.addWidget(new L.ALS.Widgets.Number("zoneNumber", "zoneNumber", this, "calculatePolygonParameters").setMin(1).setValue(1));
+		polygon.widgetable.addWidget(new L.ALS.Widgets.Number("zoneNumber", "zoneNumber", this, "calculatePolygonParameters").setMin(1).setValue(1));
 
-	controlsContainer.addWidgets(
+	polygon.widgetable.addWidgets(
 		new L.ALS.Widgets.Number("minHeight", "minHeight", this, "calculatePolygonParameters").setMin(1).setValue(1),
 		new L.ALS.Widgets.Number("maxHeight", "maxHeight", this, "calculatePolygonParameters").setMin(1).setValue(1),
 		new L.ALS.Widgets.Number("meanHeight", "meanHeight", this, "calculatePolygonParameters").setMin(1).setValue(1),
@@ -50,7 +57,7 @@ L.ALS.SynthPolygonBaseLayer.prototype.addPolygon = function (polygon, alignToCen
 	);
 
 	if (this.calculateCellSizeForPolygons) {
-		controlsContainer.addWidgets(
+		polygon.widgetable.addWidgets(
 			new L.ALS.Widgets.ValueLabel("lngCellSizeInMeters", "lngCellSizeInMeters", "m").setNumberOfDigitsAfterPoint(0),
 			new L.ALS.Widgets.ValueLabel("latCellSizeInMeters", "latCellSizeInMeters", "m").setNumberOfDigitsAfterPoint(0),
 		)
@@ -58,53 +65,101 @@ L.ALS.SynthPolygonBaseLayer.prototype.addPolygon = function (polygon, alignToCen
 
 	let toFormatNumbers = ["absoluteHeight", "elevationDifference", "lngCellSizeInMeters", "latCellSizeInMeters"];
 	for (let id of toFormatNumbers) {
-		let widget = controlsContainer.getWidgetById(id);
+		let widget = polygon.widgetable.getWidgetById(id);
 		if (widget)
 			widget.setFormatNumbers(true);
 	}
 
-	this.polygonsWidgets[polygon._intName] = controlsContainer;
-	this.widgetsGroup.addLayer(controlsContainer);
+	this.widgetsGroup.addLayer(polygon.widgetable);
 
 	if (polygon.linkedLayer)
 		polygon.linkedLayer.setStyle(polygon.options);
 }
 
-L.ALS.SynthPolygonBaseLayer.prototype.removePolygon = function (polygon, removeFromObject = true) {
-	let name = polygon._intName || this._generatePolygonName(polygon);
-	if (removeFromObject)
-		delete this.polygons[name];
-	this.widgetsGroup.removeLayer(this.polygonsWidgets[name]);
-	delete this.polygonsWidgets[name];
-}
-
-L.ALS.SynthPolygonBaseLayer.prototype.calculatePolygonParameters = function (widget) {
-	for (let name in this.polygons) {
-		if (!this.polygons.hasOwnProperty(name))
+/**
+ * Removes polygon, its widget and linked polygon from the map
+ * @param polygon {L.Layer} Polygon to remove
+ */
+L.ALS.SynthPolygonBaseLayer.prototype.removePolygon = function (polygon) {
+	for (let layer of [polygon, polygon.linkedLayer]) {
+		if (!layer)
 			continue;
 
-		let layer = this.polygons[name], latLngs = layer.getLatLngs()[0];
-		let widgetContainer = this.polygonsWidgets[name];
+		this.polygonGroup.removeLayer(layer);
+		if (!layer.widgetable)
+			continue;
+
+		this._removePolygonWidget(layer);
+	}
+}
+
+L.ALS.SynthPolygonBaseLayer.prototype.invalidatePolygon = function (polygon) {
+	for (let layer of [polygon, polygon.linkedLayer]) {
+		if (!layer)
+			continue;
+
+		layer.setStyle({color: "red", fillColor: "red"});
+		layer.isValid = false;
+
+		this._removePolygonWidget(layer);
+	}
+}
+
+L.ALS.SynthPolygonBaseLayer.prototype._removePolygonWidget = function (polygon) {
+	if (!polygon.widgetable)
+		return;
+
+	this.widgetsGroup.removeLayer(polygon.widgetable);
+	polygon.widgetable.remove();
+	delete polygon.widgetable;
+}
+
+/**
+ * Removes widgets that are hanging on the map after polygons have been removed
+ */
+L.ALS.SynthPolygonBaseLayer.prototype.removeLeftoverWidgets = function () {
+	this.widgetsGroup.eachLayer(layer => {
+		if (layer.polygon && !this.polygonGroup.hasLayer(layer.polygon))
+			this.widgetsGroup.removeLayer(layer);
+	});
+}
+
+L.ALS.SynthPolygonBaseLayer.prototype.afterEditEnd = function (invalidLayersMessage, layersInvalidated, e = undefined, shouldJustReturn = false) {
+	this.notifyAfterEditing(invalidLayersMessage, layersInvalidated, e, shouldJustReturn);
+
+	this.removeLeftoverWidgets();
+	this.map.addLayer(this.labelsGroup); // Nothing in the base layer hides or shows it, so it's only hidden in code above
+	this.updatePolygonsColors();
+	this.calculatePolygonParameters();
+	this.updatePathsMeta();
+	this.updateLayersVisibility();
+	this.writeToHistoryDebounced();
+}
+
+L.ALS.SynthPolygonBaseLayer.prototype.calculatePolygonParameters = function () {
+	this.forEachValidPolygon(layer => {
+
+		let latLngs = layer.getLatLngs()[0];
 
 		if (this.calculateCellSizeForPolygons) {
 			layer.lngCellSizeInMeters = this.getParallelOrMeridianLineLength(latLngs[0], latLngs[1], false);
 			layer.latCellSizeInMeters = this.getParallelOrMeridianLineLength(latLngs[1], latLngs[2], false);
 
-			widgetContainer.getWidgetById("lngCellSizeInMeters").setValue(layer.lngCellSizeInMeters);
-			widgetContainer.getWidgetById("latCellSizeInMeters").setValue(layer.latCellSizeInMeters);
+			layer.widgetable.getWidgetById("lngCellSizeInMeters").setValue(layer.lngCellSizeInMeters);
+			layer.widgetable.getWidgetById("latCellSizeInMeters").setValue(layer.latCellSizeInMeters);
 		}
 
-		layer.minHeight = widgetContainer.getWidgetById("minHeight").getValue();
-		layer.maxHeight = widgetContainer.getWidgetById("maxHeight").getValue();
+		layer.minHeight = layer.widgetable.getWidgetById("minHeight").getValue();
+		layer.maxHeight = layer.widgetable.getWidgetById("maxHeight").getValue();
 
-		let errorLabel = widgetContainer.getWidgetById("error");
+		let errorLabel = layer.widgetable.getWidgetById("error");
 		if (layer.minHeight > layer.maxHeight) {
 			errorLabel.setValue("errorMinHeightBiggerThanMaxHeight");
-			continue;
+			return;
 		}
 		errorLabel.setValue("");
 
-		layer.meanHeight = widgetContainer.getWidgetById("meanHeight").getValue();
+		layer.meanHeight = layer.widgetable.getWidgetById("meanHeight").getValue();
 		layer.absoluteHeight = this["flightHeight"] + layer.meanHeight;
 
 		layer.elevationDifference = (layer.maxHeight - layer.minHeight) / this["flightHeight"];
@@ -118,20 +173,16 @@ L.ALS.SynthPolygonBaseLayer.prototype.calculatePolygonParameters = function (wid
 			} catch (e) {
 				value = layer[name];
 			}
-			widgetContainer.getWidgetById(name).setValue(value);
+			layer.widgetable.getWidgetById(name).setValue(value);
 		}
-	}
+	})
 }
 
-L.ALS.SynthPolygonBaseLayer.prototype.invalidatePolygon = function (polygon) {
-	polygon._intName = this._generatePolygonName(polygon);
-
-	for (let poly of [polygon, polygon.linkedLayer]) {
-		if (poly)
-			poly.setStyle({color: "red", fillColor: "red"});
-	}
-	this.invalidPolygons[polygon._intName] = polygon;
-	delete this.polygons[polygon._intName];
+L.ALS.SynthPolygonBaseLayer.prototype.forEachValidPolygon = function (cb) {
+	this.polygonGroup.eachLayer(poly => {
+		if (!poly.isCloned && poly.isValid)
+			cb(poly);
+	})
 }
 
 L.ALS.SynthPolygonBaseLayer.prototype._getRectOrPolyCoords = function (layer) {

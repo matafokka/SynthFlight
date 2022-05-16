@@ -10,7 +10,11 @@ L.ALS.SynthGridLayer.prototype._onMapPan = function () {
 	if (!this.isShown || !this.isDisplayed)
 		return;
 
-	this.polygonGroup.clearLayers();
+	this.polygonGroup.eachLayer(polygon => {
+		if (!polygon.options.fill)
+			this.polygonGroup.removeLayer(polygon);
+	});
+
 	this.clearLabels("gridLabelsIDs");
 
 	// Get viewport bounds and calculate correct start and end coords for lng and lat
@@ -65,20 +69,19 @@ L.ALS.SynthGridLayer.prototype._onMapPan = function () {
 			// If this polygon has been selected, we should fill it and replace it in the array.
 			// Because fill will be changed, we can't keep old polygon, it's easier to just replace it
 			let name = this._generatePolygonName(polygon);
-			let isSelected = this.polygons[name] !== undefined;
-			polygon.setStyle({
-				color: this.borderColor,
-				fillColor: this.fillColor,
-				fill: isSelected,
-				weight: this.lineThicknessValue
-			});
 
-			// We should select or deselect polygons upon double click
-			this.addEventListenerTo(polygon, "dblclick contextmenu", "_selectOrDeselectPolygon");
-			this.polygonGroup.addLayer(polygon);
+			if (!this.polygons[name]) {
+				polygon.setStyle({
+					color: this.borderColor,
+					fillColor: this.fillColor,
+					fill: false,
+					weight: this.lineThicknessValue
+				});
 
-			if (isSelected)
-				this.polygons[name] = polygon;
+				// We should select or deselect polygons upon double click
+				this.addEventListenerTo(polygon, "dblclick contextmenu", "_selectOrDeselectPolygon");
+				this.polygonGroup.addLayer(polygon);
+			}
 
 			// Generate current polygon's name if grid uses one of standard scales
 			if (this._currentStandardScale === Infinity) {

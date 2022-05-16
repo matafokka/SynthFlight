@@ -161,6 +161,11 @@ L.ALS.Locales.addLocaleProperties("English", {
 	polygonHidePaths: "Hide paths",
 	polygonLayersSkipped: "One or more polygons has been skipped because they're too big. These polygons have red color.",
 
+	// Notifications after editing
+	afterEditingInvalidDEMValues: "Height values might be invalid because map objects has been edited. Please, reload DEM or edit height values manually.",
+	afterEditingToDisableNotifications: "To disable these notification, go to Settings - General Settings - Disable all annoying notifications after editing and DEM loading.",
+	generalSettingsDisableAnnoyingNotification: "Disable all annoying notifications after editing and DEM loading",
+
 	// GeoJSON initial features
 	initialFeaturesFileLabelPolygon: "Load initial polygons from zipped shapefile or GeoJSON (non-polygon features will be skipped):",
 	initialFeaturesFileLabelLine: "Load initial polylines from zipped shapefile or GeoJSON (non-polyline features will be skipped):",

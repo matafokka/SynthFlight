@@ -1,8 +1,10 @@
 // Misc methods, event handlers, etc which most likely won't change in future
 
-L.ALS.SynthRectangleBaseLayer.prototype.calculateParameters = function () {
-	L.ALS.SynthBaseLayer.prototype.calculateParameters.call(this);
-	this.calculatePolygonParameters();
+L.ALS.SynthRectangleBaseLayer.prototype.calculateParameters = function (notifyIfLayersSkipped = false) {
+	L.ALS.SynthBaseLayer.prototype.calculateParameters.call(this, notifyIfLayersSkipped);
+
+	if (!this.onEditEndDebounced)
+		this.calculatePolygonParameters();
 }
 
 L.ALS.SynthRectangleBaseLayer.prototype.updateLayersVisibility = function () {
@@ -55,13 +57,17 @@ L.ALS.SynthRectangleBaseLayer.prototype.calculatePolygonParameters = function (w
 L.ALS.SynthRectangleBaseLayer.prototype.mergePolygons = function () {
 	// Convert object with polygons to an array and push edges instead of points here
 	this.mergedPolygons = [];
-	for (let id in this.polygons) {
-		let latLngs = this.polygons[id].getLatLngs()[0], poly = [];
+
+	this.forEachValidPolygon(polygon => {
+		let latLngs = polygon.getLatLngs()[0], poly = [];
 		for (let p of latLngs)
 			poly.push([p.lng, p.lat]);
+
 		poly.push(poly[0]); // We need to close the polygons to use MathTools stuff
+
 		if (this.useZoneNumbers)
-			poly.zoneNumber = this.polygonsWidgets[id].getWidgetById("zoneNumber").getValue();
+			poly.zoneNumber = polygon.widgetable.getWidgetById("zoneNumber").getValue();
+
 		this.mergedPolygons.push(poly);
-	}
+	});
 }

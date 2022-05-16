@@ -155,7 +155,12 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 	polygonLayerName: "Слой Полигонов",
 	polygonPathsColor: "Цвет маршрутов:",
 	polygonHidePaths: "Скрыть маршруты",
+
+	// Notifications after editing
 	polygonLayersSkipped: "Один или несколько полигонов были пропущены, так как они слишком большие. Данные полигоны имеют красный цвет.",
+	afterEditingInvalidDEMValues: "Значения высот могут быть неправильными, поскольку объекты были отредактированы. Пожалуйста, заново загрузите ЦМР или вручную отредактируйте значения высот.",
+	afterEditingToDisableNotifications: "Чтобы убрать данные уведомления, перейдите в Настройки - Общие настройки - Отключить все надоедливые уведомления после редактирования и загрузки ЦМР.",
+	generalSettingsDisableAnnoyingNotification: "Отключить все надоедливые уведомления после редактирования и загрузки ЦМР",
 
 	// GeoJSON initial features
 	initialFeaturesFileLabelPolygon: "Загрузить исходные полигоны из сжатого shapefile (zip-архива) или GeoJSON (типы, отличные от полигона, будут пропущены):",

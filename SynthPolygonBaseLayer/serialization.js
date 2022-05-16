@@ -1,6 +1,7 @@
 L.ALS.SynthPolygonBaseLayer.prototype.serialize = function (seenObjects) {
 	let serialized = this.getObjectToSerializeTo(seenObjects);
 
+	// TODO: Fix serialization
 	serialized.polygonsWidgets = L.ALS.Serializable.serializeAnyObject(this.polygonsWidgets, seenObjects);
 
 	// Gather selected polygons' coordinates

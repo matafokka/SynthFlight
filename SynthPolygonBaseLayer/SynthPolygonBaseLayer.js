@@ -41,9 +41,6 @@ L.ALS.SynthPolygonBaseLayer = L.ALS.SynthBaseLayer.extend( /** @lends L.ALS.Synt
 		colorLabel2 = "meridiansColor",
 		hidePaths2WidgetId = "hidePathsByMeridians",
 	) {
-		this.polygons = {};
-		this.invalidPolygons = {};
-		this.polygonsWidgets = {};
 		this.serializationIgnoreList.push("polygons", "invalidPolygons", "lngDistance", "latDistance", "_currentStandardScale");
 
 		this.polygonGroup = new L.FeatureGroup();
@@ -198,8 +195,7 @@ L.ALS.SynthPolygonBaseLayer = L.ALS.SynthBaseLayer.extend( /** @lends L.ALS.Synt
 	updatePolygonsColors: function () {
 		let color = this.getWidgetById("borderColor").getValue(),
 			fillColor = this.getWidgetById("fillColor").getValue();
-		for (let id in this.polygons)
-			this.polygons[id].setStyle({color, fillColor});
+		this.forEachValidPolygon(polygon => polygon.setStyle({color, fillColor}));
 	},
 
 	clearPaths: function () {
@@ -237,11 +233,8 @@ L.ALS.SynthPolygonBaseLayer = L.ALS.SynthBaseLayer.extend( /** @lends L.ALS.Synt
 	baseFeaturesToGeoJSON: function () {
 		let jsons = [];
 
-		for (let name in this.polygons) {
-			if (!this.polygons.hasOwnProperty(name))
-				continue;
-			let polygon = this.polygons[name],
-				polygonJson = polygon.toGeoJSON(),
+		this.forEachValidPolygon(polygon => {
+			let polygonJson = polygon.toGeoJSON(),
 				props = ["polygonName", "minHeight", "maxHeight", "meanHeight", "absoluteHeight", "reliefType", "elevationDifference", "latCellSizeInMeters", "lngCellSizeInMeters"];
 			for (let prop of props) {
 				let value = polygon[prop];
@@ -250,7 +243,7 @@ L.ALS.SynthPolygonBaseLayer = L.ALS.SynthBaseLayer.extend( /** @lends L.ALS.Synt
 			}
 			polygonJson.properties.name = "Selected cell";
 			jsons.push(polygonJson);
-		}
+		});
 
 		let airport = this._airportMarker.toGeoJSON();
 		airport.name = "Airport";
