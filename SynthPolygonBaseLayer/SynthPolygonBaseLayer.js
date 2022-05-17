@@ -12,7 +12,6 @@ try {
  */
 L.ALS.SynthPolygonBaseLayer = L.ALS.SynthBaseLayer.extend( /** @lends L.ALS.SynthPolygonBaseLayer.prototype */ {
 	useZoneNumbers: false,
-	useRect: false,
 	calculateCellSizeForPolygons: true,
 
 	/**

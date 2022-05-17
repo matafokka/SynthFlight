@@ -13,7 +13,6 @@ require("../SynthPolygonBaseLayer/SynthPolygonBaseSettings.js");
 L.ALS.SynthRectangleBaseLayer = L.ALS.SynthPolygonBaseLayer.extend( /** @lends L.ALS.SynthRectangleBaseLayer.prototype */ {
 
 	_currentStandardScale: -1,
-	useRect: true,
 	borderColorLabel: "",
 	fillColorLabel: "",
 
