@@ -103,6 +103,11 @@ L.ALS.SynthGeometryBaseWizard = L.ALS.Wizard.extend(/** @lends L.ALS.SynthGeomet
 					synthLayer.isAfterDeserialization = false;
 				}
 
+			if (!window.FileReader) {
+				finishLoading();
+				return;
+			}
+
 			if (synthLayer instanceof L.ALS.SynthPolygonLayer) {
 				groupToAdd = synthLayer.polygonGroup;
 				layerType = L.Polygon;
