@@ -119,11 +119,8 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend(/** @lends L.ALS.SynthLineLay
 
 		this.updatePathsMeta();
 
-		if (!this.getWidgetById("hidePathsConnections").getValue())
-			this.map.addLayer(this.connectionsGroup);
-
-		if (!this.getWidgetById("hideCapturePoints").getValue())
-			this.map.addLayer(this.pointsGroup);
+		this.hideOrShowLayer(this.getWidgetById("hidePathsConnections").getValue(), this.connectionsGroup);
+		this.hideOrShowLayer(this.getWidgetById("hideCapturePoints").getValue(), this.pointsGroup);
 
 		this.map.removeLayer(this.drawingGroup);
 		this.map.addLayer(this.pathsGroup);

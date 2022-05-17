@@ -1,25 +1,27 @@
 L.ALS.SynthPolygonBaseLayer.prototype.serialize = function (seenObjects) {
 	let serialized = this.getObjectToSerializeTo(seenObjects);
 
-	// TODO: Fix serialization
-	serialized.polygonsWidgets = L.ALS.Serializable.serializeAnyObject(this.polygonsWidgets, seenObjects);
+	serialized.polygons = [];
+	serialized.polygonsWidgets = {};
 
 	// Gather selected polygons' coordinates
 
-	for (let objName of ["polygons", "invalidPolygons"]) {
-		let polyObject = this[objName];
-		serialized[objName] = {};
+	this.polygonGroup.eachLayer(poly => {
+		if (poly.isCloned)
+			return;
 
-		for (let name in polyObject) {
-			if (!polyObject.hasOwnProperty(name))
-				continue;
+		let serializedPoly = poly[poly instanceof L.Rectangle ? "getBounds" : "getLatLngs"]();
+		serializedPoly.widgetLinkId = L.ALS.Helpers.generateID();
+		serialized.polygons.push(serializedPoly);
 
-			let poly = polyObject[name];
-			serialized[objName][name] = poly[poly instanceof L.Rectangle ? "getBounds" : "getLatLngs"]();
-		}
-	}
+		if (!poly.widgetable)
+			return;
+
+		serialized.polygonsWidgets[serializedPoly.widgetLinkId] = poly.widgetable.serialize(seenObjects);
+	});
 
 	this.clearSerializedPathsWidgets(serialized);
+	console.log(serialized);
 	return serialized;
 }
 
@@ -28,31 +30,23 @@ L.ALS.SynthPolygonBaseLayer._toUpdateColors = ["borderColor", "fillColor", "colo
 L.ALS.SynthPolygonBaseLayer.deserialize = function (serialized, layerSystem, settings, seenObjects) {
 	let object = L.ALS.SynthBaseLayer.deserialize(serialized, layerSystem, settings, seenObjects);
 	object.isAfterDeserialization = true;
+	console.log(serialized);
 
-	for (let objName of ["polygons", "invalidPolygons"]) {
-		let serializedPolyObj = serialized[objName],
-			deserializedPolyObj = object[objName];
 
-		for (let prop in serializedPolyObj) {
-			if (!serializedPolyObj.hasOwnProperty(prop))
-				continue;
+	for (let poly of serialized.polygons) {
+		let newPoly = L[poly.serializableClassName === "L.LatLngBounds" ? "rectangle" : "polygon"](poly),
+			widget = serialized.polygonsWidgets[poly.widgetLinkId];
+		object.polygonGroup.addLayer(newPoly);
 
-			let value = serializedPolyObj[prop],
-				newPoly = L[value.serializableClassName === "L.LatLngBounds" ? "rectangle" : "polygon"](value);
+		if (!widget)
+			continue;
 
-			if (objName === "invalidPolygons")
-				object.invalidatePolygon(newPoly);
-			else
-				deserializedPolyObj[prop] = newPoly;
+		let newWidget = L.ALS.LeafletLayers.WidgetLayer.deserialize(widget, seenObjects);
 
-			object.polygonGroup.addLayer(newPoly);
-		}
-	}
+		newPoly.widgetable = newWidget;
+		newWidget.polygon = newPoly;
 
-	for (let prop in object.polygonsWidgets) {
-		let widget = object.polygonsWidgets[prop];
-		if (widget.addTo)
-			object.widgetsGroup.addLayer(widget);
+		object.widgetsGroup.addLayer(newWidget);
 	}
 
 	for (let color of this._toUpdateColors) {
