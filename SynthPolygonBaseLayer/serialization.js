@@ -21,7 +21,6 @@ L.ALS.SynthPolygonBaseLayer.prototype.serialize = function (seenObjects) {
 	});
 
 	this.clearSerializedPathsWidgets(serialized);
-	console.log(serialized);
 	return serialized;
 }
 
@@ -30,8 +29,6 @@ L.ALS.SynthPolygonBaseLayer._toUpdateColors = ["borderColor", "fillColor", "colo
 L.ALS.SynthPolygonBaseLayer.deserialize = function (serialized, layerSystem, settings, seenObjects) {
 	let object = L.ALS.SynthBaseLayer.deserialize(serialized, layerSystem, settings, seenObjects);
 	object.isAfterDeserialization = true;
-	console.log(serialized);
-
 
 	for (let poly of serialized.polygons) {
 		let newPoly = L[poly.serializableClassName === "L.LatLngBounds" ? "rectangle" : "polygon"](poly),
