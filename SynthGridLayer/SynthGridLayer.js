@@ -70,27 +70,6 @@ L.ALS.SynthGridLayer = L.ALS.SynthRectangleBaseLayer.extend(/** @lends L.ALS.Syn
 		this.addEventListenerTo(this.map, "moveend resize", "_onMapPan");
 	},
 
-	/**
-	 * Selects or deselects polygon upon double click and redraws flight paths
-	 * @param event
-	 */
-	_selectOrDeselectPolygon: function (event) {
-		let polygon = event.target, name = this._generatePolygonName(polygon);
-
-		if (this.polygons[name]) {
-			polygon.setStyle({fill: false});
-			delete this.polygons[name];
-			this.removePolygon(polygon);
-		} else {
-			polygon.setStyle({fill: true});
-			this.polygons[name] = polygon;
-			this.addPolygon(polygon);
-		}
-
-		this.calculateParameters();
-		this.writeToHistoryDebounced();
-	},
-
 	calculateParameters: function () {
 		this._onMapZoom();
 		L.ALS.SynthRectangleBaseLayer.prototype.calculateParameters.call(this);
@@ -144,6 +123,63 @@ L.ALS.SynthGridLayer = L.ALS.SynthRectangleBaseLayer.extend(/** @lends L.ALS.Syn
 			cb(this.polygons[id]);
 	},
 
+	initPolygon: function (lat, lng, lngDistance) {
+		let polygon = new L.Rectangle([
+			[lat, lng],
+			[lat + this.latDistance, lng + lngDistance],
+		]),
+			name = this.generatePolygonName(polygon);
+
+		return this.polygons[name] ? this.polygons[name] : this.initPolygonStyleAndEvents(polygon);
+	},
+
+	initPolygonStyleAndEvents: function (polygon, isSelected = false) {
+		let name = this.generatePolygonName(polygon);
+
+		polygon.setStyle({
+			color: this.borderColor,
+			fillColor: this.fillColor,
+			fill: false,
+			weight: this.lineThicknessValue
+		});
+
+		let select = () => {
+			polygon.setStyle({fill: true});
+			this.polygons[name] = polygon;
+			this.addPolygon(polygon);
+		}
+
+		polygon.on("dblclick contextmenu", () => {
+			if (this.polygons[name]) {
+				polygon.setStyle({fill: false});
+				delete this.polygons[name];
+				this.removePolygon(polygon);
+			} else
+				select();
+
+			this.calculateParameters();
+			this.writeToHistoryDebounced();
+		});
+
+		this.polygonGroup.addLayer(polygon);
+
+		if (isSelected)
+			select();
+
+		return polygon;
+	},
+
+	/**
+	 * Generates polygon name for adding into this.polygons
+	 * @param polygon Polygon to generate name for
+	 * @return {string} Name for given polygon
+	 * @protected
+	 */
+	generatePolygonName: function (polygon) {
+		let {lat, lng} = polygon.getBounds().getNorthWest();
+		return "p_" + this.toFixed(lat) + "_" + this.toFixed(lng);
+	},
+
 	statics: {
 		wizard: L.ALS.SynthGridWizard,
 		settings: new L.ALS.SynthGridSettings(),
@@ -153,3 +189,4 @@ L.ALS.SynthGridLayer = L.ALS.SynthRectangleBaseLayer.extend(/** @lends L.ALS.Syn
 require("./onMapPan.js");
 require("./onMapZoom.js");
 require("./mergePolygons.js");
+require("./serialization.js");

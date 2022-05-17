@@ -136,17 +136,6 @@ L.ALS.SynthPolygonBaseLayer = L.ALS.SynthBaseLayer.extend( /** @lends L.ALS.Synt
 			path.pathGroup.remove();
 	},
 
-	/**
-	 * Generates polygon name for adding into this.polygons
-	 * @param polygon Polygon to generate name for
-	 * @return {string} Name for given polygon
-	 * @protected
-	 */
-	_generatePolygonName: function (polygon) {
-		let firstPoint = polygon.getLatLngs()[0][0];
-		return "p_" + this.toFixed(firstPoint.lat) + "_" + this.toFixed(firstPoint.lng);
-	},
-
 	onShow: function () {
 		this.updateLayersVisibility();
 	},

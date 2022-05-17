@@ -59,29 +59,7 @@ L.ALS.SynthGridLayer.prototype._onMapPan = function () {
 			if (isFirstIteration)
 				createLabel([north, lng], this.toFixed(lng), "topCenter", true);
 
-			let polygon = new L.Polygon([
-				[lat, lng],
-				[lat + this.latDistance, lng],
-				[lat + this.latDistance, lng + lngDistance],
-				[lat, lng + lngDistance],
-			]);
-
-			// If this polygon has been selected, we should fill it and replace it in the array.
-			// Because fill will be changed, we can't keep old polygon, it's easier to just replace it
-			let name = this._generatePolygonName(polygon);
-
-			if (!this.polygons[name]) {
-				polygon.setStyle({
-					color: this.borderColor,
-					fillColor: this.fillColor,
-					fill: false,
-					weight: this.lineThicknessValue
-				});
-
-				// We should select or deselect polygons upon double click
-				this.addEventListenerTo(polygon, "dblclick contextmenu", "_selectOrDeselectPolygon");
-				this.polygonGroup.addLayer(polygon);
-			}
+			let polygon = this.initPolygon(lat, lng, lngDistance);
 
 			// Generate current polygon's name if grid uses one of standard scales
 			if (this._currentStandardScale === Infinity) {

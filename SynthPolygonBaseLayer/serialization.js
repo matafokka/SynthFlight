@@ -2,7 +2,6 @@ L.ALS.SynthPolygonBaseLayer.prototype.serialize = function (seenObjects) {
 	let serialized = this.getObjectToSerializeTo(seenObjects);
 
 	serialized.polygons = [];
-	serialized.polygonsWidgets = {};
 
 	// Gather selected polygons' coordinates
 
@@ -10,14 +9,14 @@ L.ALS.SynthPolygonBaseLayer.prototype.serialize = function (seenObjects) {
 		if (poly.isCloned)
 			return;
 
-		let serializedPoly = poly[poly instanceof L.Rectangle ? "getBounds" : "getLatLngs"]();
-		serializedPoly.widgetLinkId = L.ALS.Helpers.generateID();
-		serialized.polygons.push(serializedPoly);
+		let serializedPoly = poly[poly instanceof L.Rectangle ? "getBounds" : "getLatLngs"](),
+			serializedStruct = {polygon: serializedPoly}
+		serialized.polygons.push(serializedStruct);
 
 		if (!poly.widgetable)
 			return;
 
-		serialized.polygonsWidgets[serializedPoly.widgetLinkId] = poly.widgetable.serialize(seenObjects);
+		serializedStruct.widget = poly.widgetable.serialize(seenObjects);
 	});
 
 	this.clearSerializedPathsWidgets(serialized);
@@ -30,9 +29,9 @@ L.ALS.SynthPolygonBaseLayer.deserialize = function (serialized, layerSystem, set
 	let object = L.ALS.SynthBaseLayer.deserialize(serialized, layerSystem, settings, seenObjects);
 	object.isAfterDeserialization = true;
 
-	for (let poly of serialized.polygons) {
-		let newPoly = L[poly.serializableClassName === "L.LatLngBounds" ? "rectangle" : "polygon"](poly),
-			widget = serialized.polygonsWidgets[poly.widgetLinkId];
+	for (let struct of serialized.polygons) {
+		let {polygon, widget} = struct,
+			newPoly = L[polygon.serializableClassName === "L.LatLngBounds" ? "rectangle" : "polygon"](polygon);
 		object.polygonGroup.addLayer(newPoly);
 
 		if (!widget)
@@ -46,15 +45,18 @@ L.ALS.SynthPolygonBaseLayer.deserialize = function (serialized, layerSystem, set
 		object.widgetsGroup.addLayer(newWidget);
 	}
 
+	this.afterDeserialization(object);
+	return object;
+}
+
+L.ALS.SynthPolygonBaseLayer.afterDeserialization = function (deserialized) {
 	for (let color of this._toUpdateColors) {
-		let widget = object.getWidgetById(color);
+		let widget = deserialized.getWidgetById(color);
 		if (widget)
-			object.setColor(widget);
+			deserialized.setColor(widget);
 	}
 
-	object.setAirportLatLng();
-	object.calculateParameters();
-	object.updatePolygonsColors();
-
-	return object;
+	deserialized.setAirportLatLng();
+	deserialized.calculateParameters();
+	deserialized.updatePolygonsColors();
 }
