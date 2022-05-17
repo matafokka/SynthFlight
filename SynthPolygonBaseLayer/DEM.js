@@ -144,7 +144,7 @@ L.ALS.SynthPolygonBaseLayer.prototype.onDEMLoadWorker = async function (widget) 
 			if (!GeoTIFFParser)
 				continue;
 			try {
-				let stats = await GeoTIFFParser(file, projectionString, ESRIGridParser.getInitialData(this, false));
+				let stats = await GeoTIFFParser(file, projectionString, ESRIGridParser.getInitialData(this));
 				ESRIGridParser.copyStats(this, stats);
 			} catch (e) {
 				console.log(e);

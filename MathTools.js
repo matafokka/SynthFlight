@@ -98,12 +98,22 @@ class MathTools {
 	 * @return {boolean} True, if point lies in polygon or on one of its edges.
 	 */
 	static isPointInPolygon(point, polygon) {
-		let intersections = 0, ray = [point, [Infinity, point[1]]];
+		let intersections = 0, ray = [point, [Infinity, point[1]]],
+			polygonNotClosed = !MathTools.arePointsEqual(polygon[0], polygon[polygon.length - 1]);
+
+		// If polygon is not closed, algorithm will return wrong value, if point intersects with the last edge
+		if (polygonNotClosed)
+			polygon.push([...polygon[0]]);
+
 		for (let i = 0; i < polygon.length - 1; i++) {
 			let edge = [polygon[i], polygon[i + 1]], isPointOnEdge = MathTools.isPointOnLine(point, edge);
 
-			if (isPointOnEdge)
+			if (isPointOnEdge) {
+				if (polygonNotClosed)
+					polygon.pop();
+
 				return true;
+			}
 
 			let intersection = MathTools.linesIntersection(edge, ray);
 			if (!intersection)
@@ -133,6 +143,9 @@ class MathTools {
 			if (notOnVertex)
 				intersections++;
 		}
+
+		if (polygonNotClosed)
+			polygon.pop();
 
 		return (intersections % 2 !== 0);
 	}

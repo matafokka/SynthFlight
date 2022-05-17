@@ -19,20 +19,16 @@ class ESRIGridParser {
 		 * Layer to apply parsed values to
 		 * @type {L.ALS.SynthRectangleBaseLayer}
 		 */
-		this.layer = layer
+		this.layer = layer;
+
+		if (projectionString === "")
+			projectionString = "WGS84";
 
 		/**
-		 * Proj4 projection string
-		 * @type {boolean}
+		 * Proj4 projection object. Projects coordinates from WGS84 to grids projection.
+		 * @type {Object|undefined}
 		 */
-		this.hasProj = (projectionString !== "");
-
-		if (this.hasProj)
-			/**
-			 * Proj4 projection object. Projects coordinates from WGS84 to grids projection.
-			 * @type {Object|undefined}
-			 */
-			this.projectionFromWGS = proj4("WGS84", projectionString);
+		this.projectionFromMerc = proj4("EPSG:3857", projectionString);
 
 		this.clearState();
 	}
@@ -217,20 +213,13 @@ class ESRIGridParser {
 					continue;
 				}
 
-				let oldPoint = [this.x, this.y],
-					point = (this.hasProj) ? this.projectionFromWGS.inverse(oldPoint) : oldPoint;
+				let point = this.projectionFromMerc.inverse([this.x, this.y]);
 
 				for (let name in this.polygonsCoordinates) {
 					let poly = this.polygonsCoordinates[name];
 
-					if (poly.length > 2) {
-						let {x, y} = crs.project(L.latLng(point[1], point[0]));
-						if (!MathTools.isPointInPolygon([x, y], poly))
-							continue;
-					} else {
-						if (!MathTools.isPointInRectangle(point, poly))
-							continue;
-					}
+					if (!MathTools[poly.length > 2 ? "isPointInPolygon" : "isPointInRectangle"](point, poly))
+						continue;
 
 					if (!this.polygonsStats[name])
 						this.polygonsStats[name] = ESRIGridParser.createStatsObject();
@@ -238,7 +227,10 @@ class ESRIGridParser {
 					let stats = this.polygonsStats[name];
 					ESRIGridParser.addToStats(pixelValue, stats);
 
-					new L.CircleMarker([...point].reverse(), {color: `rgb(${pixelValue},${pixelValue},${pixelValue})`, fillOpacity: 1, stroke: false}).addTo(map);
+					/*new L.CircleMarker(
+						crs.unproject(L.point(...point)),
+						{color: `rgb(${pixelValue},${pixelValue},${pixelValue})`, fillOpacity: 1, stroke: false}
+					).addTo(map);*/
 				}
 			} else if (!isSpace && !isLineBreak)
 				this.value += symbol;
@@ -321,36 +313,27 @@ class ESRIGridParser {
 	/**
 	 * Generates initial parameters for the layer.
 	 * @param layer {L.ALS.SynthPolygonBaseLayer} Layer to copy data from
-	 * @param project {boolean} Whether polygon coordinates should be reprojected, if polygon is not a rectangle
 	 */
-	static getInitialData(layer, project = true) {
+	static getInitialData(layer) {
 		let polygonsCoordinates = {};
 		layer.forEachValidPolygon(polygon => {
 			polygon.tempDemName = L.ALS.Helpers.generateID();
 
+			let coords;
+
 			if (polygon instanceof L.Rectangle) {
 				let rect = polygon.getBounds();
-				polygonsCoordinates[polygon.tempDemName] = [
-					[rect.getWest(), rect.getNorth()],
-					[rect.getEast(), rect.getSouth()]
-				];
-				return;
-			}
+				coords = [rect.getNorthWest(), rect.getSouthEast()];
+			} else
+				coords = polygon.getLatLngs()[0];
 
-			let coords = polygon.getLatLngs()[0], coordsCopy = [];
-			polygonsCoordinates[polygon.tempDemName] = coordsCopy;
+			let coordsCopy = [];
 			for (let coord of coords) {
-				// GeoTIFFParser reprojects polygon from WGS84 to image's projection
-				if (!project) {
-					coordsCopy.push([coord.lng, coord.lat]);
-					continue;
-				}
-
-				// ESRIGridParser reprojects point to the WebMercator to save a lot of time on projecting
-				// polygon to the image's projection
 				let {x, y} = crs.project(coord);
 				coordsCopy.push([x, y]);
 			}
+
+			polygonsCoordinates[polygon.tempDemName] = coordsCopy;
 		});
 
 		return polygonsCoordinates;

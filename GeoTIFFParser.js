@@ -7,7 +7,6 @@ const toProj4 = require("geotiff-geokeys-to-proj4");
 const proj4 = require("proj4");
 const MathTools = require("./MathTools.js");
 const ESRIGridParser = require("./ESRIGridParser.js");
-const crs = L.CRS.EPSG3857;
 
 /**
  * Parses GeoTIFF files
@@ -40,7 +39,7 @@ module.exports = async function (file, projectionString, initialData) {
 			projectionString = projInformation.proj4;
 		}
 
-		let projectionFromWGS = proj4("WGS84", projectionString);
+		let projectionFromMerc = proj4("EPSG:3857", projectionString);
 
 		for (let name in initialData) {
 			// Project each polygon to the image, get their intersection part and calculate statistics for it
@@ -50,18 +49,12 @@ module.exports = async function (file, projectionString, initialData) {
 					polygon[0], [polygon[1][0], polygon[0][1]],
 					polygon[1], [polygon[0][0], polygon[1][1]]
 				] : polygon,
-				projPolygon = [], mercPolygon = [];
+				projPolygon = [];
 
-			for (let coord of coords) {
-				projPolygon.push(projectionFromWGS.forward(coord));
-				if (isRect)
-					continue;
-				let {x, y} = crs.project(L.latLng(coord[1], coord[0]));
-				mercPolygon.push([x, y]);
-			}
+			for (let coord of coords)
+				projPolygon.push(projectionFromMerc.forward(coord));
 
 			projPolygon.push([...projPolygon[0]]); // Clone first coordinate to avoid floating point errors
-			mercPolygon.push(mercPolygon[0]);
 
 			let polygonBbox = bboxPolygon(bbox(
 				turfHelpers.polygon([projPolygon])
@@ -107,15 +100,10 @@ module.exports = async function (file, projectionString, initialData) {
 					currentX++; // So we can continue without incrementing
 					index++;
 
-					let point = projectionFromWGS.inverse([crsX, crsY]);
-					if (isRect) {
-						if (!MathTools.isPointInRectangle(point, polygon))
-							continue;
-					} else {
-						let {x, y} = crs.project(L.latLng(point[1], point[0]));
-						if (!MathTools.isPointInPolygon([x, y], mercPolygon))
-							continue;
-					}
+					let point = projectionFromMerc.inverse([crsX, crsY]);
+
+					if (!MathTools[isRect ? "isPointInRectangle" : "isPointInPolygon"](point, polygon))
+						continue;
 
 					let value = 0;
 					for (let color of raster)
@@ -125,7 +113,10 @@ module.exports = async function (file, projectionString, initialData) {
 					if (value === nodata || multipliedValue === nodata)
 						continue;
 
-					new L.CircleMarker([...point].reverse(), {color: `rgb(${value},${value},${value})`, fillOpacity: 1, stroke: false}).addTo(map);
+					/*new L.CircleMarker(
+						L.CRS.EPSG3857.unproject(L.point(...point)),
+						{color: `rgb(${value},${value},${value})`, fillOpacity: 1, stroke: false}
+					).addTo(map);*/
 
 					ESRIGridParser.addToStats(multipliedValue, stats);
 				}
