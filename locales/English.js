@@ -146,7 +146,7 @@ L.ALS.Locales.addLocaleProperties("English", {
 	geometryNoFeatures: "Selected file doesn't contain any features, so it won't be added",
 	geometryBorderColor: "Border color:",
 	geometryFillColor: "Fill color:",
-	geometryBrowserNotSupported: "Your browser doesn't support adding this layer. You still can open projects with this layer though.",
+	geometryBrowserNotSupported: "Sorry, your browser doesn't support adding this layer. You still can open projects with this layer though.",
 	geometryNoFileSelected: "No file has been selected. Please, select a file that you want to add and try again.",
 	geometryProjectionNotSupported: "Sorry, projection of selected file is not supported. Please, convert your file to another projection, preferably, WebMercator.",
 
@@ -167,6 +167,7 @@ L.ALS.Locales.addLocaleProperties("English", {
 	generalSettingsDisableAnnoyingNotification: "Disable all annoying notifications after editing and DEM loading",
 
 	// GeoJSON initial features
+	initialFeaturesBrowserNotSupported: "Sorry, your browser doesn't support loading initial geometry for this layer. You still can draw geometry yourself though.",
 	initialFeaturesFileLabelPolygon: "Load initial polygons from zipped shapefile or GeoJSON (non-polygon features will be skipped):",
 	initialFeaturesFileLabelLine: "Load initial polylines from zipped shapefile or GeoJSON (non-polyline features will be skipped):",
 	initialFeaturesNoFeatures: "Selected file doesn't contain any features supported by the added layer",

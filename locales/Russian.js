@@ -142,7 +142,7 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 	geometryNoFeatures: "Выбранный файл не содержит объектов, поэтому не будет добавлен",
 	geometryBorderColor: "Цвет обводки:",
 	geometryFillColor: "Цвет заливки:",
-	geometryBrowserNotSupported: "Ваш браузер не поддерживает добавление данного слоя, но вы можете открывать проекты, использующие этот слой.",
+	geometryBrowserNotSupported: "Извините, ваш браузер не поддерживает добавление данного слоя, но вы можете открывать проекты, использующие этот слой.",
 	geometryNoFileSelected: "Файл не был выбран. Пожалуйста, выберете файл, который хотите добавить, и попробуйте снова.",
 	geometryProjectionNotSupported: "Извините проекция выбранного файла не поддерживается. Пожалуйста, переконвертируйте файл в другую проекцию, предпочтительно, в WebMercator.",
 
@@ -163,6 +163,7 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 	generalSettingsDisableAnnoyingNotification: "Отключить все надоедливые уведомления после редактирования и загрузки ЦМР",
 
 	// GeoJSON initial features
+	initialFeaturesBrowserNotSupported: "Извините, ваш браузер не поддерживает загрузку исходной геометрии для данного слоя, но вы все равно можете нарисовать геомтрию вручную.",
 	initialFeaturesFileLabelPolygon: "Загрузить исходные полигоны из сжатого shapefile (zip-архива) или GeoJSON (типы, отличные от полигона, будут пропущены):",
 	initialFeaturesFileLabelLine: "Загрузить исходные полилинии из сжатого shapefile (zip-архива) или GeoJSON (типы, отличные от пололинии, будут пропущены):",
 	initialFeaturesNoFeatures: "Выбранный файл не содержит ни одного объекта, поддерживаемого добавляемым слоем",

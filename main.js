@@ -63,13 +63,13 @@ let map = L.map("map", {
 	keyboard: false,
 	worldCopyJump: true,
 	fadeAnimation: false
-}).setView([55.75, 37.61], 13);
+}).setView([51.505, -0.09], 13);
 map.doubleClickZoom.disable();
 
 
 // Display a notification that users can move the map farther to jump to the other side of the world
 
-let labelLayer = new L.ALS.LeafletLayers.LabelLayer(false), maxLabelWidth = 3,
+let labelLayer = new L.ALS.LeafletLayers.LabelLayer(false),
 	labelOpts = {
 		maxWidth: 10,
 		breakWords: false,

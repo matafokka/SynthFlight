@@ -8,12 +8,13 @@ const shp = require("shpjs");
 L.ALS.SynthGeometryBaseWizard = L.ALS.Wizard.extend(/** @lends L.ALS.SynthGeometryBaseWizard.prototype */{
 
 	fileLabel: "geometryFileLabel",
+	browserNotSupportedLabel: "initialFeaturesBrowserNotSupported",
 
 	initialize: function () {
 
 		L.ALS.Wizard.prototype.initialize.call(this);
 		if (!window.FileReader) {
-			this.addWidget(new L.ALS.Widgets.SimpleLabel("lbl", "geometryBrowserNotSupported", "center", "error"));
+			this.addWidget(new L.ALS.Widgets.SimpleLabel("lbl", this.browserNotSupportedLabel, "center", "error"));
 			return;
 		}
 
