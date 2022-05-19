@@ -143,7 +143,7 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 			this.toUpdateThickness.push(path.pathGroup, path.connectionsGroup);
 		}
 
-		this.serializationIgnoreList.push("_airportMarker", "toUpdateThickness", "writeToHistoryDebounced");
+		this.serializationIgnoreList.push("airportMarker", "toUpdateThickness", "writeToHistoryDebounced", "pathsDetailsSpoiler");
 
 		/**
 		 * Properties to copy to GeoJSON when exporting
@@ -162,14 +162,14 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 		 * Airport marker
 		 * @protected
 		 */
-		this._airportMarker = new L.Marker(this.map.getCenter(), {
+		this.airportMarker = new L.Marker(this.map.getCenter(), {
 			icon: icon,
 			draggable: true
 		});
 
 		// Set inputs' values to new ones on drag
-		this.addEventListenerTo(this._airportMarker, "drag", "onMarkerDrag");
-		this.addLayers(this._airportMarker);
+		this.addEventListenerTo(this.airportMarker, "drag", "onMarkerDrag");
+		this.addLayers(this.airportMarker);
 	},
 
 	/**
@@ -210,7 +210,7 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 
 			new L.ALS.Widgets.Divider("div2"),
 		);
-		this._airportMarker.fire("drag"); // Just to set values
+		this.airportMarker.fire("drag"); // Just to set values
 	},
 
 	/**
@@ -284,14 +284,14 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 
 		latWidget.setValue(fixedLatLng.lat);
 		lngWidget.setValue(fixedLatLng.lng);
-		this._airportMarker.setLatLng(fixedLatLng);
+		this.airportMarker.setLatLng(fixedLatLng);
 		this.connectToAirport();
 	},
 
 	onMarkerDrag: function () {
-		let latLng = this._airportMarker.getLatLng(),
+		let latLng = this.airportMarker.getLatLng(),
 			fixedLatLng = this._limitAirportPos(latLng.lat, latLng.lng);
-		this._airportMarker.setLatLng(fixedLatLng);
+		this.airportMarker.setLatLng(fixedLatLng);
 		this.getWidgetById("airportLat").setValue(fixedLatLng.lat.toFixed(5));
 		this.getWidgetById("airportLng").setValue(fixedLatLng.lng.toFixed(5));
 		this.connectToAirport();
@@ -314,7 +314,7 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 		let popup = document.createElement("div");
 		L.ALS.Locales.localizeElement(popup, "airportForLayer", "innerText");
 		popup.innerText += " " + this.getName();
-		this._airportMarker.bindPopup(popup);
+		this.airportMarker.bindPopup(popup);
 	},
 
 	connectToAirport: function () {
@@ -337,14 +337,14 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 			this.connectHull();
 	},
 
-	_createPathWidget: function (layer, length, toFlash, selectedArea = 0) {
+	_createPathWidget: function (object, length, toFlash, selectedArea = 0) {
 		let id = L.ALS.Helpers.generateID(),
 			button = new L.ALS.Widgets.Button("flashPath" + id, "flashPath", this, "flashPath"),
 			lengthWidget = new L.ALS.Widgets.ValueLabel("pathLength" + id, "pathLength", "m").setFormatNumbers(true).setNumberOfDigitsAfterPoint(0),
 			timeWidget = new L.ALS.Widgets.ValueLabel("flightTime" + id, "flightTime", "h:mm"),
 			warning = new L.ALS.Widgets.SimpleLabel("warning" + id, "", "left", "warning");
 
-		layer.updateWidgets = (length) => {
+		object.updateWidgets = (length) => {
 			lengthWidget.setValue(length);
 			let time = this.getFlightTime(length);
 			timeWidget.setValue(time.formatted);
@@ -366,7 +366,7 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 
 		button.toFlash = toFlash;
 		this._pathsWidgetsNumber++;
-		layer.updateWidgets(length);
+		object.updateWidgets(length);
 	},
 
 	/**
@@ -458,7 +458,7 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 	 * Called when there's one flight per each path. You should call {@link L.ALS.SynthBaseLayer#connectOnePerFlight} here.
 	 */
 	connectOnePerFlightToAirport: function () {
-		let airportPos = this._airportMarker.getLatLng();
+		let airportPos = this.airportMarker.getLatLng();
 
 		for (let path of this.paths) {
 			path.connectionsGroup.eachLayer((layer) => {
@@ -506,7 +506,7 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 	 * @return {LatLng[][]} Cycles
 	 */
 	onePerFlightToCycles: function (path) {
-		let cycles = [], airportPos = this._airportMarker.getLatLng();
+		let cycles = [], airportPos = this.airportMarker.getLatLng();
 
 		path.pathGroup.eachLayer((layer) => {
 			let latLngs = layer.getLatLngs(), toPush = [airportPos, ...latLngs, airportPos];
@@ -613,9 +613,23 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 			window.alert(notification + L.ALS.locale.afterEditingToDisableNotifications);
 	},
 
-	clearSerializedPathsWidgets: function (serialized) {
-		for (let i = 1; i <= this._pathsWidgetsNumber; i++)
-			delete serialized._widgets["pathWidget" + i];
+	getObjectToSerializeTo: function (seenObjects) {
+		let object = L.ALS.Layer.prototype.getObjectToSerializeTo.call(this, seenObjects),
+			{lat, lng} = this.airportMarker.getLatLng();
+		object.airportPos = {lat, lng};
+
+		delete object._widgets.pathsDetails;
+
+		return object;
+	},
+
+	statics: {
+		deserialize: function (serialized, layerSystem, settings, seenObjects) {
+			let object = L.ALS.Layer.deserialize(serialized, layerSystem, settings, seenObjects);
+			object.airportMarker.setLatLng(L.latLng(serialized.airportPos));
+			object.addWidget(object.pathsDetailsSpoiler);
+			return object;
+		}
 	}
 
 });

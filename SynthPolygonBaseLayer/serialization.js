@@ -19,7 +19,6 @@ L.ALS.SynthPolygonBaseLayer.prototype.serialize = function (seenObjects) {
 		serializedStruct.widget = poly.widgetable.serialize(seenObjects);
 	});
 
-	this.clearSerializedPathsWidgets(serialized);
 	return serialized;
 }
 

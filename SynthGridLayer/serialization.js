@@ -14,7 +14,6 @@ L.ALS.SynthGridLayer.prototype.serialize = function (seenObjects) {
 		});
 	}
 
-	this.clearSerializedPathsWidgets(serialized);
 	return serialized;
 }
 

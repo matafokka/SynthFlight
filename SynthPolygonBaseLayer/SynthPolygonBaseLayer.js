@@ -233,7 +233,7 @@ L.ALS.SynthPolygonBaseLayer = L.ALS.SynthBaseLayer.extend( /** @lends L.ALS.Synt
 			jsons.push(polygonJson);
 		});
 
-		let airport = this._airportMarker.toGeoJSON();
+		let airport = this.airportMarker.toGeoJSON();
 		airport.name = "Airport";
 		jsons.push(airport);
 

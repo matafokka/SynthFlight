@@ -222,7 +222,7 @@ L.ALS.SynthBaseLayer.prototype.getHullOptimalConnection = function (pathP1, path
 }
 
 L.ALS.SynthBaseLayer.prototype.connectHullToAirport = function () {
-	let airportPos = this._airportMarker.getLatLng();
+	let airportPos = this.airportMarker.getLatLng();
 
 	for (let i = 0; i < this.paths.length; i++) {
 
@@ -301,7 +301,7 @@ L.ALS.SynthBaseLayer.prototype.hullToCycles = function (path) {
 		return undefined;
 
 	if (path.hullConnections.length === 0) {
-		let airportPos = this._airportMarker.getLatLng();
+		let airportPos = this.airportMarker.getLatLng();
 		return [[
 			airportPos,
 			...path.pathGroup.getLayers()[0].getLatLngs(),

@@ -101,6 +101,6 @@
   },
   "dependencies": {
     "@electron/remote": "^2.0.1",
-    "leaflet-advanced-layer-system": "^2.2.4"
+    "leaflet-advanced-layer-system": "^2.2.5"
   }
 }

@@ -144,10 +144,10 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend(/** @lends L.ALS.SynthLineLay
 	},
 
 	serialize: function (seenObjects) {
-		let lines = [];
-		this.drawingGroup.eachLayer(layer => lines.push(layer.getLatLngs()));
+		let serialized = this.getObjectToSerializeTo(seenObjects),
+			lines = [];
 
-		let serialized = this.getObjectToSerializeTo(seenObjects);
+		this.drawingGroup.eachLayer(layer => lines.push(layer.getLatLngs()));
 		serialized.lines = L.ALS.Serializable.serializeAnyObject(lines, seenObjects);
 		return serialized;
 	},
