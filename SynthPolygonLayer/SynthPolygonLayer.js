@@ -2,6 +2,7 @@ require("./SynthPolygonWizard.js");
 require("./SynthPolygonSettings.js");
 const MathTools = require("../MathTools.js");
 const proj4 = require("proj4");
+const geojsonMerge = require("@mapbox/geojson-merge"); // Using this since turfHelpers.featureCollection() discards previously defined properties.
 
 /**
  * Polygon layer
@@ -365,6 +366,24 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend(/** @lends L.ALS.Sy
 
 	isPointValid: function (point) {
 		return Math.sqrt(point[0] ** 2 + point[1] ** 2) <= this.maxGnomonicPointDistance;
+	},
+
+	toGeoJSON: function () {
+		let jsons = this.baseFeaturesToGeoJSON();
+
+		this.pointsGroup.eachLayer(layer => {
+			let pointsJson = layer.toGeoJSON();
+			pointsJson.name = "capturePoint";
+			jsons.push(pointsJson);
+		});
+
+		let props = {}
+		for (let param of this.propertiesToExport)
+			props[param] = this[param];
+
+		jsons.push(L.ALS.SynthBaseLayer.prototype.toGeoJSON.call(this, props));
+
+		return geojsonMerge.merge(jsons);
 	},
 
 	statics: {
