@@ -1,75 +1,45 @@
 const bbox = require("@turf/bbox").default;
+const turfArea = require("@turf/area").default;
 const MathTools = require("../MathTools.js");
 const turfHelpers = require("@turf/helpers");
 
-L.ALS.SynthPolygonLayer.prototype._clearPaths = function () {
-	let groupsToClear = [this.pathsByParallels, this.pathsByMeridians, this.meridiansExternalConnections, this.meridiansInternalConnections, this.parallelsExternalConnections, this.parallelsInternalConnections, this.latPointsGroup, this.lngPointsGroup];
-	for (let group of groupsToClear)
-		group.clearLayers();
-
-	for (let id of this._pathsLabelsIDs)
-		this.labelsGroup.deleteLabel(id);
-	this._pathsLabelsIDs = [];
+L.ALS.SynthRectangleBaseLayer.prototype.clearPaths = function () {
+	L.ALS.SynthPolygonBaseLayer.prototype.clearPaths.call(this);
+	this.clearLabels("pathsLabelsIds");
 }
 
-L.ALS.SynthPolygonLayer.prototype._drawPaths = function () {
-	this._clearPaths();
-
-	// Validate estimated paths count
-
-	let errorLabel = this.getWidgetById("calculateParametersError"),
-		parallelsPathsCount = this["lngFakePathsCount"],
-		meridiansPathsCount = this["latFakePathsCount"];
-
-	if (parallelsPathsCount === undefined) {
-		errorLabel.setValue("errorDistanceHasNotBeenCalculated");
-		return;
-	}
-
-	if (parallelsPathsCount >= 20 || meridiansPathsCount >= 20) {
-		errorLabel.setValue("errorPathsCountTooBig");
-		return;
-	}
-
-	if (parallelsPathsCount <= 2 || meridiansPathsCount <= 2) {
-		errorLabel.setValue("errorPathsCountTooSmall");
-		return;
-	}
-	errorLabel.setValue("");
-
+L.ALS.SynthRectangleBaseLayer.prototype.drawPaths = function () {
 	if (this.mergedPolygons.length === 0)
 		return;
 
-	this._drawPathsWorker(true);
-	this._drawPathsWorker(false);
-	this.updatePathsMeta();
+	this.drawPathsWorker(true);
+	this.drawPathsWorker(false);
 	this.labelsGroup.redraw();
 }
 
 /**
- * Draws flight paths. Use _drawPaths wrapper to draw paths instead of this.
+ * Draws flight paths. Use drawPaths wrapper to draw paths instead of this.
  * @private
  */
-L.ALS.SynthPolygonLayer.prototype._drawPathsWorker = function (isParallels) {
+L.ALS.SynthRectangleBaseLayer.prototype.drawPathsWorker = function (isParallels) {
 
-	let pathName, nameForOutput, color, connectionsGroup, widgetId, extensionIndex;
+	let pathGroup, nameForOutput, color, connectionsGroup, widgetId, extensionIndex;
 	if (isParallels) {
-		pathName = "pathsByParallels";
+		pathGroup = this.pathsByParallels;
 		connectionsGroup = this.parallelsInternalConnections;
 		nameForOutput = "lng";
 		color = this["color0"];
 		widgetId = "hidePathsByParallels";
 		extensionIndex = 0;
 	} else {
-		pathName = "pathsByMeridians";
+		pathGroup = this.pathsByMeridians;
 		connectionsGroup = this.meridiansInternalConnections;
 		nameForOutput = "lat";
 		color = this["color1"];
 		widgetId = "hidePathsByMeridians";
 		extensionIndex = 1;
 	}
-	let pathGroup = this[pathName],
-		pointsName = nameForOutput + "PointsGroup",
+	let pointsName = nameForOutput + "PointsGroup",
 		lineOptions = {
 			color,
 			weight: this.lineThicknessValue
@@ -89,10 +59,11 @@ L.ALS.SynthPolygonLayer.prototype._drawPathsWorker = function (isParallels) {
 
 			lat = startLat, lng = startLng,
 			turfPolygonCoordinates = turfPolygon.geometry.coordinates[0], // MathTools accepts coordinates of the polygon, not polygon itself
-			number = 1, connectionLine = L.polyline([], connLineOptions),
+			number = 1, connectionLine = new L.WrappedPolyline([], connLineOptions),
 			prevLine, shouldDraw = true;
 
 		connectionLine.actualPaths = [];
+		connectionLine.selectedArea = turfArea(turfPolygon);
 
 		while (shouldDraw) {
 			let lineCoordinates;
@@ -159,7 +130,7 @@ L.ALS.SynthPolygonLayer.prototype._drawPathsWorker = function (isParallels) {
 				secondPoint = endPoint;
 			}
 
-			let line = L.polyline([], lineOptions); // Contains paths with turns, i.e. internal connections
+			let line = new L.WrappedPolyline([], lineOptions); // Contains paths with turns, i.e. internal connections
 
 			for (let point of [firstPoint, secondPoint]) {
 				// Add points to the path
@@ -172,8 +143,8 @@ L.ALS.SynthPolygonLayer.prototype._drawPathsWorker = function (isParallels) {
 					continue;
 
 				let labelId = L.ALS.Helpers.generateID();
-				this._pathsLabelsIDs.push(labelId);
-				this.labelsGroup.addLabel(labelId, coord, number, L.LabelLayer.DefaultDisplayOptions[isParallels ? "Message" : "Error"]);
+				this.pathsLabelsIds.push(labelId);
+				this.labelsGroup.addLabel(labelId, L.latLng(coord).wrap(), number, L.LabelLayer.DefaultDisplayOptions[isParallels ? "Message" : "Error"]);
 				number++;
 			}
 

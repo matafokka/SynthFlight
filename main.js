@@ -14,9 +14,10 @@ window.L = require("leaflet");
  * Segments number to use when displaying L.Geodesic
  * @type {number}
  */
-L.GEODESIC_SEGMENTS = 1000;
+L.GEODESIC_SEGMENTS = 500;
 
 L.Geodesic = require("leaflet.geodesic").GeodesicLine;
+require("./WrappedPolyline.js");
 require("leaflet-draw");
 require("./DrawGeodesic.js");
 require("leaflet-advanced-layer-system");
@@ -24,13 +25,27 @@ L.ALS.Locales.AdditionalLocales.Russian();
 require("./node_modules/leaflet.coordinates/dist/Leaflet.Coordinates-0.1.5.min.js");
 require("./locales/English.js");
 require("./locales/Russian.js");
+require("./SynthGeneralSettings.js");
+require("./SynthGeometryBaseWizard.js");
 require("./SynthGeometryLayer/SynthGeometryLayer.js");
-require("./SynthBase/SynthBaseLayer.js");
-require("./SynthPolygonLayer/SynthPolygonLayer.js");
+require("./SynthBaseLayer/SynthBaseLayer.js");
+require("./SynthPolygonBaseLayer/SynthPolygonBaseLayer.js");
+require("./SynthRectangleBaseLayer/SynthRectangleBaseLayer.js");
 require("./SynthGridLayer/SynthGridLayer.js");
 require("./SynthRectangleLayer/SynthRectangleLayer.js");
 require("./SynthLineLayer/SynthLineLayer.js");
+require("./SynthPolygonLayer/SynthPolygonLayer.js");
 require("./SearchControl.js");
+const drawLocales = require("leaflet-draw-locales").default;
+
+// Update L.Draw locale on ALS locale change
+let oldChangeLocale = L.ALS.Locales.changeLocale;
+
+L.ALS.Locales.changeLocale = function (locale) {
+	oldChangeLocale.call(this, locale);
+	L.drawLocal = drawLocales(L.ALS.locale.language);
+	L.ALS.Helpers.dispatchEvent(document.body, "synthflight-locale-changed");
+}
 
 L.ALS.System.initializeSystem();
 
@@ -47,18 +62,24 @@ let map = L.map("map", {
 	preferCanvas: true, // Canvas is faster than SVG renderer
 	keyboard: false,
 	worldCopyJump: true,
+	fadeAnimation: false
 }).setView([51.505, -0.09], 13);
 map.doubleClickZoom.disable();
 
 
 // Display a notification that users can move the map farther to jump to the other side of the world
-let labelLayer = new L.ALS.LeafletLayers.LabelLayer(false), maxLabelWidth = 3,
+
+let labelLayer = new L.ALS.LeafletLayers.LabelLayer(false),
 	labelOpts = {
 		maxWidth: 10,
 		breakWords: false,
 	},
 	westOpts = {origin: "rightCenter", ...labelOpts},
 	eastOpts = {origin: "leftCenter", ...labelOpts};
+
+let labelsPaneElement = map.createPane("mapLabelsPane");
+
+labelLayer.options.pane = "mapLabelsPane";
 labelLayer.addTo(map);
 
 map.on("moveend zoomend resize", () => {
@@ -79,7 +100,61 @@ map.on("moveend zoomend resize", () => {
 	labelLayer.redraw();
 });
 
+// Add black overlay to hide polygons when editing is not active
+
+L.BlackOverlayLayer = L.GridLayer.extend({
+	createTile: function(coords) {
+		let tile = L.DomUtil.create("canvas", "leaflet-tile"),
+			{_northEast, _southWest} = this._tileCoordsToBounds(coords);
+
+		if (_southWest.lng >= -180 && _northEast.lng <= 180)
+			return tile;
+
+		let ctx = tile.getContext("2d"),
+			{x, y} = this.getTileSize();
+		tile.width = x;
+		tile.height = y;
+
+		ctx.fillStyle = "black";
+		ctx.fillRect(0, 0, x, y);
+
+		return tile;
+	}
+});
+
+map.createPane("blackOverlayPane");
+
+let overlayLayer = new L.BlackOverlayLayer({
+	noWrap: true,
+	pane: "blackOverlayPane",
+	updateWhenIdle: false,
+	updateWhenZooming: false,
+}).addTo(map);
+
+// When drawing starts, hide notifications and black overlay, but add red datelines
+
+let datelines = new L.FeatureGroup();
+for (let lng of [180, -180]) {
+	datelines.addLayer(new L.Polyline([[90, lng], [-90, lng]], {
+		color: "red",
+		weight: 1,
+	}));
+}
+
+map.on("draw:drawstart draw:editstart draw:deletestart", () => {
+	overlayLayer.setOpacity(0);
+	labelsPaneElement.style.opacity = "0";
+	datelines.addTo(map);
+});
+
+map.on("draw:drawstop draw:editstop draw:deletestop", () => {
+	overlayLayer.setOpacity(1);
+	labelsPaneElement.style.opacity = "1";
+	datelines.remove();
+});
+
 // Initialize layer system. Create and add base layers.
+
 let layerSystem = new L.ALS.System(map, {
 	aboutHTML: require("./about.js"),
 	filePrefix: "SynthFlight",
@@ -88,18 +163,17 @@ let layerSystem = new L.ALS.System(map, {
 	makeMapFullscreen: true,
 	historySize: L.ALS.Helpers.supportsFlexbox ? 40 : 20, // Old browsers might have lower RAM limits
 	toolbarZoomControl: new L.ALS.ControlZoom({vertical: true}),
+	generalSettings: L.ALS.SynthGeneralSettings
 });
 
 // CartoDB
 layerSystem.addBaseLayer(L.tileLayer("http://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png", {
 	maxZoom: 19,
-	noWrap: true,
 }), "CartoDB");
 
 // OSM
 layerSystem.addBaseLayer(L.tileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 	maxZoom: 19,
-	noWrap: true,
 }), "Open Street Maps");
 
 // Google maps
@@ -107,7 +181,6 @@ let letters = [["m", "Streets"], ["s", "Satellite"], ["p", "Terrain"], ["s,h", "
 for (let letter of letters) {
 	layerSystem.addBaseLayer(L.tileLayer("http://{s}.google.com/vt/lyrs=" + letter[0] + "&x={x}&y={y}&z={z}", {
 		maxZoom: 20,
-		noWrap: true,
 		subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
 	}), "Google " + letter[1]);
 }
@@ -119,7 +192,6 @@ for (let country of countries) {
 		subdomains: ['01', '02', '03', '04'],
 		reuseTiles: true,
 		updateWhenIdle: false,
-		noWrap: true,
 	}), "Yandex " + country[3] + country[4]);
 }
 
@@ -129,6 +201,7 @@ layerSystem.addBaseLayer(L.tileLayer(""), "Empty");
 // Add layer types
 layerSystem.addLayerType(L.ALS.SynthGridLayer);
 layerSystem.addLayerType(L.ALS.SynthRectangleLayer);
+layerSystem.addLayerType(L.ALS.SynthPolygonLayer);
 layerSystem.addLayerType(L.ALS.SynthLineLayer);
 layerSystem.addLayerType(L.ALS.SynthGeometryLayer);
 

@@ -39,26 +39,28 @@ module.exports = async function (file, projectionString, initialData) {
 			projectionString = projInformation.proj4;
 		}
 
-		let projectionFromWGS = proj4("WGS84", projectionString);
+		let projectionFromMerc = proj4("EPSG:3857", projectionString);
 
 		for (let name in initialData) {
-			// Let's project each polygon to the image, get their intersection part and calculate statistics for it
+			// Project each polygon to the image, get their intersection part and calculate statistics for it
 			let polygon = initialData[name],
-				oldBbox = [
-				polygon[0], [polygon[1][0], polygon[0][1]], polygon[1], [polygon[0][0], polygon[1][1]], polygon[0]
-			],
-				newBbox = [];
+				isRect = polygon.length === 2,
+				coords = isRect ? [
+					polygon[0], [polygon[1][0], polygon[0][1]],
+					polygon[1], [polygon[0][0], polygon[1][1]]
+				] : polygon,
+				projPolygon = [];
 
-			for (let point of oldBbox)
-				newBbox.push(projectionFromWGS.forward(point));
+			for (let coord of coords)
+				projPolygon.push(projectionFromMerc.forward(coord));
 
-			newBbox = bboxPolygon(
-				bbox(
-					turfHelpers.polygon([newBbox])
-				)
-			);
+			projPolygon.push([...projPolygon[0]]); // Clone first coordinate to avoid floating point errors
 
-			let intersection = intersect(imagePolygon, newBbox);
+			let polygonBbox = bboxPolygon(bbox(
+				turfHelpers.polygon([projPolygon])
+			));
+
+			let intersection = intersect(imagePolygon, polygonBbox);
 			if (!intersection)
 				continue;
 
@@ -83,10 +85,11 @@ module.exports = async function (file, projectionString, initialData) {
 				stats = ESRIGridParser.createStatsObject(); // Stats for current polygon
 
 			for (currentY; currentY <= maxY; currentY++) {
-				let currentX = minX;
-				let raster = await image.readRasters({window: [minX, currentY, maxX, currentY + 1]});
-				let color0 = raster[0], // Raster is a TypedArray where elements are colors and their elements are pixel values of that color.
+				let currentX = minX,
+					raster = await image.readRasters({window: [minX, currentY, maxX, currentY + 1]}),
+					color0 = raster[0], // Raster is a TypedArray where elements are colors and their elements are pixel values of that color.
 					index = -1;
+
 				for (let pixel of color0) {
 					let crsX = leftX + currentX * xSize, crsY = topY + currentY * ySize;
 					if (projInformation) {
@@ -94,11 +97,12 @@ module.exports = async function (file, projectionString, initialData) {
 						crsY *= projInformation.coordinatesConversionParameters.y;
 					}
 
-					let point = projectionFromWGS.inverse([crsX, crsY]);
 					currentX++; // So we can continue without incrementing
 					index++;
 
-					if (!MathTools.isPointInRectangle(point, polygon))
+					let point = projectionFromMerc.inverse([crsX, crsY]);
+
+					if (!MathTools[isRect ? "isPointInRectangle" : "isPointInPolygon"](point, polygon))
 						continue;
 
 					let value = 0;
@@ -108,6 +112,12 @@ module.exports = async function (file, projectionString, initialData) {
 					let multipliedValue = value * zScale;
 					if (value === nodata || multipliedValue === nodata)
 						continue;
+
+					/*new L.CircleMarker(
+						L.CRS.EPSG3857.unproject(L.point(...point)),
+						{color: `rgb(${value},${value},${value})`, fillOpacity: 1, stroke: false}
+					).addTo(map);*/
+
 					ESRIGridParser.addToStats(multipliedValue, stats);
 				}
 			}

@@ -46,13 +46,15 @@ module.exports = `
 
 <h1><img src="img/logo.ico" alt="Logo" />SynthFlight ${version}</h1>
 
-<p data-als-locale-property="firstParagraph"></p>
+<p data-als-locale-property="about1"></p>
 
-<p><span data-als-locale-property="secondParagraphPart1"></span> <a href="https://github.com/matafokka/SynthFlight" target="_blank" data-als-locale-property="secondParagraphPart2"></a> <span data-als-locale-property="secondParagraphPart3"></span></p>
+<p><span data-als-locale-property="about2Part1"></span> <a href="https://github.com/matafokka/SynthFlight" target="_blank" data-als-locale-property="about2Part2"></a> <span data-als-locale-property="about2Part3"></span></p>
 
-<p data-als-locale-property="thirdParagraph"></p>
+<p><span data-als-locale-property="about3Part1"></span> <a href="https://github.com/matafokka/SynthFlight/wiki" target="_blank" data-als-locale-property="about3Part2"></a></p>
 
-<p data-als-locale-property="fourthParagraph"></p>
+<p data-als-locale-property="about4"></p>
+
+<p data-als-locale-property="about5"></p>
 <ul>
 	<li><a href="https://basemaps.cartocdn.com" target="_blank">CartoDB</a></li>
 	<li><a href="https://www.openstreetmap.org" target="_blank">OpenStreetMap</a></li>
@@ -60,7 +62,7 @@ module.exports = `
 	<li><a href="https://www.yandex.ru/maps" target="_blank">Yandex Maps</a></li>
 </ul>
 
-<p><span data-als-locale-property="fifthParagraph"></span> <a href="https://nominatim.org/" target="_blank">Nominatim API</a></p>
+<p><span data-als-locale-property="about6"></span> <a href="https://nominatim.org/" target="_blank">Nominatim API</a></p>
 
 <footer><a href="https://github.com/matafokka">© matafokka, ${(new Date()).getFullYear()}</a></footer>
 `;

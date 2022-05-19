@@ -15,7 +15,7 @@ L.Geodesic.prototype.getActualLatLngs = function () {
 // Writing these functions as class methods will result in an error being thrown. I don't know why.
 
 function _createGeodesic (coords, opts = {}) {
-	let geodesic = L.geodesic(coords, {...opts, wrap: true});
+	let geodesic = new L.Geodesic(coords, {...opts, wrap: true});
 	geodesic.geom.geodesic.ellipsoid.a = 6378137;
 	geodesic.geom.geodesic.ellipsoid.b = 6378137;
 	geodesic.geom.geodesic.ellipsoid.f = 0;
@@ -125,7 +125,7 @@ L.Draw.Polyline = L.Draw.Feature.extend({
 			// also do not want to trigger any click handlers of objects we are clicking on
 			// while drawing.
 			if (!this._mouseMarker) {
-				this._mouseMarker = L.marker(this._map.getCenter(), {
+				this._mouseMarker = new L.Marker(this._map.getCenter(), {
 					icon: L.divIcon({
 						className: 'leaflet-mouse-marker',
 						iconAnchor: [20, 20],

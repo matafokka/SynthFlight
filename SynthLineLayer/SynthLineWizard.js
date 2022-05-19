@@ -1,3 +1,4 @@
-L.ALS.SynthLineWizard = L.ALS.EmptyWizard.extend({
+L.ALS.SynthLineWizard = L.ALS.SynthGeometryBaseWizard.extend({
 	displayName: "lineLayerName",
+	fileLabel: "initialFeaturesFileLabelLine",
 });

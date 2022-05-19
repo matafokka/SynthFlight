@@ -15,11 +15,14 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend(/** @lends L.ALS.SynthLineLay
 	hasYOverlay: false,
 
 	init: function (wizardResults, settings) {
-		this.pathsGroup = L.featureGroup();
-		this.drawingGroup = L.featureGroup();
-		this.connectionsGroup = L.featureGroup();
+		this.pathsGroup = new L.FeatureGroup();
+		this.drawingGroup = new L.FeatureGroup();
+		this.connectionsGroup = new L.FeatureGroup();
+		this.errorGroup = new L.FeatureGroup();
+		this.pointsGroup = new L.FeatureGroup();
 
 		L.ALS.SynthBaseLayer.prototype.init.call(this, settings, this.pathsGroup, this.connectionsGroup, "lineLayerColor");
+		this.addLayers(this.errorGroup, this.pointsGroup);
 
 		this.enableDraw({
 			polyline: {
@@ -38,9 +41,7 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend(/** @lends L.ALS.SynthLineLay
 
 		this.addBaseParametersInputSection();
 		this.addBaseParametersOutputSection();
-
-		this.pointsGroup = L.featureGroup();
-		this.calculateParameters();
+		L.ALS.SynthGeometryBaseWizard.initializePolygonOrPolylineLayer(this, wizardResults);
 	},
 
 	_hideCapturePoints: function (widget) {
@@ -52,58 +53,81 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend(/** @lends L.ALS.SynthLineLay
 	},
 
 	onEditStart: function () {
+		if (!this.isSelected)
+			return;
+
 		this.map.removeLayer(this.pathsGroup);
 		this.map.removeLayer(this.connectionsGroup);
 		this.map.removeLayer(this.pointsGroup);
 		this.map.addLayer(this.drawingGroup);
 	},
 
-	onEditEnd: function () {
+	onEditEnd: function (event, notifyIfLayersSkipped = true) {
+		if (!this.isSelected)
+			return;
+
 		this.pathsGroup.clearLayers();
 		this.pointsGroup.clearLayers();
+		this.errorGroup.clearLayers();
 
-		let layers = this.drawingGroup.getLayers(), color = this.getWidgetById("color0").getValue(), lineOptions = {
-			color, thickness: this.lineThicknessValue, segmentsNumber: L.GEODESIC_SEGMENTS,
-		};
+		let color = this.getWidgetById("color0").getValue(),
+			lineOptions = {color, thickness: this.lineThicknessValue},
+			linesWereInvalidated = false;
 
-		for (let layer of layers) {
+		notifyIfLayersSkipped = typeof notifyIfLayersSkipped === "boolean" ? notifyIfLayersSkipped : true;
+
+		this.drawingGroup.eachLayer((layer) => {
 			let latLngs = layer.getLatLngs();
 			for (let i = 1; i < latLngs.length; i++) {
-				let extendedGeodesic = new L.Geodesic([latLngs[i - 1], latLngs[i]], lineOptions),
+				let extendedGeodesic = new L.Geodesic([latLngs[i - 1], latLngs[i]], {segmentsNumber: 2}),
 					length = extendedGeodesic.statistics.sphericalLengthMeters,
 					numberOfImages = Math.ceil(length / this.Bx) + 4,
-					extendBy = (this.Bx * numberOfImages - length) / 2 / length;
-				extendedGeodesic.changeLength("both", extendBy);
-				this.pathsGroup.addLayer(extendedGeodesic);
+					shouldInvalidateLine = numberOfImages > 10000; // Line is way too long for calculated Bx
+
+				// This will throw an error when new length exceeds 180 degrees
+				try {
+					extendedGeodesic.changeLength("both", (this.Bx * numberOfImages - length) / 2 / length);
+				} catch (e) {
+					shouldInvalidateLine = true;
+				}
+
+				let displayGeodesic = new L.Geodesic(extendedGeodesic.getLatLngs(), {
+					...lineOptions,
+					segmentsNumber: Math.max(numberOfImages, L.GEODESIC_SEGMENTS)
+				});
+
+				if (shouldInvalidateLine) {
+					displayGeodesic.setStyle({color: "red"});
+					this.errorGroup.addLayer(displayGeodesic);
+					linesWereInvalidated = true;
+					continue;
+				}
+
+				this.pathsGroup.addLayer(displayGeodesic);
 
 				// Capture points made by constructing a line with segments number equal to the number of images
-				let points = new L.Geodesic(extendedGeodesic.getLatLngs(), {
-					...lineOptions,
-					segmentsNumber: numberOfImages
-				}).getActualLatLngs()[0];
+				let pointsArrays = new L.Geodesic(displayGeodesic.getLatLngs(), {
+					...lineOptions, segmentsNumber: numberOfImages
+				}).getActualLatLngs();
 
-				for (let point of points)
-					this.pointsGroup.addLayer(this.createCapturePoint([point.lat, point.lng], color));
+				for (let array of pointsArrays) {
+					for (let point of array)
+						this.pointsGroup.addLayer(this.createCapturePoint(point, color));
+				}
 			}
-		}
+		});
 
 		this.updatePathsMeta();
 
-		if (!this.getWidgetById("hidePathsConnections").getValue())
-			this.map.addLayer(this.connectionsGroup);
-
-		if (!this.getWidgetById("hideCapturePoints").getValue())
-			this.map.addLayer(this.pointsGroup);
+		this.hideOrShowLayer(this.getWidgetById("hidePathsConnections").getValue(), this.connectionsGroup);
+		this.hideOrShowLayer(this.getWidgetById("hideCapturePoints").getValue(), this.pointsGroup);
 
 		this.map.removeLayer(this.drawingGroup);
 		this.map.addLayer(this.pathsGroup);
 
-		this.writeToHistory();
-	},
+		this.notifyAfterEditing(L.ALS.locale.lineLayersSkipped, linesWereInvalidated, undefined, !notifyIfLayersSkipped);
 
-	calculateParameters: function () {
-		L.ALS.SynthBaseLayer.prototype.calculateParameters.call(this);
-		this.onEditEnd();
+		this.writeToHistoryDebounced();
 	},
 
 	toGeoJSON: function () {
@@ -120,12 +144,10 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend(/** @lends L.ALS.SynthLineLay
 	},
 
 	serialize: function (seenObjects) {
-		let layers = this.drawingGroup.getLayers(), lines = [];
+		let serialized = this.getObjectToSerializeTo(seenObjects),
+			lines = [];
 
-		for (let layer of layers)
-			lines.push(layer.getLatLngs());
-
-		let serialized = this.getObjectToSerializeTo(seenObjects);
+		this.drawingGroup.eachLayer(layer => lines.push(layer.getLatLngs()));
 		serialized.lines = L.ALS.Serializable.serializeAnyObject(lines, seenObjects);
 		return serialized;
 	},
@@ -135,12 +157,13 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend(/** @lends L.ALS.SynthLineLay
 		settings: new L.ALS.SynthLineSettings(),
 
 		deserialize: function (serialized, layerSystem, settings, seenObjects) {
-			let object = L.ALS.Layer.deserialize(serialized, layerSystem, settings, seenObjects),
+			let object = L.ALS.SynthBaseLayer.deserialize(serialized, layerSystem, settings, seenObjects),
 				lines = L.ALS.Serializable.deserialize(serialized.lines, seenObjects);
 
 			for (let line of lines)
 				object.drawingGroup.addLayer(new L.Geodesic(line, object.drawControls.polyline.shapeOptions));
 
+			object.isAfterDeserialization = true;
 			object.onEditEnd();
 
 			delete object.lines;

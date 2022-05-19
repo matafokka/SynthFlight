@@ -1,12 +1,8 @@
-# SynthFlight Beta
+# SynthFlight
 
-SynthFlight is a fully client-side software for planning aerial photography. Run it either on the desktop or in a [browser online](https://matafokka.github.io/SynthFlight/).
+SynthFlight is a fully client-side software for planning aerial photography.
 
-This is a beta version, so bugs, huge API changes and lack of backwards compatibility are to be expected.
-
-Most of the planned functionality is here, however, a number of small changes will be introduced.
-
-A stable version will be released in May or June 2022.
+Run it either on the desktop or in a [browser online](https://matafokka.github.io/SynthFlight/).
 
 # Setup
 
@@ -26,17 +22,15 @@ There are numerous ways to set up SynthFlight, listed from most to least preferr
 1. Extract the downloaded archive wherever you want.
 1. Navigate to the extracted folder, open it and run `SynthFlight` executable file.
 
-***Warning 1:** only Windows x64 builds has been tested so far.*
+***Warning:** macOS builds are not signed, so you need to configure your system to run unsigned apps.*
 
-***Warning 2:** macOS builds are not signed, thus require disabling the Gatekeeper or something.*
+## System requirements
 
-# System requirements
-
-## For PWA
+### For PWA
 
 A browser that supports it.
 
-## For browser
+### For browser
 
 One of:
 
@@ -55,8 +49,7 @@ One of:
 
 Of course, requirements for TLS might change in future with the new TLS versions coming out and GitHub and OSM changing their policies. You can't prevent this from happening, the only thing you can do is using an evergreen browser.
 
-
-## For desktop builds
+### For desktop builds
 
 * **Operating system** - one of:
     * **Windows 7** or later. ARM64, x86 and x64 platforms are supported.
@@ -64,6 +57,10 @@ Of course, requirements for TLS might change in future with the new TLS versions
     * **macOS**. I have no idea which versions are supported. Try and see if it works. Also, these builds are not signed.
 * **CPU**: One that can handle web surfing. If you can browse the internet, SynthFlight will work fine.
 * **RAM**: 1 GB or more.
+
+# User guide
+
+Please, refer to the [Wiki page](https://github.com/matafokka/SynthFlight/wiki) for the user guide.
 
 # Building
 
@@ -75,7 +72,7 @@ If you want to build SynthFlight yourself, do the following:
 1. Build by running `node build.js`. There are additional options, to see them, run `node build.js -h`.
 1. When build will be finished, in project root will be `dist` directory containing builds for different OSs and platforms.
 
-***Warning:** To build for macOS, you may need to build on an actual macOS.*
+***Warning:** To build for macOS, you may need to run everything on an actual macOS. I don't have macOS, so I can't test if builds in this repo actually work.*
 
 # Hosting
 
@@ -90,16 +87,19 @@ There's a [development](https://github.com/matafokka/SynthFlight/tree/developmen
 
 Translating this app will be much appreciated. SynthFlight locales can be found in [`locales`](https://github.com/matafokka/SynthFlight/tree/development/locales) directory and ALS locales are available [here](https://github.com/matafokka/leaflet-advanced-layer-system/tree/master/locales). Both of these needs to be translated. Locales are plain JS objects where key is being used in the program itself and value is a string that's being added to the page. Only values needs translation. Copy one of the locales to a new file, change locale name and translate all the values.
 
-You can also contribute by reporting bugs, requesting API changes, new functionality or something else. Please, create an issue and describe your request.
+You can also contribute by reporting bugs or requesting new functionality. To do so, please, create an issue and describe your request.
 
 # FAQ
 
 ## Can a local copy work offline?
 Yes.
 
-## Projects compatibility?
+## Will my old projects be compatible with the new ALS version?
 
-There will be no compatibility between SynthFlight versions until first stable release.
+Backwards compatibility is preserved unless noted otherwise in the release notes. However, this is unlikely to happen unless required for fixing a critical bug.
 
-## When a stable release will be available?
-May or June 2022
+## My plane crashed, images got ruined, and my dog died! Who should I blame?!
+
+As license states, yourself :p
+
+However, if you've encountered a some kind of error, please, report it by creating an issue.

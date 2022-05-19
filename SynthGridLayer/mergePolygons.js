@@ -2,7 +2,7 @@ const polybool = require("polybooljs");
 const MathTools = require("../MathTools.js");
 
 L.ALS.SynthGridLayer.prototype.mergePolygons = function () {
-	L.ALS.SynthPolygonLayer.prototype.mergePolygons.call(this);
+	L.ALS.SynthRectangleBaseLayer.prototype.mergePolygons.call(this);
 
 	// Until there's no adjacent polygons, compare each polygon to each and try to find adjacent one. Then merge it.
 	while (true) {

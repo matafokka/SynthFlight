@@ -20,20 +20,30 @@ L.ALS.Locales.addLocaleProperties("English", {
 	// SynthLineLayer
 	lineLayerColor: "Line color:",
 	settingsLineLayerColor: "Default line color:",
+	lineLayersSkipped: "One or more lines has been skipped because they're too long. These lines have red color.",
 
 	// SynthGridWizard
-
 	gridWizardDisplayName: "Grid Layer",
 	gridWizardNotification: `If map scale is too low, grid will be hidden. Please, zoom in to see it.
 	
-	To select a polygon, either click right mouse button (or tap and hold) or double-click (or double-tap) on it.`,
+	To select a polygon, either click right mouse button (or tap and hold on sensor display) or double-click (or double-tap) on it.`,
 
 	gridStandardScales: "Grid scale:",
 	gridLngDistance: "Distance between parallels:",
 	gridLatDistance: "Distance between meridians:",
-	gridShouldMergeCells: "Merge couples of adjacent cells when latitude exceeds 60° and merge again when it exceeds 76° (except 1:1 000 000 and 1:2 000 scales when cells above 76° triple-merged instead of quadruple-merged)",
+	gridShouldMergeCells: "Merge adjacent cells when latitude exceeds 60°",
 
 	// SynthGridLayer
+
+	// Confirmation text when distances don't divide map into the whole number of cells
+	gridCorrectDistancesMain1: "Distances don't divide Earth into the whole number of segments.",
+	gridCorrectDistancesMain2: "Would you like to use distance in",
+	gridCorrectDistancesLat: "for parallels",
+	gridCorrectDistancesAnd: "and",
+	gridCorrectDistancesLng: "for meridians",
+	gridCorrectDistancesMain3: "Click \"OK\" to use the suggested distances. Click \"Cancel\" to cancel adding this layer.",
+
+	// Main stuff
 
 	alphabet: "ABCDEFGHIJKLMNOPQRSTUVWXYZ", // Don't add it, if you don't need different symbols in cells' names
 	gridLayerDefaultName: "Grid Layer",
@@ -100,7 +110,11 @@ L.ALS.Locales.addLocaleProperties("English", {
 	confirmDEMLoading: "Are you sure you want to load DEMs? It will override current statistics and take some time.",
 	loadingDEM: "Loading selected DEM files, it might take a while...",
 	notGridNotSupported: "Sorry, your browser doesn't support anything other than ASCII Grid. Please, select a valid ASCII Grid file.",
-	DEMError: "Sorry, an error occurred while loading one of your files", //TODO: Add file name
+	DEMError: "Following files are not valid DEM files:",
+	DEMErrorProjFiles: "Following files are not valid projection files:",
+
+	jsonNoPaths1: "No paths has been drawn in layer",
+	jsonNoPaths2: "only selected geometry and airport position will be exported.",
 
 	// SynthGridSettings
 
@@ -117,28 +131,46 @@ L.ALS.Locales.addLocaleProperties("English", {
 	defaultRectangleFillColor: "Default rectangle fill color:",
 	rectangleBorderColor: "Rectangle border color:",
 	rectangleFillColor: "Rectangle fill color:",
-	rectangleLayersRemoved: "One or more rectangles has been removed because they're too big",
+	rectangleLayersSkipped: "One or more rectangles has been skipped because they're too big. These rectangles have red color.",
 
 	// SynthGeometryWizard
 
 	geometryDisplayName: "Geometry Layer",
 	geometryFileLabel: "Zipped shapefile or GeoJSON:",
-	geometryNotification: "Click/tap on features to see the semantics", // TODO: Add tip for searching by semantics when search will be added
+	geometryNotification: "Click/tap on features to see the semantics. You cam search by semantics later by clicking \"Search\" button on the program's panel.",
 
 	// SynthGeometryLayer
 
 	geometryOutOfBounds: "Features in selected file are out of visible area. Please, check projection and/or add .prj file to the archive.",
-	geometryInvalidFile: "This file is not valid zipped shapefile or GeoJSON file",
-	geometryNoFeatures: "This file doesn't contain any features, so it won't be added",
+	geometryInvalidFile: "Selected file is not valid zipped shapefile or GeoJSON file",
+	geometryNoFeatures: "Selected file doesn't contain any features, so it won't be added",
 	geometryBorderColor: "Border color:",
 	geometryFillColor: "Fill color:",
-	geometryBrowserNotSupported: "Your browser doesn't support adding this layer. You still can open projects with this layer though.",
+	geometryBrowserNotSupported: "Sorry, your browser doesn't support adding this layer. You still can open projects with this layer though.",
 	geometryNoFileSelected: "No file has been selected. Please, select a file that you want to add and try again.",
+	geometryProjectionNotSupported: "Sorry, projection of selected file is not supported. Please, convert your file to another projection, preferably, WebMercator.",
 
 	// SynthGeometrySettings
 
 	geometryDefaultFillColor: "Default fill color:",
 	geometryDefaultBorderColor: "Default border color:",
+
+	// SynthPolygonLayer
+	polygonLayerName: "Polygon Layer",
+	polygonPathsColor: "Paths color:",
+	polygonHidePaths: "Hide paths",
+	polygonLayersSkipped: "One or more polygons has been skipped because they're too big. These polygons have red color.",
+
+	// Notifications after editing
+	afterEditingInvalidDEMValues: "Height values might be invalid because map objects has been edited. Please, reload DEM or edit height values manually.",
+	afterEditingToDisableNotifications: "To disable these notification, go to Settings - General Settings - Disable all annoying notifications after editing and DEM loading.",
+	generalSettingsDisableAnnoyingNotification: "Disable all annoying notifications after editing and DEM loading",
+
+	// GeoJSON initial features
+	initialFeaturesBrowserNotSupported: "Sorry, your browser doesn't support loading initial geometry for this layer. You still can draw geometry yourself though.",
+	initialFeaturesFileLabelPolygon: "Load initial polygons from zipped shapefile or GeoJSON (non-polygon features will be skipped):",
+	initialFeaturesFileLabelLine: "Load initial polylines from zipped shapefile or GeoJSON (non-polyline features will be skipped):",
+	initialFeaturesNoFeatures: "Selected file doesn't contain any features supported by the added layer",
 
 	// Search
 	searchButtonTitle: "Search Geometry Layers or OSM",
@@ -160,16 +192,17 @@ L.ALS.Locales.addLocaleProperties("English", {
 
 	// About
 
-	firstParagraph: "SynthFlight is a fully client-side software for planning aerial photography. This is a beta version so bugs, huge API changes and lack of backwards compatibility are to be expected.",
+	about1: "SynthFlight is a fully client-side software for planning aerial photography.",
 
-	secondParagraphPart1: "Visit project's",
-	secondParagraphPart2: "GitHub page",
-	secondParagraphPart3: "for more information.",
+	about2Part1: "Visit project's",
+	about2Part2: "GitHub page",
+	about2Part3: "for more information.",
 
-	thirdParagraph: "Developing SynthFlight is possible thanks to various open-source software.",
+	about3Part1: "User guide is located in",
+	about3Part2: "SynthFlight Wiki.",
 
-	fourthParagraph: "Using maps is possible thanks to following geoservices:",
-
-	fifthParagraph: "Web search is powered by OpenStreetMaps and", // ... Nominatim API
+	about4: "Developing SynthFlight is possible thanks to various open-source software.",
+	about5: "Using maps is possible thanks to following geoservices:",
+	about6: "Web search is powered by OpenStreetMaps and", // ... Nominatim API
 
 });

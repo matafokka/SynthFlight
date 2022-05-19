@@ -39,7 +39,26 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 
 	isAfterDeserialization: false,
 
-	init: function (settings, pathGroup1, connectionsGroup1, colorLabel1, path1AdditionalLayers = [], pathGroup2 = undefined, connectionsGroup2 = undefined, colorLabel2 = undefined, path2AdditionalLayers = []) {
+	/**
+	 * Indicates whether this layer has Y overlay, i.e. if it has parallel paths
+	 * @type {boolean}
+	 */
+	hasYOverlay: true,
+
+	init: function (
+		settings,
+		// Path 1 args
+		pathGroup1,
+		connectionsGroup1,
+		colorLabel1,
+		path1AdditionalLayers = [],
+
+		// Path 2 args
+		pathGroup2 = undefined,
+		connectionsGroup2 = undefined,
+		colorLabel2 = undefined,
+		path2AdditionalLayers = []
+	) {
 
 		/**
 		 * {@link L.ALS.Layer#writeToHistory} but debounced for use in repeated calls
@@ -87,18 +106,12 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 		} : undefined;
 
 		/**
-		 * Indicates whether this layer has Y overlay, i.e. if it has parallel paths
-		 * @type {boolean}
-		 */
-		this.hasYOverlay = !!this.path2;
-
-		/**
 		 * Array of paths to work with
 		 * @type {PathData[]}
 		 */
 		this.paths = [this.path1];
 
-		if (this.hasYOverlay)
+		if (this.path2)
 			this.paths.push(this.path2);
 
 		/**
@@ -114,22 +127,29 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 		 *
 		 * @type {L.FeatureGroup[]}
 		 */
-		this.toUpdateThickness = [...path1AdditionalLayers, ...path2AdditionalLayers];
+		this.toUpdateThickness = [];
+
+		for (let arr of [path1AdditionalLayers, path2AdditionalLayers]) {
+			for (let item of arr) {
+				if (item !== undefined)
+					this.toUpdateThickness.push(item);
+			}
+		}
 
 		for (let i = 0; i < this.paths.length; i++) {
 			let path = this.paths[i];
-			path.hullConnection = L.geodesic([[0, 0], [0, 0]], this.getConnectionLineOptions(settings[`color${i}`]));
+			path.hullConnection = new L.Geodesic([[0, 0], [0, 0]], this.getConnectionLineOptions(settings[`color${i}`]));
 			this.addLayers(path.pathGroup, path.connectionsGroup);
 			this.toUpdateThickness.push(path.pathGroup, path.connectionsGroup);
 		}
 
-		this.serializationIgnoreList.push("_airportMarker", "toUpdateThickness", "writeToHistoryDebounced");
+		this.serializationIgnoreList.push("airportMarker", "toUpdateThickness", "writeToHistoryDebounced", "pathsDetailsSpoiler");
 
 		/**
 		 * Properties to copy to GeoJSON when exporting
 		 * @type {string[]}
 		 */
-		this.propertiesToExport = ["cameraWidth", "cameraHeight", "pixelWidth", "focalLength", "flightHeight", "overlayBetweenPaths", "overlayBetweenImages", "imageScale", "ly", "Ly", "By", "lx", "Lx", "Bx", "GSI", "IFOV", "GIFOV", "FOV", "GFOV", "selectedArea", "timeBetweenCaptures"];
+		this.propertiesToExport = ["cameraWidth", "cameraHeight", "pixelWidth", "focalLength", "flightHeight", "overlayBetweenPaths", "overlayBetweenImages", "imageScale", "ly", "Ly", "By", "lx", "Lx", "Bx", "GSI", "IFOV", "GIFOV", "FOV", "GFOV", "timeBetweenCaptures"];
 
 		// Add airport
 		let icon = L.divIcon({
@@ -142,14 +162,14 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 		 * Airport marker
 		 * @protected
 		 */
-		this._airportMarker = L.marker(this.map.getCenter(), {
+		this.airportMarker = new L.Marker(this.map.getCenter(), {
 			icon: icon,
 			draggable: true
 		});
 
 		// Set inputs' values to new ones on drag
-		this.addEventListenerTo(this._airportMarker, "drag", "onMarkerDrag");
-		this.addLayers(this._airportMarker);
+		this.addEventListenerTo(this.airportMarker, "drag", "onMarkerDrag");
+		this.addLayers(this.airportMarker);
 	},
 
 	/**
@@ -190,7 +210,7 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 
 			new L.ALS.Widgets.Divider("div2"),
 		);
-		this._airportMarker.fire("drag"); // Just to set values
+		this.airportMarker.fire("drag"); // Just to set values
 	},
 
 	/**
@@ -250,7 +270,8 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 	 */
 	_setPathsColor: function () {
 		for (let i = 0; i < this.paths.length; i++) {
-			let style = {color: this.getWidgetById(`color${i}`).getValue()},
+			let color = this.getWidgetById(`color${i}`).getValue(),
+				style = {fillColor: color, color},
 				path = this.paths[i];
 			for (let group of path.toUpdateColors)
 				group.setStyle(style);
@@ -263,14 +284,14 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 
 		latWidget.setValue(fixedLatLng.lat);
 		lngWidget.setValue(fixedLatLng.lng);
-		this._airportMarker.setLatLng(fixedLatLng);
+		this.airportMarker.setLatLng(fixedLatLng);
 		this.connectToAirport();
 	},
 
 	onMarkerDrag: function () {
-		let latLng = this._airportMarker.getLatLng(),
+		let latLng = this.airportMarker.getLatLng(),
 			fixedLatLng = this._limitAirportPos(latLng.lat, latLng.lng);
-		this._airportMarker.setLatLng(fixedLatLng);
+		this.airportMarker.setLatLng(fixedLatLng);
 		this.getWidgetById("airportLat").setValue(fixedLatLng.lat.toFixed(5));
 		this.getWidgetById("airportLng").setValue(fixedLatLng.lng.toFixed(5));
 		this.connectToAirport();
@@ -293,7 +314,7 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 		let popup = document.createElement("div");
 		L.ALS.Locales.localizeElement(popup, "airportForLayer", "innerText");
 		popup.innerText += " " + this.getName();
-		this._airportMarker.bindPopup(popup);
+		this.airportMarker.bindPopup(popup);
 	},
 
 	connectToAirport: function () {
@@ -316,27 +337,36 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 			this.connectHull();
 	},
 
-	_createPathWidget: function (layer, length, toFlash) {
+	_createPathWidget: function (object, length, toFlash, selectedArea = 0) {
 		let id = L.ALS.Helpers.generateID(),
 			button = new L.ALS.Widgets.Button("flashPath" + id, "flashPath", this, "flashPath"),
 			lengthWidget = new L.ALS.Widgets.ValueLabel("pathLength" + id, "pathLength", "m").setFormatNumbers(true).setNumberOfDigitsAfterPoint(0),
 			timeWidget = new L.ALS.Widgets.ValueLabel("flightTime" + id, "flightTime", "h:mm"),
-			warning = new L.ALS.Widgets.SimpleLabel("warning" + id, "", "center", "warning");
+			warning = new L.ALS.Widgets.SimpleLabel("warning" + id, "", "left", "warning");
 
-		layer.updateWidgets = (length) => {
+		object.updateWidgets = (length) => {
 			lengthWidget.setValue(length);
 			let time = this.getFlightTime(length);
 			timeWidget.setValue(time.formatted);
 			warning.setValue(time.number > 4 ? "flightTimeWarning" : "");
 		}
+
 		this.pathsDetailsSpoiler.addWidgets(
 			new L.ALS.Widgets.SimpleLabel("pathLabel" + id, `${L.ALS.locale.pathTitle} ${this._pathsWidgetsNumber}`, "center", "message"),
-			button, lengthWidget, timeWidget, warning,
+			button
 		);
+
+		if (selectedArea) {
+			this.pathsDetailsSpoiler.addWidget(
+				new L.ALS.Widgets.ValueLabel("selectedArea" + id, "selectedArea", "sq.m.").setNumberOfDigitsAfterPoint(0).setFormatNumbers(true).setValue(selectedArea)
+			);
+		}
+
+		this.pathsDetailsSpoiler.addWidgets(lengthWidget, timeWidget, warning);
 
 		button.toFlash = toFlash;
 		this._pathsWidgetsNumber++;
-		layer.updateWidgets(length);
+		object.updateWidgets(length);
 	},
 
 	/**
@@ -366,7 +396,7 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 	 * @return {number} Line length
 	 */
 	getLineLengthMeters: function (line, useFlightHeight = true) {
-		let r = this._getEarthRadius(useFlightHeight), points = line instanceof Array ? line : line.getLatLngs(), distance = 0;
+		let r = this.getEarthRadius(useFlightHeight), points = line instanceof Array ? line : line.getLatLngs(), distance = 0;
 		if (points.length === 0)
 			return 0;
 
@@ -395,7 +425,7 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 	 * @return {number} By how much you should modify (add or remove to) lng or lat to get a line of given length
 	 */
 	getArcAngleByLength: function (startingPoint, length, isVertical, useFlightHeight = false) {
-		let r = this._getEarthRadius(useFlightHeight);
+		let r = this.getEarthRadius(useFlightHeight);
 
 		// For vertical lines, we can simply use arc length since any two equal angles will form two equal arcs along any meridian.
 		if (isVertical)
@@ -411,7 +441,7 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 		return turfHelpers.radiansToDegrees(length / newR);
 	},
 
-	_getEarthRadius: function (useFlightHeight = false) {
+	getEarthRadius: function (useFlightHeight = false) {
 		return 6378137 + (useFlightHeight ? this.flightHeight : 0);
 	},
 
@@ -428,15 +458,14 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 	 * Called when there's one flight per each path. You should call {@link L.ALS.SynthBaseLayer#connectOnePerFlight} here.
 	 */
 	connectOnePerFlightToAirport: function () {
-		let airportPos = this._airportMarker.getLatLng();
+		let airportPos = this.airportMarker.getLatLng();
 
 		for (let path of this.paths) {
-			let layers = path.connectionsGroup.getLayers();
-			for (let layer of layers) {
+			path.connectionsGroup.eachLayer((layer) => {
 				layer.getLatLngs()[1] = airportPos;
 				L.redrawLayer(layer);
 				layer.updateWidgets(layer.pathLength + this.getLineLengthMeters(layer));
-			}
+			});
 		}
 
 	},
@@ -449,24 +478,24 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 	connectOnePerFlight: function () {
 		for (let i = 0; i < this.paths.length; i++) {
 
-			let path = this.paths[i], {connectionsGroup, pathGroup} = path, layers = pathGroup.getLayers(),
+			let path = this.paths[i], {connectionsGroup, pathGroup} = path,
 				lineOptions = this.getConnectionLineOptions(this.getWidgetById(`color${i}`).getValue());
 
 			connectionsGroup.clearLayers();
 
-			for (let layer of layers) {
+			pathGroup.eachLayer((layer) => {
 				layer.pathLength = this.getPathLength(layer);
 
 				let latLngs = layer.getLatLngs(),
-					connectionLine = L.geodesic([latLngs[0], [0, 0], latLngs[latLngs.length - 1]], lineOptions);
+					connectionLine = new L.Geodesic([latLngs[0], [0, 0], latLngs[latLngs.length - 1]], lineOptions);
 				connectionLine.pathLength = layer.pathLength;
 				let toFlash = [layer, connectionLine];
 				if (layer.actualPaths)
 					toFlash.push(...layer.actualPaths);
 
-				this._createPathWidget(connectionLine, 1, toFlash);
+				this._createPathWidget(connectionLine, 1, toFlash, layer.selectedArea);
 				connectionsGroup.addLayer(connectionLine);
-			}
+			});
 		}
 		this.connectOnePerFlightToAirport(); // So we'll end up with only one place that updates widgets
 	},
@@ -477,18 +506,17 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 	 * @return {LatLng[][]} Cycles
 	 */
 	onePerFlightToCycles: function (path) {
-		let layers = path.pathGroup.getLayers();
+		let cycles = [], airportPos = this.airportMarker.getLatLng();
 
-		if (layers.length === 0)
-			return undefined;
-
-		let cycles = [], airportPos = this._airportMarker.getLatLng();
-		for (let layer of layers) {
+		path.pathGroup.eachLayer((layer) => {
 			let latLngs = layer.getLatLngs(), toPush = [airportPos, ...latLngs, airportPos];
 			toPush.pathLength = layer.pathLength + this.getLineLengthMeters([latLngs[0], airportPos]) +
 				this.getLineLengthMeters([latLngs[latLngs.length - 1], airportPos]);
 			cycles.push(toPush);
-		}
+		})
+
+		if (cycles.length === 0)
+			return undefined;
 
 		return cycles;
 	},
@@ -513,9 +541,11 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 			this.layerSystem.clickOnMenu();
 
 		for (let group of widget.toFlash) {
-			let layers = group instanceof L.FeatureGroup ? group.getLayers() : [group];
-			for (let layer of layers)
-				this.flashLine(layer);
+			if (!group instanceof L.FeatureGroup) {
+				this.flashLine(group);
+				continue;
+			}
+			group.eachLayer(layer => this.flashLine(layer));
 		}
 	},
 
@@ -534,7 +564,7 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 	},
 
 	createCapturePoint: function (coord, color) {
-		return L.circleMarker(coord, {
+		return new L.CircleMarker(coord, {
 			radius: this.lineThicknessValue * 2,
 			stroke: false,
 			fillOpacity: 1,
@@ -557,9 +587,49 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 		return hide;
 	},
 
-	clearSerializedPathsWidgets: function (serialized) {
-		for (let i = 1; i <= this._pathsWidgetsNumber; i++)
-			delete serialized._widgets["pathWidget" + i];
+	/**
+	 * Displays a notification after layers has been edited
+	 * @param invalidLayersMessage {string} Message to display when layers has been invalidated
+	 * @param layersInvalidated {boolean} Whether layers has been invalidated
+	 * @param e {Event|undefined} Received L.Draw event, if present
+	 * @param shouldJustReturn {boolean} If this function should just return instead of displaying a notification
+	 */
+	notifyAfterEditing: function (invalidLayersMessage, layersInvalidated, e = undefined, shouldJustReturn = false) {
+		// The whole thing makes no sense when polygons are invalidated when user edits parameters.
+		// TODO: Somehow fix this?
+
+		if (!L.ALS.generalSettings.notificationsEnabled || shouldJustReturn)
+			return;
+
+		let notification = "";
+
+		if (layersInvalidated)
+			notification += invalidLayersMessage + "\n\n";
+
+		if (e && e.type === "draw:editstop")
+			notification += L.ALS.locale.afterEditingInvalidDEMValues + "\n\n";
+
+		if (notification !== "")
+			window.alert(notification + L.ALS.locale.afterEditingToDisableNotifications);
+	},
+
+	getObjectToSerializeTo: function (seenObjects) {
+		let object = L.ALS.Layer.prototype.getObjectToSerializeTo.call(this, seenObjects),
+			{lat, lng} = this.airportMarker.getLatLng();
+		object.airportPos = {lat, lng};
+
+		delete object._widgets.pathsDetails;
+
+		return object;
+	},
+
+	statics: {
+		deserialize: function (serialized, layerSystem, settings, seenObjects) {
+			let object = L.ALS.Layer.deserialize(serialized, layerSystem, settings, seenObjects);
+			object.airportMarker.setLatLng(L.latLng(serialized.airportPos));
+			object.addWidget(object.pathsDetailsSpoiler);
+			return object;
+		}
 	}
 
 });

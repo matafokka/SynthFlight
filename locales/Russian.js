@@ -20,20 +20,31 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 	// SynthLineLayer
 	lineLayerColor: "Цвет линий:",
 	settingsLineLayerColor: "Цвет линий по умолчанию:",
+	lineLayersSkipped: "Одна или несколько линий были пропущены, так как они слишком длинные. Данные линии имеют красный цвет.",
 
 	// SynthGridWizard
 
 	gridWizardDisplayName: "Слой Сетки",
 	gridWizardNotification: `Если масштаб карты слишком мелкий, сетка будет скрыта. Пожалуйста, увеличьте масштаб карты, чтобы ее увидеть.
 	
-	Чтобы выделить трапецию, либо нажмите на него правой кнопкой мыши (или тапните и задержите палец) или два раза кликните (тапните) на него.`,
+	Чтобы выделить трапецию, или нажмите на него правой кнопкой мыши (или задержите палец на сенсорном экране), или два раза кликните (тапните) на него.`,
 
 	gridStandardScales: "Масштаб сетки:",
 	gridLngDistance: "Расстояние между параллелями:",
 	gridLatDistance: "Расстояние между меридианами:",
-	gridShouldMergeCells: "Объединять пары соседних трапеций при широте выше 60° и снова объединять при широте выше 76° (кроме масштабов 1:1 000 000 и 1:2 000, при которых трапеции с широтой больше 76° объединяются по 3, а не по 4)",
+	gridShouldMergeCells: "Объединять соседние трапеции при широте выше 60°",
 
 	// SynthGridLayer
+
+	// Confirmation text when distances don't divide map into the whole number of cells
+	gridCorrectDistancesMain1: "Расстояния не разделяют Землю на равное число сегментов.",
+	gridCorrectDistancesMain2: "Хотите ли вы использовать расстояние в",
+	gridCorrectDistancesLat: "для параллелей",
+	gridCorrectDistancesAnd: "и",
+	gridCorrectDistancesLng: "для меридианов",
+	gridCorrectDistancesMain3: "Нажмите \"Ок\", чтобы использовать предложенные расстояния. Нажмите \"Отмена\", чтобы отменить создание данного слоя.",
+
+	// Main stuff
 
 	alphabet: "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ", // Don't add it, if you don't need different symbols in cells' names
 	gridLayerDefaultName: "Слой Сетки",
@@ -95,7 +106,11 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 	confirmDEMLoading: "Вы уверены, что хотите загрузить файлы ЦМР? Это перезапишет текущую статистику и займет некоторое время.",
 	loadingDEM: "Выбранные вами файлы ЦМР загружаются, это может занять некоторое время...",
 	notGridNotSupported: "Извините, ваш браузер не поддерживает ничего, кроме ASCII Grid. Пожалуйста, выберете файл ASCII Grid.",
-	DEMError: "Извините, во время загрузки одного из ваших файлов произошла ошибка",
+	DEMError: "Следующие файлы не являются файлами ЦМР:",
+	DEMErrorProjFiles: "Следующие файлы не являются файлами проекции:",
+
+	jsonNoPaths1: "Маршруты не были добавлены в слое",
+	jsonNoPaths2: "будет экспортирована только геометрия и положение аэропорта.",
 
 	// SynthGridSettings
 
@@ -112,28 +127,46 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 	defaultRectangleFillColor: "Цвет заливки прямоугольников по умолчанию:",
 	rectangleBorderColor: "Цвет обводки прямоугольников:",
 	rectangleFillColor: "Цвет заливки прямоугольников:",
-	rectangleLayersRemoved: "Один или несколько прямоугольников были удалены, так как они слишком большие",
+	rectangleLayersSkipped: "Один или несколько прямоугольников были пропущены, так как они слишком большие. Данные прямоугольники имеют красный цвет.",
 
-	// SynthShapefileWizard
+	// SynthGeometryWizard
 
 	geometryDisplayName: "Слой Геометрии",
 	geometryFileLabel: "Сжатый shapefile (zip-архив) или GeoJSON:",
-	geometryNotification: "Чтобы просмотреть семантику объекта, нажмите на него", // TODO: Add tip for searching by semantics when search will be added
+	geometryNotification: "Чтобы просмотреть семантику объекта, нажмите на него. Позже вы можете выполнить поиск по семантике, нажав кнопку поиска на панели программы.",
 
-	// SynthShapefileLayer
+	// SynthGeometryLayer
 
 	geometryOutOfBounds: "Объекты в выбранном файле выходят за границы видимой области. Пожалуйста, проверьте проекцию и/или добавьте в архив файл .prj",
-	geometryInvalidFile: "Этот файл не является shapefile-ом или файлом GeoJSON",
-	geometryNoFeatures: "Этот файл не содержит объектов, поэтому не будет добавлен",
+	geometryInvalidFile: "Выбранный файл не является shapefile-ом или файлом GeoJSON",
+	geometryNoFeatures: "Выбранный файл не содержит объектов, поэтому не будет добавлен",
 	geometryBorderColor: "Цвет обводки:",
 	geometryFillColor: "Цвет заливки:",
-	geometryBrowserNotSupported: "Ваш браузер не поддерживает добавление данного слоя, но вы можете открывать проекты, использующие этот слой.",
+	geometryBrowserNotSupported: "Извините, ваш браузер не поддерживает добавление данного слоя, но вы можете открывать проекты, использующие этот слой.",
 	geometryNoFileSelected: "Файл не был выбран. Пожалуйста, выберете файл, который хотите добавить, и попробуйте снова.",
+	geometryProjectionNotSupported: "Извините проекция выбранного файла не поддерживается. Пожалуйста, переконвертируйте файл в другую проекцию, предпочтительно, в WebMercator.",
 
-	// Shapefile settings
+	// SynthGeometrySettings
 
 	geometryDefaultFillColor: "Цвет заливки по умолчанию:",
 	geometryDefaultBorderColor: "Цвет обводки по умолчанию:",
+
+	// SynthPolygonLayer
+	polygonLayerName: "Слой Полигонов",
+	polygonPathsColor: "Цвет маршрутов:",
+	polygonHidePaths: "Скрыть маршруты",
+
+	// Notifications after editing
+	polygonLayersSkipped: "Один или несколько полигонов были пропущены, так как они слишком большие. Данные полигоны имеют красный цвет.",
+	afterEditingInvalidDEMValues: "Значения высот могут быть неправильными, поскольку объекты были отредактированы. Пожалуйста, заново загрузите ЦМР или вручную отредактируйте значения высот.",
+	afterEditingToDisableNotifications: "Чтобы убрать данные уведомления, перейдите в Настройки - Общие настройки - Отключить все надоедливые уведомления после редактирования и загрузки ЦМР.",
+	generalSettingsDisableAnnoyingNotification: "Отключить все надоедливые уведомления после редактирования и загрузки ЦМР",
+
+	// GeoJSON initial features
+	initialFeaturesBrowserNotSupported: "Извините, ваш браузер не поддерживает загрузку исходной геометрии для данного слоя, но вы все равно можете нарисовать геомтрию вручную.",
+	initialFeaturesFileLabelPolygon: "Загрузить исходные полигоны из сжатого shapefile (zip-архива) или GeoJSON (типы, отличные от полигона, будут пропущены):",
+	initialFeaturesFileLabelLine: "Загрузить исходные полилинии из сжатого shapefile (zip-архива) или GeoJSON (типы, отличные от пололинии, будут пропущены):",
+	initialFeaturesNoFeatures: "Выбранный файл не содержит ни одного объекта, поддерживаемого добавляемым слоем",
 
 	// Search
 	searchButtonTitle: "Поиск в Слоях Геометрии и OSM",
@@ -155,16 +188,17 @@ L.ALS.Locales.addLocaleProperties("Русский", {
 
 	// About
 
-	firstParagraph: "SynthFlight – это полностью клиентское программное обеспечение для проектирования аэрофотосъемочных работ. Это beta-версия, поэтому ожидаемы баги, большие изменения API, отсутствие обратной совместимости и т.д.",
+	about1: "SynthFlight – это полностью клиентское программное обеспечение для проектирования аэрофотосъемочных работ.",
 
-	secondParagraphPart1: "Посетите",
-	secondParagraphPart2: "страницу проекта на GitHub",
-	secondParagraphPart3: "для дополнительной информации (на английском языке).",
+	about2Part1: "Посетите",
+	about2Part2: "страницу проекта на GitHub",
+	about2Part3: "для дополнительной информации (на английском языке).",
 
-	thirdParagraph: "Разработка SynthFlight возможна, благодаря различному свободному ПО.",
+	about3Part1: "Руководство пользователя на английском языке находится на",
+	about3Part2: "странице SynthFlight Wiki.",
 
-	fourthParagraph: "Использование карт возможно, благодаря следующим геосервисам:",
-
-	fifthParagraph: "Поиск по Интернету осуществляется через OpenStreetMaps при помощи", // ... Nominatim API
+	about4: "Разработка SynthFlight возможна, благодаря различному свободному ПО.",
+	about5: "Использование карт возможно, благодаря следующим геосервисам:",
+	about6: "Поиск по Интернету осуществляется через OpenStreetMaps при помощи", // ... Nominatim API
 
 });

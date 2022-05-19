@@ -1,3 +1,5 @@
+const debounce = require("debounce");
+
 /**
  * Enables L.Draw on this layer
  * @param drawControls {Object} L.Draw controls to use
@@ -22,6 +24,8 @@ L.ALS.SynthBaseLayer.prototype.enableDraw = function (drawControls, drawingGroup
 		}
 	}
 
+	this.onEditEndDebounced = debounce((notifyIfLayersSkipped = false) => this.onEditEnd(undefined, notifyIfLayersSkipped), 300); // Math operations are too slow for immediate update
+
 	for (let control of this._drawTypes)
 		this._drawOptions.draw[control] = false;
 
@@ -34,10 +38,33 @@ L.ALS.SynthBaseLayer.prototype.enableDraw = function (drawControls, drawingGroup
 	this.addEventListenerTo(this.map, "draw:created", "onDraw");
 	this.addEventListenerTo(this.map, "draw:drawstart draw:editstart draw:deletestart", "onEditStart");
 	this.addEventListenerTo(this.map, "draw:drawstop draw:editstop draw:deletestop", "onEditEnd");
-	this.addControl(this.drawControl, "top", "follow-menu");
+	let addDrawControl = () => this.addControl(this.drawControl, "top", "follow-menu");
+	addDrawControl();
+
+	document.body.addEventListener("synthflight-locale-changed", () => {
+		this.removeControl(this.drawControl);
+		addDrawControl();
+	});
 }
 
 L.ALS.SynthBaseLayer.prototype.onDraw = function (e) {
+	if (!this.isSelected)
+		return;
+
+	// Don't add layers of size less than 3x3 px and don't add geodesics with one point
+	if (e.layer instanceof L.Geodesic && e.layer.getLatLngs().length < 2)
+		return;
+
+	if (e.layer.getBounds) {
+		let {_northEast, _southWest} = e.layer.getBounds(),
+			zoom = this.map.getZoom(),
+			min = this.map.project(_northEast, zoom),
+			max = this.map.project(_southWest, zoom);
+
+		if (Math.abs(max.x - min.x) <= 3 && Math.abs(max.y - min.y) <= 3)
+			return;
+	}
+
 	this._drawingGroup.addLayer(e.layer);
 
 	let borderColorId, fillColor;

@@ -1,6 +1,6 @@
 const turfHelpers = require("@turf/helpers");
 
-L.ALS.SynthBaseLayer.prototype.calculateParameters = function () {
+L.ALS.SynthBaseLayer.prototype.calculateParameters = function (notifyIfLayersSkipped = false) {
 
 	let parameters = ["cameraWidth", "cameraHeight", "pixelWidth", "focalLength", "imageScale", "overlayBetweenPaths", "overlayBetweenImages", "aircraftSpeed"];
 	for (let param of parameters)
@@ -54,5 +54,8 @@ L.ALS.SynthBaseLayer.prototype.calculateParameters = function () {
 		this.getWidgetById(name).setValue(value);
 	}
 
-	this.writeToHistoryDebounced();
+	if (this.onEditEndDebounced)
+		this.onEditEndDebounced(typeof notifyIfLayersSkipped === "boolean" ? notifyIfLayersSkipped : false);
+	else
+		this.writeToHistoryDebounced();
 }

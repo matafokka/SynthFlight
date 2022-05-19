@@ -1,6 +1,5 @@
 require("./SynthGeometryWizard.js");
 require("./SynthGeometrySettings.js");
-const shp = require("shpjs");
 
 /**
  * Layer with geometry from shapefile or GeoJSON
@@ -13,7 +12,7 @@ L.ALS.SynthGeometryLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGeometryLay
 	isShapeFile: false,
 	writeToHistoryOnInit: false,
 
-	init: function (wizardResults, settings) {
+	init: function (wizardResults, settings, cancelCreation) {
 		this.copySettingsToThis(settings);
 		this.setConstructorArguments(["deserialized"]);
 
@@ -21,63 +20,44 @@ L.ALS.SynthGeometryLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGeometryLay
 			return;
 
 		if (!window.FileReader) {
-			this._deleteInvalidLayer(L.ALS.locale.geometryBrowserNotSupported);
+			window.alert(L.ALS.locale.geometryBrowserNotSupported);
+			cancelCreation();
 			return;
 		}
 
-		let file = wizardResults["geometryFileLabel"][0], fileReader = new FileReader();
-
-		if (!file) {
-			this._deleteInvalidLayer(L.ALS.locale.geometryNoFileSelected);
-			return;
-		}
-
-		this.setName(file.name);
-
-		// Try to read as shapefile
-		fileReader.addEventListener("load", (event) => {
-			this.isShapefile = true; // Will hide unneeded widgets using this
-			shp(event.target.result).then((geoJson) => {
-				if (geoJson.features.length === 0) {
-					this._deleteInvalidLayer(L.ALS.locale.geometryNoFeatures);
-					return;
-				}
-
-				this._displayFile(geoJson);
-				// Check if bounds are valid
-				let bounds = this._layer.getBounds();
-				if (bounds._northEast.lng > 180 || bounds._northEast.lat > 90 || bounds._southWest.lng < -180 || bounds._southWest.lat < -90)
-					window.alert(L.ALS.locale.geometryOutOfBounds);
-
-			}).catch((reason) => {
-				console.log(reason);
-
-				// If reading as shapefile fails, try to read as GeoJSON.
-				// We won't check bounds because we assume GeoJSON being in WGS84.
-				let fileReader2 = new FileReader();
-				fileReader2.addEventListener("load", (event) => {
-					try {this._displayFile(JSON.parse(event.target.result));}
-					catch (e) {
-						console.log(e);
-						this._deleteInvalidLayer();
-					}
-				});
-				fileReader2.readAsText(file);
-			});
-		});
-
-		try {fileReader.readAsArrayBuffer(file);}
-		catch (e) {}
+		L.ALS.SynthGeometryBaseWizard.getGeoJSON(wizardResults, (geoJson, name) => this._displayFile(geoJson, name));
 	},
 
-	_displayFile: function (geoJson) {
-		let borderColor = new L.ALS.Widgets.Color("borderColor", "geometryBorderColor", this, "_setColor").setValue(this.borderColor),
-			fillColor = new L.ALS.Widgets.Color("fillColor", "geometryFillColor", this, "_setColor").setValue(this.fillColor),
+	_displayFile: function (geoJson, fileName, isShapefile) {
+		if (fileName)
+			this.setName(fileName);
+
+		switch (geoJson) {
+			case "NoFileSelected":
+				this._deleteInvalidLayer(L.ALS.locale.geometryNoFileSelected);
+				return;
+			case "NoFeatures":
+				this._deleteInvalidLayer(L.ALS.locale.geometryNoFeatures);
+				return;
+			case "InvalidFileType":
+				this._deleteInvalidLayer(L.ALS.locale.geometryInvalidFile);
+				return;
+			case "ProjectionNotSupported":
+				this._deleteInvalidLayer(L.ALS.locale.geometryProjectionNotSupported);
+				return;
+		}
+
+		this.originalGeoJson = geoJson;
+
+		let borderColor = new L.ALS.Widgets.Color("borderColor", "geometryBorderColor", this, "setColor").setValue(this.borderColor),
+			fillColor = new L.ALS.Widgets.Color("fillColor", "geometryFillColor", this, "setColor").setValue(this.fillColor),
 			menu = [borderColor, fillColor],
 			popupOptions = {
 				maxWidth: 500,
 				maxHeight: 500,
 			};
+
+		this.isShapefile = this.isShapefile || isShapefile;
 
 		if (this.isShapefile) {
 			let type = geoJson.features[0].geometry.type;
@@ -90,21 +70,59 @@ L.ALS.SynthGeometryLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGeometryLay
 		for (let widget of menu)
 			this.addWidget(widget);
 
-		let docs = [], fields = []; // Search documents
+		let docs = [], fields = [], clonedLayers = []; // Search documents
 
-		this._layer = L.geoJSON(geoJson, {
+		this._layer = new L.GeoJSON(geoJson, {
 			onEachFeature: (feature, layer) => {
-				let popup = "", doc = {};
+				let popup = "", doc = {}, bbox;
 
 				// Calculate bbox for zooming
-				if (!feature.geometry.bbox) {
-					if (layer.getBounds) {
-						let bounds = layer.getBounds();
-						feature.geometry.bbox = [bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()];
-					} else {
-						let latLng = layer.getLatLng(), size = 0.008;
-						feature.geometry.bbox = [latLng.lng - size, latLng.lat - size, latLng.lng + size, latLng.lat + size];
+				if (layer.getBounds) {
+					let bounds = layer.getBounds(), west = bounds.getWest(), east = bounds.getEast();
+					bbox = [west, bounds.getSouth(), east, bounds.getNorth()];
+
+					// Check if layer crosses one of antimeridians
+					let moveBy = 0, crossesLeft = west < -180, crossesRight = east > 180;
+
+					if (crossesLeft && crossesRight)
+						moveBy = 0;
+					else if (crossesLeft)
+						moveBy = 360;
+					else if (crossesRight)
+						moveBy = -360;
+
+					// Clone layer
+					if (moveBy) {
+						// Move bbox
+						for (let i = 0; i <= 2; i += 2)
+							bbox += moveBy;
+
+						// Clone coordinates
+						let latLngs = layer.getLatLngs(), clonedLatLngs = [];
+
+						if (latLngs.length === 0 || latLngs[0] instanceof L.LatLng)
+							latLngs = [latLngs];
+
+						for (let array of latLngs) {
+							let clonedArray = [];
+							for (let coord of array) {
+								let clonedCoord = coord.clone();
+								clonedCoord.lng += moveBy;
+								clonedArray.push(clonedCoord);
+							}
+							clonedLatLngs.push(clonedArray);
+						}
+
+						// Create cloned layer
+						let clonedLayer = layer instanceof L.Polygon ? new L.Polygon(clonedLatLngs) :
+							new L.Polyline(clonedLatLngs);
+						layer.clone = clonedLayer;
+						clonedLayers.push(clonedLayer);
 					}
+				} else {
+					let latLng = layer.getLatLng().wrap(), size = 0.008;
+					layer.setLatLng(latLng); // Wrap points
+					bbox = [latLng.lng - size, latLng.lat - size, latLng.lng + size, latLng.lat + size];
 				}
 
 				// Copy properties to the popup and search doc
@@ -121,14 +139,26 @@ L.ALS.SynthGeometryLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGeometryLay
 					fields.push(name);
 				}
 
-				layer.bindPopup(`<div class="synth-popup">${popup}</div>`, popupOptions);
+				if (!popup)
+					popup = "<div>No data</div>";
+
+				for (let lyr of [layer, layer.clone]) {
+					if (lyr)
+						lyr.bindPopup(`<div class="synth-popup">${popup}</div>`, popupOptions);
+				}
 
 				doc._miniSearchId = L.ALS.Helpers.generateID();
-				doc.bbox = feature.geometry.bbox;
+				doc.bbox = bbox;
 				doc.properties = feature.properties;
 				docs.push(doc);
 			}
 		});
+
+		for (let layer of clonedLayers)
+			this._layer.addLayer(layer);
+
+		// Check if bounds are valid
+		L.ALS.SynthGeometryBaseWizard.checkGeoJSONBounds(this._layer);
 
 		if (L.ALS.searchWindow)
 			L.ALS.searchWindow.addToSearch(this.id, docs, fields); // Add GeoJSON to search
@@ -137,28 +167,27 @@ L.ALS.SynthGeometryLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGeometryLay
 		this.writeToHistory();
 	},
 
-	_deleteInvalidLayer: function (message = L.ALS.locale.geometryInvalidFile) {
+	_deleteInvalidLayer: function (message) {
 		window.alert(message);
 		this.deleteLayer();
 	},
 
-	_setColor(widget) {
+	setColor(widget) {
 		this[widget.id] = widget.getValue();
 		this._setLayerColors();
 	},
 
 	_setLayerColors() {
-		let layers = this._layer.getLayers();
-		for (let layer of layers) {
+		this._layer.eachLayer((layer) => {
 			if (!layer.setStyle)
-				continue;
+				return;
 
 			layer.setStyle({
 				color: this.borderColor,
 				fillColor: this.fillColor,
 				fill: layer instanceof L.Polygon
 			});
-		}
+		});
 	},
 
 	onDelete: function () {
@@ -175,7 +204,7 @@ L.ALS.SynthGeometryLayer = L.ALS.Layer.extend( /** @lends L.ALS.SynthGeometryLay
 		let json = {
 			widgets: this.serializeWidgets(seenObjects),
 			name: this.getName(),
-			geoJson: this._layer.toGeoJSON(),
+			geoJson: this.originalGeoJson,
 			serializationID: this.serializationID
 		};
 
