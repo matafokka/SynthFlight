@@ -9,7 +9,7 @@ L.ALS.SynthGridLayer.prototype.serialize = function (seenObjects) {
 		let poly = this.polygons[id];
 
 		serialized.polygons.push({
-			polygon: poly.getBounds(),
+			polygon: this.serializeRect(poly),
 			widget: poly.widgetable.serialize(seenObjects),
 		});
 	}
