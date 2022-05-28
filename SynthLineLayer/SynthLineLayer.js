@@ -137,9 +137,17 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend(/** @lends L.ALS.SynthLineLay
 				pathsMeta[prop] = this[prop];
 		}
 
+		let points = this.pointsGroup.toGeoJSON();
+		for (let feature of points.features)
+			feature.properties.name = "Capture point";
+
+		let airport = this.airportMarker.toGeoJSON();
+		airport.properties.name = "Airport";
+
 		return geojsonMerge.merge([
 			L.ALS.SynthBaseLayer.prototype.toGeoJSON.call(this, pathsMeta),
-			this.pointsGroup.toGeoJSON(),
+			points,
+			airport
 		]);
 	},
 

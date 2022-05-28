@@ -62,10 +62,8 @@ L.ALS.SynthGridLayer.prototype._onMapPan = function () {
 			let polygon = this.initPolygon(lat, lng, lngDistance);
 
 			// Generate current polygon's name if grid uses one of standard scales
-			if (this._currentStandardScale === Infinity) {
-				polygon.polygonName = "Not in standard scale system";
+			if (this._currentStandardScale === Infinity)
 				continue;
-			}
 
 			// Firstly, we round our coordinates to avoid floating-point errors.
 			// Secondly, our point lies on bottom left corner. To avoid dealing with points on lines and errors related to it, we need to add some value to each coordinate.
