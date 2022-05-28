@@ -63,7 +63,7 @@ L.ALS.SynthLineLayer = L.ALS.SynthBaseLayer.extend(/** @lends L.ALS.SynthLineLay
 	},
 
 	onEditEnd: function (event, notifyIfLayersSkipped = true) {
-		if (!this.isSelected)
+		if (!this.isSelected && !this.isAfterDeserialization)
 			return;
 
 		this.pathsGroup.clearLayers();

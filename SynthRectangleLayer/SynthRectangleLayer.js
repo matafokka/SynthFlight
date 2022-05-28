@@ -28,7 +28,7 @@ L.ALS.SynthRectangleLayer = L.ALS.SynthRectangleBaseLayer.extend(/** @lends L.AL
 	},
 
 	onEditEnd: function (e, notifyIfLayersSkipped = true) {
-		if (!this.isSelected)
+		if (!this.isSelected && !this.isAfterDeserialization)
 			return;
 
 		this.clearPaths();

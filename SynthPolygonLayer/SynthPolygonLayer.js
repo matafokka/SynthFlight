@@ -62,7 +62,7 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend(/** @lends L.ALS.Sy
 	},
 
 	onEditEnd: function (e, notifyIfLayersSkipped = true) {
-		if (!this.isSelected)
+		if (!this.isSelected && !this.isAfterDeserialization)
 			return;
 
 		this.labelsGroup.deleteAllLabels();
