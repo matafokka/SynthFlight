@@ -18,9 +18,7 @@ L.ALS.SynthGridLayer.prototype._onMapPan = function () {
 	this.clearLabels("gridLabelsIDs");
 
 	// Get viewport bounds and calculate correct start and end coords for lng and lat
-	let bounds = this.map.getBounds(), north = bounds.getNorth(), west = bounds.getWest(),
-		lngFrom = this._closestLess(west, this.lngDistance),
-		lngTo = this._closestGreater(bounds.getEast(), this.lngDistance),
+	let bounds = this.map.getBounds(), north = bounds.getNorth(), west = bounds.getWest(), east = bounds.getEast(),
 		latFrom = this._closestLess(bounds.getSouth(), this.latDistance),
 		latTo = this._closestGreater(north, this.latDistance);
 
@@ -37,20 +35,22 @@ L.ALS.SynthGridLayer.prototype._onMapPan = function () {
 	// We will use toFixed() to generate lat and lng labels and to fix floating point errors in generating polygons' names
 
 	for (let lat = latFrom; lat <= latTo; lat += this.latDistance) { // From bottom (South) to top (North)
-		let absLat = this.toFixed(lat > 0 ? lat - this.latDistance : lat);
-		createLabel([lat, west], absLat, "leftCenter", true);
+		createLabel([lat, west], this.toFixed(lat), "leftCenter", true);
 
 		// Merge sheets when lat exceeds certain value. Implemented as specified by this document:
 		// https://docs.cntd.ru/document/456074853
 		let mergedSheetsCount = 1;
 		if (this.shouldMergeCells) {
-			absLat = Math.abs(lat);
+			let absLat = Math.abs(this.toFixed(lat > 0 ? lat + this.latDistance : lat));
 			if (absLat > 76)
 				mergedSheetsCount = (this._currentStandardScale === 200000 || this._currentStandardScale === 2000) ? 3 : 4;
 			else if (absLat > 60)
 				mergedSheetsCount = 2;
 		}
-		let lngDistance = this.lngDistance * mergedSheetsCount;
+
+		let lngDistance = this.lngDistance * mergedSheetsCount,
+			lngFrom = this._closestLess(west, lngDistance),
+			lngTo = this._closestGreater(east, lngDistance);
 
 		for (let lng = lngFrom; lng <= lngTo; lng += lngDistance) { // From left (West) to right (East)
 			if (lng < -180 || lng > 180 -  lngDistance)
