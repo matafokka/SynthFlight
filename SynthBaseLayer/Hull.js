@@ -403,5 +403,5 @@ L.ALS.SynthBaseLayer.prototype.getOrderedPathFromHull = function (prevPoint, con
 L.ALS.SynthBaseLayer.prototype.cross = function (a, b, o) {
 	// It calculates only direction, so it should be good enough. Also, we wrap lngs to get correct direction on
 	// lng differences > 90 and near map's edges
-	return (MathTools.wrapLng(o.lng, a.lng) - o.lng) * (b.lat - o.lat) - (a.lat - o.lat) * (MathTools.wrapLng(o.lng, b.lng) - o.lng);
+	return this.toFixed((MathTools.wrapLng(o.lng, a.lng) - o.lng) * (b.lat - o.lat) - (a.lat - o.lat) * (MathTools.wrapLng(o.lng, b.lng) - o.lng));
 }
