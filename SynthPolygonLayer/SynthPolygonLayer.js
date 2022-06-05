@@ -184,6 +184,11 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend(/** @lends L.ALS.Sy
 							p2y += dy;
 
 							line = [[p1x, p1y], [p2x, p2y]];
+
+							// Fix wrong swapping
+							if (!shouldSwapPoints)
+								line.reverse();
+
 							lineAfterPolygonAdded = true;
 						}
 					}
