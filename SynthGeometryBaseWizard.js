@@ -62,6 +62,7 @@ L.ALS.SynthGeometryBaseWizard = L.ALS.Wizard.extend(/** @lends L.ALS.SynthGeomet
 
 				}).catch((reason) => {
 					// If reason is string, proj4js doesn't support file projection
+					console.log(reason);
 					if (typeof reason === "string") {
 						callback("ProjectionNotSupported");
 						return;
@@ -139,7 +140,7 @@ L.ALS.SynthGeometryBaseWizard = L.ALS.Wizard.extend(/** @lends L.ALS.SynthGeomet
 				}
 
 				let layersAdded = false;
-				L.geoJson(geoJson, {
+				let leafletGeoJson = L.geoJson(geoJson, {
 					onEachFeature: (feature, layer) => {
 						if (!(layer instanceof layerType))
 							return;
@@ -150,7 +151,7 @@ L.ALS.SynthGeometryBaseWizard = L.ALS.Wizard.extend(/** @lends L.ALS.SynthGeomet
 				});
 
 				if(layersAdded)
-					this.checkGeoJSONBounds(geoJson);
+					this.checkGeoJSONBounds(leafletGeoJson);
 				else
 					window.alert(L.ALS.locale.initialFeaturesNoFeatures);
 
