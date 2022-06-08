@@ -223,18 +223,18 @@ L.ALS.SynthPolygonBaseLayer = L.ALS.SynthBaseLayer.extend( /** @lends L.ALS.Synt
 
 		this.forEachValidPolygon(polygon => {
 			let polygonJson = polygon.toGeoJSON(),
-				props = ["polygonName", "minHeight", "maxHeight", "meanHeight", "absoluteHeight", "reliefType", "elevationDifference", "latCellSizeInMeters", "lngCellSizeInMeters"];
+				props = ["minHeight", "maxHeight", "meanHeight", "absoluteHeight", "reliefType", "elevationDifference", "latCellSizeInMeters", "lngCellSizeInMeters"];
 			for (let prop of props) {
 				let value = polygon[prop];
 				if (value !== undefined)
 					polygonJson.properties[prop] = value;
 			}
-			polygonJson.properties.name = "Selected cell";
+			polygonJson.properties.name = polygon.polygonName || "Area to capture";
 			jsons.push(polygonJson);
 		});
 
 		let airport = this.airportMarker.toGeoJSON();
-		airport.name = "Airport";
+		airport.properties.name = "Airport";
 		jsons.push(airport);
 
 		return jsons;

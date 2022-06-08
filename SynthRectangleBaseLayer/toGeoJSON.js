@@ -18,11 +18,11 @@ L.ALS.SynthRectangleBaseLayer.prototype.toGeoJSON = function () {
 
 	jsons.push(L.ALS.SynthBaseLayer.prototype.toGeoJSON.call(this, parallelsProps, meridiansProps));
 
-	let pointsParams = [["capturePointsByMeridians", this.latPointsGroup], ["capturePointsByParallels", this.lngPointsGroup]];
+	let pointsParams = [["Capture point by meridians", this.latPointsGroup], ["Capture point by parallels", this.lngPointsGroup]];
 	for (let param of pointsParams) {
-		param[1].eachLayer((layer) => {
+		param[1].eachLayer(layer => {
 			let pointsJson = layer.toGeoJSON();
-			pointsJson.name = param[0];
+			pointsJson.properties.name = param[0];
 			jsons.push(pointsJson);
 		});
 	}

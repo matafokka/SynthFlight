@@ -58,13 +58,13 @@ L.ALS.SynthGridLayer = L.ALS.SynthRectangleBaseLayer.extend(/** @lends L.ALS.Syn
 
 		this.polygons = {};
 
-		L.ALS.SynthRectangleBaseLayer.prototype.init.call(this, wizardResults, settings);
-
 		/**
 		 * Whether or not cells above 60 lat should be merged
 		 * @type {boolean}
 		 */
 		this.shouldMergeCells = wizardResults.gridShouldMergeCells;
+
+		L.ALS.SynthRectangleBaseLayer.prototype.init.call(this, wizardResults, settings);
 
 		this.addEventListenerTo(this.map, "zoomend", "_onMapZoom");
 		this.addEventListenerTo(this.map, "moveend resize", "_onMapPan");

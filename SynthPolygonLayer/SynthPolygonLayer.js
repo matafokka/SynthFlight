@@ -62,7 +62,7 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend(/** @lends L.ALS.Sy
 	},
 
 	onEditEnd: function (e, notifyIfLayersSkipped = true) {
-		if (!this.isSelected)
+		if (!this.isSelected && !this.isAfterDeserialization)
 			return;
 
 		this.labelsGroup.deleteAllLabels();
@@ -184,6 +184,11 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend(/** @lends L.ALS.Sy
 							p2y += dy;
 
 							line = [[p1x, p1y], [p2x, p2y]];
+
+							// Fix wrong swapping
+							if (!shouldSwapPoints)
+								line.reverse();
+
 							lineAfterPolygonAdded = true;
 						}
 					}
@@ -372,9 +377,9 @@ L.ALS.SynthPolygonLayer = L.ALS.SynthPolygonBaseLayer.extend(/** @lends L.ALS.Sy
 		let jsons = this.baseFeaturesToGeoJSON();
 
 		this.pointsGroup.eachLayer(layer => {
-			let pointsJson = layer.toGeoJSON();
-			pointsJson.name = "capturePoint";
-			jsons.push(pointsJson);
+			let pointJson = layer.toGeoJSON();
+			pointJson.properties.name = "Capture point";
+			jsons.push(pointJson);
 		});
 
 		let props = {}

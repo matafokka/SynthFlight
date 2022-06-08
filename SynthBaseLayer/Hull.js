@@ -266,7 +266,8 @@ L.ALS.SynthBaseLayer.prototype.connectHullToAirport = function () {
 
 		let [p1, p2] = toRemove.getLatLngs();
 		hullConnection.setLatLngs([p1, airportPos, p2]);
-		path.updateWidgets(minLen + path.hullLength);
+		path.pathLength = minLen + path.hullLength;
+		path.updateWidgets(path.pathLength);
 	}
 }
 
@@ -301,12 +302,15 @@ L.ALS.SynthBaseLayer.prototype.hullToCycles = function (path) {
 		return undefined;
 
 	if (path.hullConnections.length === 0) {
-		let airportPos = this.airportMarker.getLatLng();
-		return [[
-			airportPos,
-			...path.pathGroup.getLayers()[0].getLatLngs(),
-			airportPos
-		]];
+		let layer = path.pathGroup.getLayers()[0],
+			airportPos = this.airportMarker.getLatLng(),
+			cycle = [
+				airportPos,
+				...layer.getLatLngs(),
+				airportPos
+			];
+		cycle.pathLength = path.pathLength;
+		return [cycle];
 	}
 
 	// The idea is to start with the first connection, find the starting point in it and for each connection
@@ -372,7 +376,7 @@ L.ALS.SynthBaseLayer.prototype.hullToCycles = function (path) {
 	}
 
 	let toReturn = [hullP2, ...afterAirport, ...beforeAirport, hullP2];
-	toReturn.pathLength = path.hullLength;
+	toReturn.pathLength = path.pathLength;
 	return [toReturn];
 }
 
@@ -399,5 +403,5 @@ L.ALS.SynthBaseLayer.prototype.getOrderedPathFromHull = function (prevPoint, con
 L.ALS.SynthBaseLayer.prototype.cross = function (a, b, o) {
 	// It calculates only direction, so it should be good enough. Also, we wrap lngs to get correct direction on
 	// lng differences > 90 and near map's edges
-	return (MathTools.wrapLng(o.lng, a.lng) - o.lng) * (b.lat - o.lat) - (a.lat - o.lat) * (MathTools.wrapLng(o.lng, b.lng) - o.lng);
+	return this.toFixed((MathTools.wrapLng(o.lng, a.lng) - o.lng) * (b.lat - o.lat) - (a.lat - o.lat) * (MathTools.wrapLng(o.lng, b.lng) - o.lng));
 }
