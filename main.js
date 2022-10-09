@@ -38,6 +38,20 @@ require("./SynthPolygonLayer/SynthPolygonLayer.js");
 require("./SearchControl.js");
 const drawLocales = require("leaflet-draw-locales").default;
 
+// Fix spacing between tiles. See this comment for details: https://github.com/Leaflet/Leaflet/issues/3575#issuecomment-1262578435
+
+let gridLayerOriginalInitTile = L.GridLayer.prototype._initTile
+L.GridLayer.include({
+	_initTile: function (tile) {
+		gridLayerOriginalInitTile.call(this, tile);
+
+		let tileSize = this.getTileSize();
+
+		tile.style.width = tileSize.x + 0.5 + "px";
+		tile.style.height = tileSize.y + 0.5 + "px";
+	}
+});
+
 // Update L.Draw locale on ALS locale change
 let oldChangeLocale = L.ALS.Locales.changeLocale;
 
