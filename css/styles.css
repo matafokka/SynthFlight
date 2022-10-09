@@ -2,6 +2,8 @@
 	background: black;
 }
 
+.leaflet-tile-container img { will-change: transform; outline: 1px solid transparent; } /* See https://github.com/Leaflet/Leaflet/issues/3575#issuecomment-1262578435 */
+
 .leaflet-pane.leaflet-mapLabels-pane {
 	z-index: 600;
 }
