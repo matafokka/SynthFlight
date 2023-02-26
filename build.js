@@ -107,9 +107,6 @@ let toCopy = ["index.html", "img/logo.ico", "img/logo.svg", "img/logo.png", "img
 	"node_modules/leaflet-draw/dist/images",
 ];
 
-if (!onlyBrowser)
-	toCopy.push(...electronDeps) // Needed for Electron, will be removed after packaging
-
 // Copy files and insert file list to the service worker
 let promises = [], swContent = fs.readFileSync("PWAServiceWorker.js").toString(),
 	insertAt = swContent.indexOf("/** to_cache_list */"),
@@ -125,10 +122,14 @@ let promises = [], swContent = fs.readFileSync("PWAServiceWorker.js").toString()
 	}
 
 for (let target of toCopy) {
-	promises.push(new Promise((resolve) => {
-		fse.copy(target, dir + target).then(resolve());
-	}));
+	promises.push(fse.copy(target, dir + target));
 	buildFileTree(target);
+}
+
+// Needed for Electron, will be removed after packaging
+if (!onlyBrowser) {
+	for (let target of electronDeps)
+		promises.push(fse.copy(target, dir + target));
 }
 
 Promise.all(promises).then(() => {
