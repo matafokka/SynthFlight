@@ -240,15 +240,6 @@ L.ALS.SynthPolygonBaseLayer = L.ALS.SynthBaseLayer.extend( /** @lends L.ALS.Synt
 		return jsons;
 	},
 
-	/**
-	 * Truncates argument to fifth number after point.
-	 * @param n {number} Number to truncate
-	 * @return {number} Truncated number
-	 */
-	toFixed: function (n) {
-		return parseFloat(n.toFixed(5));
-	},
-
 });
 
 require("./DEM.js");

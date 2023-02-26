@@ -613,6 +613,15 @@ L.ALS.SynthBaseLayer = L.ALS.Layer.extend(/** @lends L.ALS.SynthBaseLayer.protot
 			window.alert(notification + L.ALS.locale.afterEditingToDisableNotifications);
 	},
 
+	/**
+	 * Truncates argument to fifth number after point.
+	 * @param n {number} Number to truncate
+	 * @return {number} Truncated number
+	 */
+	toFixed: function (n) {
+		return parseFloat(n.toFixed(5));
+	},
+
 	getObjectToSerializeTo: function (seenObjects) {
 		let object = L.ALS.Layer.prototype.getObjectToSerializeTo.call(this, seenObjects),
 			{lat, lng} = this.airportMarker.getLatLng();
