@@ -5,7 +5,7 @@
 //      require("./js/LeafletAdvancedLayerSystem/System.js");
 // This problem doesn't present in scripts that has been imported into other scripts.
 // So the easiest solution is to move main.js into project's root directory.
-// I've spend hours struggling with this issue, so don't try to reorganise the code, you'll fail and, as it seems, break compatibility with the older Electron versions.
+// I've spent hours struggling with this issue, so don't try to reorganise the code, you'll fail and, as it seems, break compatibility with the older Electron versions.
 
 //require("fastestsmallesttextencoderdecoder");
 window.L = require("leaflet");
