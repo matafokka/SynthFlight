@@ -5,7 +5,10 @@ const fs = require("fs");
 const fse = require("fs-extra");
 const {Worker} = require('worker_threads');
 
-let onlyBrowser = false, debug = false, cssThreadFinished = false, copyPromiseFinished = false,
+let onlyBrowser = false,
+	debug = false,
+	cssThreadFinished = false,
+	copyPromiseFinished = false,
 	dir = "dist/SynthFlight-browser/",
 	electronDeps = ["package.json", "electronApp.js"], // Packager can't work without these in dist
 	electronMissingDeps = ["node_modules/@electron", "node_modules/leaflet-advanced-layer-system/ElectronIntegration.js", "node_modules/leaflet-advanced-layer-system/_service/mergeOptions.js"]; // Packager also won't copy these for some unknown reason
@@ -108,7 +111,8 @@ let toCopy = ["index.html", "img/logo.ico", "img/logo.svg", "img/logo.png", "img
 ];
 
 // Copy files and insert file list to the service worker
-let promises = [], swContent = fs.readFileSync("PWAServiceWorker.js").toString(),
+let promises = [],
+	swContent = fs.readFileSync("PWAServiceWorker.js").toString(),
 	insertAt = swContent.indexOf("/** to_cache_list */"),
 	buildFileTree = (path) => {
 		if (!fs.lstatSync(path).isDirectory()) {
@@ -136,6 +140,4 @@ Promise.all(promises).then(() => {
 	fs.writeFileSync(dir + "PWAServiceWorker.js", swContent);
 	copyPromiseFinished = true;
 	buildElectron();
-}).catch(error => {
-	console.error(error.message);
 });
