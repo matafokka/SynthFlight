@@ -3,7 +3,7 @@ const cacheName = "SynthFlight", matchOptions = {ignoreSearch: true};
 // Cache project files. More files are added in build.js. Preserve the comment inside of array!
 // The whole thing works like auto update.
 caches.open(cacheName).then(cache => cache.addAll([
-	"/", "/PWAServiceWorker.js", "/css/styles.css", "/main.js", /** to_cache_list */
+	"./", "./PWAServiceWorker.js", "./css/styles.css", "./main.js", /** to_cache_list */
 ]));
 
 // On resource fetch, try to load it from cache or pass request to fetch()
