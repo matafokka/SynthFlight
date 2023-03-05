@@ -116,7 +116,7 @@ let promises = [],
 	insertAt = swContent.indexOf("/** to_cache_list */"),
 	buildFileTree = (path) => {
 		if (!fs.lstatSync(path).isDirectory()) {
-			swContent = swContent.slice(0, insertAt) + `"/${path}",` + swContent.slice(insertAt);
+			swContent = swContent.slice(0, insertAt) + `"./${path}",` + swContent.slice(insertAt);
 			return;
 		}
 
