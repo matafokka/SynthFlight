@@ -1,7 +1,7 @@
 {
   "name": "synthflight",
   "productName": "SynthFlight",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A fully client-side software for planning aerial photography",
   "main": "electronApp.js",
   "browser": "index.html",
@@ -77,7 +77,7 @@
     "electron-packager": "^15.4.0",
     "fs-extra": "^9.0.1",
     "geotiff": "^1.0.4",
-    "geotiff-geokeys-to-proj4": "^2022.5.28",
+    "geotiff-geokeys-to-proj4": "^2024.3.9",
     "http-server": "^0.12.3",
     "keyboardevent-key-polyfill": "^1.1.0",
     "leaflet": "~1.7.1",

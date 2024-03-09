@@ -25,10 +25,8 @@ module.exports = async function (file, projectionString, initialData) {
 		// Get info about image
 		let [leftX, topY] = image.getOrigin(),
 			nodata = image.getGDALNoData(),
-			resolution = image.getResolution(), xSize = resolution[0], ySize = resolution[1], zScale = resolution[2];
-		if (zScale === 0)
-			zScale = 1;
-		let rightX = leftX + image.getWidth() * xSize, bottomY = topY + image.getHeight() * ySize,
+			resolution = image.getResolution(), xSize = resolution[0], ySize = resolution[1],
+			rightX = leftX + image.getWidth() * xSize, bottomY = topY + image.getHeight() * ySize,
 			imagePolygon = turfHelpers.polygon([[
 				[leftX, topY], [rightX, topY], [rightX, bottomY], [leftX, bottomY], [leftX, topY]
 			]]),
@@ -84,7 +82,7 @@ module.exports = async function (file, projectionString, initialData) {
 			let [minX, currentY, maxX, maxY] = imageWindow,
 				stats = ESRIGridParser.createStatsObject(); // Stats for current polygon
 
-			for (currentY; currentY <= maxY; currentY++) {
+			for (currentY; currentY < maxY; currentY++) {
 				let currentX = minX,
 					raster = await image.readRasters({window: [minX, currentY, maxX, currentY + 1]}),
 					color0 = raster[0], // Raster is a TypedArray where elements are colors and their elements are pixel values of that color.
@@ -106,18 +104,21 @@ module.exports = async function (file, projectionString, initialData) {
 						continue;
 
 					let value = 0;
-					for (let color of raster)
-						value += color[index];
-					value = value / raster.length;
-					let multipliedValue = value * zScale;
-					if (value === nodata || multipliedValue === nodata)
+					let accountedColorsLength = 0;
+					for (let color of raster) {
+						const colorValue = color[index];
+
+						if (colorValue !== nodata) {
+							value += color[index];
+							accountedColorsLength++;
+						}
+					}
+
+					if (accountedColorsLength === 0)
 						continue;
 
-					/*new L.CircleMarker(
-						L.CRS.EPSG3857.unproject(L.point(...point)),
-						{color: `rgb(${value},${value},${value})`, fillOpacity: 1, stroke: false}
-					).addTo(map);*/
-
+					value = value / accountedColorsLength;
+					let multipliedValue = value * projInformation.coordinatesConversionParameters.z;
 					ESRIGridParser.addToStats(multipliedValue, stats);
 				}
 			}
